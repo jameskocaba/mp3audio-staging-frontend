@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const urlMessage = document.getElementById('urlMessage');
 
     // === CHANGE THIS TO YOUR RENDER STAGING URL ===
-    const BACKEND_URL = 'https://YOUR-STAGING-RENDER-URL.onrender.com'; 
+    const BACKEND_URL = 'https://mp3audio-staging.onrender.com'; 
     
     // Check for Magic Link URL parameters
     const urlParams = new URLSearchParams(window.location.search);
