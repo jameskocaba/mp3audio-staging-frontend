@@ -1,0 +1,94 @@
+/* =========================================
+   9. AUTHENTICATION & DASHBOARD (BETA ADDITIONS)
+   ========================================= */
+.auth-box {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    padding: 20px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+}
+
+.dashboard-box {
+    background: #ffffff;
+    border: 2px solid #e2e8f0;
+    padding: 20px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    text-align: left;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+}
+
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.stats-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.stat-pill {
+    flex: 1;
+    background: #f1f5f9;
+    padding: 10px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    color: #475569;
+    text-align: center;
+}
+
+.stat-pill strong {
+    display: block;
+    font-size: 1.1rem;
+    color: #0f172a;
+    margin-top: 4px;
+}
+
+.premium-btn {
+    width: 100%;
+    background: linear-gradient(90deg, #f59e0b 0%, #ea580c 100%);
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.premium-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(234, 88, 12, 0.3);
+}
+
+.text-btn {
+    background: transparent;
+    border: none;
+    color: #ef4444;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 0;
+}
+
+.text-btn:hover {
+    text-decoration: underline;
+}
+
+.alert-message {
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+.alert-success { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+.alert-error { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
