@@ -18,16 +18,48 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const BACKEND_URL = 'https://mp3audio-staging.onrender.com'; // Verify this URL!
     
-    // Check for Magic Link URL parameters
+    // --- SEAMLESS TOKEN VERIFICATION ---
     const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('login') === 'success') {
-        urlMessage.innerHTML = `<div class="alert-message alert-success">Login successful! Welcome back.</div>`;
+    const token = urlParams.get('token');
+
+    if (token) {
+        // 1. Show a loading state on the UI immediately
+        urlMessage.innerHTML = `<div class="alert-message" style="background:#eff6ff; color:#1e40af; border:1px solid #bfdbfe;">Verifying secure link...</div>`;
         urlMessage.classList.remove('hidden');
+        
+        // 2. Clean the URL bar so the token disappears
         window.history.replaceState({}, document.title, window.location.pathname);
-    } 
+        
+        // 3. Secretly verify with the backend
+        fetch(`${BACKEND_URL}/auth/verify`, {
+            method: 'POST',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ token: token })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                urlMessage.innerHTML = `<div class="alert-message alert-success">Login successful! Welcome back.</div>`;
+                // Hide the success message after 4 seconds
+                setTimeout(() => { urlMessage.classList.add('hidden'); }, 4000); 
+                checkAuth(); // Refreshes UI and hides the guest login section
+            } else {
+                urlMessage.innerHTML = `<div class="alert-message alert-error">${data.error || 'Invalid link.'}</div>`;
+                checkAuth();
+            }
+        })
+        .catch(err => {
+            urlMessage.innerHTML = `<div class="alert-message alert-error">Network error. Please try logging in again.</div>`;
+            checkAuth();
+        });
+    } else {
+        // Normal page load, no token
+        checkAuth();
+    }
 
     // --- SMART AUTHENTICATION FLOW ---
-    const checkAuth = async () => {
+    async function checkAuth() {
         try {
             const response = await fetch(`${BACKEND_URL}/auth/me`, { credentials: 'include' });
             const data = await response.json();
@@ -52,7 +84,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 guestLoginSection.classList.remove('hidden'); // Show login form
                 buyCreditsBtn.classList.add('hidden'); // Hide buy button
                 
-                // Just update the text if they hit the limit, but don't hide the tool
+                // Update text if they hit limit, but don't hide the tool
                 if (data.free_conversions_used >= 5) {
                     authMessage.style.color = '#ef4444';
                     authMessage.textContent = "Free limit reached. Please sign in to buy credits.";
@@ -61,7 +93,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) {
             console.error('Auth Check Failed', error);
         }
-    };
+    }
 
     const sendMagicLink = async () => {
         const email = loginEmail.value.trim();
@@ -118,9 +150,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Initial Load
-    checkAuth();
-
     // --- CONVERSION LOGIC ---
     const urlInput = document.getElementById('urlInput');
     const convertBtn = document.getElementById('convertBtn');
@@ -166,7 +195,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             const data = await response.json();
 
-            // --- THE NEW INTERCEPT FOR GUESTS HITTING THE LIMIT ---
+            // --- THE INTERCEPT FOR GUESTS HITTING THE LIMIT ---
             if (response.status === 403) {
                 statusDiv.innerHTML = `<p style="color: #ef4444; font-weight: bold;">❌ Conversion Blocked: Limit Reached</p>`;
                 
