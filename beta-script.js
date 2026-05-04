@@ -17,20 +17,56 @@ document.addEventListener('DOMContentLoaded', () => {
     const urlMessage = document.getElementById('urlMessage');
 
     const BACKEND_URL = 'https://mp3audio-staging.onrender.com'; // Verify this URL!
-    
+
+    // --- SMART AUTHENTICATION FLOW ---
+    const checkAuth = async () => {
+        try {
+            const response = await fetch(`${BACKEND_URL}/auth/me`, { credentials: 'include' });
+            const data = await response.json();
+            
+            userDashboard.classList.remove('hidden');
+            freeUsesDisplay.textContent = `${data.free_conversions_used}/5`;
+            paidCreditsDisplay.textContent = data.paid_track_credits;
+
+            // We always want the tool visible now
+            conversionToolContainer.classList.remove('hidden'); 
+
+            if (data.authenticated) {
+                // USER IS LOGGED IN
+                userEmailDisplay.textContent = data.email;
+                logoutBtn.classList.remove('hidden');
+                guestLoginSection.classList.add('hidden'); // Hides the email input
+                buyCreditsBtn.classList.remove('hidden');  // Shows the buy button
+            } else {
+                // USER IS AN ANONYMOUS GUEST
+                userEmailDisplay.textContent = 'Guest Session';
+                logoutBtn.classList.add('hidden');
+                guestLoginSection.classList.remove('hidden'); // Shows the email input
+                buyCreditsBtn.classList.add('hidden'); // Hides the buy button
+                
+                if (data.free_conversions_used >= 5) {
+                    authMessage.style.color = '#ef4444';
+                    authMessage.textContent = "Free limit reached. Please sign in to buy credits.";
+                }
+            }
+        } catch (error) {
+            console.error('Auth Check Failed', error);
+        }
+    };
+
     // --- SEAMLESS TOKEN VERIFICATION ---
     const urlParams = new URLSearchParams(window.location.search);
     const token = urlParams.get('token');
 
     if (token) {
-        // 1. Show a loading state on the UI immediately
+        // 1. Show loading state
         urlMessage.innerHTML = `<div class="alert-message" style="background:#eff6ff; color:#1e40af; border:1px solid #bfdbfe;">Verifying secure link...</div>`;
         urlMessage.classList.remove('hidden');
         
-        // 2. Clean the URL bar so the token disappears
+        // 2. Clean the URL
         window.history.replaceState({}, document.title, window.location.pathname);
         
-        // 3. Secretly verify with the backend
+        // 3. Verify with backend
         fetch(`${BACKEND_URL}/auth/verify`, {
             method: 'POST',
             credentials: 'include',
@@ -41,9 +77,8 @@ document.addEventListener('DOMContentLoaded', () => {
         .then(data => {
             if (data.success) {
                 urlMessage.innerHTML = `<div class="alert-message alert-success">Login successful! Welcome back.</div>`;
-                // Hide the success message after 4 seconds
                 setTimeout(() => { urlMessage.classList.add('hidden'); }, 4000); 
-                checkAuth(); // Refreshes UI and hides the guest login section
+                checkAuth(); // Only load dashboard AFTER success
             } else {
                 urlMessage.innerHTML = `<div class="alert-message alert-error">${data.error || 'Invalid link.'}</div>`;
                 checkAuth();
@@ -54,46 +89,10 @@ document.addEventListener('DOMContentLoaded', () => {
             checkAuth();
         });
     } else {
-        // Normal page load, no token
+        // Normal page load, no token present
         checkAuth();
     }
 
-    // --- SMART AUTHENTICATION FLOW ---
-    async function checkAuth() {
-        try {
-            const response = await fetch(`${BACKEND_URL}/auth/me`, { credentials: 'include' });
-            const data = await response.json();
-            
-            userDashboard.classList.remove('hidden');
-            freeUsesDisplay.textContent = `${data.free_conversions_used}/5`;
-            paidCreditsDisplay.textContent = data.paid_track_credits;
-
-            // WE ALWAYS WANT THE TOOL VISIBLE NOW
-            conversionToolContainer.classList.remove('hidden'); 
-
-            if (data.authenticated) {
-                // USER IS LOGGED IN
-                userEmailDisplay.textContent = data.email;
-                logoutBtn.classList.remove('hidden');
-                guestLoginSection.classList.add('hidden'); // Hide the login form
-                buyCreditsBtn.classList.remove('hidden');  // Show the buy button
-            } else {
-                // USER IS AN ANONYMOUS GUEST
-                userEmailDisplay.textContent = 'Guest Session';
-                logoutBtn.classList.add('hidden');
-                guestLoginSection.classList.remove('hidden'); // Show login form
-                buyCreditsBtn.classList.add('hidden'); // Hide buy button
-                
-                // Update text if they hit limit, but don't hide the tool
-                if (data.free_conversions_used >= 5) {
-                    authMessage.style.color = '#ef4444';
-                    authMessage.textContent = "Free limit reached. Please sign in to buy credits.";
-                }
-            }
-        } catch (error) {
-            console.error('Auth Check Failed', error);
-        }
-    }
 
     const sendMagicLink = async () => {
         const email = loginEmail.value.trim();
@@ -195,11 +194,10 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             const data = await response.json();
 
-            // --- THE INTERCEPT FOR GUESTS HITTING THE LIMIT ---
+            // THE INTERCEPT FOR GUESTS HITTING THE LIMIT
             if (response.status === 403) {
                 statusDiv.innerHTML = `<p style="color: #ef4444; font-weight: bold;">❌ Conversion Blocked: Limit Reached</p>`;
                 
-                // Highlight the login box and scroll the user up to it
                 guestLoginSection.classList.remove('hidden');
                 loginEmail.focus();
                 authMessage.style.color = '#ef4444';
