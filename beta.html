@@ -6,7 +6,6 @@
     <title>BETA | MP3aud.io</title>
     <link rel="icon" type="image/png" href="favicon.png">
     <meta name="theme-color" content="#FF5500">
-    
     <link rel="stylesheet" href="beta-style.css">
 </head>
 <body>
@@ -18,45 +17,39 @@
                         <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
                     </a>
                 </div>
-                <div style="display: flex; gap: 15px; align-items: center;">
-                    <a href="supported-sites.html" style="font-size: 0.9rem; font-weight: 600; color: #2980b9; text-decoration: none;">Supported Sites</a>
-                    <a href="top-5.html" style="font-size: 0.9rem; font-weight: 600; color: #2980b9; text-decoration: none;">Top 5</a>
-                </div>
             </div>
 
             <header class="logo-container">
                 <img src="logo.png" alt="MP3aud.io" class="main-logo" style="max-width: 240px;">
                 <h1 class="main-headline">Soundcloud Playlist & Media Converter</h1>
-                <p class="h1-subtext">Batch convert entire playlists and generate smart notes. Log in below to get started.</p>
             </header>
             
             <div id="urlMessage" class="hidden"></div>
 
-            <div id="authContainer" class="auth-box">
-                <h3 style="margin-top: 0; color: #1e293b;">Log In to Convert</h3>
-                <p style="font-size: 0.9rem; color: #64748b; margin-bottom: 15px;">Enter your email to receive a secure magic link. No passwords required.</p>
-                <div class="unified-search-bar" style="margin-bottom: 5px;">
-                    <input type="email" id="loginEmail" placeholder="you@example.com" required autocomplete="email">
-                    <button id="sendLinkBtn">Send Link</button>
-                </div>
-                <div id="authMessage" style="font-size: 0.85rem; font-weight: bold; margin-top: 5px;"></div>
-            </div>
-
             <div id="userDashboard" class="dashboard-box hidden">
                 <div class="dashboard-header">
-                    <span style="font-size: 0.85rem; color: #64748b;">Logged in as <strong id="userEmailDisplay" style="color: #1e293b;">...</strong></span>
-                    <button id="logoutBtn" class="text-btn">Logout</button>
+                    <span style="font-size: 0.85rem; color: #64748b;">Status: <strong id="userEmailDisplay" style="color: #1e293b;">...</strong></span>
+                    <button id="logoutBtn" class="text-btn hidden">Logout</button>
                 </div>
                 <div class="stats-row">
                     <div class="stat-pill">Free Uses: <strong id="freeUsesDisplay">0/5</strong></div>
                     <div class="stat-pill">Paid Credits: <strong id="paidCreditsDisplay">0</strong></div>
                 </div>
-                <button id="buyCreditsBtn" class="premium-btn">Buy 100 Credits for $2.00</button>
+
+                <div id="guestLoginSection" class="hidden" style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #e2e8f0;">
+                    <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 10px;">Sign in to buy credits or save your progress.</p>
+                    <div class="unified-search-bar" style="margin-bottom: 5px;">
+                        <input type="email" id="loginEmail" placeholder="you@example.com" autocomplete="email">
+                        <button id="sendLinkBtn">Send Link</button>
+                    </div>
+                    <div id="authMessage" style="font-size: 0.85rem; font-weight: bold;"></div>
+                </div>
+
+                <button id="buyCreditsBtn" class="premium-btn hidden">Buy 100 Credits for $2.00</button>
                 <div id="billingMessage" style="font-size: 0.85rem; color: #ef4444; font-weight: bold; margin-top: 10px; display: none;"></div>
             </div>
                       
             <section id="conversionToolContainer" class="hidden" aria-label="Conversion tool">
-                
                 <div class="unified-search-bar" style="margin-top: 20px;">
                     <input type="text" id="urlInput" placeholder="Paste URL here..." autocomplete="off">
                     <button id="convertBtn">Process</button>
@@ -65,44 +58,19 @@
 
                 <div class="options-row">
                     <div class="inline-ai-toggle">
-                        <label class="switch">
-                          <input type="checkbox" id="transcribeAudio">
-                          <span class="slider round"></span>
-                        </label>
-                        <div class="toggle-text">
-                            <span class="feature-title" style="font-size: 0.90rem; font-weight: 700;">Smart Notes</span>
-                        </div>
+                        <label class="switch"><input type="checkbox" id="transcribeAudio"><span class="slider round"></span></label>
+                        <div class="toggle-text"><span class="feature-title" style="font-size: 0.90rem; font-weight: 700;">Smart Notes</span></div>
                     </div>
                     <button class="advanced-btn" onclick="document.getElementById('advancedModal').style.display='flex'">⚙️ Advanced</button>
                 </div>
-
-                <div class="button-group secondary-actions" style="display: none; margin-top: 15px;" id="actionGroup">
-                    <button id="cancelBtn" class="hidden" style="width: 100%;">Cancel Process</button> 
-                </div>
-
-                <div id="thumbnailContainer" class="hidden" style="margin-top: 20px; text-align: center;">
-                    <img id="currentThumbnail" src="" style="max-width: 160px; border-radius: 8px;">
-                </div>
-
+                
                 <div id="status" style="margin-top: 20px;">Ready</div>
-
-                <div id="progressBar" class="hidden">
-                    <div id="progressFill"></div>
-                </div>
-
-                <div id="downloadArea" class="hidden">
-                    <div class="download-separator"></div>
-                    <ul id="downloadList"></ul>
-                </div>
+                <div id="downloadArea" class="hidden"><ul id="downloadList"></ul></div>
             </section>
-
-            <footer>
-                <p>&copy; 2026 MP3aud.io.</p>
-            </footer>
         </div>
     </main>
 
-    <div id="advancedModal" class="modal">
+    <div id="advancedModal" class="modal" role="dialog" aria-hidden="true">
         <div class="modal-content">
             <span class="close" onclick="document.getElementById('advancedModal').style.display='none'">&times;</span>
             <h2>Advanced Options</h2>
@@ -116,7 +84,7 @@
                     <input type="text" id="endTime" placeholder="Optional" style="width: 100%;">
                 </div>
             </div>
-            <button onclick="document.getElementById('advancedModal').style.display='none'" style="width: 100%; padding: 12px; background: #2980b9; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;">Save & Close</button>
+            <button onclick="document.getElementById('advancedModal').style.display='none'" style="width: 100%; padding: 12px; background: #2980b9; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px;">Save & Close</button>
         </div>
     </div>
 
