@@ -28,25 +28,28 @@ document.addEventListener('DOMContentLoaded', () => {
             freeUsesDisplay.textContent = `${data.free_conversions_used}/5`;
             paidCreditsDisplay.textContent = data.paid_track_credits;
 
-            // We always want the tool visible now
+            // We always want the tool visible
             conversionToolContainer.classList.remove('hidden'); 
 
             if (data.authenticated) {
-                // USER IS LOGGED IN
+                // --- USER IS LOGGED IN ---
                 userEmailDisplay.textContent = data.email;
                 logoutBtn.classList.remove('hidden');
-                guestLoginSection.classList.add('hidden'); // Hides the email input
-                buyCreditsBtn.classList.remove('hidden');  // Shows the buy button
+                guestLoginSection.classList.add('hidden'); // Hide the login form entirely
+                buyCreditsBtn.classList.remove('hidden');  // Show the buy button
             } else {
-                // USER IS AN ANONYMOUS GUEST
+                // --- USER IS AN ANONYMOUS GUEST ---
                 userEmailDisplay.textContent = 'Guest Session';
                 logoutBtn.classList.add('hidden');
-                guestLoginSection.classList.remove('hidden'); // Shows the email input
-                buyCreditsBtn.classList.add('hidden'); // Hides the buy button
+                buyCreditsBtn.classList.add('hidden'); // Hide the buy button
                 
+                // THE NEW LOGIC: Only show the email section IF they hit the limit
                 if (data.free_conversions_used >= 5) {
+                    guestLoginSection.classList.remove('hidden');
                     authMessage.style.color = '#ef4444';
                     authMessage.textContent = "Free limit reached. Please sign in to buy credits.";
+                } else {
+                    guestLoginSection.classList.add('hidden');
                 }
             }
         } catch (error) {
@@ -198,6 +201,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (response.status === 403) {
                 statusDiv.innerHTML = `<p style="color: #ef4444; font-weight: bold;">❌ Conversion Blocked: Limit Reached</p>`;
                 
+                // Show the login box right when they get blocked
                 guestLoginSection.classList.remove('hidden');
                 loginEmail.focus();
                 authMessage.style.color = '#ef4444';
