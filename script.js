@@ -35,6 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentSessionId = null;
     let pollInterval = null;
 
+    // --- AUTHENTICATION LOGIC ---
     const checkAuth = async () => {
         if (conversionToolContainer) conversionToolContainer.classList.remove('hidden');
 
@@ -217,7 +218,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const overallProgress = current + (subProgress / 100);
         const percent = total > 0 ? Math.min(Math.round((overallProgress / total) * 100), 100) : 0;
         progressFill.style.width = percent + '%';
-        // Only output percentage in the bar now to keep it clean
         progressFill.textContent = `${percent}%`;
     };
 
@@ -231,7 +231,6 @@ document.addEventListener('DOMContentLoaded', () => {
             
             if (!statusDiv) return;
 
-            // STATE: WAITING IN QUEUE
             if (data.status === 'queued') {
                 if (progressBar) progressBar.classList.add('hidden');
                 const waitText = data.estimated_wait <= 1 ? "< 1 min" : `~${data.estimated_wait} mins`;
@@ -244,11 +243,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                 `;
             } 
-            // STATE: PROCESSING
             else if (data.status === 'processing') {
                 if (progressBar) progressBar.classList.remove('hidden');
                 
-                // Gracefully handle missing playlist thumbnails
                 if (data.current_thumbnail && currentThumbnail && thumbnailContainer) {
                     currentThumbnail.src = data.current_thumbnail;
                     thumbnailContainer.classList.remove('hidden');
@@ -257,8 +254,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 
                 updateProgress(data.completed, data.total, data.sub_progress);
-                
-                // We prominently show Track 1 of XX here so the user never has to guess
                 const currentTrackDisplay = Math.min(data.completed + 1, data.total);
                 
                 statusDiv.innerHTML = `
@@ -267,7 +262,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     <p style="margin:5px 0 0 0; font-size:0.85rem; color:#64748b;">${data.current_status || 'Working on your files'}</p>
                 `;
             }
-            // STATE: COMPLETED
             else if (data.status === 'completed') {
                 resetUI();
                 if (progressBar) progressBar.classList.remove('hidden');
@@ -289,7 +283,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 currentSessionId = null;
                 checkAuth(); 
             }
-            // STATE: ERROR OR CANCELLED
             else if (data.status === 'error' || data.status === 'cancelled') {
                 resetUI();
                 const msg = data.status === 'error' ? (data.error || 'An error occurred during processing.') : 'Process Cancelled.';
@@ -302,35 +295,37 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const startConversion = async () => {
-        if (!urlInput || !statusDiv) return;
-        const url = urlInput.value.trim();
-        if (!url) {
-            statusDiv.innerHTML = `<p style="color: #ef4444;">Please enter a valid URL.</p>`;
-            return;
-        }
-
-        const startTime = startTimeInput ? startTimeInput.value.trim() : '';
-        const endTime = endTimeInput ? endTimeInput.value.trim() : '';
-        const transcribeAudio = transcribeInput ? transcribeInput.checked : false;
-
-        if (convertBtn) {
-            convertBtn.disabled = true;
-            convertBtn.textContent = "Processing...";
-        }
-        if (resetBtn) resetBtn.disabled = true;
-        if (actionGroup) actionGroup.style.display = 'flex';
-        if (cancelBtn) cancelBtn.classList.remove('hidden');
-        
-        statusDiv.innerHTML = `<div class="spinner"></div><p>Spinning up the server. Please be patient...</p>`;
-        if (downloadArea) downloadArea.classList.add('hidden');
-        if (thumbnailContainer) thumbnailContainer.classList.add('hidden');
-        if (progressBar) progressBar.classList.remove('hidden');
-        if (progressFill) {
-            progressFill.style.width = '0%';
-            progressFill.textContent = 'Initializing...';
-        }
-
         try {
+            if (!urlInput || !statusDiv) return;
+            const url = urlInput.value.trim();
+            if (!url) {
+                statusDiv.innerHTML = `<p style="color: #ef4444;">Please enter a valid URL.</p>`;
+                return;
+            }
+
+            // 1. Instantly update the UI so we know the button click worked
+            if (convertBtn) {
+                convertBtn.disabled = true;
+                convertBtn.textContent = "Processing...";
+            }
+            if (resetBtn) resetBtn.disabled = true;
+            if (actionGroup) actionGroup.style.display = 'flex';
+            if (cancelBtn) cancelBtn.classList.remove('hidden');
+
+            statusDiv.innerHTML = `<div class="spinner"></div><p style="font-weight:bold; color:#2980b9;">Analyzing Link...</p><p style="font-size:0.85rem; color:#64748b;">(Playlists can take 10-15 seconds to fetch from SoundCloud)</p>`;
+            
+            if (downloadArea) downloadArea.classList.add('hidden');
+            if (thumbnailContainer) thumbnailContainer.classList.add('hidden');
+            if (progressBar) progressBar.classList.remove('hidden');
+            if (progressFill) {
+                progressFill.style.width = '0%';
+                progressFill.textContent = 'Initializing...';
+            }
+
+            const startTime = startTimeInput ? startTimeInput.value.trim() : '';
+            const endTime = endTimeInput ? endTimeInput.value.trim() : '';
+            const transcribeAudio = transcribeInput ? transcribeInput.checked : false;
+
             const response = await fetch(`${BACKEND_URL}/start_conversion`, {
                 method: 'POST',
                 credentials: 'include',
@@ -345,7 +340,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const data = await response.json();
 
-            // INTERCEPT GUESTS HITTING LIMIT
             if (response.status === 403) {
                 statusDiv.innerHTML = `<p style="color: #ef4444; font-weight: bold;">❌ ${data.error || 'Conversion Blocked: Limit Reached'}</p>`;
                 if (guestLoginSection) guestLoginSection.classList.remove('hidden');
@@ -367,7 +361,9 @@ document.addEventListener('DOMContentLoaded', () => {
             currentSessionId = data.session_id;
             pollInterval = setInterval(pollStatus, 2000);
             pollStatus(); 
+            
         } catch (error) {
+            console.error(error);
             resetUI();
             statusDiv.innerHTML = `<p style="color: #ef4444;">❌ ${error.message}</p>`;
         }
