@@ -35,9 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentSessionId = null;
     let pollInterval = null;
 
-    // --- BULLETPROOF AUTHENTICATION LOGIC ---
     const checkAuth = async () => {
-        // ALWAYS MAKE SURE THE TOOL IS VISIBLE IMMEDIATELY
         if (conversionToolContainer) conversionToolContainer.classList.remove('hidden');
 
         try {
@@ -74,7 +72,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // --- MAGIC LINK VERIFICATION ---
     const urlParams = new URLSearchParams(window.location.search);
     const token = urlParams.get('token');
 
@@ -220,7 +217,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const overallProgress = current + (subProgress / 100);
         const percent = total > 0 ? Math.min(Math.round((overallProgress / total) * 100), 100) : 0;
         progressFill.style.width = percent + '%';
-        progressFill.textContent = `${current}/${total} (${percent}%)`;
+        // Only output percentage in the bar now to keep it clean
+        progressFill.textContent = `${percent}%`;
     };
 
     const pollStatus = async () => {
@@ -250,16 +248,22 @@ document.addEventListener('DOMContentLoaded', () => {
             else if (data.status === 'processing') {
                 if (progressBar) progressBar.classList.remove('hidden');
                 
+                // Gracefully handle missing playlist thumbnails
                 if (data.current_thumbnail && currentThumbnail && thumbnailContainer) {
                     currentThumbnail.src = data.current_thumbnail;
                     thumbnailContainer.classList.remove('hidden');
+                } else if (thumbnailContainer) {
+                    thumbnailContainer.classList.add('hidden');
                 }
                 
                 updateProgress(data.completed, data.total, data.sub_progress);
                 
+                // We prominently show Track 1 of XX here so the user never has to guess
+                const currentTrackDisplay = Math.min(data.completed + 1, data.total);
+                
                 statusDiv.innerHTML = `
                     <div class="spinner"></div>
-                    <p style="margin:0; font-weight:bold;">Processing...</p>
+                    <p style="margin:0; font-weight:bold; font-size:1.05rem;">Processing Track ${currentTrackDisplay} of ${data.total}</p>
                     <p style="margin:5px 0 0 0; font-size:0.85rem; color:#64748b;">${data.current_status || 'Working on your files'}</p>
                 `;
             }
@@ -343,7 +347,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // INTERCEPT GUESTS HITTING LIMIT
             if (response.status === 403) {
-                statusDiv.innerHTML = `<p style="color: #ef4444; font-weight: bold;">❌ Conversion Blocked: Limit Reached</p>`;
+                statusDiv.innerHTML = `<p style="color: #ef4444; font-weight: bold;">❌ ${data.error || 'Conversion Blocked: Limit Reached'}</p>`;
                 if (guestLoginSection) guestLoginSection.classList.remove('hidden');
                 if (loginEmail) loginEmail.focus();
                 if (authMessage) {
