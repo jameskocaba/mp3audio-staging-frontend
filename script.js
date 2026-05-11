@@ -35,15 +35,22 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentSessionId = null;
     let pollInterval = null;
 
-    // --- AUTHENTICATION LOGIC ---
+    // --- BULLETPROOF AUTHENTICATION LOGIC (WITH COLD START FIX) ---
     const checkAuth = async () => {
+        // 1. Instantly unhide the tool and dashboard so the screen isn't blank
         if (conversionToolContainer) conversionToolContainer.classList.remove('hidden');
+        if (userDashboard) userDashboard.classList.remove('hidden');
+
+        // 2. Show a temporary loading state
+        if (userEmailDisplay) userEmailDisplay.innerHTML = `<span style="color:#f59e0b;">Waking up secure server (takes ~30s)...</span>`;
+        if (freeUsesDisplay) freeUsesDisplay.textContent = `...`;
+        if (paidCreditsDisplay) paidCreditsDisplay.textContent = `...`;
 
         try {
             const response = await fetch(`${BACKEND_URL}/auth/me`, { credentials: 'include' });
             const data = await response.json();
             
-            if (userDashboard) userDashboard.classList.remove('hidden');
+            // 3. Populate with real data once the server is awake
             if (freeUsesDisplay) freeUsesDisplay.textContent = `${data.free_conversions_used}/5`;
             if (paidCreditsDisplay) paidCreditsDisplay.textContent = data.paid_track_credits;
 
@@ -69,10 +76,12 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         } catch (error) {
             console.error('Auth Check Failed', error);
+            if (userEmailDisplay) userEmailDisplay.textContent = 'Offline Mode';
             if (guestLoginSection) guestLoginSection.classList.add('hidden');
         }
     };
 
+    // --- MAGIC LINK VERIFICATION ---
     const urlParams = new URLSearchParams(window.location.search);
     const token = urlParams.get('token');
 
@@ -231,6 +240,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             if (!statusDiv) return;
 
+            // STATE: WAITING IN QUEUE
             if (data.status === 'queued') {
                 if (progressBar) progressBar.classList.add('hidden');
                 const waitText = data.estimated_wait <= 1 ? "< 1 min" : `~${data.estimated_wait} mins`;
@@ -243,9 +253,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                 `;
             } 
+            // STATE: PROCESSING
             else if (data.status === 'processing') {
                 if (progressBar) progressBar.classList.remove('hidden');
                 
+                // Gracefully handle missing playlist thumbnails
                 if (data.current_thumbnail && currentThumbnail && thumbnailContainer) {
                     currentThumbnail.src = data.current_thumbnail;
                     thumbnailContainer.classList.remove('hidden');
@@ -254,6 +266,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 
                 updateProgress(data.completed, data.total, data.sub_progress);
+                
+                // Prominently show Track 1 of XX so the user never has to guess
                 const currentTrackDisplay = Math.min(data.completed + 1, data.total);
                 
                 statusDiv.innerHTML = `
@@ -262,6 +276,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <p style="margin:5px 0 0 0; font-size:0.85rem; color:#64748b;">${data.current_status || 'Working on your files'}</p>
                 `;
             }
+            // STATE: COMPLETED
             else if (data.status === 'completed') {
                 resetUI();
                 if (progressBar) progressBar.classList.remove('hidden');
@@ -283,6 +298,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 currentSessionId = null;
                 checkAuth(); 
             }
+            // STATE: ERROR OR CANCELLED
             else if (data.status === 'error' || data.status === 'cancelled') {
                 resetUI();
                 const msg = data.status === 'error' ? (data.error || 'An error occurred during processing.') : 'Process Cancelled.';
@@ -340,6 +356,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const data = await response.json();
 
+            // INTERCEPT GUESTS HITTING LIMIT
             if (response.status === 403) {
                 statusDiv.innerHTML = `<p style="color: #ef4444; font-weight: bold;">❌ ${data.error || 'Conversion Blocked: Limit Reached'}</p>`;
                 if (guestLoginSection) guestLoginSection.classList.remove('hidden');
