@@ -304,6 +304,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 const msg = data.status === 'error' ? (data.error || 'An error occurred during processing.') : 'Process Cancelled.';
                 statusDiv.innerHTML = `<p style="color: #ef4444; font-weight: bold;">❌ ${msg}</p>`;
                 currentSessionId = null;
+                // Re-fetch Auth to visually return refunded credits back to the user's dashboard!
+                checkAuth(); 
             }
         } catch (error) {
             console.error('Polling error:', error);
