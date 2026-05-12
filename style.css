@@ -622,7 +622,7 @@ footer p { margin: 0 0 10px 0; }
 }
 
 /* =========================================
-   10. CONVERSION SUMMARY TABLE (NEW)
+   10. CONVERSION SUMMARY TABLE
    ========================================= */
 .summary-container {
     margin: 15px 0 20px 0;
@@ -674,4 +674,40 @@ footer p { margin: 0 0 10px 0; }
 
 .summary-table td:last-child {
     color: #ef4444; 
+}
+
+/* =========================================
+   11. PROCESS CARD (NEW)
+   ========================================= */
+.process-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    padding: 25px;
+    border-radius: 12px;
+    /* Soft blue/gray drop shadow to make it lift off the page */
+    box-shadow: 0 12px 30px rgba(41, 128, 185, 0.08); 
+    margin-top: 25px;
+    margin-bottom: 20px;
+    position: relative;
+}
+
+/* Adds a sleek colorful gradient strip to the top edge */
+.process-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #2980b9 0%, #2ecc71 100%);
+    border-radius: 12px 12px 0 0;
+}
+
+.card-title {
+    margin-top: 0;
+    color: #1e293b;
+    font-size: 1.1rem;
+    margin-bottom: 18px;
+    text-align: center;
+    font-weight: 700;
 }
