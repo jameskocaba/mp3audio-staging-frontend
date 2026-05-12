@@ -62,20 +62,21 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (logoutBtn) logoutBtn.classList.add('hidden');
                 if (buyCreditsBtn) buyCreditsBtn.classList.add('hidden'); 
                 
+                // ALWAYS show the login section for guests
+                if (guestLoginSection) guestLoginSection.classList.remove('hidden');
+                
                 if (data.free_conversions_used >= 5) {
-                    if (guestLoginSection) guestLoginSection.classList.remove('hidden');
                     if (authMessage) {
                         authMessage.style.color = '#ef4444';
                         authMessage.textContent = "Free limit reached. Please sign in to buy credits.";
                     }
-                } else {
-                    if (guestLoginSection) guestLoginSection.classList.add('hidden');
                 }
             }
         } catch (error) {
             console.error('Auth Check Failed', error);
             if (userEmailDisplay) userEmailDisplay.textContent = 'Offline Mode';
-            if (guestLoginSection) guestLoginSection.classList.add('hidden');
+            // Even in offline mode, show the login so users know the feature exists
+            if (guestLoginSection) guestLoginSection.classList.remove('hidden');
         }
     };
 
@@ -229,7 +230,6 @@ document.addEventListener('DOMContentLoaded', () => {
         progressFill.textContent = `${percent}%`;
     };
 
-    // Helper to generate the breakdown HTML table
     const generateSummaryTable = (failedDetails, titleColor = "#1e293b") => {
         if (!failedDetails || failedDetails.length === 0) return '';
         let tableRows = failedDetails.map(f => `
@@ -330,10 +330,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 const msg = data.status === 'error' ? (data.error || 'An error occurred during processing.') : 'Process Cancelled.';
                 statusDiv.innerHTML = `<p style="color: #ef4444; font-weight: bold; font-size: 1.1rem;">❌ ${msg}</p>`;
                 
-                // CRITICAL FIX: If it was a fatal error, but we have failed track data, SHOW THE TABLE!
                 if (data.status === 'error' && data.failed_details && data.failed_details.length > 0) {
                     if (downloadArea) downloadArea.classList.remove('hidden');
-                    if (downloadList) downloadList.innerHTML = ''; // Ensure no download button is rendered
+                    if (downloadList) downloadList.innerHTML = ''; 
                     if (conversionSummary) {
                         conversionSummary.innerHTML = generateSummaryTable(data.failed_details, "#ef4444");
                     }
@@ -395,6 +394,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (response.status === 403) {
                 statusDiv.innerHTML = `<p style="color: #ef4444; font-weight: bold;">❌ ${data.error || 'Conversion Blocked: Limit Reached'}</p>`;
+                
+                // Keep the login section visible, focus it, and show the limit error message
                 if (guestLoginSection) guestLoginSection.classList.remove('hidden');
                 if (loginEmail) loginEmail.focus();
                 if (authMessage) {
