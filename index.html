@@ -100,30 +100,6 @@
             
             <div id="urlMessage" class="hidden"></div>
 
-            <div id="userDashboard" class="dashboard-box hidden">
-                <div class="dashboard-header">
-                    <span style="font-size: 0.85rem; color: #64748b;">Status: <strong id="userEmailDisplay" style="color: #1e293b;">...</strong></span>
-                    <button id="logoutBtn" class="text-btn hidden">Logout</button>
-                </div>
-                <div class="stats-row">
-                    <div class="stat-pill">Free Uses: <strong id="freeUsesDisplay">0/5</strong></div>
-                    <div class="stat-pill">Paid Credits: <strong id="paidCreditsDisplay">0</strong></div>
-                </div>
-
-                <button id="buyCreditsBtn" class="premium-btn hidden">Buy 100 Credits for $2.00</button>
-                <div id="billingMessage" style="font-size: 0.85rem; color: #ef4444; font-weight: bold; margin-top: 10px; display: none;"></div>
-            </div>
-            
-            <div id="guestLoginSection" class="auth-box hidden">
-                <h3 style="margin-top: 0; color: #1e293b; font-size: 1rem; margin-bottom: 8px;">Unlock More Features</h3>
-                <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 15px; line-height: 1.4;">Guests get up to 5 free conversions. Sign in with a magic link to buy credits, view your history, and save your progress.</p>
-                <div class="unified-search-bar" style="margin-bottom: 5px;">
-                    <input type="email" id="loginEmail" placeholder="you@example.com" autocomplete="email">
-                    <button id="sendLinkBtn">Send Link</button>
-                </div>
-                <div id="authMessage" style="font-size: 0.85rem; font-weight: bold;"></div>
-            </div>
-                      
             <section id="conversionToolContainer" class="process-card" aria-label="Conversion tool">
                 <h3 class="card-title">Convert Media</h3>
                 
@@ -172,165 +148,18 @@
                 </div>
             </section>
 
-            <footer>
-                <p>&copy; 2026 MP3aud.io. All Rights Reserved.</p>
-                <nav class="footer-links" aria-label="Footer navigation">
-                    <a href="mailto:jameskocaba@gmail.com" aria-label="Contact us via email">Contact</a> |
-                    <a href="#" onclick="openModal('aboutModal'); return false;" aria-label="About MP3aud.io">About</a> |
-                    <a href="#" onclick="openModal('FAQModal'); return false;" aria-label="Frequently asked questions">FAQs</a> |
-                    <a href="#" onclick="openModal('privacyModal'); return false;" aria-label="Privacy policy">Privacy</a> | 
-                    <a href="#" onclick="openModal('disclaimerModal'); return false;" aria-label="Legal disclaimer">Disclaimer</a>
-                </nav>
-            </footer>
-        </div>
-    </main>
+            <div id="userDashboard" class="dashboard-box hidden">
+                <div class="dashboard-header">
+                    <span style="font-size: 0.85rem; color: #64748b;">Status: <strong id="userEmailDisplay" style="color: #1e293b;">...</strong></span>
+                    <button id="logoutBtn" class="text-btn hidden">Logout</button>
+                </div>
+                <div class="stats-row">
+                    <div class="stat-pill">Free Uses: <strong id="freeUsesDisplay">0/5</strong></div>
+                    <div class="stat-pill">Paid Credits: <strong id="paidCreditsDisplay">0</strong></div>
+                </div>
 
-    <div id="advancedModal" class="modal" role="dialog" aria-labelledby="advancedTitle" aria-hidden="true">
-        <div class="modal-content">
-            <span class="close" onclick="closeModal('advancedModal')" aria-label="Close modal">&times;</span>
-            <h2 id="advancedTitle">Advanced Options</h2>
-            
-            <div class="input-group" style="display: flex; gap: 15px; margin-bottom: 20px; margin-top: 15px;">
-                <div style="flex: 1; display: flex; flex-direction: column;">
-                    <label for="startTime" class="micro-label">Start Time (e.g. 01:20)</label>
-                    <input type="text" id="startTime" placeholder="00:00" style="width: 100%; box-sizing: border-box;">
-                </div>
-                <div style="flex: 1; display: flex; flex-direction: column;">
-                    <label for="endTime" class="micro-label">End Time (e.g. 05:45)</label>
-                    <input type="text" id="endTime" placeholder="Optional" style="width: 100%; box-sizing: border-box;">
-                </div>
+                <button id="buyCreditsBtn" class="premium-btn hidden">Buy 100 Credits for $2.00</button>
+                <div id="billingMessage" style="font-size: 0.85rem; color: #ef4444; font-weight: bold; margin-top: 10px; display: none;"></div>
             </div>
-
-            <button onclick="closeModal('advancedModal')" style="width: 100%; padding: 12px; background: #2980b9; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px;">Save & Close</button>
-        </div>
-    </div>
-
-    <div id="aboutModal" class="modal" role="dialog" aria-labelledby="aboutTitle" aria-hidden="true">
-        <div class="modal-content">
-            <span class="close" onclick="closeModal('aboutModal')" aria-label="Close modal">&times;</span>
-            <h2 id="aboutTitle">About MP3aud.io</h2>
-            <p>MP3aud.io was originally developed as a specialized utility for digital audio preservation, ensuring your favorite media is securely archived offline. Today, it has evolved into a comprehensive media processing suite. Alongside high-fidelity MP3 extraction, we now offer advanced AI-powered transcription and formatting.</p>
-            <p>Whether you are saving a music playlist, extracting a specific clip using our timestamp tools, or converting a recorded meeting or DIY tutorial into structured HTML notes, MP3aud.io handles it all in the cloud. We believe in "Media Permanence" and accessibility, providing a fast, browser-based, and privacy-focused tool to securely build your digital library and text archives.</p>
-        </div>
-    </div>
-
-    <div id="FAQModal" class="modal" role="dialog" aria-labelledby="faqTitle" aria-hidden="true">
-        <div class="modal-content">
-            <span class="close" onclick="closeModal('FAQModal')" aria-label="Close modal">&times;</span>
-            <h2 id="faqTitle">Frequently Asked Questions</h2>
-            <h3>1. How do I back up my media to MP3 or generate notes?</h3>
-            <p>Simply copy the shareable URL, paste it into the search box, set any optional start/end times via Advanced Options, toggle "Generate Smart Notes" if desired, and click "Process". Our system will process the link and generate a ZIP file.</p>
-            <h3>2. What does the "Generate Smart Notes" toggle do?</h3>
-            <p>When activated, our backend uses advanced AI to transcribe the audio file. It then intelligently detects if the audio is a "DIY/Instructional Video" or a "Professional Meeting" and generates formatted HTML notes. <strong>Please note: This feature is currently compatible with only some social media video URLs.</strong></p>
-            <h3>3. How do the Start and End time fields work?</h3>
-            <p>If you only want a specific segment of an audio file, you can input a Start Time (e.g., 01:20) and an End Time (e.g., 05:45) in the Advanced Options. Our processor will clip the audio to those exact timestamps.</p>
-            <h3>4. What audio quality are the MP3 backups?</h3>
-            <p>We prioritize audio fidelity. Our tool attempts to capture the highest available bitrate provided by the shareable link (typically 128kbps).</p>
-            <h3>5. How many files can I convert at once?</h3>
-            <p>You can process up to 50 files per playlist URL. Files are processed sequentially to ensure maximum reliability.</p>
-            <h3>6. Do I need to keep the browser tab open?</h3>
-            <p>If you are signed into an account, you do not need to keep the tab open. We will automatically email you a secure download link once your ZIP file is ready. Note: <strong>This link automatically expires after 1 hour</strong>.</p>
-            <h3>7. How long will my conversion take?</h3>
-            <p>Because processing high-quality audio and running AI transcription is resource-intensive, conversions are handled in a queue. If the server is busy, you will be given a queue position and an estimated wait time.</p>
-        </div>
-    </div>
-
-    <div id="privacyModal" class="modal" role="dialog" aria-labelledby="privacyTitle" aria-hidden="true">
-        <div class="modal-content">
-            <span class="close" onclick="closeModal('privacyModal')" aria-label="Close modal">&times;</span>
-            <h2 id="privacyTitle">Privacy Policy</h2>
-            <p>We prioritize your privacy. We do not store user data or IP logs, and all generated files are permanently deleted from our servers shortly after processing.</p>
-            <p><strong>Data Collection & Retention:</strong></p>
-            <ul>
-                <li><strong>Email Addresses:</strong> If provided, emails are used strictly by our email provider to send a one-time "Download Ready" notification. They are not stored permanently or sold.</li>
-                <li><strong>Your Files:</strong> Converted MP3s, ZIP archives, and generated text files are temporarily stored on our server to allow you to download them. They are automatically and permanently deleted <strong>1 hour</strong> after the last update to your session.</li>
-            </ul>
-            <p><strong>Third-Party AI Processing:</strong></p>
-            <ul>
-                <li>If you choose to use the AI Transcription feature, your audio files are temporarily securely transmitted to OpenAI's API to generate transcripts and summaries. OpenAI does not use data submitted via their API to train their models.</li>
-            </ul>
-            <p><strong>Cookies:</strong> We use Google Analytics to understand site usage and improve our service. You can opt out using browser settings or extensions.</p>
-        </div>
-    </div>
-
-    <div id="disclaimerModal" class="modal" role="dialog" aria-labelledby="disclaimerTitle" aria-hidden="true">
-        <div class="modal-content">
-            <span class="close" onclick="closeModal('disclaimerModal')" aria-label="Close modal">&times;</span>
-            <h2 id="disclaimerTitle">Legal Disclaimer</h2>
-            <p>This tool is intended for personal archival and educational use of shareable media only. Users are responsible for complying with the terms of service of the content platforms and local copyright laws.</p>
-            <p><strong>AI-Generated Content Warning:</strong></p>
-            <ul>
-                <li>Transcripts, meeting minutes, DIY instructions, and safety warnings are generated by Artificial Intelligence.</li>
-                <li>MP3aud.io makes no guarantees regarding the accuracy, completeness, or safety of AI-generated text. Always verify critical information, action items, and safety protocols manually.</li>
-            </ul>
-            <p><strong>Acceptable Use:</strong></p>
-            <ul>
-                <li>Backing up your own uploaded media files and recorded meetings.</li>
-                <li>Archiving publicly shared mixes, educational podcasts, and tutorials.</li>
-                <li>Personal offline listening and reading.</li>
-            </ul>
-            <p><strong>Prohibited Use:</strong></p>
-            <ul>
-                <li>Redistribution of copyrighted material.</li>
-                <li>Commercial use of downloaded media or AI-generated transcripts without proper licensing.</li>
-            </ul>
-            <p>MP3aud.io is an independent utility and is not affiliated with any specific media platforms or AI providers. By using this service, you agree to take full responsibility for your actions and comply with all applicable laws.</p>
-        </div>
-    </div>
-
-    <div id="exampleModal" class="modal" role="dialog" aria-labelledby="exampleTitle" aria-hidden="true">
-        <div class="modal-content" style="max-width: 650px;">
-            <span class="close" onclick="closeModal('exampleModal')" aria-label="Close modal">&times;</span>
-            <h2 id="exampleTitle">How AI Smart Notes Work</h2>
-            <p>Our AI doesn't just transcribe; it understands the context of your audio and structures it perfectly.</p>
             
-            <div class="example-comparison">
-                <div class="example-box">
-                    <div class="example-header raw-header">Raw Audio Transcript</div>
-                    <div class="example-body raw-body">
-                        "Uh, okay, let's get started. So today is October 4th. Sarah, can you make sure to email the client the updated specs by Friday? Uh, yeah. And we decided to push the launch to Q3. Let's make sure marketing knows..."
-                    </div>
-                </div>
-                
-                <div class="example-icon">
-                    <svg viewBox="0 0 24 24" width="24" height="24" stroke="#2980b9" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
-                </div>
-    
-                <div class="example-box">
-                    <div class="example-header pro-header">Generated Smart Notes</div>
-                    <div class="example-body pro-body">
-                        <strong>Decisions Made:</strong>
-                        <ul>
-                            <li>Launch pushed to Q3.</li>
-                        </ul>
-                        <strong>Action Items:</strong>
-                        <ol>
-                            <li><strong>Sarah:</strong> Email client updated specs (Deadline: Friday).</li>
-                            <li><strong>Team:</strong> Inform marketing of the new Q3 launch date.</li>
-                        </ol>
-                    </div>
-                </div>
-            </div>
-            <p style="font-size: 0.85rem; color: #64748b; margin-top: 15px; text-align: center;">You will receive both the raw text file and the formatted HTML notes in your ZIP download.</p>
-        </div>
-    </div>
-
-    <script>
-        function openModal(modalId) {
-            var modal = document.getElementById(modalId);
-            if (modal) { modal.style.display = "flex"; }
-        }
-        function closeModal(modalId) {
-            var modal = document.getElementById(modalId);
-            if (modal) { modal.style.display = "none"; }
-        }
-        window.onclick = function(event) {
-            if (event.target.classList.contains('modal')) {
-                event.target.style.display = "none";
-            }
-        }
-    </script>
-    
-    <script src="script.js?v=6"></script>
-</body>
-</html>
+            <div id="guestLoginSection" class="
