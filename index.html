@@ -100,7 +100,7 @@
             
             <div id="urlMessage" class="hidden"></div>
 
-            <div id="userDashboard" class="dashboard-box hidden">
+            <div id="userDashboard" class="dashboard-box">
                 <div class="dashboard-header">
                     <span style="font-size: 0.85rem; color: #64748b;">Status: <strong id="userEmailDisplay" style="color: #1e293b;">...</strong></span>
                     <button id="logoutBtn" class="text-btn hidden">Logout</button>
@@ -112,16 +112,6 @@
 
                 <button id="buyCreditsBtn" class="premium-btn hidden">Buy 100 Credits for $2.00</button>
                 <div id="billingMessage" style="font-size: 0.85rem; color: #ef4444; font-weight: bold; margin-top: 10px; display: none;"></div>
-            </div>
-            
-            <div id="guestLoginSection" class="auth-box hidden">
-                <h3 style="margin-top: 0; color: #1e293b; font-size: 1rem; margin-bottom: 8px;">Unlock More Features</h3>
-                <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 15px; line-height: 1.4;">Guests get up to 5 free conversions. Sign in with a magic link to buy credits, view your history, and save your progress.</p>
-                <div class="unified-search-bar" style="margin-bottom: 5px;">
-                    <input type="email" id="loginEmail" placeholder="you@example.com" autocomplete="email">
-                    <button id="sendLinkBtn">Send Link</button>
-                </div>
-                <div id="authMessage" style="font-size: 0.85rem; font-weight: bold;"></div>
             </div>
                       
             <section id="conversionToolContainer" class="process-card" aria-label="Conversion tool">
@@ -171,6 +161,16 @@
                     <ul id="downloadList"></ul>
                 </div>
             </section>
+
+            <div id="guestLoginSection" class="auth-box">
+                <h3 style="margin-top: 0; color: #1e293b; font-size: 1rem; margin-bottom: 8px;">Unlock More Features</h3>
+                <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 15px; line-height: 1.4;">Guests get up to 5 free conversions. Sign in with a magic link to buy credits, view your history, and save your progress.</p>
+                <div class="unified-search-bar" style="margin-bottom: 5px;">
+                    <input type="email" id="loginEmail" placeholder="you@example.com" autocomplete="email">
+                    <button id="sendLinkBtn">Send Link</button>
+                </div>
+                <div id="authMessage" style="font-size: 0.85rem; font-weight: bold;"></div>
+            </div>
 
             <footer>
                 <p>&copy; 2026 MP3aud.io. All Rights Reserved.</p>
