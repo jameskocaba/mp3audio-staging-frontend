@@ -30,6 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const progressFill = document.getElementById('progressFill');
     const downloadArea = document.getElementById('downloadArea');
     const downloadList = document.getElementById('downloadList');
+    const conversionSummary = document.getElementById('conversionSummary'); // NEW
 
     const BACKEND_URL = 'https://mp3audio-staging.onrender.com'; 
     let currentSessionId = null;
@@ -37,11 +38,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- BULLETPROOF AUTHENTICATION LOGIC (WITH COLD START FIX) ---
     const checkAuth = async () => {
-        // 1. Instantly unhide the tool and dashboard so the screen isn't blank
         if (conversionToolContainer) conversionToolContainer.classList.remove('hidden');
         if (userDashboard) userDashboard.classList.remove('hidden');
 
-        // 2. Show a temporary loading state
         if (userEmailDisplay) userEmailDisplay.innerHTML = `<span style="color:#f59e0b;">Waking up secure server (takes ~30s)...</span>`;
         if (freeUsesDisplay) freeUsesDisplay.textContent = `...`;
         if (paidCreditsDisplay) paidCreditsDisplay.textContent = `...`;
@@ -50,7 +49,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const response = await fetch(`${BACKEND_URL}/auth/me`, { credentials: 'include' });
             const data = await response.json();
             
-            // 3. Populate with real data once the server is awake
             if (freeUsesDisplay) freeUsesDisplay.textContent = `${data.free_conversions_used}/5`;
             if (paidCreditsDisplay) paidCreditsDisplay.textContent = data.paid_track_credits;
 
@@ -214,6 +212,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (endTimeInput) endTimeInput.value = '';  
         if (transcribeInput) transcribeInput.checked = false;   
         if (statusDiv) statusDiv.innerHTML = "Ready";
+        if (conversionSummary) conversionSummary.innerHTML = '';
         if (downloadList) downloadList.innerHTML = '';
         if (downloadArea) downloadArea.classList.add('hidden');
         if (thumbnailContainer) thumbnailContainer.classList.add('hidden'); 
@@ -240,7 +239,6 @@ document.addEventListener('DOMContentLoaded', () => {
             
             if (!statusDiv) return;
 
-            // STATE: WAITING IN QUEUE
             if (data.status === 'queued') {
                 if (progressBar) progressBar.classList.add('hidden');
                 const waitText = data.estimated_wait <= 1 ? "< 1 min" : `~${data.estimated_wait} mins`;
@@ -253,11 +251,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                 `;
             } 
-            // STATE: PROCESSING
             else if (data.status === 'processing') {
                 if (progressBar) progressBar.classList.remove('hidden');
                 
-                // Gracefully handle missing playlist thumbnails
                 if (data.current_thumbnail && currentThumbnail && thumbnailContainer) {
                     currentThumbnail.src = data.current_thumbnail;
                     thumbnailContainer.classList.remove('hidden');
@@ -267,7 +263,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 updateProgress(data.completed, data.total, data.sub_progress);
                 
-                // Prominently show Track 1 of XX so the user never has to guess
                 const currentTrackDisplay = Math.min(data.completed + 1, data.total);
                 
                 statusDiv.innerHTML = `
@@ -276,16 +271,49 @@ document.addEventListener('DOMContentLoaded', () => {
                     <p style="margin:5px 0 0 0; font-size:0.85rem; color:#64748b;">${data.current_status || 'Working on your files'}</p>
                 `;
             }
-            // STATE: COMPLETED
             else if (data.status === 'completed') {
                 resetUI();
                 if (progressBar) progressBar.classList.remove('hidden');
                 updateProgress(data.total, data.total, 100);
                 
-                statusDiv.innerHTML = `<p style="color: #2ecc71; font-weight: bold;">✅ Success! Conversion complete.</p>`;
+                // Show Positive vs Total Conversions
+                statusDiv.innerHTML = `<p style="color: #2ecc71; font-weight: bold; font-size: 1.1rem;">✅ Success! Converted ${data.completed} of ${data.total} tracks.</p>`;
                 
                 if (downloadArea && downloadList) {
                     downloadArea.classList.remove('hidden');
+
+                    // --- GENERATE CONVERSION SUMMARY TABLE ---
+                    let summaryHTML = '';
+                    if (data.failed_details && data.failed_details.length > 0) {
+                        let tableRows = data.failed_details.map(f => `
+                            <tr>
+                                <td>${f.track}</td>
+                                <td>${f.reason}</td>
+                            </tr>
+                        `).join('');
+
+                        summaryHTML = `
+                            <div class="summary-container">
+                                <h3 class="summary-title">Failure Breakdown</h3>
+                                <table class="summary-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Skipped Track</th>
+                                            <th>Reason</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${tableRows}
+                                    </tbody>
+                                </table>
+                            </div>
+                        `;
+                    }
+
+                    if (conversionSummary) {
+                        conversionSummary.innerHTML = summaryHTML;
+                    }
+
                     downloadList.innerHTML = `
                         <li>
                             <a href="${BACKEND_URL}${data.zip_path}" class="zip-btn" target="_blank">
@@ -298,13 +326,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 currentSessionId = null;
                 checkAuth(); 
             }
-            // STATE: ERROR OR CANCELLED
             else if (data.status === 'error' || data.status === 'cancelled') {
                 resetUI();
                 const msg = data.status === 'error' ? (data.error || 'An error occurred during processing.') : 'Process Cancelled.';
                 statusDiv.innerHTML = `<p style="color: #ef4444; font-weight: bold;">❌ ${msg}</p>`;
                 currentSessionId = null;
-                // Re-fetch Auth to visually return refunded credits back to the user's dashboard!
                 checkAuth(); 
             }
         } catch (error) {
@@ -321,7 +347,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            // 1. Instantly update the UI so we know the button click worked
             if (convertBtn) {
                 convertBtn.disabled = true;
                 convertBtn.textContent = "Processing...";
@@ -333,6 +358,7 @@ document.addEventListener('DOMContentLoaded', () => {
             statusDiv.innerHTML = `<div class="spinner"></div><p style="font-weight:bold; color:#2980b9;">Analyzing Link...</p><p style="font-size:0.85rem; color:#64748b;">(Playlists can take 10-15 seconds to fetch from SoundCloud)</p>`;
             
             if (downloadArea) downloadArea.classList.add('hidden');
+            if (conversionSummary) conversionSummary.innerHTML = '';
             if (thumbnailContainer) thumbnailContainer.classList.add('hidden');
             if (progressBar) progressBar.classList.remove('hidden');
             if (progressFill) {
@@ -358,7 +384,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const data = await response.json();
 
-            // INTERCEPT GUESTS HITTING LIMIT
             if (response.status === 403) {
                 statusDiv.innerHTML = `<p style="color: #ef4444; font-weight: bold;">❌ ${data.error || 'Conversion Blocked: Limit Reached'}</p>`;
                 if (guestLoginSection) guestLoginSection.classList.remove('hidden');
