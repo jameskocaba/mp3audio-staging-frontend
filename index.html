@@ -110,17 +110,18 @@
                     <div class="stat-pill">Paid Credits: <strong id="paidCreditsDisplay">0</strong></div>
                 </div>
 
-                <div id="guestLoginSection" class="hidden" style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #e2e8f0;">
-                    <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 10px;">Guests get up to 5 free conversions. Sign in with a magic link to buy credits or save your history.</p>
-                    <div class="unified-search-bar" style="margin-bottom: 5px;">
-                        <input type="email" id="loginEmail" placeholder="you@example.com" autocomplete="email">
-                        <button id="sendLinkBtn">Send Link</button>
-                    </div>
-                    <div id="authMessage" style="font-size: 0.85rem; font-weight: bold;"></div>
-                </div>
-
                 <button id="buyCreditsBtn" class="premium-btn hidden">Buy 100 Credits for $2.00</button>
                 <div id="billingMessage" style="font-size: 0.85rem; color: #ef4444; font-weight: bold; margin-top: 10px; display: none;"></div>
+            </div>
+            
+            <div id="guestLoginSection" class="auth-box hidden">
+                <h3 style="margin-top: 0; color: #1e293b; font-size: 1rem; margin-bottom: 8px;">Unlock More Features</h3>
+                <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 15px; line-height: 1.4;">Guests get up to 5 free conversions. Sign in with a magic link to buy credits, view your history, and save your progress.</p>
+                <div class="unified-search-bar" style="margin-bottom: 5px;">
+                    <input type="email" id="loginEmail" placeholder="you@example.com" autocomplete="email">
+                    <button id="sendLinkBtn">Send Link</button>
+                </div>
+                <div id="authMessage" style="font-size: 0.85rem; font-weight: bold;"></div>
             </div>
                       
             <section id="conversionToolContainer" aria-label="Conversion tool">
