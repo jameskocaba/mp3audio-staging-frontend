@@ -30,13 +30,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const progressFill = document.getElementById('progressFill');
     const downloadArea = document.getElementById('downloadArea');
     const downloadList = document.getElementById('downloadList');
-    const conversionSummary = document.getElementById('conversionSummary'); // NEW
+    const conversionSummary = document.getElementById('conversionSummary'); 
 
     const BACKEND_URL = 'https://mp3audio-staging.onrender.com'; 
     let currentSessionId = null;
     let pollInterval = null;
 
-    // --- BULLETPROOF AUTHENTICATION LOGIC (WITH COLD START FIX) ---
+    // --- AUTHENTICATION LOGIC ---
     const checkAuth = async () => {
         if (conversionToolContainer) conversionToolContainer.classList.remove('hidden');
         if (userDashboard) userDashboard.classList.remove('hidden');
@@ -229,6 +229,34 @@ document.addEventListener('DOMContentLoaded', () => {
         progressFill.textContent = `${percent}%`;
     };
 
+    // Helper to generate the breakdown HTML table
+    const generateSummaryTable = (failedDetails, titleColor = "#1e293b") => {
+        if (!failedDetails || failedDetails.length === 0) return '';
+        let tableRows = failedDetails.map(f => `
+            <tr>
+                <td>${f.track}</td>
+                <td>${f.reason}</td>
+            </tr>
+        `).join('');
+
+        return `
+            <div class="summary-container">
+                <h3 class="summary-title" style="color: ${titleColor};">Failure Breakdown</h3>
+                <table class="summary-table">
+                    <thead>
+                        <tr>
+                            <th>Skipped Track</th>
+                            <th>Reason</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${tableRows}
+                    </tbody>
+                </table>
+            </div>
+        `;
+    };
+
     const pollStatus = async () => {
         if (!currentSessionId) return;
 
@@ -276,42 +304,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (progressBar) progressBar.classList.remove('hidden');
                 updateProgress(data.total, data.total, 100);
                 
-                // Show Positive vs Total Conversions
                 statusDiv.innerHTML = `<p style="color: #2ecc71; font-weight: bold; font-size: 1.1rem;">✅ Success! Converted ${data.completed} of ${data.total} tracks.</p>`;
                 
                 if (downloadArea && downloadList) {
                     downloadArea.classList.remove('hidden');
-
-                    // --- GENERATE CONVERSION SUMMARY TABLE ---
-                    let summaryHTML = '';
-                    if (data.failed_details && data.failed_details.length > 0) {
-                        let tableRows = data.failed_details.map(f => `
-                            <tr>
-                                <td>${f.track}</td>
-                                <td>${f.reason}</td>
-                            </tr>
-                        `).join('');
-
-                        summaryHTML = `
-                            <div class="summary-container">
-                                <h3 class="summary-title">Failure Breakdown</h3>
-                                <table class="summary-table">
-                                    <thead>
-                                        <tr>
-                                            <th>Skipped Track</th>
-                                            <th>Reason</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        ${tableRows}
-                                    </tbody>
-                                </table>
-                            </div>
-                        `;
-                    }
-
+                    
                     if (conversionSummary) {
-                        conversionSummary.innerHTML = summaryHTML;
+                        conversionSummary.innerHTML = generateSummaryTable(data.failed_details, "#1e293b");
                     }
 
                     downloadList.innerHTML = `
@@ -329,7 +328,17 @@ document.addEventListener('DOMContentLoaded', () => {
             else if (data.status === 'error' || data.status === 'cancelled') {
                 resetUI();
                 const msg = data.status === 'error' ? (data.error || 'An error occurred during processing.') : 'Process Cancelled.';
-                statusDiv.innerHTML = `<p style="color: #ef4444; font-weight: bold;">❌ ${msg}</p>`;
+                statusDiv.innerHTML = `<p style="color: #ef4444; font-weight: bold; font-size: 1.1rem;">❌ ${msg}</p>`;
+                
+                // CRITICAL FIX: If it was a fatal error, but we have failed track data, SHOW THE TABLE!
+                if (data.status === 'error' && data.failed_details && data.failed_details.length > 0) {
+                    if (downloadArea) downloadArea.classList.remove('hidden');
+                    if (downloadList) downloadList.innerHTML = ''; // Ensure no download button is rendered
+                    if (conversionSummary) {
+                        conversionSummary.innerHTML = generateSummaryTable(data.failed_details, "#ef4444");
+                    }
+                }
+
                 currentSessionId = null;
                 checkAuth(); 
             }
