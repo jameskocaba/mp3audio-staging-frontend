@@ -95,7 +95,7 @@
             <header class="logo-container">
                 <img src="logo.png" alt="MP3aud.io - Free SoundCloud to MP3 Converter and AI Transcriber" class="main-logo" style="max-width: 240px;">
                 <h1 class="main-headline">Soundcloud Playlist and Audio Media Converter</h1>
-                <p class="h1-subtext">Skip the ad-heavy downloaders. Securely archive high-fidelity MP3s from SoundCloud, <strong>batch convert entire playlists</strong>, and turn meeting URLs into actionable minutes. Free to use, thousands of sites supported.</p>
+                <p class="h1-subtext">Skip the ad-heavy downloaders. Securely archive high-fidelity MP3s from SoundCloud, <strong>batch convert entire playlists</strong>, and turn meeting URLs into actionable minutes. Your first 5 track conversions are completely free. Thousands of sites supported.</p>
             </header>
             
             <div id="urlMessage" class="hidden"></div>
@@ -106,7 +106,7 @@
                     <button id="logoutBtn" class="text-btn hidden">Logout</button>
                 </div>
                 <div class="stats-row">
-                    <div class="stat-pill">Free Uses: <strong id="freeUsesDisplay">0/5</strong></div>
+                    <div class="stat-pill">Free Tracks: <strong id="freeUsesDisplay">...</strong></div>
                     <div class="stat-pill">Paid Credits: <strong id="paidCreditsDisplay">0</strong></div>
                 </div>
 
@@ -121,6 +121,9 @@
                     <input type="text" id="urlInput" placeholder="Paste URL here..." aria-label="Media URL input" autocomplete="off">
                     <button id="convertBtn" aria-label="Start conversion">Process</button>
                     <button id="resetBtn" aria-label="Reset form">Reset</button>
+                </div>
+                <div class="secure-note" style="justify-content: center; margin-top: -15px; margin-bottom: 15px;">
+                    <em>Guests get 5 free track conversions.</em>
                 </div>
 
                 <div class="options-row">
@@ -164,7 +167,7 @@
 
             <div id="guestLoginSection" class="auth-box">
                 <h3 style="margin-top: 0; color: #1e293b; font-size: 1rem; margin-bottom: 8px;">Unlock More Features</h3>
-                <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 15px; line-height: 1.4;">Guests get up to 5 free conversions. Sign in with a magic link to buy credits, view your history, and save your progress.</p>
+                <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 15px; line-height: 1.4;">Guests get up to 5 free track downloads. Sign in with a magic link to buy credits, view your history, and save your progress.</p>
                 <div class="unified-search-bar" style="margin-bottom: 5px;">
                     <input type="email" id="loginEmail" placeholder="you@example.com" autocomplete="email">
                     <button id="sendLinkBtn">Send Link</button>
