@@ -400,32 +400,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 statusDiv.innerHTML = `
                     <div style="background: #fffbeb; border: 1px solid #fde68a; padding: 15px; border-radius: 8px; text-align: left;">
                         <p style="color: #b45309; font-weight: bold; margin-top: 0; margin-bottom: 8px;">⚠️ Limit Reached</p>
-                        <p style="font-size: 0.9rem; color: #92400e; margin: 0; line-height: 1.4;">${data.error || 'Conversion Blocked: You do not have enough credits to process this request.'}</p>
-                        <div style="margin-top: 15px;">
-                            <button id="loginFocusBtn" style="width: 100%; background: #f59e0b; color: white; border: none; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: background 0.2s;">Log In or Buy Credits</button>
-                        </div>
+                        <p style="font-size: 0.9rem; color: #92400e; margin: 0; line-height: 1.4;">${data.error || 'Conversion Blocked: You have reached the limit for this request.'}</p>
                     </div>
                 `;
-
-                // Add event listener to jump to login
-                setTimeout(() => {
-                    const loginFocusBtn = document.getElementById('loginFocusBtn');
-                    if (loginFocusBtn) {
-                        loginFocusBtn.addEventListener('click', () => {
-                            if (loginEmail) loginEmail.focus();
-                            if (guestLoginSection) guestLoginSection.scrollIntoView({ behavior: 'smooth' });
-                        });
-                        loginFocusBtn.addEventListener('mouseover', () => loginFocusBtn.style.background = '#d97706');
-                        loginFocusBtn.addEventListener('mouseout', () => loginFocusBtn.style.background = '#f59e0b');
-                    }
-                }, 0);
                 
-                // Keep the login section visible, focus it, and show the limit error message
-                if (guestLoginSection) guestLoginSection.classList.remove('hidden');
-                if (authMessage) {
-                    authMessage.style.color = '#ef4444';
-                    authMessage.textContent = "You've hit the free limit! Please sign in below to unlock more.";
-                }
                 resetUI();
                 checkAuth();
                 return;
