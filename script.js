@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     // 1. User Dashboard & Auth UI Elements
     const userDashboard = document.getElementById('userDashboard');
-    const guestLoginSection = document.getElementById('guestLoginSection');
+    const loginFormContainer = document.getElementById('loginFormContainer');
     const conversionToolContainer = document.getElementById('conversionToolContainer');
     const loginEmail = document.getElementById('loginEmail');
     const sendLinkBtn = document.getElementById('sendLinkBtn');
@@ -58,15 +58,13 @@ document.addEventListener('DOMContentLoaded', () => {
             if (data.authenticated) {
                 if (userEmailDisplay) userEmailDisplay.textContent = data.email;
                 if (logoutBtn) logoutBtn.classList.remove('hidden');
-                if (guestLoginSection) guestLoginSection.classList.add('hidden'); 
                 if (buyCreditsBtn) buyCreditsBtn.classList.remove('hidden');  
+                if (loginFormContainer) loginFormContainer.classList.add('hidden'); 
             } else {
                 if (userEmailDisplay) userEmailDisplay.textContent = 'Guest Session';
                 if (logoutBtn) logoutBtn.classList.add('hidden');
                 if (buyCreditsBtn) buyCreditsBtn.classList.add('hidden'); 
-                
-                // ALWAYS show the login section for guests
-                if (guestLoginSection) guestLoginSection.classList.remove('hidden');
+                if (loginFormContainer) loginFormContainer.classList.remove('hidden');
                 
                 if (data.free_conversions_used >= 5) {
                     if (authMessage) {
@@ -78,8 +76,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) {
             console.error('Auth Check Failed', error);
             if (userEmailDisplay) userEmailDisplay.textContent = 'Offline Mode';
-            // Even in offline mode, show the login so users know the feature exists
-            if (guestLoginSection) guestLoginSection.classList.remove('hidden');
+            if (loginFormContainer) loginFormContainer.classList.remove('hidden');
         }
     };
 
@@ -403,6 +400,9 @@ document.addEventListener('DOMContentLoaded', () => {
                         <p style="font-size: 0.9rem; color: #92400e; margin: 0; line-height: 1.4;">${data.error || 'Conversion Blocked: You have reached the limit for this request.'}</p>
                     </div>
                 `;
+                
+                if (loginFormContainer) loginFormContainer.classList.remove('hidden');
+                if (loginEmail) loginEmail.focus();
                 
                 resetUI();
                 checkAuth();
