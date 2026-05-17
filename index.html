@@ -100,30 +100,7 @@
             
             <div id="urlMessage" class="hidden"></div>
 
-            <div id="userDashboard" class="dashboard-box">
-                <div class="dashboard-header">
-                    <span style="font-size: 0.85rem; color: #64748b;">Status: <strong id="userEmailDisplay" style="color: #1e293b;">...</strong></span>
-                    <button id="logoutBtn" class="text-btn hidden">Logout</button>
-                </div>
-                <div class="stats-row">
-                    <div class="stat-pill">Free Tracks: <strong id="freeUsesDisplay">...</strong></div>
-                    <div class="stat-pill">Paid Credits: <strong id="paidCreditsDisplay">0</strong></div>
-                </div>
-
-                <button id="buyCreditsBtn" class="premium-btn hidden">Buy 250 Credits for $5.00</button>
-                <div id="billingMessage" style="font-size: 0.85rem; color: #ef4444; font-weight: bold; margin-top: 10px; display: none;"></div>
-                
-                <div id="loginFormContainer" class="hidden" style="margin-top: 15px; border-top: 1px solid #f1f5f9; padding-top: 15px;">
-                    <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 8px;">Sign in to access your paid credits or buy more:</p>
-                    <div class="unified-search-bar" style="margin-bottom: 5px;">
-                        <input type="email" id="loginEmail" placeholder="you@example.com" autocomplete="email">
-                        <button id="sendLinkBtn">Send Link</button>
-                    </div>
-                    <div id="authMessage" style="font-size: 0.85rem; font-weight: bold;"></div>
-                </div>
-            </div>
-                      
-            <section id="conversionToolContainer" class="process-card" aria-label="Conversion tool">
+            <section id="conversionToolContainer" class="process-card" aria-label="Conversion tool" style="margin-top: 10px;">
                 <h3 class="card-title">Convert Media</h3>
                 
                 <div class="unified-search-bar">
@@ -170,6 +147,30 @@
                     <ul id="downloadList"></ul>
                 </div>
             </section>
+
+            <div id="userDashboard" class="dashboard-box hidden">
+                <div class="dashboard-header">
+                    <span style="font-size: 0.85rem; color: #64748b;">Status: <strong id="userEmailDisplay" style="color: #1e293b;">...</strong></span>
+                    <button id="logoutBtn" class="text-btn hidden">Logout</button>
+                </div>
+                <div class="stats-row">
+                    <div class="stat-pill">Free Tracks: <strong id="freeUsesDisplay">...</strong></div>
+                    <div class="stat-pill">Paid Credits: <strong id="paidCreditsDisplay">0</strong></div>
+                </div>
+
+                <button id="buyCreditsBtn" class="premium-btn hidden">Buy 250 Credits for $5.00</button>
+                <div id="billingMessage" style="font-size: 0.85rem; color: #ef4444; font-weight: bold; margin-top: 10px; display: none;"></div>
+            </div>
+
+            <div id="loginFormContainer" class="auth-box">
+                <h3 style="margin-top: 0; color: #1e293b; font-size: 1rem; margin-bottom: 8px;">Access Paid Features</h3>
+                <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 15px; line-height: 1.4;">Sign in with a magic link to access your paid credits or view your history.</p>
+                <div class="unified-search-bar" style="margin-bottom: 5px;">
+                    <input type="email" id="loginEmail" placeholder="you@example.com" autocomplete="email">
+                    <button id="sendLinkBtn">Send Link</button>
+                </div>
+                <div id="authMessage" style="font-size: 0.85rem; font-weight: bold;"></div>
+            </div>
 
             <footer>
                 <p>&copy; 2026 MP3aud.io. All Rights Reserved.</p>

@@ -39,11 +39,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- AUTHENTICATION LOGIC ---
     const checkAuth = async () => {
         if (conversionToolContainer) conversionToolContainer.classList.remove('hidden');
-        if (userDashboard) userDashboard.classList.remove('hidden');
-
-        if (userEmailDisplay) userEmailDisplay.innerHTML = `<span style="color:#f59e0b;">Waking up secure server (takes ~30s)...</span>`;
-        if (freeUsesDisplay) freeUsesDisplay.textContent = `...`;
-        if (paidCreditsDisplay) paidCreditsDisplay.textContent = `...`;
 
         try {
             const response = await fetch(`${BACKEND_URL}/auth/me`, { credentials: 'include' });
@@ -56,14 +51,15 @@ document.addEventListener('DOMContentLoaded', () => {
             if (paidCreditsDisplay) paidCreditsDisplay.textContent = data.paid_track_credits;
 
             if (data.authenticated) {
+                // User is logged in/paid
+                if (userDashboard) userDashboard.classList.remove('hidden');
                 if (userEmailDisplay) userEmailDisplay.textContent = data.email;
                 if (logoutBtn) logoutBtn.classList.remove('hidden');
                 if (buyCreditsBtn) buyCreditsBtn.classList.remove('hidden');  
                 if (loginFormContainer) loginFormContainer.classList.add('hidden'); 
             } else {
-                if (userEmailDisplay) userEmailDisplay.textContent = 'Guest Session';
-                if (logoutBtn) logoutBtn.classList.add('hidden');
-                if (buyCreditsBtn) buyCreditsBtn.classList.add('hidden'); 
+                // User is a guest
+                if (userDashboard) userDashboard.classList.add('hidden');
                 if (loginFormContainer) loginFormContainer.classList.remove('hidden');
                 
                 if (data.free_conversions_used >= 5) {
@@ -75,7 +71,8 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         } catch (error) {
             console.error('Auth Check Failed', error);
-            if (userEmailDisplay) userEmailDisplay.textContent = 'Offline Mode';
+            // Fallback for offline mode/guests
+            if (userDashboard) userDashboard.classList.add('hidden');
             if (loginFormContainer) loginFormContainer.classList.remove('hidden');
         }
     };
