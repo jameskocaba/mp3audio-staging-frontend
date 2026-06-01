@@ -7,7 +7,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const sendLinkBtn = document.getElementById('sendLinkBtn');
     const authMessage = document.getElementById('authMessage');
     const userEmailDisplay = document.getElementById('userEmailDisplay');
-    const freeUsesDisplay = document.getElementById('freeUsesDisplay');
     const paidCreditsDisplay = document.getElementById('paidCreditsDisplay');
     const logoutBtn = document.getElementById('logoutBtn');
     const buyCreditsBtn = document.getElementById('buyCreditsBtn');
@@ -44,9 +43,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const response = await fetch(`${BACKEND_URL}/auth/me`, { credentials: 'include' });
             const data = await response.json();
             
-            // Calculate remaining free tracks instead of showing used
-            const freeRemaining = Math.max(0, 5 - data.free_conversions_used);
-            if (freeUsesDisplay) freeUsesDisplay.textContent = `${freeRemaining} Left`;
             
             if (paidCreditsDisplay) paidCreditsDisplay.textContent = data.paid_track_credits;
 
