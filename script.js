@@ -44,6 +44,29 @@ document.addEventListener('DOMContentLoaded', () => {
         urlInput.addEventListener('input', (e) => {
             sessionStorage.setItem('savedUrl', e.target.value);
         });
+
+        // --- CLEAR INPUT BUTTON LOGIC ---
+        const clearBtn = document.createElement('button');
+        clearBtn.innerHTML = `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>`;
+        clearBtn.className = 'clear-input-btn hidden';
+        clearBtn.type = 'button';
+        clearBtn.title = 'Clear URL';
+
+        urlInput.parentNode.insertBefore(clearBtn, urlInput.nextSibling);
+
+        const toggleClearBtn = () => {
+            if (urlInput.value.length > 0) clearBtn.classList.remove('hidden');
+            else clearBtn.classList.add('hidden');
+        };
+
+        urlInput.addEventListener('input', toggleClearBtn);
+        clearBtn.addEventListener('click', () => {
+            urlInput.value = '';
+            sessionStorage.removeItem('savedUrl');
+            toggleClearBtn();
+            urlInput.focus();
+        });
+        toggleClearBtn();
     }
 
     // --- AUTHENTICATION LOGIC ---
@@ -217,6 +240,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (urlInput) {
             urlInput.value = '';
             sessionStorage.removeItem('savedUrl');
+            urlInput.dispatchEvent(new Event('input')); // Hide clear button on reset
         }
         if (startTimeInput) startTimeInput.value = ''; 
         if (endTimeInput) endTimeInput.value = '';  

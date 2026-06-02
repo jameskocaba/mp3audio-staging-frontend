@@ -116,6 +116,20 @@ body {
     transform: none;
 }
 
+.unified-search-bar .clear-input-btn {
+    background: transparent;
+    color: #94a3b8;
+    padding: 0 10px;
+    box-shadow: none;
+    display: flex;
+    align-items: center;
+}
+
+.unified-search-bar .clear-input-btn:hover {
+    color: #ef4444;
+    transform: none;
+}
+
 .unified-search-bar #resetBtn {
     background: #f1f5f9;
     color: #475569;
