@@ -34,6 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const BACKEND_URL = 'https://mp3audio-staging.onrender.com'; 
     let currentSessionId = null;
     let pollInterval = null;
+    let isGuestUser = true;
 
     // --- AUTHENTICATION LOGIC ---
     const checkAuth = async () => {
@@ -47,6 +48,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (paidCreditsDisplay) paidCreditsDisplay.textContent = data.paid_track_credits;
 
             if (data.authenticated) {
+                isGuestUser = false;
                 // User is logged in/paid
                 if (userDashboard) userDashboard.classList.remove('hidden');
                 if (userEmailDisplay) userEmailDisplay.textContent = data.email;
@@ -54,6 +56,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (buyCreditsBtn) buyCreditsBtn.classList.remove('hidden');  
                 if (loginFormContainer) loginFormContainer.classList.add('hidden'); 
             } else {
+                isGuestUser = true;
                 // User is a guest
                 if (userDashboard) userDashboard.classList.add('hidden');
                 if (loginFormContainer) loginFormContainer.classList.remove('hidden');
@@ -439,4 +442,12 @@ document.addEventListener('DOMContentLoaded', () => {
     if (convertBtn) convertBtn.addEventListener('click', startConversion);
     if (cancelBtn) cancelBtn.addEventListener('click', cancelConversion);
     if (resetBtn) resetBtn.addEventListener('click', fullReset);
+
+    // --- PREVENT ACCIDENTAL TAB CLOSURE FOR GUESTS ---
+    window.addEventListener('beforeunload', (e) => {
+        if (currentSessionId && isGuestUser) {
+            e.preventDefault();
+            e.returnValue = ''; // Required by modern browsers to trigger the warning popup
+        }
+    });
 });
