@@ -36,6 +36,16 @@ document.addEventListener('DOMContentLoaded', () => {
     let pollInterval = null;
     let isGuestUser = true;
 
+    // --- RESTORE URL FROM SESSION STORAGE ---
+    if (urlInput) {
+        const savedUrl = sessionStorage.getItem('savedUrl');
+        if (savedUrl) urlInput.value = savedUrl;
+
+        urlInput.addEventListener('input', (e) => {
+            sessionStorage.setItem('savedUrl', e.target.value);
+        });
+    }
+
     // --- AUTHENTICATION LOGIC ---
     const checkAuth = async () => {
         if (conversionToolContainer) conversionToolContainer.classList.remove('hidden');
@@ -204,7 +214,10 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const fullReset = () => {
-        if (urlInput) urlInput.value = '';
+        if (urlInput) {
+            urlInput.value = '';
+            sessionStorage.removeItem('savedUrl');
+        }
         if (startTimeInput) startTimeInput.value = ''; 
         if (endTimeInput) endTimeInput.value = '';  
         if (transcribeInput) transcribeInput.checked = false;   
