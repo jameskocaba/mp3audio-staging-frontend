@@ -36,6 +36,29 @@ document.addEventListener('DOMContentLoaded', () => {
     let pollInterval = null;
     let isGuestUser = true;
 
+    // --- TOAST NOTIFICATION SYSTEM ---
+    const showToast = (message, type = 'info') => {
+        let container = document.getElementById('toast-container');
+        if (!container) {
+            container = document.createElement('div');
+            container.id = 'toast-container';
+            document.body.appendChild(container);
+        }
+        const toast = document.createElement('div');
+        toast.className = `toast toast-${type}`;
+        let icon = '';
+        if (type === 'success') icon = `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
+        else if (type === 'error') icon = `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>`;
+        else icon = `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>`;
+        
+        toast.innerHTML = `${icon} <span>${message}</span>`;
+        container.appendChild(toast);
+        setTimeout(() => {
+            toast.classList.add('fade-out');
+            setTimeout(() => toast.remove(), 300);
+        }, 3000);
+    };
+
     // --- RESTORE URL FROM SESSION STORAGE ---
     if (urlInput) {
         const savedUrl = sessionStorage.getItem('savedUrl');
@@ -65,6 +88,7 @@ document.addEventListener('DOMContentLoaded', () => {
             sessionStorage.removeItem('savedUrl');
             toggleClearBtn();
             urlInput.focus();
+            showToast('URL cleared', 'info');
         });
         toggleClearBtn();
     }
@@ -130,17 +154,17 @@ document.addEventListener('DOMContentLoaded', () => {
         .then(data => {
             if (data.success) {
                 if (urlMessage) {
-                    urlMessage.innerHTML = `<div class="alert-message alert-success">Login successful! Welcome back.</div>`;
-                    setTimeout(() => { urlMessage.classList.add('hidden'); }, 4000); 
+                    urlMessage.classList.add('hidden'); 
                 }
+                showToast('Login successful! Welcome back.', 'success');
                 checkAuth(); 
             } else {
-                if (urlMessage) urlMessage.innerHTML = `<div class="alert-message alert-error">${data.error || 'Invalid link.'}</div>`;
+                showToast(data.error || 'Invalid link.', 'error');
                 checkAuth();
             }
         })
         .catch(err => {
-            if (urlMessage) urlMessage.innerHTML = `<div class="alert-message alert-error">Network error. Please try logging in again.</div>`;
+            showToast('Network error. Please try logging in again.', 'error');
             checkAuth();
         });
     } else {
@@ -165,22 +189,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
                 if (response.ok) {
                     if (authMessage) {
-                        authMessage.style.color = '#2ecc71';
-                        authMessage.textContent = 'Link sent! Check your email inbox.';
+                        authMessage.textContent = '';
                     }
+                    showToast('Link sent! Check your email inbox.', 'success');
                 } else {
-                    if (authMessage) {
-                        authMessage.style.color = '#ef4444';
-                        authMessage.textContent = 'Failed to send link.';
-                    }
+                    showToast('Failed to send link.', 'error');
                     sendLinkBtn.disabled = false;
                     sendLinkBtn.textContent = 'Send Link';
                 }
             } catch (error) {
-                if (authMessage) {
-                    authMessage.style.color = '#ef4444';
-                    authMessage.textContent = 'Network error. Try again.';
-                }
+                showToast('Network error. Try again.', 'error');
                 sendLinkBtn.disabled = false;
             }
         });
@@ -202,17 +220,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 const data = await response.json();
                 if (response.ok && data.invoice_url) window.location.href = data.invoice_url;
                 else {
-                    if (billingMessage) {
-                        billingMessage.textContent = 'Checkout error. Please try again later.';
-                        billingMessage.style.display = 'block';
-                    }
+                    showToast('Checkout error. Please try again later.', 'error');
                     buyCreditsBtn.disabled = false;
                 }
             } catch (error) {
-                if (billingMessage) {
-                    billingMessage.textContent = 'Network error. Please try again.';
-                    billingMessage.style.display = 'block';
-                }
+                showToast('Network error. Please try again.', 'error');
                 buyCreditsBtn.disabled = false;
             }
         });
@@ -338,6 +350,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 updateProgress(data.total, data.total, 100);
                 
                 statusDiv.innerHTML = `<p style="color: #2ecc71; font-weight: bold; font-size: 1.1rem;">✅ Success! Converted ${data.completed} of ${data.total} tracks.</p>`;
+                showToast(`Success! Converted ${data.completed} of ${data.total} tracks.`, 'success');
                 
                 if (downloadArea && downloadList) {
                     downloadArea.classList.remove('hidden');
@@ -361,7 +374,8 @@ document.addEventListener('DOMContentLoaded', () => {
             else if (data.status === 'error' || data.status === 'cancelled') {
                 resetUI();
                 const msg = data.status === 'error' ? (data.error || 'An error occurred during processing.') : 'Process Cancelled.';
-                statusDiv.innerHTML = `<p style="color: #ef4444; font-weight: bold; font-size: 1.1rem;">❌ ${msg}</p>`;
+                statusDiv.innerHTML = `<p style="color: #ef4444; font-weight: bold; font-size: 1.1rem;">❌ Action Failed</p>`;
+                if (data.status === 'error') showToast(msg, 'error');
                 
                 if (data.status === 'error' && data.failed_details && data.failed_details.length > 0) {
                     if (downloadArea) downloadArea.classList.remove('hidden');
@@ -384,7 +398,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!urlInput || !statusDiv) return;
             const url = urlInput.value.trim();
             if (!url) {
-                statusDiv.innerHTML = `<p style="color: #ef4444;">Please enter a valid URL.</p>`;
+                showToast('Please enter a valid URL.', 'error');
                 return;
             }
 
@@ -439,6 +453,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 resetUI();
                 checkAuth();
+                showToast('Limit Reached. Please sign in.', 'error');
                 return;
             }
 
@@ -453,7 +468,8 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) {
             console.error(error);
             resetUI();
-            statusDiv.innerHTML = `<p style="color: #ef4444;">❌ ${error.message}</p>`;
+            statusDiv.innerHTML = `Ready`;
+            showToast(error.message, 'error');
         }
     };
 
@@ -470,6 +486,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ session_id: currentSessionId })
             });
+            showToast('Conversion cancelled.', 'info');
         } catch (error) {
             console.error('Failed to cancel:', error);
             resetUI();
