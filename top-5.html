@@ -11,6 +11,58 @@
     <link rel="apple-touch-icon" href="favicon.png">
     <meta name="theme-color" content="#FF5500">
 
+    <style>
+        /* Styles for the new Weekly Top & Monthly Archive layout */
+        .featured-banner {
+            background: linear-gradient(90deg, #f59e0b 0%, #ea580c 100%);
+            color: white;
+            padding: 6px 16px;
+            border-radius: 8px 8px 0 0;
+            font-weight: bold;
+            display: inline-block;
+            margin-bottom: -5px;
+            position: relative;
+            z-index: 1;
+            font-size: 0.85rem;
+            box-shadow: 0 -2px 10px rgba(234, 88, 12, 0.2);
+        }
+        .featured-block {
+            border: 2px solid #ea580c !important;
+            background: #fffaf5;
+            padding: 20px;
+            border-radius: 0 8px 8px 8px;
+            margin-bottom: 40px;
+            box-shadow: 0 8px 20px rgba(234, 88, 12, 0.08);
+        }
+        .archive-header h2 {
+            font-size: 1.2rem;
+            color: #1e293b;
+            border-top: 1px solid #e2e8f0;
+            padding-top: 25px;
+            margin-bottom: 15px;
+        }
+        .month-header {
+            color: #64748b;
+            font-size: 1rem;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .month-group {
+            margin-bottom: 30px;
+        }
+        .archive-item {
+            padding: 15px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            background: #ffffff;
+            transition: box-shadow 0.2s;
+        }
+        .archive-item:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+        }
+    </style>
 </head>
 <body>
     <main>
@@ -36,8 +88,13 @@
                 </p>
             </header>
 
-            <section class="chart-section" id="chart-container">
+            <!-- Weekly Top Container -->
+            <section class="featured-section" id="weekly-top-container">
             </section>
+            
+            <!-- Monthly Archive Container -->
+            <div class="archive-header"><h2>Monthly Archive</h2></div>
+            <section class="archive-section" id="monthly-archive-container"></section>
 
             <footer>
                 <p>&copy; 2026 MP3aud.io. All Rights Reserved.</p>
@@ -47,79 +104,91 @@
 
     <script>
         // ==========================================
-        //      WEEKLY UPDATES GO HERE
+        //      DYNAMIC TOP-URLS SCRIPT
         // ==========================================
-        
-        const weeklyData = [
-            
-            // --- PASTE NEW WEEK HERE (COPY CODE BELOW) ---
-            /* 
-             {
-                date: "Feb 02, 2026",
-                title: "New Mix Title",
-                desc: "Description goes here...",
-                link: "https://soundcloud.com/link"
-            },
-            */
-            // ---------------------------------------------
+        const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://127.0.0.1:5000' : 'https://mp3aud.io';
 
-            {
-                date: "Feb 16, 2026",
-                title: "New Jazz",
-                desc: "Cosmic Tones Research Trio",
-                link: "https://soundcloud.com/thecosmictonesresearchtrio/sets/the-cosmic-tones-research-1?si=8c45cc880b9d47778beed0387113682e&utm_source=clipboard&utm_medium=text&utm_campaign=social_sharing"
-            },
-
-
-            {
-                date: "Feb 09, 2026",
-                title: "Random Listen",
-                desc: "Very Best of Solomon Burke",
-                link: "https://soundcloud.com/solomonburke/sets/the-very-best-of-solomon-burke?si=99782e02d8b743ff8797462e064469d3&utm_source=clipboard&utm_medium=text&utm_campaign=social_sharing"
-            },
-
-
-           {
-                date: "Feb 02, 2026",
-                title: "Weekly Wave",
-                desc: "Shugmoon, toh, carzo, nothinglastsforever and more...",
-                link: "https://soundcloud.com/discover/sets/weekly::user-841173538?si=6eb6b004813f4d2083564dd6495dad6b&utm_source=clipboard&utm_medium=text&utm_campaign=social_sharing"
-            },
-
-            
-            {
-                date: "Jan 23, 2026",
-                title: "Viral Rock Anthems",
-                desc: "Queen, Guns and Roses, Oasis and more..",
-                link: "https://soundcloud.com/user-841173538/sets/viral-rock-anthems?si=85048f778b284860a0780079da9d6e2d&utm_source=clipboard&utm_medium=text&utm_campaign=social_sharing"
+        async function fetchTopURLs() {
+            try {
+                const response = await fetch(`${API_BASE}/api/top-urls`);
+                const data = await response.json();
+                if (data.success && data.data.length > 0) {
+                    renderTopURLs(data.data);
+                } else {
+                    document.getElementById('weekly-top-container').innerHTML = '<p style="color:#64748b;">No popular links yet. Start converting!</p>';
+                }
+            } catch (err) {
+                console.error("Failed to load top URLs", err);
+                document.getElementById('weekly-top-container').innerHTML = '<p style="color:#ef4444;">Error loading popular URLs from the server.</p>';
             }
-        ];
+        }
 
-        // ==========================================
-        //    AUTOMATION SCRIPT (DO NOT TOUCH)
-        // ==========================================
+        function renderTopURLs(urlData) {
+            const topContainer = document.getElementById('weekly-top-container');
+            const archiveContainer = document.getElementById('monthly-archive-container');
 
-        const container = document.getElementById('chart-container');
+            // The most converted item is index 0
+            const topWeek = urlData[0];
+            const archiveData = urlData.slice(1);
 
-        weeklyData.forEach(week => {
-            const article = `
-                <article class="week-archive-block">
-                    <h2 class="date-label">Date Posted: ${week.date}</h2>
-                    
-                    <div class="content-row">
-                        <p class="playlist-desc">
-                            <strong>${week.title}:</strong> ${week.desc}
-                        </p>
+            // 1. Render Featured Weekly Top
+            if (topWeek) {
+                topContainer.innerHTML = `
+                    <div class="featured-banner">🔥 Top Shareable URL</div>
+                    <article class="week-archive-block featured-block">
+                        <h2 class="date-label" style="margin-top:0;">Top Converting Playlist (${topWeek.count} conversions)</h2>
+                        <div class="content-row">
+                            <p class="playlist-desc">
+                                <strong>${topWeek.title}:</strong> ${topWeek.desc}
+                            </p>
+                            <button class="sc-share-button" onclick="copyLink(this, '${topWeek.link}')" style="background: linear-gradient(90deg, #f59e0b 0%, #ea580c 100%); color:white; border:none;">
+                                <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
+                                <span>Copy Playlist</span>
+                            </button>
+                        </div>
+                    </article>
+                `;
+            }
 
-                        <button class="sc-share-button" onclick="copyLink(this, '${week.link}')">
-                            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
-                            <span>Copy Playlist</span>
-                        </button>
-                    </div>
-                </article>
-            `;
-            container.innerHTML += article;
-        });
+            // 2. Group Older items into Monthly Archive
+            const groupedArchive = {};
+            archiveData.forEach(item => {
+                // Extract just the Month/Year from the DB timestamp (e.g. "Feb 09, 2026")
+                const dateParts = item.date.split(" ");
+                const monthYear = dateParts.length >= 3 ? `${dateParts[0]} ${dateParts[2]}` : "Older";
+                
+                if (!groupedArchive[monthYear]) groupedArchive[monthYear] = [];
+                groupedArchive[monthYear].push(item);
+            });
+
+            // 3. Render Monthly Archive
+            for (const [monthYear, items] of Object.entries(groupedArchive)) {
+                let monthHTML = `<div class="month-group"><h3 class="month-header">${monthYear}</h3>`;
+                
+                items.forEach(item => {
+                    monthHTML += `
+                        <article class="week-archive-block archive-item">
+                            <h4 class="date-label" style="font-size:0.8rem; margin:0 0 8px 0; color:#94a3b8;">${item.count} Conversions • Last used ${item.date}</h4>
+                            <div class="content-row">
+                                <p class="playlist-desc" style="margin:0; font-size:0.95rem;">
+                                    <strong>${item.title}:</strong> ${item.desc}
+                                </p>
+                                <button class="sc-share-button text-btn" onclick="copyLink(this, '${item.link}')" style="margin-left:auto; display:flex; align-items:center; gap:6px; color:#2980b9;">
+                                    <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
+                                    <span>Copy Link</span>
+                                </button>
+                            </div>
+                        </article>
+                    `;
+                });
+                
+                monthHTML += `</div>`;
+                archiveContainer.innerHTML += monthHTML;
+            }
+        }
+
+        // Fetch data immediately when the page loads
+        fetchTopURLs();
 
         function copyLink(button, url) {
             navigator.clipboard.writeText(url).then(function() {
