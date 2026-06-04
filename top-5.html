@@ -34,6 +34,35 @@
             margin-bottom: 40px;
             box-shadow: 0 8px 20px rgba(234, 88, 12, 0.08);
         }
+        .top-ranked-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px 0;
+            border-bottom: 1px solid #ffedd5;
+        }
+        .featured-block .top-ranked-item:last-child {
+            border-bottom: none;
+        }
+        .rank-badge {
+            flex-shrink: 0;
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+            font-size: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .conversion-count {
+            display: block;
+            font-size: 0.8rem;
+            color: #94a3b8;
+            margin-top: 4px;
+        }
         .archive-header h2 {
             font-size: 1.2rem;
             color: #1e293b;
@@ -194,28 +223,40 @@
 
             let newArchiveItems = [];
 
-            // 1. Render Featured Weekly Top (only on first load)
+            // 1. Render Featured Top 5 (only on first load)
             if (!append) {
-                const topWeek = urlData[0];
-                newArchiveItems = urlData.slice(1);
+                const topFive = urlData.slice(0, 5);
+                newArchiveItems = urlData.slice(5);
                 allArchiveData = [...newArchiveItems];
 
-                if (topWeek) {
-                    topContainer.innerHTML = `
-                        <div class="featured-banner">🔥 Top Shareable URL</div>
-                        <article class="week-archive-block featured-block">
-                            <h2 class="date-label" style="margin-top:0;">Top Converting Playlist (${topWeek.count} conversions)</h2>
-                            <div class="content-row">
-                                <p class="playlist-desc">
-                                    <strong>${topWeek.title}:</strong> ${topWeek.desc}
-                                </p>
-                                <button class="sc-share-button" onclick="copyLink(this, '${topWeek.link}')" style="background: linear-gradient(90deg, #f59e0b 0%, #ea580c 100%); color:white; border:none;">
-                                    <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
-                                    <span>Copy Playlist</span>
-                                </button>
+                if (topFive.length > 0) {
+                    let html = '<div class="featured-banner">🔥 Top 5 Shareable URLs</div><div class="featured-block">';
+                    
+                    topFive.forEach((item, index) => {
+                        const rank = index + 1;
+                        let badgeColor = '#b45309';
+                        if (rank === 1) badgeColor = '#f59e0b'; // Gold
+                        else if (rank === 2) badgeColor = '#94a3b8'; // Silver
+                        else if (rank === 3) badgeColor = '#cd7f32'; // Bronze
+                        
+                        html += `
+                            <div class="top-ranked-item">
+                                <div class="rank-badge" style="background-color: ${badgeColor};">${rank}</div>
+                                <div class="content-row" style="flex-grow: 1; align-items: center; width: 100%;">
+                                    <p class="playlist-desc" style="margin:0;">
+                                        <strong>${item.title}:</strong> ${item.desc}
+                                        <span class="conversion-count">${item.count} conversions</span>
+                                    </p>
+                                    <button class="sc-share-button" onclick="copyLink(this, '${item.link}')" style="background: linear-gradient(90deg, #f59e0b 0%, #ea580c 100%); color:white; border:none;">
+                                        <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
+                                        <span>Copy Playlist</span>
+                                    </button>
+                                </div>
                             </div>
-                        </article>
-                    `;
+                        `;
+                    });
+                    html += '</div>';
+                    topContainer.innerHTML = html;
                 }
             } else {
                 newArchiveItems = urlData;
