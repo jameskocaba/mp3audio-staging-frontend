@@ -62,6 +62,21 @@
         .archive-item:hover {
             box-shadow: 0 4px 12px rgba(0,0,0,0.03);
         }
+        
+        #load-more-btn {
+            margin: 0 auto;
+            padding: 10px 24px;
+            font-weight: bold;
+            background: #e2e8f0;
+            color: #334155;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        #load-more-btn:hover:not(:disabled) {
+            background: #cbd5e1;
+        }
     </style>
 </head>
 <body>
@@ -97,7 +112,7 @@
             <section class="archive-section" id="monthly-archive-container"></section>
 
             <div style="text-align: center; margin-top: 20px;">
-                <button id="load-more-btn" onclick="fetchTopURLs(true)" class="sc-share-button" style="display: none; margin: 0 auto; padding: 10px 24px; font-weight: bold; background: #e2e8f0; color: #334155; border: none; border-radius: 6px; cursor: pointer; transition: background 0.2s;">Load More</button>
+                <button id="load-more-btn" onclick="fetchTopURLs(true)" style="display: none;">Load More</button>
             </div>
 
             <footer>
