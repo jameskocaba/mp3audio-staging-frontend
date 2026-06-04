@@ -96,6 +96,10 @@
             <div class="archive-header"><h2>Monthly Archive</h2></div>
             <section class="archive-section" id="monthly-archive-container"></section>
 
+            <div style="text-align: center; margin-top: 20px;">
+                <button id="load-more-btn" onclick="fetchTopURLs(true)" class="sc-share-button" style="display: none; margin: 0 auto; padding: 10px 24px; font-weight: bold; background: #e2e8f0; color: #334155; border: none; border-radius: 6px; cursor: pointer; transition: background 0.2s;">Load More</button>
+            </div>
+
             <footer>
                 <p>&copy; 2026 MP3aud.io. All Rights Reserved.</p>
             </footer>
@@ -107,58 +111,91 @@
         //      DYNAMIC TOP-URLS SCRIPT
         // ==========================================
         const API_BASE = 'https://mp3audio-staging.onrender.com';
+        let currentOffset = 0;
+        const LIMIT = 20;
+        let allArchiveData = [];
 
-        async function fetchTopURLs() {
+        async function fetchTopURLs(append = false) {
             try {
-                document.getElementById('weekly-top-container').innerHTML = '<p style="color:#64748b; font-style: italic; margin-top: 10px;">Fetching popular links... (This may take up to 60 seconds if the server is waking up from sleep)</p>';
+                if (!append) {
+                    document.getElementById('weekly-top-container').innerHTML = '<p style="color:#64748b; font-style: italic; margin-top: 10px;">Fetching popular links... (This may take up to 60 seconds if the server is waking up from sleep)</p>';
+                } else {
+                    const btn = document.getElementById('load-more-btn');
+                    if (btn) { btn.textContent = "Loading..."; btn.disabled = true; }
+                }
 
-                const response = await fetch(`${API_BASE}/api/top-urls`);
+                const response = await fetch(`${API_BASE}/api/top-urls?limit=${LIMIT}&offset=${currentOffset}`);
                 if (!response.ok) {
                     throw new Error(`Backend returned a ${response.status} error.`);
                 }
                 const data = await response.json();
+                
                 if (data.success && data.data && data.data.length > 0) {
-                    renderTopURLs(data.data);
+                    renderTopURLs(data.data, append);
+                    currentOffset += data.data.length;
+                    
+                    const btn = document.getElementById('load-more-btn');
+                    if (btn) {
+                        btn.style.display = (data.data.length === LIMIT) ? 'inline-block' : 'none';
+                        btn.textContent = "Load More";
+                        btn.disabled = false;
+                    }
                 } else {
-                    document.getElementById('weekly-top-container').innerHTML = '<p style="color:#64748b;">No popular links yet. Start converting!</p>';
+                    if (!append) {
+                        document.getElementById('weekly-top-container').innerHTML = '<p style="color:#64748b;">No popular links yet. Start converting!</p>';
+                    }
+                    const btn = document.getElementById('load-more-btn');
+                    if (btn) btn.style.display = 'none';
                 }
             } catch (err) {
                 console.error("Failed to load top URLs", err);
-                document.getElementById('weekly-top-container').innerHTML = '<p style="color:#ef4444; margin-top: 10px;">Error connecting to the server. If the server is waking up, please refresh the page in about 30 seconds.</p>';
+                if (!append) {
+                    document.getElementById('weekly-top-container').innerHTML = '<p style="color:#ef4444; margin-top: 10px;">Error connecting to the server. If the server is waking up, please refresh the page in about 30 seconds.</p>';
+                } else {
+                    const btn = document.getElementById('load-more-btn');
+                    if (btn) { btn.textContent = "Error. Try again."; btn.disabled = false; }
+                }
             }
         }
 
-        function renderTopURLs(urlData) {
+        function renderTopURLs(urlData, append) {
             const topContainer = document.getElementById('weekly-top-container');
             const archiveContainer = document.getElementById('monthly-archive-container');
 
-            // The most converted item is index 0
-            const topWeek = urlData[0];
-            const archiveData = urlData.slice(1);
+            let newArchiveItems = [];
 
-            // 1. Render Featured Weekly Top
-            if (topWeek) {
-                topContainer.innerHTML = `
-                    <div class="featured-banner">🔥 Top Shareable URL</div>
-                    <article class="week-archive-block featured-block">
-                        <h2 class="date-label" style="margin-top:0;">Top Converting Playlist (${topWeek.count} conversions)</h2>
-                        <div class="content-row">
-                            <p class="playlist-desc">
-                                <strong>${topWeek.title}:</strong> ${topWeek.desc}
-                            </p>
-                            <button class="sc-share-button" onclick="copyLink(this, '${topWeek.link}')" style="background: linear-gradient(90deg, #f59e0b 0%, #ea580c 100%); color:white; border:none;">
-                                <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
-                                <span>Copy Playlist</span>
-                            </button>
-                        </div>
-                    </article>
-                `;
+            // 1. Render Featured Weekly Top (only on first load)
+            if (!append) {
+                const topWeek = urlData[0];
+                newArchiveItems = urlData.slice(1);
+                allArchiveData = [...newArchiveItems];
+
+                if (topWeek) {
+                    topContainer.innerHTML = `
+                        <div class="featured-banner">🔥 Top Shareable URL</div>
+                        <article class="week-archive-block featured-block">
+                            <h2 class="date-label" style="margin-top:0;">Top Converting Playlist (${topWeek.count} conversions)</h2>
+                            <div class="content-row">
+                                <p class="playlist-desc">
+                                    <strong>${topWeek.title}:</strong> ${topWeek.desc}
+                                </p>
+                                <button class="sc-share-button" onclick="copyLink(this, '${topWeek.link}')" style="background: linear-gradient(90deg, #f59e0b 0%, #ea580c 100%); color:white; border:none;">
+                                    <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
+                                    <span>Copy Playlist</span>
+                                </button>
+                            </div>
+                        </article>
+                    `;
+                }
+            } else {
+                newArchiveItems = urlData;
+                allArchiveData = allArchiveData.concat(newArchiveItems);
             }
 
-            // 2. Group Older items into Monthly Archive
+            // 2. Group all archive items into Monthly Archive
             const groupedArchive = {};
-            archiveData.forEach(item => {
-                // Extract just the Month/Year from the DB timestamp (e.g. "Feb 09, 2026")
+            allArchiveData.forEach(item => {
+                // Extract just the Month/Year
                 const dateParts = item.date.split(" ");
                 const monthYear = dateParts.length >= 3 ? `${dateParts[0]} ${dateParts[2]}` : "Older";
                 
@@ -167,6 +204,7 @@
             });
 
             // 3. Render Monthly Archive
+            archiveContainer.innerHTML = ''; // clear before rendering
             if (Object.keys(groupedArchive).length === 0) {
                 archiveContainer.innerHTML = '<p style="color:#64748b; font-style: italic; margin-top: 5px;">Check back soon for more links!</p>';
             } else {
