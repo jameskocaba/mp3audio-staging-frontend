@@ -106,20 +106,25 @@
         // ==========================================
         //      DYNAMIC TOP-URLS SCRIPT
         // ==========================================
-        const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://127.0.0.1:5000' : 'https://mp3aud.io';
+        const API_BASE = 'https://mp3audio-staging.onrender.com';
 
         async function fetchTopURLs() {
             try {
+                document.getElementById('weekly-top-container').innerHTML = '<p style="color:#64748b; font-style: italic; margin-top: 10px;">Fetching popular links... (This may take up to 60 seconds if the server is waking up from sleep)</p>';
+
                 const response = await fetch(`${API_BASE}/api/top-urls`);
+                if (!response.ok) {
+                    throw new Error(`Backend returned a ${response.status} error.`);
+                }
                 const data = await response.json();
-                if (data.success && data.data.length > 0) {
+                if (data.success && data.data && data.data.length > 0) {
                     renderTopURLs(data.data);
                 } else {
                     document.getElementById('weekly-top-container').innerHTML = '<p style="color:#64748b;">No popular links yet. Start converting!</p>';
                 }
             } catch (err) {
                 console.error("Failed to load top URLs", err);
-                document.getElementById('weekly-top-container').innerHTML = '<p style="color:#ef4444;">Error loading popular URLs from the server.</p>';
+                document.getElementById('weekly-top-container').innerHTML = '<p style="color:#ef4444; margin-top: 10px;">Error connecting to the server. If the server is waking up, please refresh the page in about 30 seconds.</p>';
             }
         }
 
