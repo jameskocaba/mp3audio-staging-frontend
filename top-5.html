@@ -63,6 +63,13 @@
             color: #94a3b8;
             margin-top: 4px;
         }
+        .truncate-text {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 100%;
+            display: block;
+        }
         .archive-header h2 {
             font-size: 1.2rem;
             color: #1e293b;
@@ -242,12 +249,14 @@
                         html += `
                             <div class="top-ranked-item">
                                 <div class="rank-badge" style="background-color: ${badgeColor};">${rank}</div>
-                                <div class="content-row" style="flex-grow: 1; align-items: center; width: 100%;">
-                                    <p class="playlist-desc" style="margin:0;">
-                                        <strong>${item.title}:</strong> ${item.desc}
+                                <div class="content-row" style="flex-grow: 1; align-items: center; width: 100%; display: flex; gap: 15px; min-width: 0;">
+                                    <div style="flex-grow: 1; min-width: 0;">
+                                        <p class="playlist-desc truncate-text" style="margin:0;" title="${item.title}: ${item.desc}">
+                                            <strong>${item.title}:</strong> ${item.desc}
+                                        </p>
                                         <span class="conversion-count">${item.count} conversions</span>
-                                    </p>
-                                    <button class="sc-share-button" onclick="copyLink(this, '${item.link}')" style="background: linear-gradient(90deg, #f59e0b 0%, #ea580c 100%); color:white; border:none;">
+                                    </div>
+                                    <button class="sc-share-button" onclick="copyLink(this, '${item.link}')" style="flex-shrink: 0; background: linear-gradient(90deg, #f59e0b 0%, #ea580c 100%); color:white; border:none;">
                                         <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
                                         <span>Copy Playlist</span>
                                     </button>
@@ -286,11 +295,13 @@
                         monthHTML += `
                             <article class="week-archive-block archive-item">
                                 <h4 class="date-label" style="font-size:0.8rem; margin:0 0 8px 0; color:#94a3b8;">${item.count} Conversions • Last used ${item.date}</h4>
-                                <div class="content-row">
-                                    <p class="playlist-desc" style="margin:0; font-size:0.95rem;">
-                                        <strong>${item.title}:</strong> ${item.desc}
-                                    </p>
-                                    <button class="sc-share-button text-btn" onclick="copyLink(this, '${item.link}')" style="margin-left:auto; display:flex; align-items:center; gap:6px; color:#2980b9;">
+                                <div class="content-row" style="display: flex; align-items: center; gap: 15px; min-width: 0;">
+                                    <div style="flex-grow: 1; min-width: 0;">
+                                        <p class="playlist-desc truncate-text" style="margin:0; font-size:0.95rem;" title="${item.title}: ${item.desc}">
+                                            <strong>${item.title}:</strong> ${item.desc}
+                                        </p>
+                                    </div>
+                                    <button class="sc-share-button text-btn" onclick="copyLink(this, '${item.link}')" style="flex-shrink: 0; margin-left:auto; display:flex; align-items:center; gap:6px; color:#2980b9;">
                                         <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
                                         <span>Copy Link</span>
                                     </button>
