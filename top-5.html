@@ -167,28 +167,32 @@
             });
 
             // 3. Render Monthly Archive
-            for (const [monthYear, items] of Object.entries(groupedArchive)) {
-                let monthHTML = `<div class="month-group"><h3 class="month-header">${monthYear}</h3>`;
-                
-                items.forEach(item => {
-                    monthHTML += `
-                        <article class="week-archive-block archive-item">
-                            <h4 class="date-label" style="font-size:0.8rem; margin:0 0 8px 0; color:#94a3b8;">${item.count} Conversions • Last used ${item.date}</h4>
-                            <div class="content-row">
-                                <p class="playlist-desc" style="margin:0; font-size:0.95rem;">
-                                    <strong>${item.title}:</strong> ${item.desc}
-                                </p>
-                                <button class="sc-share-button text-btn" onclick="copyLink(this, '${item.link}')" style="margin-left:auto; display:flex; align-items:center; gap:6px; color:#2980b9;">
-                                    <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
-                                    <span>Copy Link</span>
-                                </button>
-                            </div>
-                        </article>
-                    `;
-                });
-                
-                monthHTML += `</div>`;
-                archiveContainer.innerHTML += monthHTML;
+            if (Object.keys(groupedArchive).length === 0) {
+                archiveContainer.innerHTML = '<p style="color:#64748b; font-style: italic; margin-top: 5px;">Check back soon for more links!</p>';
+            } else {
+                for (const [monthYear, items] of Object.entries(groupedArchive)) {
+                    let monthHTML = `<div class="month-group"><h3 class="month-header">${monthYear}</h3>`;
+                    
+                    items.forEach(item => {
+                        monthHTML += `
+                            <article class="week-archive-block archive-item">
+                                <h4 class="date-label" style="font-size:0.8rem; margin:0 0 8px 0; color:#94a3b8;">${item.count} Conversions • Last used ${item.date}</h4>
+                                <div class="content-row">
+                                    <p class="playlist-desc" style="margin:0; font-size:0.95rem;">
+                                        <strong>${item.title}:</strong> ${item.desc}
+                                    </p>
+                                    <button class="sc-share-button text-btn" onclick="copyLink(this, '${item.link}')" style="margin-left:auto; display:flex; align-items:center; gap:6px; color:#2980b9;">
+                                        <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
+                                        <span>Copy Link</span>
+                                    </button>
+                                </div>
+                            </article>
+                        `;
+                    });
+                    
+                    monthHTML += `</div>`;
+                    archiveContainer.innerHTML += monthHTML;
+                }
             }
         }
 
