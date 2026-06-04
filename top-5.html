@@ -77,6 +77,21 @@
         #load-more-btn:hover:not(:disabled) {
             background: #cbd5e1;
         }
+        
+        .btn-spinner {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            border: 2px solid rgba(51, 65, 85, 0.3);
+            border-radius: 50%;
+            border-top-color: #334155;
+            animation: btn-spin 0.8s linear infinite;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+        @keyframes btn-spin {
+            to { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
@@ -136,7 +151,7 @@
                     document.getElementById('weekly-top-container').innerHTML = '<p style="color:#64748b; font-style: italic; margin-top: 10px;">Fetching popular links... (This may take up to 60 seconds if the server is waking up from sleep)</p>';
                 } else {
                     const btn = document.getElementById('load-more-btn');
-                    if (btn) { btn.textContent = "Loading..."; btn.disabled = true; }
+                    if (btn) { btn.innerHTML = '<span class="btn-spinner"></span> Loading...'; btn.disabled = true; }
                 }
 
                 const response = await fetch(`${API_BASE}/api/top-urls?limit=${LIMIT}&offset=${currentOffset}`);
