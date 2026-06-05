@@ -33,7 +33,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const BACKEND_URL = 'https://mp3audio-staging.onrender.com'; 
     let currentSessionId = null;
-    let pollInterval = null;
+    let pollTimeout = null;
     let isGuestUser = true;
 
     // --- TOAST NOTIFICATION SYSTEM ---
@@ -218,9 +218,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         if (actionGroup) actionGroup.style.display = 'none'; 
         if (resetBtn) resetBtn.disabled = false; 
-        if (pollInterval) {
-            clearInterval(pollInterval);
-            pollInterval = null;
+        if (pollTimeout) {
+            clearTimeout(pollTimeout);
+            pollTimeout = null;
         }
     };
 
@@ -366,6 +366,11 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) {
             console.error('Polling error:', error);
         }
+        
+        // Schedule the next poll only AFTER the previous one has completed
+        if (currentSessionId) {
+            pollTimeout = setTimeout(pollStatus, 2000);
+        }
     };
 
     const startConversion = async () => {
@@ -437,8 +442,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             currentSessionId = data.session_id;
-            pollInterval = setInterval(pollStatus, 2000);
-            pollStatus(); 
+            pollStatus(); // Triggers the first check, which then schedules the rest
             
         } catch (error) {
             console.error(error);
