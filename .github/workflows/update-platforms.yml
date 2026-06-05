@@ -1,0 +1,45 @@
+name: Weekly Platform Health Check
+
+# 1. THE TRIGGERS
+on:
+  schedule:
+    # Runs automatically at 00:00 (Midnight UTC) every Sunday
+    - cron: '0 0 * * 0' 
+  workflow_dispatch: 
+    # This allows you to click a "Run workflow" button in GitHub to trigger it manually anytime
+
+# 2. THE PERMISSIONS
+permissions:
+  contents: write # This is required so the bot can push the new HTML file to your repo
+
+# 3. THE JOBS (What it actually does)
+jobs:
+  run-health-check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install yt-dlp
+
+      - name: Run the Python script
+        run: python update_supported_sites.py
+
+      - name: Commit and push the updated HTML file
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git add supported-sites.html
+          
+          # This checks if the script actually changed the HTML file. 
+          # If nothing changed, it skips the commit so your commit history stays clean.
+          git diff --quiet && git diff --staged --quiet || (git commit -m "Auto-updated supported-sites.html via GitHub Actions" && git push)
