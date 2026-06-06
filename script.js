@@ -31,7 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const downloadList = document.getElementById('downloadList');
     const conversionSummary = document.getElementById('conversionSummary'); 
 
-    const BACKEND_URL = 'https://mp3audio-staging.onrender.com'; 
+    const BACKEND_URL = 'https://audio-converter-backend.onrender.com'; 
     let currentSessionId = null;
     let pollTimeout = null;
     let isGuestUser = true;
