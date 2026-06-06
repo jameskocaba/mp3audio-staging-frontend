@@ -289,15 +289,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (data.status === 'queued') {
                 if (progressBar) progressBar.classList.add('hidden');
-                const waitText = data.estimated_wait <= 1 ? "< 1 min" : `~${data.estimated_wait} mins`;
-
-                statusDiv.innerHTML = `
-                    <div class="queue-box">
-                        <div class="spinner queue-spinner"></div>
-                        <p style="margin:0 0 5px 0; font-weight:bold;">Waiting in Queue</p>
-                        <p style="margin:0; font-size:0.85rem;">Position: ${data.queue_position} | Est. Wait: ${waitText}</p>
-                    </div>
-                `;
+                
+                // If they are first in line, the worker is just waking up. Show a loading state instead of the queue block.
+                if (data.queue_position <= 1) {
+                    statusDiv.innerHTML = `
+                        <div class="spinner"></div>
+                        <p style="margin:0; font-weight:bold; font-size:1.05rem;">Starting process...</p>
+                        <p style="margin:5px 0 0 0; font-size:0.85rem; color:#64748b;">Waking up the processor</p>
+                    `;
+                } else {
+                    const waitText = data.estimated_wait <= 1 ? "< 1 min" : `~${data.estimated_wait} mins`;
+                    statusDiv.innerHTML = `
+                        <div class="queue-box">
+                            <div class="spinner queue-spinner"></div>
+                            <p style="margin:0 0 5px 0; font-weight:bold;">Waiting in Queue</p>
+                            <p style="margin:0; font-size:0.85rem;">Position: ${data.queue_position} | Est. Wait: ${waitText}</p>
+                        </div>
+                    `;
+                }
             } 
             else if (data.status === 'processing') {
                 if (progressBar) progressBar.classList.remove('hidden');
