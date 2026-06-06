@@ -390,7 +390,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (actionGroup) actionGroup.style.display = 'flex';
             if (cancelBtn) cancelBtn.classList.remove('hidden');
 
-            statusDiv.innerHTML = `<div class="spinner"></div><p style="font-weight:bold; color:#2980b9;">Analyzing Link...</p><p style="font-size:0.85rem; color:#64748b;">(Playlists can take 10-15 seconds to fetch from SoundCloud)</p>`;
+            statusDiv.innerHTML = `<div class="spinner"></div><p style="font-weight:bold; color:#2980b9;">Spinning up server and analyzing Link...</p><p style="font-size:0.85rem; color:#64748b;">(Playlists can take 10-15 seconds to fetch from SoundCloud)</p>`;
             
             if (downloadArea) downloadArea.classList.add('hidden');
             if (conversionSummary) conversionSummary.innerHTML = '';
