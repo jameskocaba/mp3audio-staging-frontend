@@ -31,6 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const downloadList = document.getElementById('downloadList');
     const conversionSummary = document.getElementById('conversionSummary'); 
 
+    // Point this to your production backend URL
     const BACKEND_URL = 'https://audio-converter-backend.onrender.com'; 
     let currentSessionId = null;
     let pollTimeout = null;
