@@ -338,24 +338,33 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (progressBar) progressBar.classList.remove('hidden');
                 updateProgress(data.total, data.total, 100);
                 
-                statusDiv.innerHTML = `<p style="color: #2ecc71; font-weight: bold; font-size: 1.1rem;">✅ Success! Converted ${data.completed} of ${data.total} tracks.</p>`;
-                showToast(`Success! Converted ${data.completed} of ${data.total} tracks.`, 'success');
+                if (data.completed > 0) {
+                    statusDiv.innerHTML = `<p style="color: #2ecc71; font-weight: bold; font-size: 1.1rem;">✅ Success! Converted ${data.completed} of ${data.total} tracks.</p>`;
+                    showToast(`Success! Converted ${data.completed} of ${data.total} tracks.`, 'success');
+                } else {
+                    statusDiv.innerHTML = `<p style="color: #ef4444; font-weight: bold; font-size: 1.1rem;">⚠️ Process Finished: 0 tracks converted.</p>`;
+                    showToast(`No tracks could be converted.`, 'error');
+                }
                 
                 if (downloadArea && downloadList) {
                     downloadArea.classList.remove('hidden');
                     
                     if (conversionSummary) {
-                        conversionSummary.innerHTML = generateSummaryTable(data.failed_details, "#1e293b");
+                        conversionSummary.innerHTML = generateSummaryTable(data.failed_details, data.completed > 0 ? "#1e293b" : "#ef4444");
                     }
 
-                    downloadList.innerHTML = `
-                        <li>
-                            <a href="${BACKEND_URL}${data.zip_path}" class="zip-btn" target="_blank">
-                                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                                Download ZIP Archive
-                            </a>
-                        </li>
-                    `;
+                    if (data.completed > 0) {
+                        downloadList.innerHTML = `
+                            <li>
+                                <a href="${BACKEND_URL}${data.zip_path}" class="zip-btn" target="_blank">
+                                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                                    Download ZIP Archive
+                                </a>
+                            </li>
+                        `;
+                    } else {
+                        downloadList.innerHTML = '';
+                    }
                 }
                 currentSessionId = null;
                 checkAuth(); 
