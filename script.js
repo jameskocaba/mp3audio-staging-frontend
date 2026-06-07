@@ -148,7 +148,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (sendLinkBtn) {
-        sendLinkBtn.addEventListener('click', async () => {
+        sendLinkBtn.addEventListener('click', async (e) => {
+            if (e && e.preventDefault) e.preventDefault();
             const email = loginEmail.value.trim();
             if (!email) return;
 
@@ -181,14 +182,16 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (logoutBtn) {
-        logoutBtn.addEventListener('click', async () => {
+        logoutBtn.addEventListener('click', async (e) => {
+            if (e && e.preventDefault) e.preventDefault();
             await fetch(`${BACKEND_URL}/auth/logout`, { method: 'POST', credentials: 'include' });
             window.location.reload();
         });
     }
     
     if (buyCreditsBtn) {
-        buyCreditsBtn.addEventListener('click', async () => {
+        buyCreditsBtn.addEventListener('click', async (e) => {
+            if (e && e.preventDefault) e.preventDefault();
             buyCreditsBtn.disabled = true;
             buyCreditsBtn.textContent = 'Generating Invoice...';
             try {
@@ -224,7 +227,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    const fullReset = () => {
+    const fullReset = (e) => {
+        if (e && e.preventDefault) e.preventDefault();
         if (urlInput) {
             urlInput.value = '';
             sessionStorage.removeItem('savedUrl');
@@ -382,7 +386,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    const startConversion = async () => {
+    const startConversion = async (e) => {
+        if (e && e.preventDefault) e.preventDefault();
         try {
             if (!urlInput || !statusDiv) return;
             const url = urlInput.value.trim();
@@ -461,7 +466,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    const cancelConversion = async () => {
+    const cancelConversion = async (e) => {
+        if (e && e.preventDefault) e.preventDefault();
         if (!currentSessionId) return;
         if (cancelBtn) {
             cancelBtn.disabled = true;
