@@ -103,14 +103,14 @@
             <section id="conversionToolContainer" class="process-card" aria-label="Conversion tool" style="margin-top: 10px;">
                 
                 <div class="unified-search-bar">
-                    <input type="file" id="fileInput" multiple webkitdirectory style="display: none;" aria-label="Media file input">
-                    <label for="fileInput" class="file-input-label" style="flex: 1; padding: 10px; font-size: 1rem; color: #64748b; background: transparent; cursor: pointer; display: flex; align-items: center; gap: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                    <input type="file" id="fileInput" multiple style="display: none;" aria-label="Media file input">
+                    <label id="dropZone" for="fileInput" class="file-input-label" style="flex: 1; padding: 10px; font-size: 1rem; color: #64748b; background: transparent; cursor: pointer; display: flex; align-items: center; gap: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; border: 2px dashed transparent; border-radius: 8px; transition: all 0.2s ease;">
                         <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;">
                             <path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"></path>
                             <polyline points="7 9 12 4 17 9"></polyline>
                             <line x1="12" y1="4" x2="12" y2="16"></line>
                         </svg>
-                        <span id="fileInputText">Select files or a folder to upload...</span>
+                        <span id="fileInputText">Click to select files, or drag & drop here...</span>
                     </label>
                     <button id="convertBtn" aria-label="Start conversion">Process</button>
                     <button id="resetBtn" aria-label="Reset form">Reset</button>

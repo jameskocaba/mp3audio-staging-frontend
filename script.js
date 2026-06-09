@@ -91,9 +91,87 @@ document.addEventListener('DOMContentLoaded', () => {
                 fileInputText.style.color = '#1e293b';
             } else {
                 // This case handles when the user opens the file dialog and cancels it.
-                fileInputText.textContent = 'Select files or a folder to upload...';
+                fileInputText.textContent = 'Click to select files, or drag & drop here...';
                 fileInputText.style.fontWeight = 'normal';
                 fileInputText.style.color = '#64748b';
+            }
+        });
+    }
+
+    // --- DRAG AND DROP ZONE LOGIC ---
+    const dropZone = document.getElementById('dropZone');
+    if (dropZone && fileInput && fileInputText) {
+        // Add dragover and dragenter highlights
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropZone.addEventListener(eventName, (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                dropZone.style.borderColor = '#2980b9';
+                dropZone.style.backgroundColor = 'rgba(41, 128, 185, 0.05)';
+            }, false);
+        });
+
+        // Remove highlight on leave
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                dropZone.style.borderColor = 'transparent';
+                dropZone.style.backgroundColor = 'transparent';
+            }, false);
+        });
+
+        // Process dropped items
+        dropZone.addEventListener('drop', async (e) => {
+            const items = e.dataTransfer.items;
+            if (!items) return;
+            
+            fileInputText.textContent = "Scanning dropped files...";
+            const files = [];
+            const queue = [];
+
+            // Helper to recursively read files and folders
+            const readEntry = (entry) => {
+                return new Promise((resolve) => {
+                    if (entry.isFile) {
+                        entry.file(f => {
+                            files.push(f);
+                            resolve();
+                        });
+                    } else if (entry.isDirectory) {
+                        const reader = entry.createReader();
+                        reader.readEntries(async (entries) => {
+                            const promises = entries.map(e => readEntry(e));
+                            await Promise.all(promises);
+                            resolve();
+                        });
+                    } else {
+                        resolve();
+                    }
+                });
+            };
+
+            // Scan all dropped items
+            for (let i = 0; i < items.length; i++) {
+                const item = items[i];
+                if (item.kind === 'file') {
+                    const entry = item.webkitGetAsEntry();
+                    if (entry) queue.push(readEntry(entry));
+                }
+            }
+
+            await Promise.all(queue);
+
+            if (files.length > 0) {
+                // Create a new DataTransfer to populate our file input programmatically
+                const dt = new DataTransfer();
+                files.forEach(f => dt.items.add(f));
+                fileInput.files = dt.files;
+                
+                // Trigger change event to update UI
+                fileInput.dispatchEvent(new Event('change'));
+            } else {
+                fileInputText.textContent = 'Click to select files, or drag & drop here...';
             }
         });
     }
@@ -270,7 +348,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (attachLyricsInput) attachLyricsInput.checked = false;
         if (organizeGenreInput) organizeGenreInput.checked = false;
         if (fileInputText) {
-            fileInputText.textContent = 'Select files or a folder to upload...';
+            fileInputText.textContent = 'Click to select files, or drag & drop here...';
             fileInputText.style.fontWeight = 'normal';
             fileInputText.style.color = '#64748b';
         }
