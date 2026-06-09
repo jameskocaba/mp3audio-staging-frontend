@@ -103,26 +103,41 @@
             <section id="conversionToolContainer" class="process-card" aria-label="Conversion tool" style="margin-top: 10px;">
                 
                 <div class="unified-search-bar">
-                    <input type="text" id="urlInput" placeholder="Paste URL here..." aria-label="Media URL input" autocomplete="off">
+                    <input type="file" id="fileInput" multiple webkitdirectory aria-label="Media file input" style="flex: 1; padding: 10px; border: none; outline: none; font-size: 1rem; color: #334155; background: transparent; cursor: pointer;">
                     <button id="convertBtn" aria-label="Start conversion">Process</button>
                     <button id="resetBtn" aria-label="Reset form">Reset</button>
                 </div>
 
-                <div class="options-row">
+                <div class="options-row" style="flex-wrap: wrap; justify-content: center; gap: 20px; margin-top: 20px;">
                     <div class="inline-ai-toggle">
-                        <label class="switch" aria-label="Toggle AI Generation">
-                          <input type="checkbox" id="transcribeAudio" name="transcribeAudio">
+                        <label class="switch" aria-label="Increase Bitrate to 320k">
+                          <input type="checkbox" id="increaseQuality" name="increaseQuality">
                           <span class="slider round"></span>
                         </label>
                         <div class="toggle-text">
-                            <span class="feature-title" style="font-size: 0.90rem; font-weight: 700; color: #1e293b;">Smart Notes</span>
-                            <a href="#" onclick="openModal('exampleModal'); return false;" class="example-link" style="font-size: 0.8rem; color: #2980b9; text-decoration: none; font-weight: 600;">Example</a>
+                            <span class="feature-title" style="font-size: 0.90rem; font-weight: 700; color: #1e293b;">Increase Bitrate (320k)</span>
+                        </div>
+                    </div>
+                    
+                    <div class="inline-ai-toggle">
+                        <label class="switch" aria-label="Transcribe Lyrics">
+                          <input type="checkbox" id="attachLyrics" name="attachLyrics">
+                          <span class="slider round"></span>
+                        </label>
+                        <div class="toggle-text">
+                            <span class="feature-title" style="font-size: 0.90rem; font-weight: 700; color: #1e293b;">Attach Lyrics</span>
                         </div>
                     </div>
 
-                    <button class="advanced-btn" onclick="openModal('advancedModal'); return false;" aria-label="Open advanced options">
-                        ⚙️ Advanced
-                    </button>
+                    <div class="inline-ai-toggle">
+                        <label class="switch" aria-label="Auto-Organize by Genre">
+                          <input type="checkbox" id="organizeGenre" name="organizeGenre">
+                          <span class="slider round"></span>
+                        </label>
+                        <div class="toggle-text">
+                            <span class="feature-title" style="font-size: 0.90rem; font-weight: 700; color: #1e293b;">Organize by Genre</span>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="button-group secondary-actions" style="display: none; margin-top: 15px; gap: 12px;" id="actionGroup">
