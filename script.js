@@ -1,4 +1,9 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // --- GLOBAL DRAG PREVENT DEFAULT ---
+    // This prevents the browser from accidentally opening dropped files if dropped outside the target zone
+    window.addEventListener('dragover', (e) => e.preventDefault(), false);
+    window.addEventListener('drop', (e) => e.preventDefault(), false);
+
     // 1. User Dashboard & Auth UI Elements
     const userDashboard = document.getElementById('userDashboard');
     const loginFormContainer = document.getElementById('loginFormContainer');
@@ -123,8 +128,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Process dropped items
         dropZone.addEventListener('drop', async (e) => {
+            e.preventDefault();
+            e.stopPropagation();
             const items = e.dataTransfer.items;
-            if (!items) return;
+            const dtFiles = e.dataTransfer.files;
+            if (!items && !dtFiles) return;
             
             fileInputText.textContent = "Scanning dropped files...";
             const files = [];
@@ -137,30 +145,42 @@ document.addEventListener('DOMContentLoaded', () => {
                         entry.file(f => {
                             files.push(f);
                             resolve();
-                        });
+                        }, resolve);
                     } else if (entry.isDirectory) {
                         const reader = entry.createReader();
                         reader.readEntries(async (entries) => {
                             const promises = entries.map(e => readEntry(e));
                             await Promise.all(promises);
                             resolve();
-                        });
+                        }, resolve);
                     } else {
                         resolve();
                     }
                 });
             };
 
-            // Scan all dropped items
-            for (let i = 0; i < items.length; i++) {
-                const item = items[i];
-                if (item.kind === 'file') {
-                    const entry = item.webkitGetAsEntry();
-                    if (entry) queue.push(readEntry(entry));
+            if (items && items.length > 0) {
+                // Scan all dropped items
+                for (let i = 0; i < items.length; i++) {
+                    const item = items[i];
+                    if (item.kind === 'file') {
+                        if (typeof item.webkitGetAsEntry === 'function') {
+                            const entry = item.webkitGetAsEntry();
+                            if (entry) {
+                                queue.push(readEntry(entry));
+                                continue;
+                            }
+                        }
+                        const f = item.getAsFile();
+                        if (f) files.push(f);
+                    }
+                }
+                await Promise.all(queue);
+            } else if (dtFiles && dtFiles.length > 0) {
+                for (let i = 0; i < dtFiles.length; i++) {
+                    files.push(dtFiles[i]);
                 }
             }
-
-            await Promise.all(queue);
 
             if (files.length > 0) {
                 // Create a new DataTransfer to populate our file input programmatically
