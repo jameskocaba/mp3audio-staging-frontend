@@ -22,6 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const increaseQualityInput = document.getElementById('increaseQuality');
     const attachLyricsInput = document.getElementById('attachLyrics');
     const organizeGenreInput = document.getElementById('organizeGenre');
+    const fileInputText = document.getElementById('fileInputText');
     const thumbnailContainer = document.getElementById('thumbnailContainer'); 
     const currentThumbnail = document.getElementById('currentThumbnail');     
     const convertBtn = document.getElementById('convertBtn');
@@ -71,6 +72,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
         urlInput.addEventListener('input', (e) => {
             sessionStorage.setItem('savedUrl', e.target.value);
+        });
+    }
+
+    // --- CUSTOM FILE INPUT UI ---
+    if (fileInput && fileInputText) {
+        fileInput.addEventListener('change', () => {
+            if (fileInput.files.length > 0) {
+                const fileCount = fileInput.files.length;
+                // Check if a directory was selected by inspecting the path of the first file
+                const isDirectory = fileInput.files[0].webkitRelativePath !== "";
+                if (isDirectory && fileCount > 1) {
+                    fileInputText.textContent = `Folder with ${fileCount} files selected`;
+                } else {
+                    fileInputText.textContent = `${fileCount} file(s) selected`;
+                }
+                fileInputText.style.fontWeight = '600';
+                fileInputText.style.color = '#1e293b';
+            } else {
+                // This case handles when the user opens the file dialog and cancels it.
+                fileInputText.textContent = 'Select files or a folder to upload...';
+                fileInputText.style.fontWeight = 'normal';
+                fileInputText.style.color = '#64748b';
+            }
         });
     }
 
@@ -245,6 +269,11 @@ document.addEventListener('DOMContentLoaded', () => {
         if (increaseQualityInput) increaseQualityInput.checked = false;
         if (attachLyricsInput) attachLyricsInput.checked = false;
         if (organizeGenreInput) organizeGenreInput.checked = false;
+        if (fileInputText) {
+            fileInputText.textContent = 'Select files or a folder to upload...';
+            fileInputText.style.fontWeight = 'normal';
+            fileInputText.style.color = '#64748b';
+        }
         if (statusDiv) statusDiv.innerHTML = "Ready";
         if (conversionSummary) conversionSummary.innerHTML = '';
         if (downloadList) downloadList.innerHTML = '';
