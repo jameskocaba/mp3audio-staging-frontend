@@ -121,8 +121,8 @@ document.addEventListener('DOMContentLoaded', () => {
             dropZone.addEventListener(eventName, (e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                dropZone.style.borderColor = 'transparent';
-                dropZone.style.backgroundColor = 'transparent';
+                dropZone.style.borderColor = '';
+                dropZone.style.backgroundColor = '';
             }, false);
         });
 
