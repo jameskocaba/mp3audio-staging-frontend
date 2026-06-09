@@ -41,8 +41,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const downloadList = document.getElementById('downloadList');
     const conversionSummary = document.getElementById('conversionSummary'); 
 
-    // Point this to your production backend URL
-    const BACKEND_URL = 'https://audio-converter-backend.onrender.com'; 
+    // Point this to your staging backend URL
+    const BACKEND_URL = 'https://mp3audio-staging.onrender.com'; 
     let currentSessionId = null;
     let pollTimeout = null;
     let isGuestUser = true;
