@@ -18,6 +18,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const startTimeInput = document.getElementById('startTime'); 
     const endTimeInput = document.getElementById('endTime');     
     const transcribeInput = document.getElementById('transcribeAudio'); 
+    const fileInput = document.getElementById('fileInput'); 
+    const increaseQualityInput = document.getElementById('increaseQuality');
+    const attachLyricsInput = document.getElementById('attachLyrics');
+    const organizeGenreInput = document.getElementById('organizeGenre');
     const thumbnailContainer = document.getElementById('thumbnailContainer'); 
     const currentThumbnail = document.getElementById('currentThumbnail');     
     const convertBtn = document.getElementById('convertBtn');
@@ -237,6 +241,10 @@ document.addEventListener('DOMContentLoaded', () => {
         if (startTimeInput) startTimeInput.value = ''; 
         if (endTimeInput) endTimeInput.value = '';  
         if (transcribeInput) transcribeInput.checked = false;   
+        if (fileInput) fileInput.value = '';
+        if (increaseQualityInput) increaseQualityInput.checked = false;
+        if (attachLyricsInput) attachLyricsInput.checked = false;
+        if (organizeGenreInput) organizeGenreInput.checked = false;
         if (statusDiv) statusDiv.innerHTML = "Ready";
         if (conversionSummary) conversionSummary.innerHTML = '';
         if (downloadList) downloadList.innerHTML = '';
@@ -399,10 +407,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const startConversion = async (e) => {
         if (e && e.preventDefault) e.preventDefault();
         try {
-            if (!urlInput || !statusDiv) return;
-            const url = urlInput.value.trim();
-            if (!url) {
-                showToast('Please enter a valid URL.', 'error');
+            if (!statusDiv) return;
+            
+            const hasFiles = fileInput && fileInput.files.length > 0;
+            const url = urlInput ? urlInput.value.trim() : '';
+            
+            if (!hasFiles && !url) {
+                showToast('Please select files to upload or enter a URL.', 'error');
                 return;
             }
 
@@ -414,7 +425,11 @@ document.addEventListener('DOMContentLoaded', () => {
             if (actionGroup) actionGroup.style.display = 'flex';
             if (cancelBtn) cancelBtn.classList.remove('hidden');
 
-            statusDiv.innerHTML = `<div class="spinner"></div><p style="font-weight:bold; color:#2980b9;">Spinning up server and analyzing link...</p><p style="font-size:0.85rem; color:#64748b;">(Playlists can take 10-15 seconds to fetch from SoundCloud)</p>`;
+            if (hasFiles) {
+                statusDiv.innerHTML = `<div class="spinner"></div><p style="font-weight:bold; color:#2980b9;">Uploading files to server...</p><p style="font-size:0.85rem; color:#64748b;">(Please keep this tab open during upload)</p>`;
+            } else {
+                statusDiv.innerHTML = `<div class="spinner"></div><p style="font-weight:bold; color:#2980b9;">Spinning up server and analyzing link...</p><p style="font-size:0.85rem; color:#64748b;">(Playlists can take 10-15 seconds to fetch from SoundCloud)</p>`;
+            }
             
             if (downloadArea) downloadArea.classList.add('hidden');
             if (conversionSummary) conversionSummary.innerHTML = '';
@@ -425,21 +440,39 @@ document.addEventListener('DOMContentLoaded', () => {
                 progressFill.textContent = 'Initializing...';
             }
 
-            const startTime = startTimeInput ? startTimeInput.value.trim() : '';
-            const endTime = endTimeInput ? endTimeInput.value.trim() : '';
-            const transcribeAudio = transcribeInput ? transcribeInput.checked : false;
+            let response;
+            
+            if (hasFiles) {
+                const formData = new FormData();
+                for (let i = 0; i < fileInput.files.length; i++) {
+                    formData.append('files', fileInput.files[i]);
+                }
+                if (increaseQualityInput && increaseQualityInput.checked) formData.append('increase_quality', 'true');
+                if (attachLyricsInput && attachLyricsInput.checked) formData.append('attach_lyrics', 'true');
+                if (organizeGenreInput && organizeGenreInput.checked) formData.append('organize_genre', 'true');
+                
+                response = await fetch(`${BACKEND_URL}/start_upload`, {
+                    method: 'POST',
+                    credentials: 'include',
+                    body: formData
+                });
+            } else {
+                const startTime = startTimeInput ? startTimeInput.value.trim() : '';
+                const endTime = endTimeInput ? endTimeInput.value.trim() : '';
+                const transcribeAudio = transcribeInput ? transcribeInput.checked : false;
 
-            const response = await fetch(`${BACKEND_URL}/start_conversion`, {
-                method: 'POST',
-                credentials: 'include',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    url, 
-                    start_time: startTime, 
-                    end_time: endTime, 
-                    transcribe_audio: transcribeAudio
-                })
-            });
+                response = await fetch(`${BACKEND_URL}/start_conversion`, {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        url, 
+                        start_time: startTime, 
+                        end_time: endTime, 
+                        transcribe_audio: transcribeAudio
+                    })
+                });
+            }
 
             const data = await response.json();
 
