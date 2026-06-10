@@ -137,13 +137,22 @@ document.addEventListener('DOMContentLoaded', () => {
             fileInputText.textContent = "Scanning dropped files...";
             const files = [];
             const queue = [];
+            
+            // Valid audio and video extensions/mime types to accept
+            const isValidMedia = (file) => {
+                if (file.type.startsWith('audio/') || file.type.startsWith('video/')) return true;
+                // Fallback for files without a recognized mime type
+                const ext = file.name.split('.').pop().toLowerCase();
+                const validExts = ['mp3', 'wav', 'flac', 'aac', 'ogg', 'm4a', 'wma', 'mp4', 'mov', 'avi', 'mkv', 'webm'];
+                return validExts.includes(ext);
+            };
 
             // Helper to recursively read files and folders
             const readEntry = (entry) => {
                 return new Promise((resolve) => {
                     if (entry.isFile) {
                         entry.file(f => {
-                            files.push(f);
+                            if (isValidMedia(f)) files.push(f);
                             resolve();
                         }, resolve);
                     } else if (entry.isDirectory) {
@@ -178,7 +187,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 await Promise.all(queue);
             } else if (dtFiles && dtFiles.length > 0) {
                 for (let i = 0; i < dtFiles.length; i++) {
-                    files.push(dtFiles[i]);
+                    if (isValidMedia(dtFiles[i])) files.push(dtFiles[i]);
                 }
             }
 
@@ -192,6 +201,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 fileInput.dispatchEvent(new Event('change'));
             } else {
                 fileInputText.textContent = 'Click to select files, or drag & drop here...';
+                showToast('No valid audio or video files found in the dropped items.', 'error');
             }
         });
     }
