@@ -484,11 +484,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 updateProgress(data.total, data.total, 100);
                 
                 if (data.completed > 0) {
-                    statusDiv.innerHTML = `<p style="color: #2ecc71; font-weight: bold; font-size: 1.1rem;">✅ Success! Converted ${data.completed} of ${data.total} tracks.</p>`;
-                    showToast(`Success! Converted ${data.completed} of ${data.total} tracks.`, 'success');
+                    statusDiv.innerHTML = `<p style="color: #2ecc71; font-weight: bold; font-size: 1.1rem;">✅ Success! Processed ${data.completed} of ${data.total} tracks.</p>`;
+                    showToast(`Success! Processed ${data.completed} of ${data.total} tracks.`, 'success');
                 } else {
-                    statusDiv.innerHTML = `<p style="color: #ef4444; font-weight: bold; font-size: 1.1rem;">⚠️ Process Finished: 0 tracks converted.</p>`;
-                    showToast(`No tracks could be converted.`, 'error');
+                    statusDiv.innerHTML = `<p style="color: #ef4444; font-weight: bold; font-size: 1.1rem;">⚠️ Process Finished: 0 tracks processed.</p>`;
+                    showToast(`No tracks could be processed.`, 'error');
                 }
                 
                 if (downloadArea && downloadList) {
@@ -618,7 +618,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 statusDiv.innerHTML = `
                     <div style="background: #fffbeb; border: 1px solid #fde68a; padding: 15px; border-radius: 8px; text-align: left;">
                         <p style="color: #b45309; font-weight: bold; margin-top: 0; margin-bottom: 8px;">⚠️ Limit Reached</p>
-                        <p style="font-size: 0.9rem; color: #92400e; margin: 0; line-height: 1.4;">${data.error || 'Conversion Blocked: You have reached the limit for this request.'}</p>
+                        <p style="font-size: 0.9rem; color: #92400e; margin: 0; line-height: 1.4;">${data.error || 'Processing Blocked: You have reached the limit for this request.'}</p>
                     </div>
                 `;
                 
@@ -632,7 +632,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             if (!response.ok) {
-                throw new Error(data.error || 'Failed to start conversion');
+                throw new Error(data.error || 'Failed to start processing');
             }
 
             currentSessionId = data.session_id;
@@ -660,7 +660,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ session_id: currentSessionId })
             });
-            showToast('Conversion cancelled.', 'info');
+            showToast('Processing cancelled.', 'info');
         } catch (error) {
             console.error('Failed to cancel:', error);
             resetUI();
