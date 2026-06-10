@@ -140,6 +140,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             // Valid audio and video extensions/mime types to accept
             const isValidMedia = (file) => {
+                if (file.name.startsWith('._')) return false; // Ignore macOS metadata files
                 if (file.type.startsWith('audio/') || file.type.startsWith('video/')) return true;
                 // Fallback for files without a recognized mime type
                 const ext = file.name.split('.').pop().toLowerCase();
