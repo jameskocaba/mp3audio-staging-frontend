@@ -43,7 +43,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Point this to your staging backend URL
     // Ensure this EXACTLY matches your Render web service URL
-    const BACKEND_URL = 'https://mp3audio-staging-backend.onrender.com'; 
+    const BACKEND_URL = 'https://mp3audio-staging.onrender.com'; 
     let currentSessionId = null;
     let pollTimeout = null;
     let isGuestUser = true;
