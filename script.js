@@ -42,7 +42,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const conversionSummary = document.getElementById('conversionSummary'); 
 
     // Point this to your staging backend URL
-    const BACKEND_URL = 'https://mp3audio-staging.onrender.com'; 
+    // Ensure this EXACTLY matches your Render web service URL
+    const BACKEND_URL = 'https://mp3audio-staging-backend.onrender.com'; 
     let currentSessionId = null;
     let pollTimeout = null;
     let isGuestUser = true;
@@ -643,7 +644,12 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error(error);
             resetUI();
             statusDiv.innerHTML = `Ready`;
-            showToast(error.message, 'error');
+            
+            let errorMsg = error.message;
+            if (errorMsg.toLowerCase().includes('failed to fetch')) {
+                errorMsg = "Network Error: Cannot reach the backend. Check your BACKEND_URL or CORS settings.";
+            }
+            showToast(errorMsg, 'error');
         }
     };
 
