@@ -141,29 +141,30 @@ document.addEventListener('DOMContentLoaded', () => {
             
             // Valid audio and video extensions/mime types to accept
             const isValidMedia = (file) => {
+                if (!file || !file.name) return false;
                 if (file.name.startsWith('._')) return false; // Ignore macOS metadata files
-                if (file.type.startsWith('audio/') || file.type.startsWith('video/')) return true;
+                if (file.type && typeof file.type === 'string' && (file.type.startsWith('audio/') || file.type.startsWith('video/'))) return true;
                 // Fallback for files without a recognized mime type
                 const ext = file.name.split('.').pop().toLowerCase();
-                const validExts = ['mp3', 'wav', 'flac', 'aac', 'ogg', 'm4a', 'wma', 'mp4', 'mov', 'avi', 'mkv', 'webm'];
+                const validExts = ['mp3', 'wav', 'flac', 'aac', 'ogg', 'm4a', 'm4b', 'm4r', 'm4v', 'wma', 'mp4', 'mov', 'avi', 'mkv', 'webm', 'ts', 'aiff', 'alac'];
                 return validExts.includes(ext);
             };
 
             // Helper to recursively read files and folders
             const readEntry = (entry) => {
-                return new Promise((resolve) => {
+                return new Promise((resolve, reject) => {
                     if (entry.isFile) {
                         entry.file(f => {
                             if (isValidMedia(f)) files.push(f);
                             resolve();
-                        }, resolve);
+                        }, err => reject(err));
                     } else if (entry.isDirectory) {
                         const reader = entry.createReader();
                         reader.readEntries(async (entries) => {
-                            const promises = entries.map(e => readEntry(e));
+                            const promises = entries.map(e => readEntry(e).catch(() => {}));
                             await Promise.all(promises);
                             resolve();
-                        }, resolve);
+                        }, err => reject(err));
                     } else {
                         resolve();
                     }
@@ -174,16 +175,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Scan all dropped items
                 for (let i = 0; i < items.length; i++) {
                     const item = items[i];
+                    
                     if (item.kind === 'file') {
                         if (typeof item.webkitGetAsEntry === 'function') {
                             const entry = item.webkitGetAsEntry();
                             if (entry) {
-                                queue.push(readEntry(entry));
+                                queue.push(readEntry(entry).catch(() => {
+                                    const f = item.getAsFile();
+                                    if (f && isValidMedia(f)) files.push(f);
+                                }));
                                 continue;
                             }
                         }
                         const f = item.getAsFile();
-                        if (f) files.push(f);
+                        if (f && isValidMedia(f)) files.push(f);
                     }
                 }
                 await Promise.all(queue);
