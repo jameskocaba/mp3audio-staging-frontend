@@ -564,10 +564,20 @@ document.addEventListener('DOMContentLoaded', () => {
             if (actionGroup) actionGroup.style.display = 'flex';
             if (cancelBtn) cancelBtn.classList.remove('hidden');
 
+            statusDiv.innerHTML = `<div class="spinner"></div><p style="font-weight:bold; color:#2980b9;">Spinning up server...</p><p style="font-size:0.85rem; color:#64748b;">(This may take up to 50 seconds if the server is asleep)</p>`;
+            showToast('Spinning up server. This may take up to 50 seconds...', 'info');
+            
+            // Ping the backend to wake it up before sending a potentially large payload
+            try {
+                await fetch(`${BACKEND_URL}/health`);
+            } catch (err) {
+                console.warn("Pre-flight wake up ping failed or timed out, continuing anyway...", err);
+            }
+
             if (hasFiles) {
                 statusDiv.innerHTML = `<div class="spinner"></div><p style="font-weight:bold; color:#2980b9;">Uploading files to server...</p><p style="font-size:0.85rem; color:#64748b;">(Please keep this tab open during upload)</p>`;
             } else {
-                statusDiv.innerHTML = `<div class="spinner"></div><p style="font-weight:bold; color:#2980b9;">Spinning up server and analyzing link...</p><p style="font-size:0.85rem; color:#64748b;">(Playlists can take 10-15 seconds to fetch from SoundCloud)</p>`;
+                statusDiv.innerHTML = `<div class="spinner"></div><p style="font-weight:bold; color:#2980b9;">Analyzing link...</p><p style="font-size:0.85rem; color:#64748b;">(Playlists can take 10-15 seconds to fetch from SoundCloud)</p>`;
             }
             
             if (downloadArea) downloadArea.classList.add('hidden');
