@@ -590,7 +590,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (attachLyricsInput && attachLyricsInput.checked) formData.append('attach_lyrics', 'true');
                 if (organizeGenreInput && organizeGenreInput.checked) formData.append('organize_genre', 'true');
                 
-                response = await fetch(`${BACKEND_URL}/start_upload`, {
+                response = await fetch(`${BACKEND_URL}/process_local_files`, {
                     method: 'POST',
                     credentials: 'include',
                     body: formData
