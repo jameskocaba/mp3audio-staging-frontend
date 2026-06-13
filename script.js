@@ -86,12 +86,31 @@ document.addEventListener('DOMContentLoaded', () => {
         fileInput.addEventListener('change', () => {
             if (fileInput.files.length > 0) {
                 const fileCount = fileInput.files.length;
+                
+                // Calculate total size
+                let totalBytes = 0;
+                for (let i = 0; i < fileCount; i++) {
+                    totalBytes += fileInput.files[i].size;
+                }
+                
+                const formatSize = (bytes) => {
+                    if (bytes === 0) return '0 Bytes';
+                    const k = 1024;
+                    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+                    const i = Math.floor(Math.log(bytes) / Math.log(k));
+                    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+                };
+                
+                const sizeText = formatSize(totalBytes);
+
                 // Check if a directory was selected by inspecting the path of the first file
                 const isDirectory = fileInput.files[0].webkitRelativePath !== "";
                 if (isDirectory && fileCount > 1) {
-                    fileInputText.textContent = `Folder with ${fileCount} files selected`;
+                    fileInputText.textContent = `Folder with ${fileCount} files selected (${sizeText})`;
+                } else if (fileCount === 1) {
+                    fileInputText.textContent = `${fileInput.files[0].name} (${sizeText})`;
                 } else {
-                    fileInputText.textContent = `${fileCount} file(s) selected`;
+                    fileInputText.textContent = `${fileCount} files selected (${sizeText})`;
                 }
                 fileInputText.style.fontWeight = '600';
                 fileInputText.style.color = '#1e293b';
