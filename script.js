@@ -85,6 +85,19 @@ document.addEventListener('DOMContentLoaded', () => {
     if (fileInput && fileInputText) {
         fileInput.addEventListener('change', () => {
             if (fileInput.files.length > 0) {
+                // Enforce maximum file size limit instantly on selection
+                const MAX_PER_FILE_SIZE = 50 * 1024 * 1024; // 50MB in bytes
+                const oversizedFiles = Array.from(fileInput.files).filter(file => file.size > MAX_PER_FILE_SIZE);
+                
+                if (oversizedFiles.length > 0) {
+                    showToast('One or more files exceed the 50MB limit per track. Please select smaller files.', 'error');
+                    fileInput.value = ''; // Instantly clear the invalid selection
+                    fileInputText.textContent = 'Click to select files, or drag & drop here...';
+                    fileInputText.style.fontWeight = 'normal';
+                    fileInputText.style.color = '#64748b';
+                    return;
+                }
+
                 const fileCount = fileInput.files.length;
                 
                 // Calculate total size
