@@ -597,6 +597,17 @@ document.addEventListener('DOMContentLoaded', () => {
             let response;
             
             if (hasFiles) {
+                // Enforce a maximum file size limit of 50MB per file
+                const MAX_PER_FILE_SIZE = 50 * 1024 * 1024; // 50MB in bytes
+                const oversizedFiles = Array.from(fileInput.files).filter(file => file.size > MAX_PER_FILE_SIZE);
+                
+                if (oversizedFiles.length > 0) {
+                    showToast('One or more files exceed the 50MB limit per track. Please remove them and try again.', 'error');
+                    resetUI();
+                    statusDiv.innerHTML = `Ready`;
+                    return;
+                }
+
                 const formData = new FormData();
                 for (let i = 0; i < fileInput.files.length; i++) {
                     formData.append('files', fileInput.files[i]);
