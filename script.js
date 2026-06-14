@@ -15,6 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const paidCreditsDisplay = document.getElementById('paidCreditsDisplay');
     const logoutBtn = document.getElementById('logoutBtn');
     const buyCreditsBtn = document.getElementById('buyCreditsBtn');
+    const subscribeBtn = document.getElementById('subscribeBtn');
     const billingMessage = document.getElementById('billingMessage');
     const urlMessage = document.getElementById('urlMessage');
 
@@ -79,6 +80,17 @@ document.addEventListener('DOMContentLoaded', () => {
         urlInput.addEventListener('input', (e) => {
             sessionStorage.setItem('savedUrl', e.target.value);
         });
+    }
+
+    // --- STRIPE CHECKOUT REDIRECT HANDLER ---
+    const successParam = urlParams.get('success');
+    const canceledParam = urlParams.get('canceled');
+    if (successParam) {
+        showToast('Payment successful! Your account has been updated.', 'success');
+        window.history.replaceState({}, document.title, window.location.pathname);
+    } else if (canceledParam) {
+        showToast('Payment was canceled.', 'info');
+        window.history.replaceState({}, document.title, window.location.pathname);
     }
 
     // --- CUSTOM FILE INPUT UI ---
@@ -263,6 +275,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (userEmailDisplay) userEmailDisplay.textContent = data.email;
                 if (logoutBtn) logoutBtn.classList.remove('hidden');
                 if (buyCreditsBtn) buyCreditsBtn.classList.remove('hidden');  
+                if (subscribeBtn) subscribeBtn.classList.remove('hidden');
                 if (loginFormContainer) loginFormContainer.classList.add('hidden'); 
             } else {
                 isGuestUser = true;
@@ -369,18 +382,52 @@ document.addEventListener('DOMContentLoaded', () => {
         buyCreditsBtn.addEventListener('click', async (e) => {
             if (e && e.preventDefault) e.preventDefault();
             buyCreditsBtn.disabled = true;
-            buyCreditsBtn.textContent = 'Generating Invoice...';
+            buyCreditsBtn.textContent = 'Processing...';
             try {
-                const response = await fetch(`${BACKEND_URL}/buy-credits`, { method: 'POST', credentials: 'include' });
+                const response = await fetch(`${BACKEND_URL}/create-checkout-session`, { 
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ type: 'credits' }),
+                    credentials: 'include' 
+                });
                 const data = await response.json();
-                if (response.ok && data.invoice_url) window.location.href = data.invoice_url;
+                if (response.ok && data.url) window.location.href = data.url;
                 else {
-                    showToast('Checkout error. Please try again later.', 'error');
+                    showToast(data.error || 'Checkout error. Please try again later.', 'error');
                     buyCreditsBtn.disabled = false;
+                    buyCreditsBtn.textContent = 'Buy Credits';
                 }
             } catch (error) {
                 showToast('Network error. Please try again.', 'error');
                 buyCreditsBtn.disabled = false;
+                buyCreditsBtn.textContent = 'Buy Credits';
+            }
+        });
+    }
+    
+    if (subscribeBtn) {
+        subscribeBtn.addEventListener('click', async (e) => {
+            if (e && e.preventDefault) e.preventDefault();
+            subscribeBtn.disabled = true;
+            subscribeBtn.textContent = 'Processing...';
+            try {
+                const response = await fetch(`${BACKEND_URL}/create-checkout-session`, { 
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ type: 'subscription' }),
+                    credentials: 'include' 
+                });
+                const data = await response.json();
+                if (response.ok && data.url) window.location.href = data.url;
+                else {
+                    showToast(data.error || 'Checkout error. Please try again later.', 'error');
+                    subscribeBtn.disabled = false;
+                    subscribeBtn.textContent = 'Subscribe Now';
+                }
+            } catch (error) {
+                showToast('Network error. Please try again.', 'error');
+                subscribeBtn.disabled = false;
+                subscribeBtn.textContent = 'Subscribe Now';
             }
         });
     }

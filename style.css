@@ -688,6 +688,32 @@ footer p { margin: 0 0 10px 0; }
     box-shadow: none;
 }
 
+.subscribe-btn {
+    width: 100%;
+    background: linear-gradient(90deg, #8b5cf6 0%, #4f46e5 100%);
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    margin-top: 10px;
+}
+
+.subscribe-btn:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(79, 70, 229, 0.3);
+}
+
+.subscribe-btn:disabled {
+    background: #cbd5e1;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
 .text-btn {
     background: transparent;
     border: none;
