@@ -613,11 +613,51 @@ footer p { margin: 0 0 10px 0; }
    9. AUTHENTICATION & DASHBOARD
    ========================================= */
 .auth-box {
-    background: #f8fafc;
+    background: #ffffff;
     border: 1px solid #e2e8f0;
-    padding: 20px;
+    padding: 25px;
     border-radius: 12px;
     margin-bottom: 20px;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.05);
+    position: relative;
+    text-align: left;
+}
+
+.auth-box::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #f59e0b 0%, #4f46e5 100%);
+    border-radius: 12px 12px 0 0;
+}
+
+#sendLinkBtn {
+    width: 100%;
+    background: linear-gradient(90deg, #f59e0b 0%, #4f46e5 100%);
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    margin-top: 10px;
+}
+
+#sendLinkBtn:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(139, 92, 246, 0.3);
+}
+
+#sendLinkBtn:disabled {
+    background: #cbd5e1;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
 }
 
 .dashboard-box {

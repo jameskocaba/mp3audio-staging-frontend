@@ -737,9 +737,9 @@ document.addEventListener('DOMContentLoaded', () => {
             if (response.status === 403) {
                 // UI Limit Warning Handler
                 statusDiv.innerHTML = `
-                    <div style="background: #fffbeb; border: 1px solid #fde68a; padding: 15px; border-radius: 8px; text-align: left;">
-                        <p style="color: #b45309; font-weight: bold; margin-top: 0; margin-bottom: 8px;">⚠️ Limit Reached</p>
-                        <p style="font-size: 0.9rem; color: #92400e; margin: 0; line-height: 1.4;">${data.error || 'Processing Blocked: You have reached the limit for this request.'}</p>
+                    <div style="background: #ffffff; border: 1px solid #e2e8f0; border-top: 4px solid #f59e0b; padding: 15px; border-radius: 8px; text-align: left; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
+                        <p style="color: #1e293b; font-weight: bold; margin-top: 0; margin-bottom: 8px;">⚠️ Limit Reached</p>
+                        <p style="font-size: 0.9rem; color: #475569; margin: 0; line-height: 1.4;">${data.error || 'Processing Blocked: You have reached the limit for this request.'}</p>
                     </div>
                 `;
                 
