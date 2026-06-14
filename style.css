@@ -338,10 +338,13 @@ input:checked + .slider:before { transform: translateX(20px); }
 }
 
 input[type="text"], input[type="email"] { 
-    padding: 12px; 
+    padding: 14px 16px; 
     border: 1px solid #cbd5e1; 
     border-radius: 8px; 
-    font-size: 0.9rem; 
+    font-size: 1rem; 
+    width: 100%;
+    box-sizing: border-box;
+    flex: 1;
     transition: all 0.2s;
 }
 
