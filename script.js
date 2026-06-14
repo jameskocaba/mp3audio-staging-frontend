@@ -284,13 +284,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 // User is a guest
                 if (userDashboard) userDashboard.classList.add('hidden');
                 if (loginFormContainer) loginFormContainer.classList.remove('hidden');
-                
-                if (data.free_conversions_used >= 10) {
-                    if (authMessage) {
-                        authMessage.style.color = '#ef4444';
-                        authMessage.textContent = "Free limit reached. Please sign in to buy credits.";
-                    }
-                }
             }
         } catch (error) {
             console.error('Auth Check Failed', error);
