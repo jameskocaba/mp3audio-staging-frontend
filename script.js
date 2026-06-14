@@ -366,6 +366,7 @@ document.addEventListener('DOMContentLoaded', () => {
             } catch (error) {
                 showToast('Network error. Try again.', 'error');
                 sendLinkBtn.disabled = false;
+                sendLinkBtn.textContent = 'Send Link';
             }
         });
     }
