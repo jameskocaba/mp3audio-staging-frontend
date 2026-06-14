@@ -663,6 +663,11 @@ footer p { margin: 0 0 10px 0; }
     margin-top: 4px;
 }
 
+.billing-actions-row {
+    display: flex;
+    gap: 12px;
+}
+
 .premium-btn {
     width: 100%;
     background: linear-gradient(90deg, #f59e0b 0%, #ea580c 100%);
@@ -700,6 +705,12 @@ footer p { margin: 0 0 10px 0; }
     cursor: pointer;
     transition: transform 0.2s, box-shadow 0.2s;
     margin-top: 10px;
+}
+
+.billing-actions-row .premium-btn,
+.billing-actions-row .subscribe-btn {
+    margin-top: 15px;
+    flex: 1;
 }
 
 .subscribe-btn:hover:not(:disabled) {
