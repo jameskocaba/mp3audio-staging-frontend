@@ -638,17 +638,17 @@ footer p { margin: 0 0 10px 0; }
 }
 
 #sendLinkBtn {
-    width: 100%;
     background: linear-gradient(90deg, #f59e0b 0%, #4f46e5 100%);
     color: white;
     border: none;
-    padding: 12px;
+    padding: 14px 24px;
     border-radius: 8px;
     font-weight: 700;
     font-size: 1rem;
     cursor: pointer;
     transition: transform 0.2s, box-shadow 0.2s;
-    margin-top: 10px;
+    white-space: nowrap;
+    flex-shrink: 0;
 }
 
 #sendLinkBtn:hover:not(:disabled) {
