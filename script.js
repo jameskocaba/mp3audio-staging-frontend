@@ -82,6 +82,8 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    const urlParams = new URLSearchParams(window.location.search);
+
     // --- STRIPE CHECKOUT REDIRECT HANDLER ---
     const successParam = urlParams.get('success');
     const canceledParam = urlParams.get('canceled');
@@ -299,7 +301,6 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // --- MAGIC LINK VERIFICATION ---
-    const urlParams = new URLSearchParams(window.location.search);
     const token = urlParams.get('token');
 
     if (token) {
@@ -339,8 +340,18 @@ document.addEventListener('DOMContentLoaded', () => {
     if (sendLinkBtn) {
         sendLinkBtn.addEventListener('click', async (e) => {
             if (e && e.preventDefault) e.preventDefault();
+            console.log("Send Link button clicked!");
+
+            if (!loginEmail) {
+                console.error("Error: loginEmail input field not found in the HTML.");
+                return showToast('System error: Email input not found.', 'error');
+            }
+
             const email = loginEmail.value.trim();
-            if (!email) return;
+            if (!email) {
+                console.warn("User clicked send but the email field is empty.");
+                return showToast('Please enter an email address first.', 'error');
+            }
 
             sendLinkBtn.disabled = true;
             sendLinkBtn.textContent = 'Sending...';
@@ -350,20 +361,29 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             try {
+                console.log("Attempting to send magic link to:", `${BACKEND_URL}/auth/login`);
                 const response = await fetch(`${BACKEND_URL}/auth/login`, {
                     method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email })
                 });
+                
+                console.log("Backend Response Status:", response.status);
+
                 if (response.ok) {
                     if (authMessage) {
                         authMessage.textContent = '';
                     }
                     showToast('Link sent! Check your email inbox.', 'success');
+                    sendLinkBtn.disabled = false;
+                    sendLinkBtn.textContent = 'Send Link';
                 } else {
-                    showToast('Failed to send link.', 'error');
+                    const errorData = await response.json().catch(() => ({}));
+                    console.error("Backend Error Data:", errorData);
+                    showToast(errorData.error || 'Failed to send link.', 'error');
                     sendLinkBtn.disabled = false;
                     sendLinkBtn.textContent = 'Send Link';
                 }
             } catch (error) {
+                console.error("Fetch/Network Error:", error);
                 showToast('Network error. Try again.', 'error');
                 sendLinkBtn.disabled = false;
                 sendLinkBtn.textContent = 'Send Link';
