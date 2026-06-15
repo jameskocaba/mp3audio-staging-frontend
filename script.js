@@ -18,6 +18,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const subscribeBtn = document.getElementById('subscribeBtn');
     const billingMessage = document.getElementById('billingMessage');
     const urlMessage = document.getElementById('urlMessage');
+    const pricingTiersContainer = document.getElementById('pricingTiersContainer');
+    const subscriptionBadge = document.getElementById('subscriptionBadge');
 
     // 2. Conversion Tool UI Elements
     const urlInput = document.getElementById('urlInput');
@@ -276,8 +278,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (userDashboard) userDashboard.classList.remove('hidden');
                 if (userEmailDisplay) userEmailDisplay.textContent = data.email;
                 if (logoutBtn) logoutBtn.classList.remove('hidden');
+            
+            if (data.subscription_active) {
+                if (subscriptionBadge) subscriptionBadge.classList.remove('hidden');
+                if (pricingTiersContainer) pricingTiersContainer.style.display = 'none';
+                if (paidCreditsDisplay) paidCreditsDisplay.textContent = 'Unlimited (Pro)';
+            } else {
+                if (subscriptionBadge) subscriptionBadge.classList.add('hidden');
+                if (pricingTiersContainer) pricingTiersContainer.style.display = 'flex';
                 if (buyCreditsBtn) buyCreditsBtn.classList.remove('hidden');  
                 if (subscribeBtn) subscribeBtn.classList.remove('hidden');
+            }
                 if (loginFormContainer) loginFormContainer.classList.add('hidden'); 
             } else {
                 isGuestUser = true;

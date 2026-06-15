@@ -161,14 +161,14 @@
 
             <div id="userDashboard" class="dashboard-box hidden">
                 <div class="dashboard-header">
-                    <span style="font-size: 0.85rem; color: #64748b;">Status: <strong id="userEmailDisplay" style="color: #1e293b;">...</strong></span>
+                    <span style="font-size: 0.85rem; color: #64748b;">Status: <strong id="userEmailDisplay" style="color: #1e293b;">...</strong> <span id="subscriptionBadge" class="hidden" style="background: linear-gradient(90deg, #3b82f6 0%, #2563eb 100%); color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.7rem; font-weight: bold; margin-left: 8px; vertical-align: middle;">PRO ACTIVE</span></span>
                     <button id="logoutBtn" class="text-btn hidden">Logout</button>
                 </div>
                 <div class="stats-row" style="margin-bottom: 20px;">
                     <div class="stat-pill" style="width: 100%; text-align: center; background: #e0f2fe; color: #1e3a8a; border-color: #bfdbfe;">Available Premium Credits: <strong id="paidCreditsDisplay" style="font-size: 1.2rem;">0</strong></div>
                 </div>
 
-                <div class="pricing-tiers" style="display: flex; gap: 15px; margin-bottom: 10px; flex-wrap: wrap;">
+                <div id="pricingTiersContainer" class="pricing-tiers" style="display: flex; gap: 15px; margin-bottom: 10px; flex-wrap: wrap;">
                     <div class="tier-card" style="flex: 1; border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px; text-align: center; background: #f8fafc; min-width: 200px;">
                         <h4 style="margin: 0 0 10px 0; color: #334155;">Pay As You Go</h4>
                         <div style="font-size: 1.5rem; font-weight: bold; color: #0f172a; margin-bottom: 10px;">$5.00</div>
