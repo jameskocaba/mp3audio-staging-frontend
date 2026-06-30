@@ -30,6 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const increaseQualityInput = document.getElementById('increaseQuality');
     const attachLyricsInput = document.getElementById('attachLyrics');
     const organizeGenreInput = document.getElementById('organizeGenre');
+    const autoAddAlbumArtInput = document.getElementById('autoAddAlbumArt');
     const fileInputText = document.getElementById('fileInputText');
     const thumbnailContainer = document.getElementById('thumbnailContainer'); 
     const currentThumbnail = document.getElementById('currentThumbnail');     
@@ -44,9 +45,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const downloadList = document.getElementById('downloadList');
     const conversionSummary = document.getElementById('conversionSummary'); 
 
-    // Point this to your staging backend URL
-    // Ensure this EXACTLY matches your Render web service URL
-    const BACKEND_URL = 'https://mp3audio-staging.onrender.com'; 
+    // Point this to your PRODUCTION backend URL
+    // Ensure this EXACTLY matches your Render PROD web service URL
+    const BACKEND_URL = 'https://audio-converter-backend.onrender.com'; 
     let currentSessionId = null;
     let pollTimeout = null;
     let isGuestUser = true;
@@ -344,18 +345,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (sendLinkBtn) {
         sendLinkBtn.addEventListener('click', async (e) => {
             if (e && e.preventDefault) e.preventDefault();
-            console.log("Send Link button clicked!");
-
-            if (!loginEmail) {
-                console.error("Error: loginEmail input field not found in the HTML.");
-                return showToast('System error: Email input not found.', 'error');
-            }
-
             const email = loginEmail.value.trim();
-            if (!email) {
-                console.warn("User clicked send but the email field is empty.");
-                return showToast('Please enter an email address first.', 'error');
-            }
+            if (!email) return;
 
             sendLinkBtn.disabled = true;
             sendLinkBtn.textContent = 'Sending...';
@@ -488,6 +479,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (increaseQualityInput) increaseQualityInput.checked = false;
         if (attachLyricsInput) attachLyricsInput.checked = false;
         if (organizeGenreInput) organizeGenreInput.checked = false;
+        if (autoAddAlbumArtInput) autoAddAlbumArtInput.checked = true;
         if (fileInputText) {
             fileInputText.textContent = 'Click to select files, or drag & drop here...';
             fileInputText.style.fontWeight = 'normal';
@@ -719,6 +711,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (increaseQualityInput && increaseQualityInput.checked) formData.append('increase_quality', 'true');
                 if (attachLyricsInput && attachLyricsInput.checked) formData.append('attach_lyrics', 'true');
                 if (organizeGenreInput && organizeGenreInput.checked) formData.append('organize_genre', 'true');
+                if (autoAddAlbumArtInput && autoAddAlbumArtInput.checked) formData.append('auto_add_album_art', 'true');
                 
                 response = await fetch(`${BACKEND_URL}/process_local_files`, {
                     method: 'POST',
@@ -738,7 +731,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         url, 
                         start_time: startTime, 
                         end_time: endTime, 
-                        transcribe_audio: transcribeAudio
+                        transcribe_audio: transcribeAudio,
+                        auto_add_album_art: autoAddAlbumArtInput ? autoAddAlbumArtInput.checked : false
                     })
                 });
             }
