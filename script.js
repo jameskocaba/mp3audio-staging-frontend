@@ -29,7 +29,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const fileInput = document.getElementById('fileInput'); 
     const increaseQualityInput = document.getElementById('increaseQuality');
     const attachLyricsInput = document.getElementById('attachLyrics');
-    const organizeGenreInput = document.getElementById('organizeGenre');
     const autoAddAlbumArtInput = document.getElementById('autoAddAlbumArt');
     const fileInputText = document.getElementById('fileInputText');
     const thumbnailContainer = document.getElementById('thumbnailContainer'); 
@@ -478,7 +477,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (fileInput) fileInput.value = '';
         if (increaseQualityInput) increaseQualityInput.checked = false;
         if (attachLyricsInput) attachLyricsInput.checked = false;
-        if (organizeGenreInput) organizeGenreInput.checked = false;
         if (autoAddAlbumArtInput) autoAddAlbumArtInput.checked = true;
         if (fileInputText) {
             fileInputText.textContent = 'Click to select files, or drag & drop here...';
@@ -710,7 +708,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 if (increaseQualityInput && increaseQualityInput.checked) formData.append('increase_quality', 'true');
                 if (attachLyricsInput && attachLyricsInput.checked) formData.append('attach_lyrics', 'true');
-                if (organizeGenreInput && organizeGenreInput.checked) formData.append('organize_genre', 'true');
                 if (autoAddAlbumArtInput && autoAddAlbumArtInput.checked) formData.append('auto_add_album_art', 'true');
                 
                 response = await fetch(`${BACKEND_URL}/process_local_files`, {

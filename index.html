@@ -7,8 +7,8 @@
 
     <title>Free MP3 Organizer & AI Audio Enhancer | Auto-Add Lyrics to MP3</title>
     <meta name="title" content="Free MP3 Organizer & AI Audio Enhancer | Auto-Add Lyrics to MP3">
-    <meta name="description" content="Free online AI audio enhancer and MP3 organizer. Automatically add transcribed lyrics, organize music folders by genre, and upgrade audio quality to 320kbps.">
-    <meta name="keywords" content="AI audio enhancer, MP3 organizer, auto tagger, add lyrics to MP3, genre organizer, audio quality enhancer, 320kbps converter, MP3 metadata editor, audio metadata tagger">
+    <meta name="description" content="Free online AI audio enhancer and MP3 organizer. Automatically add transcribed lyrics, embed album art and metadata tags, and upgrade audio quality to 320kbps.">
+    <meta name="keywords" content="AI audio enhancer, MP3 organizer, auto tagger, add lyrics to MP3, album art tagger, audio quality enhancer, 320kbps converter, MP3 metadata editor, audio metadata tagger">
     <meta name="author" content="MP3aud.io">
     <meta name="robots" content="index, follow">
     <link rel="canonical" href="https://mp3aud.io/">
@@ -17,7 +17,7 @@
     <meta property="og:url" content="https://mp3aud.io/">
     <meta property="og:site_name" content="MP3aud.io">
     <meta property="og:title" content="Free MP3 Organizer & AI Audio Enhancer | Auto-Add Lyrics to MP3">
-    <meta property="og:description" content="Free online AI audio enhancer and MP3 organizer. Automatically add transcribed lyrics, organize music folders by genre, and upgrade audio quality to 320kbps.">
+    <meta property="og:description" content="Free online AI audio enhancer and MP3 organizer. Automatically add transcribed lyrics, embed album art and metadata tags, and upgrade audio quality to 320kbps.">
     <meta property="og:image" content="https://mp3aud.io/og-image.jpg">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
@@ -27,7 +27,7 @@
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:url" content="https://mp3aud.io/">
     <meta name="twitter:title" content="Free MP3 Organizer & AI Audio Enhancer | Auto-Add Lyrics to MP3">
-    <meta name="twitter:description" content="Free online AI audio enhancer and MP3 organizer. Automatically add transcribed lyrics, organize music folders by genre, and upgrade audio quality to 320kbps.">
+    <meta name="twitter:description" content="Free online AI audio enhancer and MP3 organizer. Automatically add transcribed lyrics, embed album art and metadata tags, and upgrade audio quality to 320kbps.">
     <meta name="twitter:image" content="https://mp3aud.io/og-image.jpg">
 
     <link rel="icon" type="image/png" href="favicon.png">
@@ -61,7 +61,7 @@
         "priceCurrency": "USD"
       },
       "featureList": [
-        "Automatic genre organization",
+        "Auto-add album art and tags",
         "AI lyric transcription and embedding",
         "Audio fidelity normalization"
       ]
@@ -77,7 +77,7 @@
           "name": "How do I process my local audio files?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Simply drag and drop your music files or folders into the dropzone, select your desired enhancements (like Attach Lyrics or Organize by Genre), and click 'Process'. Our system will process the files and generate an organized ZIP file."
+            "text": "Simply drag and drop your music files or folders into the dropzone, select your desired enhancements (like Attach Lyrics or Auto-Add Album Art & Tags), and click 'Process'. Our system will process the files and generate an organized ZIP file."
           }
         },
         {
@@ -115,7 +115,7 @@
             <header class="logo-container">
                 <img src="logo.png" alt="MP3aud.io - AI Audio Enhancer and MP3 Organizer" class="main-logo" style="max-width: 240px;">
                 <h1 class="main-headline">Free MP3 Organizer & AI Audio Enhancer</h1>
-                <h2 class="h1-subtext" style="font-weight: 400; margin-top: 0;">Upgrade your local music library. Leverage AI to <strong>automatically transcribe and embed lyrics</strong> into MP3 metadata, experience always-free track organization via genre folders, plus enhance audio quality reaching 320kbps. <em>Guest users must keep this tab open while processing.</em></h2>
+                <h2 class="h1-subtext" style="font-weight: 400; margin-top: 0;">Upgrade your local music library. Leverage AI to <strong>automatically transcribe and embed lyrics</strong> into MP3 metadata, experience always-free album art and tag embedding, plus enhance audio quality reaching 320kbps. <em>Guest users must keep this tab open while processing.</em></h2>
             </header>
             
             <div id="urlMessage" class="hidden"></div>
@@ -139,19 +139,6 @@
                 </div>
 
                 <div class="options-row" style="flex-wrap: wrap; justify-content: center; gap: 20px; margin-top: 20px;">
-                    <div class="inline-ai-toggle" style="background: #ecfdf5; border: 1px solid #a7f3d0; padding: 8px 16px; border-radius: 8px;">
-                        <label class="switch" aria-label="Organize into Artist/Album Folders">
-                          <input type="checkbox" id="organizeGenre" name="organizeGenre">
-                          <span class="slider round"></span>
-                        </label>
-                        <div class="toggle-text" style="flex: 1;">
-                            <span class="feature-title" style="font-size: 0.90rem; font-weight: 700; color: #1e293b; display: block;">Organize by Artist & Album</span>
-                            <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 2px;">
-                                <span style="background: #10b981; color: white; padding: 2px 6px; border-radius: 6px; font-size: 0.7rem; font-weight: bold;">FREE</span>
-                            </div>
-                        </div>
-                    </div>
-
                     <div class="inline-ai-toggle" style="background: #ecfdf5; border: 1px solid #a7f3d0; padding: 8px 16px; border-radius: 8px;">
                         <label class="switch" aria-label="Auto-Add Album Art & Tags">
                           <input type="checkbox" id="autoAddAlbumArt" name="autoAddAlbumArt" checked>
@@ -310,18 +297,16 @@
             <span class="close" onclick="closeModal('FAQModal')" aria-label="Close modal">&times;</span>
             <h2 id="faqTitle">Frequently Asked Questions</h2>
             <h3>1. How do I process my local audio files?</h3>
-            <p>Simply drag and drop your music files or folders into the dropzone, select your desired enhancements (like Attach Lyrics or Organize by Genre), and click "Process". Our system will process the files and generate an organized ZIP file.</p>
+            <p>Simply drag and drop your music files or folders into the dropzone, select your desired enhancements (like Attach Lyrics or Auto-Add Album Art & Tags), and click "Process". Our system will process the files and generate an organized ZIP file.</p>
             <h3>2. What does the "Attach Lyrics" toggle do?</h3>
             <p>When activated, our backend uses advanced AI to physically listen to the audio track and transcribe the lyrics. It then takes those lyrics and physically embeds them into the metadata tag of your final audio file so it shows up in media players!</p>
             <h3>3. Will this tool convert my files to MP3?</h3>
             <p>No! By default, this tool preserves your original file format (e.g., WAV stays WAV). However, if you explicitly toggle "Increase Bitrate (320k)", the system will upsample your audio and convert it to a standard high-fidelity MP3.</p>
-            <h3>4. What does Organize by Artist & Album do?</h3>
-            <p>If you upload hundreds of loose tracks, this feature reads the metadata from each file and physically organizes your final ZIP output into respective artist and album folders (e.g., "Artist/Album/Track").</p>
-            <h3>5. How many files can I process at once?</h3>
+            <h3>4. How many files can I process at once?</h3>
             <p>You can always process up to 5 tracks completely for free. Additionally, with a $5.00 cryptocurrency payment, you can process up to 350 files per ZIP upload. Paid users get top priority and skip the server queue.</p>
-            <h3>6. Do I need to keep the browser tab open?</h3>
+            <h3>5. Do I need to keep the browser tab open?</h3>
             <p>If you are signed into an account, you do not need to keep the tab open. We will automatically email you a secure download link once your organized ZIP file is ready. Note: <strong>This link automatically expires after 1 hour</strong>.</p>
-            <h3>7. How long will my conversion take?</h3>
+            <h3>6. How long will my conversion take?</h3>
             <p>Because processing high-quality audio and transcribing lyrics is resource-intensive, jobs are handled in a queue. If the server is busy, you will be given a queue position and an estimated wait time. <strong>Premium Priority:</strong> Jobs processed using paid credits automatically skip ahead of free users in the queue.</p>
         </div>
     </div>
