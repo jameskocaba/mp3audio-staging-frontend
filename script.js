@@ -351,10 +351,32 @@ document.addEventListener('DOMContentLoaded', () => {
             sendLinkBtn.textContent = 'Sending...';
             if (authMessage) {
                 authMessage.style.color = '#475569';
-                authMessage.textContent = 'Requesting secure link...';
+                authMessage.textContent = 'Connecting to secure server...';
             }
 
             try {
+                // Wake up/spin up server if inactive before requesting magic link
+                try {
+                    let isServerActive = false;
+                    const wakeUpPromise = fetch(`${BACKEND_URL}/health`).then(() => { isServerActive = true; });
+                    const timeoutPromise = new Promise(resolve => setTimeout(resolve, 1500));
+                    
+                    await Promise.race([wakeUpPromise, timeoutPromise]);
+                    
+                    if (!isServerActive) {
+                        if (authMessage) {
+                            authMessage.textContent = 'Server is asleep. Waking up, please wait (up to 50 seconds)...';
+                        }
+                        await wakeUpPromise;
+                    }
+                } catch (err) {
+                    console.warn("Pre-flight magic link wake up ping failed, continuing...", err);
+                }
+
+                if (authMessage) {
+                    authMessage.textContent = 'Requesting secure link...';
+                }
+
                 console.log("Attempting to send magic link to:", `${BACKEND_URL}/auth/login`);
                 const response = await fetch(`${BACKEND_URL}/auth/login`, {
                     method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email })
