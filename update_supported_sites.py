@@ -111,32 +111,79 @@ def generate_html(supported_platforms):
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <main>
-        <div class="container" style="max-width: 600px;"> 
-            <div class="utility-bar">
-                <div class="social-icons">
-                    <a href="https://www.instagram.com/mp3aud.io?igsh=ZXljNzMxaGtqdWwz&utm_source=qr" target="_blank" aria-label="Follow us on Instagram">
-                        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
-                    </a>
-                </div>
-                
-                <div style="display: flex; gap: 15px; align-items: center;">
-                    <a href="index.html" style="font-size: 0.9rem; font-weight: 600; color: #64748b; text-decoration: none; display: flex; align-items: center; gap: 4px; transition: color 0.2s ease;">
-                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
-                        Back
-                    </a>
-                </div>
-            </div>
-
-            <header class="logo-container">
-                <a href="index.html">
-                    <img src="logo.png" alt="MP3aud.io - Media Tools" class="main-logo" style="max-width: 240px; margin-bottom: 10px;">
+    <header class="app-header">
+        <div class="header-container">
+            <div class="header-brand">
+                <button class="menu-toggle" aria-label="Toggle Navigation">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="3" y1="12" x2="21" y2="12"></line>
+                        <line x1="3" y1="6" x2="21" y2="6"></line>
+                        <line x1="3" y1="18" x2="21" y2="18"></line>
+                    </svg>
+                </button>
+                <a href="index.html" class="header-brand">
+                    <img src="logo.webp" alt="MP3aud.io Logo" class="header-logo">
                 </a>
-                <h1 class="main-headline">Top Supported Platforms</h1>
-                <p class="h1-subtext">Our extraction technology supports over 1,000 websites. Below is an alphabetical list of the most popular platforms you can process today.</p>
-            </header>
-                      
-            <section aria-label="Supported Websites" style="text-align: left; margin-top: 10px;">
+            </div>
+            <div class="header-actions">
+                <a href="https://www.instagram.com/mp3aud.io?igsh=ZXljNzMxaGtqdWwz&utm_source=qr" target="_blank"
+                    aria-label="Follow us on Instagram" style="color: #64748b; display: flex; align-items: center; transition: color 0.2s;">
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor"
+                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+                        <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+                        <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+                    </svg>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <aside class="sidebar-nav">
+        <ul class="sidebar-menu">
+            <li>
+                <a href="index.html" class="sidebar-link">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                    <span>Converter</span>
+                </a>
+            </li>
+            <li>
+                <a href="supported-sites.html" class="sidebar-link active">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="3" x2="9" y2="21"></line></svg>
+                    <span>Supported Sites</span>
+                </a>
+            </li>
+            <li>
+                <a href="top-5.html" class="sidebar-link">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+                    <span>Top Charts</span>
+                </a>
+            </li>
+            <li>
+                <a href="shop.html" class="sidebar-link">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+                    <span>Gear Shop</span>
+                </a>
+            </li>
+        </ul>
+
+        <div class="sidebar-footer">
+            <div style="padding: 15px; background: #fffbeb; border: 1px solid #fde68a; border-radius: 12px; font-size: 0.85rem; color: #92400e; box-shadow: 0 4px 10px rgba(245, 158, 11, 0.05);">
+                <strong>Need more credits?</strong><br>
+                Upgrade your account directly on the <a href="index.html" style="color: #ea580c; font-weight: bold; text-decoration: underline;">Converter panel</a>.
+            </div>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <div class="content-container" style="max-width: 768px;"> 
+            <div class="page-card">
+                <header class="logo-container" style="text-align: left; margin-bottom: 20px;">
+                    <h1 class="main-headline" style="font-size: 2rem; margin-top: 0;">Top Supported Platforms</h1>
+                    <p class="h1-subtext" style="margin-bottom: 0;">Our extraction technology supports over 1,000 websites. Below is an alphabetical list of the most popular platforms you can process today.</p>
+                </header>
+                
+                <section aria-label="Supported Websites" style="text-align: left;">
                 <ol style="padding-left: 20px; color: #334155; line-height: 1.8; font-size: 0.90rem; margin-bottom: 30px;">
 {list_items_html}                </ol>
 
@@ -147,6 +194,8 @@ def generate_html(supported_platforms):
                     </p>
                 </div>
             </section>
+            </div>
+            </div>
 
             <footer style="margin-top: 30px; text-align: center; font-size: 0.85rem; color: #64748b;">
                 <p>&copy; 2026 MP3aud.io. All Rights Reserved.</p>
@@ -156,8 +205,23 @@ def generate_html(supported_platforms):
                 </nav>
                 <p style="margin-top: 15px; font-size: 0.75rem;"><em>Status List Last Auto-Updated: {current_time}</em></p>
             </footer>
-        </div>
     </main>
+
+    <script>
+        const menuToggle = document.querySelector('.menu-toggle');
+        const sidebarNav = document.querySelector('.sidebar-nav');
+        if (menuToggle && sidebarNav) {{
+            menuToggle.addEventListener('click', (e) => {{
+                e.stopPropagation();
+                sidebarNav.classList.toggle('open');
+            }});
+            document.addEventListener('click', (e) => {{
+                if (sidebarNav.classList.contains('open') && !sidebarNav.contains(e.target) && e.target !== menuToggle) {{
+                    sidebarNav.classList.remove('open');
+                }}
+            }});
+        }}
+    </script>
 </body>
 </html>"""
     

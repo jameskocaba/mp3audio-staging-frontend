@@ -23,16 +23,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 2. Conversion Tool UI Elements
     const urlInput = document.getElementById('urlInput');
-    const startTimeInput = document.getElementById('startTime'); 
-    const endTimeInput = document.getElementById('endTime');     
-    const transcribeInput = document.getElementById('transcribeAudio'); 
-    const fileInput = document.getElementById('fileInput'); 
+    const startTimeInput = document.getElementById('startTime');
+    const endTimeInput = document.getElementById('endTime');
+    const transcribeInput = document.getElementById('transcribeAudio');
+    const fileInput = document.getElementById('fileInput');
     const increaseQualityInput = document.getElementById('increaseQuality');
     const attachLyricsInput = document.getElementById('attachLyrics');
     const autoAddAlbumArtInput = document.getElementById('autoAddAlbumArt');
     const fileInputText = document.getElementById('fileInputText');
-    const thumbnailContainer = document.getElementById('thumbnailContainer'); 
-    const currentThumbnail = document.getElementById('currentThumbnail');     
+    const thumbnailContainer = document.getElementById('thumbnailContainer');
+    const currentThumbnail = document.getElementById('currentThumbnail');
     const convertBtn = document.getElementById('convertBtn');
     const cancelBtn = document.getElementById('cancelBtn');
     const resetBtn = document.getElementById('resetBtn');
@@ -42,11 +42,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const progressFill = document.getElementById('progressFill');
     const downloadArea = document.getElementById('downloadArea');
     const downloadList = document.getElementById('downloadList');
-    const conversionSummary = document.getElementById('conversionSummary'); 
+    const conversionSummary = document.getElementById('conversionSummary');
 
     // Point this to your PRODUCTION backend URL
     // Ensure this EXACTLY matches your Render PROD web service URL
-    const BACKEND_URL = 'https://audio-converter-backend.onrender.com'; 
+    const BACKEND_URL = 'https://audio-converter-backend.onrender.com';
     let currentSessionId = null;
     let pollTimeout = null;
     let isGuestUser = true;
@@ -65,7 +65,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (type === 'success') icon = `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
         else if (type === 'error') icon = `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>`;
         else icon = `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>`;
-        
+
         toast.innerHTML = `${icon} <span>${message}</span>`;
         container.appendChild(toast);
         setTimeout(() => {
@@ -104,7 +104,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Enforce maximum file size limit instantly on selection
                 const MAX_PER_FILE_SIZE = 50 * 1024 * 1024; // 50MB in bytes
                 const oversizedFiles = Array.from(fileInput.files).filter(file => file.size > MAX_PER_FILE_SIZE);
-                
+
                 if (oversizedFiles.length > 0) {
                     showToast('One or more files exceed the 50MB limit per track. Please select smaller files.', 'error');
                     fileInput.value = ''; // Instantly clear the invalid selection
@@ -115,13 +115,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
                 const fileCount = fileInput.files.length;
-                
+
                 // Calculate total size
                 let totalBytes = 0;
                 for (let i = 0; i < fileCount; i++) {
                     totalBytes += fileInput.files[i].size;
                 }
-                
+
                 const formatSize = (bytes) => {
                     if (bytes === 0) return '0 Bytes';
                     const k = 1024;
@@ -129,7 +129,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     const i = Math.floor(Math.log(bytes) / Math.log(k));
                     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
                 };
-                
+
                 const sizeText = formatSize(totalBytes);
 
                 // Check if a directory was selected by inspecting the path of the first file
@@ -182,11 +182,11 @@ document.addEventListener('DOMContentLoaded', () => {
             const items = e.dataTransfer.items;
             const dtFiles = e.dataTransfer.files;
             if (!items && !dtFiles) return;
-            
+
             fileInputText.textContent = "Scanning dropped files...";
             const files = [];
             const queue = [];
-            
+
             // Valid audio and video extensions/mime types to accept
             const isValidMedia = (file) => {
                 if (!file || !file.name) return false;
@@ -209,7 +209,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     } else if (entry.isDirectory) {
                         const reader = entry.createReader();
                         reader.readEntries(async (entries) => {
-                            const promises = entries.map(e => readEntry(e).catch(() => {}));
+                            const promises = entries.map(e => readEntry(e).catch(() => { }));
                             await Promise.all(promises);
                             resolve();
                         }, err => reject(err));
@@ -223,7 +223,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Scan all dropped items
                 for (let i = 0; i < items.length; i++) {
                     const item = items[i];
-                    
+
                     if (item.kind === 'file') {
                         if (typeof item.webkitGetAsEntry === 'function') {
                             const entry = item.webkitGetAsEntry();
@@ -251,7 +251,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const dt = new DataTransfer();
                 files.forEach(f => dt.items.add(f));
                 fileInput.files = dt.files;
-                
+
                 // Trigger change event to update UI
                 fileInput.dispatchEvent(new Event('change'));
             } else {
@@ -268,8 +268,8 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const response = await fetch(`${BACKEND_URL}/auth/me`, { credentials: 'include' });
             const data = await response.json();
-            
-            
+
+
             if (paidCreditsDisplay) paidCreditsDisplay.textContent = data.paid_track_credits;
 
             if (data.authenticated) {
@@ -278,18 +278,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (userDashboard) userDashboard.classList.remove('hidden');
                 if (userEmailDisplay) userEmailDisplay.textContent = data.email;
                 if (logoutBtn) logoutBtn.classList.remove('hidden');
-            
-            if (data.subscription_active) {
-                if (subscriptionBadge) subscriptionBadge.classList.remove('hidden');
-                if (pricingTiersContainer) pricingTiersContainer.style.display = 'none';
-                if (paidCreditsDisplay) paidCreditsDisplay.textContent = 'Unlimited (Pro)';
-            } else {
-                if (subscriptionBadge) subscriptionBadge.classList.add('hidden');
-                if (pricingTiersContainer) pricingTiersContainer.style.display = 'flex';
-                if (buyCreditsBtn) buyCreditsBtn.classList.remove('hidden');  
-                if (subscribeBtn) subscribeBtn.classList.remove('hidden');
-            }
-                if (loginFormContainer) loginFormContainer.classList.add('hidden'); 
+
+                if (data.subscription_active) {
+                    if (subscriptionBadge) subscriptionBadge.classList.remove('hidden');
+                    if (pricingTiersContainer) pricingTiersContainer.style.display = 'none';
+                    if (paidCreditsDisplay) paidCreditsDisplay.textContent = 'Unlimited (Pro)';
+                } else {
+                    if (subscriptionBadge) subscriptionBadge.classList.add('hidden');
+                    if (pricingTiersContainer) pricingTiersContainer.style.display = 'flex';
+                    if (buyCreditsBtn) buyCreditsBtn.classList.remove('hidden');
+                    if (subscribeBtn) subscribeBtn.classList.remove('hidden');
+                }
+                if (loginFormContainer) loginFormContainer.classList.add('hidden');
             } else {
                 isGuestUser = true;
                 // User is a guest
@@ -313,30 +313,30 @@ document.addEventListener('DOMContentLoaded', () => {
             urlMessage.classList.remove('hidden');
         }
         window.history.replaceState({}, document.title, window.location.pathname);
-        
+
         fetch(`${BACKEND_URL}/auth/verify`, {
             method: 'POST',
             credentials: 'include',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ token: token })
         })
-        .then(res => res.json())
-        .then(data => {
-            if (data.success) {
-                if (urlMessage) {
-                    urlMessage.classList.add('hidden'); 
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    if (urlMessage) {
+                        urlMessage.classList.add('hidden');
+                    }
+                    showToast('Login successful! Welcome back.', 'success');
+                    checkAuth();
+                } else {
+                    showToast(data.error || 'Invalid link.', 'error');
+                    checkAuth();
                 }
-                showToast('Login successful! Welcome back.', 'success');
-                checkAuth(); 
-            } else {
-                showToast(data.error || 'Invalid link.', 'error');
+            })
+            .catch(err => {
+                showToast('Network error. Please try logging in again.', 'error');
                 checkAuth();
-            }
-        })
-        .catch(err => {
-            showToast('Network error. Please try logging in again.', 'error');
-            checkAuth();
-        });
+            });
     } else {
         checkAuth();
     }
@@ -360,12 +360,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     let isServerActive = false;
                     const wakeUpPromise = fetch(`${BACKEND_URL}/health`).then(() => { isServerActive = true; });
                     const timeoutPromise = new Promise(resolve => setTimeout(resolve, 1500));
-                    
+
                     await Promise.race([wakeUpPromise, timeoutPromise]);
-                    
+
                     if (!isServerActive) {
                         if (authMessage) {
-                            authMessage.textContent = 'Server is asleep. Waking up, please wait (up to 50 seconds)...';
+                            authMessage.textContent = 'Spinning up server, please wait (up to 50 seconds)...';
                         }
                         await wakeUpPromise;
                     }
@@ -381,7 +381,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const response = await fetch(`${BACKEND_URL}/auth/login`, {
                     method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email })
                 });
-                
+
                 console.log("Backend Response Status:", response.status);
 
                 if (response.ok) {
@@ -414,18 +414,18 @@ document.addEventListener('DOMContentLoaded', () => {
             window.location.reload();
         });
     }
-    
+
     if (buyCreditsBtn) {
         buyCreditsBtn.addEventListener('click', async (e) => {
             if (e && e.preventDefault) e.preventDefault();
             buyCreditsBtn.disabled = true;
             buyCreditsBtn.textContent = 'Processing...';
             try {
-                const response = await fetch(`${BACKEND_URL}/create-checkout-session`, { 
-                    method: 'POST', 
+                const response = await fetch(`${BACKEND_URL}/create-checkout-session`, {
+                    method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ type: 'credits' }),
-                    credentials: 'include' 
+                    credentials: 'include'
                 });
                 const data = await response.json();
                 if (response.ok && data.url) window.location.href = data.url;
@@ -441,18 +441,18 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
-    
+
     if (subscribeBtn) {
         subscribeBtn.addEventListener('click', async (e) => {
             if (e && e.preventDefault) e.preventDefault();
             subscribeBtn.disabled = true;
             subscribeBtn.textContent = 'Processing...';
             try {
-                const response = await fetch(`${BACKEND_URL}/create-checkout-session`, { 
-                    method: 'POST', 
+                const response = await fetch(`${BACKEND_URL}/create-checkout-session`, {
+                    method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ type: 'subscription' }),
-                    credentials: 'include' 
+                    credentials: 'include'
                 });
                 const data = await response.json();
                 if (response.ok && data.url) window.location.href = data.url;
@@ -479,8 +479,8 @@ document.addEventListener('DOMContentLoaded', () => {
             cancelBtn.disabled = false;
             cancelBtn.textContent = "Cancel";
         }
-        if (actionGroup) actionGroup.style.display = 'none'; 
-        if (resetBtn) resetBtn.disabled = false; 
+        if (actionGroup) actionGroup.style.display = 'none';
+        if (resetBtn) resetBtn.disabled = false;
         if (pollTimeout) {
             clearTimeout(pollTimeout);
             pollTimeout = null;
@@ -493,9 +493,9 @@ document.addEventListener('DOMContentLoaded', () => {
             urlInput.value = '';
             sessionStorage.removeItem('savedUrl');
         }
-        if (startTimeInput) startTimeInput.value = ''; 
-        if (endTimeInput) endTimeInput.value = '';  
-        if (transcribeInput) transcribeInput.checked = false;   
+        if (startTimeInput) startTimeInput.value = '';
+        if (endTimeInput) endTimeInput.value = '';
+        if (transcribeInput) transcribeInput.checked = false;
         if (fileInput) fileInput.value = '';
         if (increaseQualityInput) increaseQualityInput.checked = false;
         if (attachLyricsInput) attachLyricsInput.checked = false;
@@ -509,7 +509,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (conversionSummary) conversionSummary.innerHTML = '';
         if (downloadList) downloadList.innerHTML = '';
         if (downloadArea) downloadArea.classList.add('hidden');
-        if (thumbnailContainer) thumbnailContainer.classList.add('hidden'); 
+        if (thumbnailContainer) thumbnailContainer.classList.add('hidden');
         if (currentThumbnail) currentThumbnail.src = '';
         if (progressBar) progressBar.classList.add('hidden');
         resetUI();
@@ -557,12 +557,12 @@ document.addEventListener('DOMContentLoaded', () => {
             const response = await fetch(`${BACKEND_URL}/status/${currentSessionId}`, { credentials: 'include' });
             if (!response.ok) throw new Error('Status check failed');
             const data = await response.json();
-            
+
             if (!statusDiv) return;
 
             if (data.status === 'queued') {
                 if (progressBar) progressBar.classList.add('hidden');
-                
+
                 // If they are first in line, the worker is just waking up. Show a loading state instead of the queue block.
                 if (data.queue_position <= 1) {
                     statusDiv.innerHTML = `
@@ -580,21 +580,21 @@ document.addEventListener('DOMContentLoaded', () => {
                         </div>
                     `;
                 }
-            } 
+            }
             else if (data.status === 'processing') {
                 if (progressBar) progressBar.classList.remove('hidden');
-                
+
                 if (data.current_thumbnail && currentThumbnail && thumbnailContainer) {
                     currentThumbnail.src = data.current_thumbnail;
                     thumbnailContainer.classList.remove('hidden');
                 } else if (thumbnailContainer) {
                     thumbnailContainer.classList.add('hidden');
                 }
-                
+
                 updateProgress(data.completed, data.total, data.sub_progress);
-                
+
                 const currentTrackDisplay = Math.min(data.completed + 1, data.total);
-                
+
                 statusDiv.innerHTML = `
                     <div class="spinner"></div>
                     <p style="margin:0; font-weight:bold; font-size:1.05rem;">Processing Track ${currentTrackDisplay} of ${data.total}</p>
@@ -605,7 +605,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 resetUI();
                 if (progressBar) progressBar.classList.remove('hidden');
                 updateProgress(data.total, data.total, 100);
-                
+
                 if (data.completed > 0) {
                     statusDiv.innerHTML = `<p style="color: #2ecc71; font-weight: bold; font-size: 1.1rem;">✅ Success! Processed ${data.completed} of ${data.total} tracks.</p>`;
                     showToast(`Success! Processed ${data.completed} of ${data.total} tracks.`, 'success');
@@ -613,10 +613,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     statusDiv.innerHTML = `<p style="color: #ef4444; font-weight: bold; font-size: 1.1rem;">⚠️ Process Finished: 0 tracks processed.</p>`;
                     showToast(`No tracks could be processed.`, 'error');
                 }
-                
+
                 if (downloadArea && downloadList) {
                     downloadArea.classList.remove('hidden');
-                    
+
                     if (conversionSummary) {
                         conversionSummary.innerHTML = generateSummaryTable(data.failed_details, data.completed > 0 ? "#1e293b" : "#ef4444");
                     }
@@ -635,29 +635,29 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 }
                 currentSessionId = null;
-                checkAuth(); 
+                checkAuth();
             }
             else if (data.status === 'error' || data.status === 'cancelled') {
                 resetUI();
                 const msg = data.status === 'error' ? (data.error || 'An error occurred during processing.') : 'Process Cancelled.';
                 statusDiv.innerHTML = `<p style="color: #ef4444; font-weight: bold; font-size: 1.1rem;">❌ Action Failed</p>`;
                 if (data.status === 'error') showToast(msg, 'error');
-                
+
                 if (data.status === 'error' && data.failed_details && data.failed_details.length > 0) {
                     if (downloadArea) downloadArea.classList.remove('hidden');
-                    if (downloadList) downloadList.innerHTML = ''; 
+                    if (downloadList) downloadList.innerHTML = '';
                     if (conversionSummary) {
                         conversionSummary.innerHTML = generateSummaryTable(data.failed_details, "#ef4444");
                     }
                 }
 
                 currentSessionId = null;
-                checkAuth(); 
+                checkAuth();
             }
         } catch (error) {
             console.error('Polling error:', error);
         }
-        
+
         // Schedule the next poll only AFTER the previous one has completed
         if (currentSessionId) {
             pollTimeout = setTimeout(pollStatus, 2000);
@@ -668,10 +668,10 @@ document.addEventListener('DOMContentLoaded', () => {
         if (e && e.preventDefault) e.preventDefault();
         try {
             if (!statusDiv) return;
-            
+
             const hasFiles = fileInput && fileInput.files.length > 0;
             const url = urlInput ? urlInput.value.trim() : '';
-            
+
             if (!hasFiles && !url) {
                 showToast('Please select files to upload or enter a URL.', 'error');
                 return;
@@ -687,7 +687,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             statusDiv.innerHTML = `<div class="spinner"></div><p style="font-weight:bold; color:#2980b9;">Spinning up server...</p><p style="font-size:0.85rem; color:#64748b;">(This may take up to 50 seconds if the server is asleep)</p>`;
             showToast('Spinning up server. This may take up to 50 seconds...', 'info');
-            
+
             // Ping the backend to wake it up before sending a potentially large payload
             try {
                 await fetch(`${BACKEND_URL}/health`);
@@ -700,7 +700,7 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 statusDiv.innerHTML = `<div class="spinner"></div><p style="font-weight:bold; color:#2980b9;">Analyzing link...</p><p style="font-size:0.85rem; color:#64748b;">(Playlists can take 10-15 seconds to fetch from SoundCloud)</p>`;
             }
-            
+
             if (downloadArea) downloadArea.classList.add('hidden');
             if (conversionSummary) conversionSummary.innerHTML = '';
             if (thumbnailContainer) thumbnailContainer.classList.add('hidden');
@@ -711,12 +711,12 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             let response;
-            
+
             if (hasFiles) {
                 // Enforce a maximum file size limit of 50MB per file
                 const MAX_PER_FILE_SIZE = 50 * 1024 * 1024; // 50MB in bytes
                 const oversizedFiles = Array.from(fileInput.files).filter(file => file.size > MAX_PER_FILE_SIZE);
-                
+
                 if (oversizedFiles.length > 0) {
                     showToast('One or more files exceed the 50MB limit per track. Please remove them and try again.', 'error');
                     resetUI();
@@ -731,7 +731,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (increaseQualityInput && increaseQualityInput.checked) formData.append('increase_quality', 'true');
                 if (attachLyricsInput && attachLyricsInput.checked) formData.append('attach_lyrics', 'true');
                 if (autoAddAlbumArtInput && autoAddAlbumArtInput.checked) formData.append('auto_add_album_art', 'true');
-                
+
                 response = await fetch(`${BACKEND_URL}/process_local_files`, {
                     method: 'POST',
                     credentials: 'include',
@@ -747,9 +747,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     credentials: 'include',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        url, 
-                        start_time: startTime, 
-                        end_time: endTime, 
+                        url,
+                        start_time: startTime,
+                        end_time: endTime,
                         transcribe_audio: transcribeAudio,
                         auto_add_album_art: autoAddAlbumArtInput ? autoAddAlbumArtInput.checked : false
                     })
@@ -766,10 +766,10 @@ document.addEventListener('DOMContentLoaded', () => {
                         <p style="font-size: 0.9rem; color: #475569; margin: 0; line-height: 1.4;">${data.error || 'Processing Blocked: You have reached the limit for this request.'}</p>
                     </div>
                 `;
-                
+
                 if (loginFormContainer) loginFormContainer.classList.remove('hidden');
                 if (loginEmail) loginEmail.focus();
-                
+
                 resetUI();
                 checkAuth();
                 showToast('Limit Reached. Please sign in.', 'error');
@@ -782,12 +782,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
             currentSessionId = data.session_id;
             pollStatus(); // Triggers the first check, which then schedules the rest
-            
+
         } catch (error) {
             console.error(error);
             resetUI();
             statusDiv.innerHTML = `Ready`;
-            
+
             let errorMsg = error.message;
             if (errorMsg.toLowerCase().includes('failed to fetch')) {
                 errorMsg = "Network Error: Cannot reach the backend. Check your BACKEND_URL or CORS settings.";
@@ -803,7 +803,7 @@ document.addEventListener('DOMContentLoaded', () => {
             cancelBtn.disabled = true;
             cancelBtn.textContent = "Cancelling...";
         }
-        
+
         try {
             await fetch(`${BACKEND_URL}/cancel`, {
                 method: 'POST',
@@ -827,5 +827,54 @@ document.addEventListener('DOMContentLoaded', () => {
             e.preventDefault();
             e.returnValue = ''; // Required by modern browsers to trigger the warning popup
         }
+    });
+
+    // --- MOBILE SIDEBAR DRAWER TOGGLE ---
+    const menuToggle = document.querySelector('.menu-toggle');
+    const sidebarNav = document.querySelector('.sidebar-nav');
+    if (menuToggle && sidebarNav) {
+        menuToggle.addEventListener('click', (e) => {
+            e.stopPropagation();
+            sidebarNav.classList.toggle('open');
+        });
+
+        // Close sidebar if user clicks outside of it on mobile
+        document.addEventListener('click', (e) => {
+            if (sidebarNav.classList.contains('open') && !sidebarNav.contains(e.target) && e.target !== menuToggle) {
+                sidebarNav.classList.remove('open');
+            }
+        });
+    }
+
+    // --- FAQ ACCORDION TOGGLE LOGIC ---
+    const faqTriggers = document.querySelectorAll('.faq-trigger');
+    faqTriggers.forEach(trigger => {
+        trigger.addEventListener('click', () => {
+            const faqItem = trigger.parentElement;
+            const panel = faqItem.querySelector('.faq-panel');
+            const isActive = faqItem.classList.contains('active');
+
+            // Close all other panels for accordion effect
+            document.querySelectorAll('.faq-item').forEach(item => {
+                if (item !== faqItem) {
+                    item.classList.remove('active');
+                    const otherPanel = item.querySelector('.faq-panel');
+                    if (otherPanel) otherPanel.style.maxHeight = null;
+                    const otherTrigger = item.querySelector('.faq-trigger');
+                    if (otherTrigger) otherTrigger.setAttribute('aria-expanded', 'false');
+                }
+            });
+
+            // Toggle active state
+            faqItem.classList.toggle('active');
+
+            if (isActive) {
+                panel.style.maxHeight = null;
+                trigger.setAttribute('aria-expanded', 'false');
+            } else {
+                panel.style.maxHeight = panel.scrollHeight + 'px';
+                trigger.setAttribute('aria-expanded', 'true');
+            }
+        });
     });
 });

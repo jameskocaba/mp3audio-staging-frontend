@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <title>Music Digitizer Gear Shop | MP3aud.io</title>
+    <meta name="description" content="Shop the top-rated audio digitizers, external CD drives, USB turntables, and cassette to MP3 converters to digitize your music collection.">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="apple-touch-icon" href="favicon.png">
+    <meta name="theme-color" content="#FF5500">
+    
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="shop.css">
+</head>
+<body>
+    <header class="app-header">
+        <div class="header-container">
+            <div class="header-brand">
+                <button class="menu-toggle" id="menuToggle" aria-label="Toggle Navigation">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="3" y1="12" x2="21" y2="12"></line>
+                        <line x1="3" y1="6" x2="21" y2="6"></line>
+                        <line x1="3" y1="18" x2="21" y2="18"></line>
+                    </svg>
+                </button>
+                <a href="index.html" class="header-brand">
+                    <img src="logo.webp" alt="MP3aud.io Logo" class="header-logo">
+                </a>
+            </div>
+            <div class="header-actions">
+                <a href="https://www.instagram.com/mp3aud.io?igsh=ZXljNzMxaGtqdWwz&utm_source=qr" target="_blank"
+                    aria-label="Follow us on Instagram" style="color: #64748b; display: flex; align-items: center; transition: color 0.2s;">
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor"
+                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+                        <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+                        <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+                    </svg>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <aside class="sidebar-nav" id="sidebarNav">
+        <ul class="sidebar-menu">
+            <li>
+                <a href="index.html" class="sidebar-link">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                    <span>Converter</span>
+                </a>
+            </li>
+            <li>
+                <a href="supported-sites.html" class="sidebar-link">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="3" x2="9" y2="21"></line></svg>
+                    <span>Supported Sites</span>
+                </a>
+            </li>
+            <li>
+                <a href="top-5.html" class="sidebar-link">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+                    <span>Top Charts</span>
+                </a>
+            </li>
+            <li>
+                <a href="shop.html" class="sidebar-link active">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+                    <span>Gear Shop</span>
+                </a>
+            </li>
+        </ul>
+
+        <div class="sidebar-footer">
+            <div style="padding: 15px; background: #fffbeb; border: 1px solid #fde68a; border-radius: 12px; font-size: 0.85rem; color: #92400e; box-shadow: 0 4px 10px rgba(245, 158, 11, 0.05);">
+                <strong>Ready to Enhance?</strong><br>
+                Once you digitize your files, upload them to the <a href="index.html" style="color: #ea580c; font-weight: bold; text-decoration: underline;">Converter</a> to upscale quality and embed tags.
+            </div>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <div class="content-container">
+            <div class="page-card">
+                <header class="logo-container">
+                    <h1 class="main-headline">Music Digitizer Gear Shop</h1>
+                    <p class="h1-subtext">Got physical CDs, vintage cassette tapes, or vinyl records? Convert them into digital files with these top-rated, plug-and-play audio digitizers. Once digitized, drag your files into our main <a href="index.html" style="color: #2980b9; font-weight: 600; text-decoration: underline;">Converter panel</a> to run AI audio enhancements and tag them automatically.</p>
+                </header>
+
+                <!-- Filters -->
+                <div class="filter-bar" role="tablist" aria-label="Product Categories">
+                    <button class="filter-btn active" data-filter="all" role="tab" aria-selected="true" id="tab-all">All Gear</button>
+                    <button class="filter-btn" data-filter="cassette" role="tab" aria-selected="false" id="tab-cassette">Cassette Converters</button>
+                    <button class="filter-btn" data-filter="vinyl" role="tab" aria-selected="false" id="tab-vinyl">USB Turntables</button>
+                    <button class="filter-btn" data-filter="interface" role="tab" aria-selected="false" id="tab-interface">Audio Interfaces</button>
+                    <button class="filter-btn" data-filter="cd" role="tab" aria-selected="false" id="tab-cd">CD Rippers</button>
+                </div>
+
+                <!-- Products Grid -->
+                <div class="products-grid" id="productsGrid">
+                    
+                    <!-- 1. ClearClick Cassette -->
+                    <div class="product-card fade-in" data-category="cassette">
+                        <span class="product-category-badge">CASSETTE</span>
+                        <div class="product-img-wrapper">
+                            <img src="images/clearclick_cassette.png" alt="ClearClick Cassette-to-MP3 Converter 3.0" class="product-img" loading="lazy">
+                        </div>
+                        <div class="product-details">
+                            <h3 class="product-title">ClearClick Cassette-to-MP3 Converter 3.0 (Standalone)</h3>
+                            
+                            <div class="product-rating-row">
+                                <div class="stars-container" aria-label="4.8 out of 5 stars">
+                                    <svg viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                                    <svg viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                                    <svg viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                                    <svg viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                                    <svg viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                                </div>
+                                <span class="rating-value">4.8</span>
+                                <span class="review-count">(470+ reviews)</span>
+                            </div>
+
+                            <div class="price-row">
+                                <span class="product-price">$39.95</span>
+                                <span class="price-note">Prime Available</span>
+                            </div>
+
+                            <p class="product-description">The ultimate hassle-free cassette ripper. It requires absolutely no computer to operate. Simply insert a cassette, plug in a standard USB flash drive, and press record. The device automatically converts and saves songs as individual MP3 files.</p>
+                            
+                            <div class="review-quote-box">
+                                "Super easy to use. I digitized 20 of my high school mixtapes directly to a USB drive in one afternoon."
+                                <span class="review-quote-author">— Sarah T. (Verified Purchaser)</span>
+                            </div>
+
+                            <a href="https://www.amazon.com/s?k=ClearClick+Cassette+to+MP3+Converter+3.0" target="_blank" rel="noopener" class="amazon-btn" id="buy-clearclick">
+                                <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+                                View on Amazon
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- 2. Reshow Cassette -->
+                    <div class="product-card fade-in" data-category="cassette">
+                        <span class="product-category-badge">CASSETTE</span>
+                        <div class="product-img-wrapper">
+                            <img src="images/reshow_cassette.png" alt="Reshow USB Cassette Player" class="product-img" loading="lazy">
+                        </div>
+                        <div class="product-details">
+                            <h3 class="product-title">Reshow USB Cassette Player & Walkman (PC/Mac Link)</h3>
+                            
+                            <div class="product-rating-row">
+                                <div class="stars-container" aria-label="4.5 out of 5 stars">
+                                    <svg viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                                    <svg viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                                    <svg viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                                    <svg viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                                    <svg viewBox="0 0 20 20" style="color: #e2e8f0;"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                                </div>
+                                <span class="rating-value">4.5</span>
+                                <span class="review-count">(12,000+ reviews)</span>
+                            </div>
+
+                            <div class="price-row">
+                                <span class="product-price">$22.99</span>
+                                <span class="price-note">Bestseller</span>
+                            </div>
+
+                            <p class="product-description">The most popular budget-friendly cassette converter. Plugs directly into your PC or Mac's USB port. It ships with software instructions (Audacity) and functions as a standard Walkman when you insert AA batteries.</p>
+                            
+                            <div class="review-quote-box">
+                                "Breathed new life into my old cassette collection. Clean sound for the price point."
+                                <span class="review-quote-author">— Mark K. (Verified Purchaser)</span>
+                            </div>
+
+                            <a href="https://www.amazon.com/s?k=Reshow+USB+Cassette+Player" target="_blank" rel="noopener" class="amazon-btn" id="buy-reshow">
+                                <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+                                View on Amazon
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- 3. Audio-Technica Turntable -->
+                    <div class="product-card fade-in" data-category="vinyl">
+                        <span class="product-category-badge">VINYL</span>
+                        <div class="product-img-wrapper">
+                            <img src="images/audiotechnica_turntable.png" alt="Audio-Technica AT-LP60X-USB Turntable" class="product-img" loading="lazy">
+                        </div>
+                        <div class="product-details">
+                            <h3 class="product-title">Audio-Technica AT-LP60X-USB Belt-Drive Turntable</h3>
+                            
+                            <div class="product-rating-row">
+                                <div class="stars-container" aria-label="4.8 out of 5 stars">
+                                    <svg viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                                    <svg viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                                    <svg viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                                    <svg viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                                    <svg viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                                </div>
+                                <span class="rating-value">4.8</span>
+                                <span class="review-count">(8,900+ reviews)</span>
+                            </div>
+
+                            <div class="price-row">
+                                <span class="product-price">$149.00</span>
+                                <span class="price-note">Audiophile Choice</span>
+                            </div>
+
+                            <p class="product-description">The gold standard for vinyl records. Fully automatic belt-drive turntable featuring a built-in switchable phono pre-amplifier and a direct USB output connection. It outputs clean analog audio directly to your computer without distortion.</p>
+                            
+                            <div class="review-quote-box">
+                                "Pristine sound quality. Ripping my vinyl record collection to FLAC was incredibly smooth with the USB interface."
+                                <span class="review-quote-author">— Jessica H. (Verified Purchaser)</span>
+                            </div>
+
+                            <a href="https://www.amazon.com/s?k=Audio-Technica+AT-LP60X-USB+Turntable" target="_blank" rel="noopener" class="amazon-btn" id="buy-audiotechnica">
+                                <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+                                View on Amazon
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- 4. Victrola Turntable -->
+                    <div class="product-card fade-in" data-category="vinyl">
+                        <span class="product-category-badge">VINYL</span>
+                        <div class="product-img-wrapper">
+                            <img src="images/victrola_turntable.png" alt="Victrola Vintage Suitcase Turntable" class="product-img" loading="lazy">
+                        </div>
+                        <div class="product-details">
+                            <h3 class="product-title">Victrola 3-Speed Vintage Suitcase Turntable</h3>
+                            
+                            <div class="product-rating-row">
+                                <div class="stars-container" aria-label="4.4 out of 5 stars">
+                                    <svg viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                                    <svg viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                                    <svg viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                                    <svg viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                                    <svg viewBox="0 0 20 20" style="color: #e2e8f0;"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                                </div>
+                                <span class="rating-value">4.4</span>
+                                <span class="review-count">(35,000+ reviews)</span>
+                            </div>
+
+                            <div class="price-row">
+                                <span class="product-price">$49.99</span>
+                                <span class="price-note">Popular Budget Option</span>
+                            </div>
+
+                            <p class="product-description">A portable suitcase record player combining retro aesthetic with modern conveniences. Features 3-speed playback, built-in stereo speakers, Bluetooth streaming capability, and a basic USB output to encode your vinyl albums directly into digital files.</p>
+                            
+                            <div class="review-quote-box">
+                                "Great gift and super portable. Love the vintage vibe combined with simple USB ripping."
+                                <span class="review-quote-author">— David L. (Verified Purchaser)</span>
+                            </div>
+
+                            <a href="https://www.amazon.com/s?k=Victrola+Vintage+3-Speed+Suitcase+Turntable" target="_blank" rel="noopener" class="amazon-btn" id="buy-victrola">
+                                <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+                                View on Amazon
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- 5. Behringer Audio Interface -->
+                    <div class="product-card fade-in" data-category="interface">
+                        <span class="product-category-badge">INTERFACE</span>
+                        <div class="product-img-wrapper">
+                            <img src="images/behringer_interface.png" alt="Behringer U-Phono UFO202 Interface" class="product-img" loading="lazy">
+                        </div>
+                        <div class="product-details">
+                            <h3 class="product-title">Behringer U-Phono UFO202 USB Audio Interface</h3>
+                            
+                            <div class="product-rating-row">
+                                <div class="stars-container" aria-label="4.7 out of 5 stars">
+                                    <svg viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                                    <svg viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                                    <svg viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                                    <svg viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                                    <svg viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                                </div>
+                                <span class="rating-value">4.7</span>
+                                <span class="review-count">(3,100+ reviews)</span>
+                            </div>
+
+                            <div class="price-row">
+                                <span class="product-price">$29.99</span>
+                                <span class="price-note">Highly Recommended</span>
+                            </div>
+
+                            <p class="product-description">The bridge between analog sound and digital computers. Features high-resolution 48 kHz converters and a built-in phono pre-amplifier. Connects any existing tape deck, cassette player, or record player via RCA output directly to a PC/Mac USB port.</p>
+                            
+                            <div class="review-quote-box">
+                                "Zero background line hum or static. Perfect for connecting my vintage cassette player to my laptop."
+                                <span class="review-quote-author">— Raymond W. (Verified Purchaser)</span>
+                            </div>
+
+                            <a href="https://www.amazon.com/s?k=Behringer+U-Phono+UFO202+Interface" target="_blank" rel="noopener" class="amazon-btn" id="buy-behringer">
+                                <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+                                View on Amazon
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- 6. ASUS CD Drive -->
+                    <div class="product-card fade-in" data-category="cd">
+                        <span class="product-category-badge">CD / DVD</span>
+                        <div class="product-img-wrapper">
+                            <img src="images/asus_zendrive.png" alt="ASUS ZenDrive SDRW-08D2S-U CD Drive" class="product-img" loading="lazy">
+                        </div>
+                        <div class="product-details">
+                            <h3 class="product-title">ASUS ZenDrive Ultra-Slim External CD/DVD Ripper</h3>
+                            
+                            <div class="product-rating-row">
+                                <div class="stars-container" aria-label="4.6 out of 5 stars">
+                                    <svg viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                                    <svg viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                                    <svg viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                                    <svg viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                                    <svg viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                                </div>
+                                <span class="rating-value">4.6</span>
+                                <span class="review-count">(5,400+ reviews)</span>
+                            </div>
+
+                            <div class="price-row">
+                                <span class="product-price">$26.99</span>
+                                <span class="price-note">USB-C/A Dual Interface</span>
+                            </div>
+
+                            <p class="product-description">An ultra-slim, portable external CD/DVD burner and writer. Features an elegant concentric-circle finish. Supports dual cables (USB-C and USB-A) to connect directly to any modern Windows laptop or MacBook to rip your CD collections.</p>
+                            
+                            <div class="review-quote-box">
+                                "Quiet, fast, and worked instantly on my Mac for ripping my old albums to MP3 audios."
+                                <span class="review-quote-author">— Gregory V. (Verified Purchaser)</span>
+                            </div>
+
+                            <a href="https://www.amazon.com/s?k=ASUS+ZenDrive+SDRW-08D2S-U+CD+Drive" target="_blank" rel="noopener" class="amazon-btn" id="buy-asus">
+                                <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+                                View on Amazon
+                            </a>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Mobile Menu Toggle
+            const menuToggle = document.getElementById('menuToggle');
+            const sidebarNav = document.getElementById('sidebarNav');
+            
+            if (menuToggle && sidebarNav) {
+                menuToggle.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    sidebarNav.classList.toggle('open');
+                });
+                
+                // Close sidebar if user clicks outside of it on mobile
+                document.addEventListener('click', (e) => {
+                    if (sidebarNav.classList.contains('open') && !sidebarNav.contains(e.target) && e.target !== menuToggle) {
+                        sidebarNav.classList.remove('open');
+                    }
+                });
+            }
+
+            // Category Filtering Logic
+            const filterButtons = document.querySelectorAll('.filter-btn');
+            const productCards = document.querySelectorAll('.product-card');
+
+            filterButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    // Update active button styling
+                    filterButtons.forEach(btn => {
+                        btn.classList.remove('active');
+                        btn.setAttribute('aria-selected', 'false');
+                    });
+                    button.classList.add('active');
+                    button.setAttribute('aria-selected', 'true');
+
+                    const filterValue = button.getAttribute('data-filter');
+
+                    // Filter product cards
+                    productCards.forEach(card => {
+                        card.classList.remove('fade-in');
+                        
+                        // Small timeout to trigger animation reset
+                        setTimeout(() => {
+                            if (filterValue === 'all' || card.getAttribute('data-category') === filterValue) {
+                                card.style.display = 'flex';
+                                card.classList.add('fade-in');
+                            } else {
+                                card.style.display = 'none';
+                            }
+                        }, 50);
+                    });
+                });
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,59 +1,234 @@
 /* =========================================
    1. GLOBAL & LAYOUT
    ========================================= */
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
 body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, sans-serif;
-    background: #f4f7f9;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, sans-serif;
+    background: #f8fafc;
     min-height: 100vh;
     margin: 0;
+    display: flex;
+    flex-direction: column;
+    color: #0f172a;
+    overflow-x: hidden;
 }
 
 .container {
-    background: white;
-    padding: 2.5rem;
-    border-radius: 12px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
-    width: 90%;
-    max-width: 460px;
-    text-align: center;
-    position: relative;
-    z-index: 1;
+    width: 100%;
+    max-width: 100%;
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
 }
 
 /* =========================================
-   2. TYPOGRAPHY & HEADER
+   2. APP HEADER & STICKY NAVBAR (SaaS style)
    ========================================= */
-.logo-container { 
-    text-align: center; 
-    margin-bottom: 20px; 
+.app-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 64px;
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid #e2e8f0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.02);
 }
 
-.main-logo { 
-    max-width: 300px; 
-    width: 100%; 
-    height: auto; 
-    display: block; 
-    margin: 0 auto; 
+.header-container {
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-sizing: border-box;
+}
+
+.header-brand {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+}
+
+.header-logo {
+    height: 32px;
+    width: auto;
+    display: block;
+}
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.menu-toggle {
+    background: transparent;
+    border: none;
+    color: #64748b;
+    cursor: pointer;
+    padding: 8px;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    transition: all 0.2s;
+}
+
+.menu-toggle:hover {
+    background: #f1f5f9;
+    color: #0f172a;
+}
+
+/* =========================================
+   2b. LEFT SIDEBAR NAVIGATION
+   ========================================= */
+.sidebar-nav {
+    position: fixed;
+    top: 64px;
+    left: 0;
+    bottom: 0;
+    width: 280px;
+    background: #ffffff;
+    border-right: 1px solid #e2e8f0;
+    z-index: 990;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 24px 16px;
+    box-sizing: border-box;
+    overflow-y: auto;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sidebar-menu {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.sidebar-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: #475569;
+    text-decoration: none;
+    font-size: 0.95rem;
+    font-weight: 600;
+    padding: 10px 16px;
+    border-radius: 10px;
+    transition: all 0.2s ease;
+}
+
+.sidebar-link svg {
+    width: 20px;
+    height: 20px;
+    stroke-width: 2px;
+    color: #64748b;
+    transition: all 0.2s ease;
+}
+
+.sidebar-link:hover {
+    color: #2980b9;
+    background: #f8fafc;
+}
+
+.sidebar-link:hover svg {
+    color: #2980b9;
+}
+
+.sidebar-link.active {
+    color: #ffffff;
+    background: linear-gradient(135deg, #2980b9 0%, #176394 100%);
+    box-shadow: 0 4px 12px rgba(41, 128, 185, 0.15);
+}
+
+.sidebar-link.active svg {
+    color: #ffffff;
+}
+
+.sidebar-footer {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-top: auto;
+    padding-top: 20px;
+    border-top: 1px solid #f1f5f9;
+}
+
+/* =========================================
+   2c. MAIN CONTENT & WORKSPACE
+   ========================================= */
+.main-content {
+    margin-top: 64px;
+    margin-left: 280px;
+    padding: 40px 24px;
+    box-sizing: border-box;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: #f8fafc;
+}
+
+.content-container {
+    width: 100%;
+    max-width: 1040px;
+    display: flex;
+    flex-direction: column;
+}
+
+.page-card {
+    background: white;
+    padding: 2.5rem;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
+    border: 1px solid #e2e8f0;
+    text-align: left;
+    margin-bottom: 2rem;
+    box-sizing: border-box;
+}
+
+.logo-container {
+    text-align: left;
+    margin-bottom: 30px;
 }
 
 .main-headline {
-    font-size: 1.15rem; 
-    color: #1e293b;
-    margin: 15px 0 8px 0;
-    line-height: 1.4; 
-    font-weight: 700; 
-    letter-spacing: -0.01em;
+    font-size: 2.25rem;
+    color: #0f172a;
+    margin: 0 0 10px 0;
+    line-height: 1.25;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+}
+
+.main-subheadline {
+    font-size: 1.125rem !important;
+    color: #475569;
+    font-weight: 500 !important;
+    margin: 0 0 12px 0;
+    line-height: 1.5;
 }
 
 .h1-subtext {
-    font-size: 0.95rem;
+    font-size: 0.90rem;
     color: #64748b;
+    margin-top: 0;
     margin-bottom: 1.5rem;
-    display: block; 
-    line-height: 1.4;
+    line-height: 1.5;
 }
 
 /* =========================================
@@ -163,9 +338,26 @@ body {
     box-sizing: border-box;
 }
 
+.premium-badge {
+    background: linear-gradient(90deg, #f59e0b 0%, #d97706 100%);
+    color: white;
+    font-size: 0.65rem;
+    font-weight: 800;
+    padding: 2px 6px;
+    border-radius: 12px;
+    margin-left: 6px;
+    vertical-align: middle;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 2px 4px rgba(245, 158, 11, 0.3);
+    display: inline-block;
+}
+
 .inline-ai-toggle .toggle-text {
     display: flex;
-    align-items: baseline;
+    align-items: center;
+    justify-content: space-between;
+    flex-grow: 1;
     gap: 8px;
 }
 
@@ -930,4 +1122,168 @@ footer p { margin: 0 0 10px 0; }
 @keyframes fadeOutRight {
     from { transform: translateX(0); opacity: 1; }
     to { transform: translateX(150%); opacity: 0; }
+}
+
+/* =========================================
+   13. SEO FEATURES SECTION
+   ========================================= */
+.seo-features-section {
+    margin-top: 35px;
+    margin-bottom: 20px;
+    text-align: left;
+    border-top: 1px dashed #cbd5e1;
+    padding-top: 30px;
+}
+
+.seo-section-title {
+    font-size: 1.05rem;
+    color: #1e293b;
+    font-weight: 800;
+    margin-bottom: 22px;
+    text-align: center;
+    line-height: 1.4;
+}
+
+.seo-feature-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.seo-feature-card {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+}
+
+.seo-feature-icon {
+    flex-shrink: 0;
+    background: #f0fdf4;
+    color: #16a34a;
+    width: 38px;
+    height: 38px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 5px rgba(22, 163, 74, 0.08);
+}
+
+.seo-feature-card h3 {
+    font-size: 0.92rem;
+    color: #1e293b;
+    font-weight: 700;
+    margin: 0 0 5px 0;
+}
+
+.seo-feature-card p {
+    font-size: 0.82rem;
+    color: #64748b;
+    margin: 0;
+    line-height: 1.45;
+}
+
+/* =========================================
+   15. SAAS INTEGRATED SIDEBAR ELEMENTS & RESPONSIVE BREAKPOINTS
+   ========================================= */
+.menu-toggle svg {
+    width: 24px;
+    height: 24px;
+}
+
+.sidebar-nav .dashboard-box,
+.sidebar-nav .auth-box {
+    border: none;
+    padding: 12px 8px;
+    box-shadow: none;
+    margin-top: 0 !important;
+    background: transparent;
+}
+
+.sidebar-nav .auth-box::before {
+    display: none;
+}
+
+.sidebar-nav .pricing-tiers {
+    flex-direction: column;
+    gap: 12px;
+}
+
+.sidebar-nav .tier-card {
+    min-width: 100%;
+    margin-bottom: 0;
+    box-sizing: border-box;
+}
+
+@media (max-width: 992px) {
+    .menu-toggle {
+        display: flex;
+    }
+    
+    .sidebar-nav {
+        transform: translateX(-100%);
+        top: 64px;
+        box-shadow: 10px 0 30px rgba(0,0,0,0.08);
+    }
+    
+    .sidebar-nav.open {
+        transform: translateX(0);
+    }
+    
+    .main-content {
+        margin-left: 0;
+        padding: 30px 16px;
+    }
+    
+    /* Reset sidebar elements back to card layouts on mobile */
+    .sidebar-nav .dashboard-box,
+    .sidebar-nav .auth-box {
+        border: 1px solid #e2e8f0;
+        padding: 20px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+        background: #ffffff;
+        margin-top: 15px !important;
+    }
+    
+    .sidebar-nav .auth-box::before {
+        display: block;
+    }
+}
+
+/* =========================================
+   16. WORKSPACE TWO-COLUMN LAYOUT
+   ========================================= */
+.workspace-layout {
+    display: flex;
+    gap: 24px;
+    width: 100%;
+    align-items: stretch;
+    margin-top: 15px;
+}
+
+#conversionToolContainer {
+    flex: 1;
+    min-width: 0;
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+}
+
+#loginFormContainer {
+    flex: 1;
+    min-width: 0;
+    margin: 0 !important;
+    box-sizing: border-box;
+}
+
+@media (max-width: 992px) {
+    .workspace-layout {
+        flex-direction: column;
+        gap: 20px;
+    }
+    
+    #loginFormContainer {
+        width: 100%;
+        max-width: 600px;
+        margin: 20px auto 0 auto !important;
+    }
 }
