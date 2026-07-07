@@ -1286,4 +1286,71 @@ footer p { margin: 0 0 10px 0; }
         max-width: 600px;
         margin: 20px auto 0 auto !important;
     }
+
+    .workspace-layout:has(#workspacePricingContainer:not(.hidden)) #conversionToolContainer {
+        flex: none;
+    }
+
+    #workspacePricingContainer {
+        flex: none;
+        width: 100%;
+    }
+
+    .workspace-tier-card {
+        flex: none;
+        width: 100%;
+        max-width: 600px;
+        margin: 0 auto !important;
+    }
+}
+
+/* =========================================
+   17. WORKSPACE TIERS LAYOUT
+   ========================================= */
+.workspace-layout:has(#workspacePricingContainer:not(.hidden)) #conversionToolContainer {
+    flex: 3;
+}
+
+#workspacePricingContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    flex: 2;
+    min-width: 0;
+    box-sizing: border-box;
+}
+
+.workspace-tier-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.05);
+    position: relative;
+    text-align: center;
+    flex: 1;
+    min-width: 0;
+    margin: 0 !important;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.workspace-tier-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    border-radius: 12px 12px 0 0;
+}
+
+.pay-as-you-go-card::before {
+    background: linear-gradient(90deg, #f59e0b 0%, #ea580c 100%);
+}
+
+.pro-subscription-card::before {
+    background: linear-gradient(90deg, #3b82f6 0%, #2563eb 100%);
 }

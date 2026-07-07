@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const subscribeBtn = document.getElementById('subscribeBtn');
     const billingMessage = document.getElementById('billingMessage');
     const urlMessage = document.getElementById('urlMessage');
-    const pricingTiersContainer = document.getElementById('pricingTiersContainer');
+    const workspacePricingContainer = document.getElementById('workspacePricingContainer');
     const subscriptionBadge = document.getElementById('subscriptionBadge');
 
     // 2. Conversion Tool UI Elements
@@ -264,7 +264,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- AUTHENTICATION LOGIC ---
     const checkAuth = async () => {
         if (conversionToolContainer) conversionToolContainer.classList.remove('hidden');
-
         try {
             const response = await fetch(`${BACKEND_URL}/auth/me`, { credentials: 'include' });
             const data = await response.json();
@@ -281,11 +280,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 if (data.subscription_active) {
                     if (subscriptionBadge) subscriptionBadge.classList.remove('hidden');
-                    if (pricingTiersContainer) pricingTiersContainer.style.display = 'none';
+                    if (workspacePricingContainer) workspacePricingContainer.classList.add('hidden');
                     if (paidCreditsDisplay) paidCreditsDisplay.textContent = 'Unlimited (Pro)';
                 } else {
                     if (subscriptionBadge) subscriptionBadge.classList.add('hidden');
-                    if (pricingTiersContainer) pricingTiersContainer.style.display = 'flex';
+                    if (workspacePricingContainer) workspacePricingContainer.classList.remove('hidden');
                     if (buyCreditsBtn) buyCreditsBtn.classList.remove('hidden');
                     if (subscribeBtn) subscribeBtn.classList.remove('hidden');
                 }
@@ -294,12 +293,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 isGuestUser = true;
                 // User is a guest
                 if (userDashboard) userDashboard.classList.add('hidden');
+                if (workspacePricingContainer) workspacePricingContainer.classList.add('hidden');
                 if (loginFormContainer) loginFormContainer.classList.remove('hidden');
             }
         } catch (error) {
             console.error('Auth Check Failed', error);
             // Fallback for offline mode/guests
             if (userDashboard) userDashboard.classList.add('hidden');
+            if (workspacePricingContainer) workspacePricingContainer.classList.add('hidden');
             if (loginFormContainer) loginFormContainer.classList.remove('hidden');
         }
     };
