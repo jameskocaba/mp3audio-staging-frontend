@@ -204,3 +204,70 @@ footer {
 }
 
 footer p { margin: 0 0 10px 0; }
+
+/* =========================================
+   7. ALBUM ART & TRACK DETAILS
+   ========================================= */
+.album-art-container {
+    width: 52px;
+    height: 52px;
+    border-radius: 8px;
+    overflow: hidden;
+    flex-shrink: 0;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+    background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    border: 1px solid rgba(226, 232, 240, 0.8);
+}
+
+.album-art-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.top-ranked-item:hover .album-art-img, 
+.archive-item:hover .album-art-img {
+    transform: scale(1.06);
+}
+
+.album-art-fallback {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #f59e0b 0%, #ea580c 100%);
+    color: white;
+}
+
+.album-art-fallback svg {
+    width: 24px;
+    height: 24px;
+    opacity: 0.9;
+}
+
+.track-details {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+    flex-grow: 1;
+}
+
+.track-title {
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: #1e293b;
+    margin: 0;
+}
+
+.track-artist {
+    font-size: 0.82rem;
+    color: #64748b;
+    margin: 0;
+}

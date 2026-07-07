@@ -4,10 +4,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Top Shareable URLs | MP3aud.io</title>
+    <title>Top Album Art | MP3aud.io</title>
 
     <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="top-5.css">
+    <link rel="stylesheet" href="top-album-art.css">
 
     <link rel="icon" type="image/png" href="favicon.png">
     <link rel="apple-touch-icon" href="favicon.png">
@@ -192,9 +192,9 @@
                 </a>
             </li>
             <li>
-                <a href="top-5.html" class="sidebar-link active">
+                <a href="top-album-art.html" class="sidebar-link active">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
-                    <span>Top Charts</span>
+                    <span>Top Album Art</span>
                 </a>
             </li>
             <li>
@@ -217,7 +217,7 @@
         <div class="content-container" style="max-width: 768px;">
             <div class="page-card">
                 <header class="logo-container" style="text-align: left; margin-bottom: 20px;">
-                    <h1 class="main-headline" style="font-size: 2rem; margin-top: 0;">Top Shareable URLs</h1>
+                    <h1 class="main-headline" style="font-size: 2rem; margin-top: 0;">Top Album Art</h1>
                     <p class="h1-subtext" style="margin-bottom: 0;">
                         Copy a URL link below and paste it in the converter.
                     </p>
@@ -302,6 +302,27 @@
 
             let newArchiveItems = [];
 
+            const fallbackArtwork = `
+                <div class="album-art-fallback">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <circle cx="12" cy="12" r="3"></circle>
+                    </svg>
+                </div>
+            `;
+
+            const getArtworkHtml = (item) => {
+                if (item.thumbnail_url) {
+                    const escapedFallback = fallbackArtwork.replace(/'/g, "\\'").replace(/\n/g, "").replace(/\s+/g, " ");
+                    return `
+                        <div class="album-art-container">
+                            <img src="${item.thumbnail_url}" alt="${item.title}" class="album-art-img" onerror="this.outerHTML='${escapedFallback}'">
+                        </div>
+                    `;
+                }
+                return `<div class="album-art-container">${fallbackArtwork}</div>`;
+            };
+
             // 1. Render Featured Top 5 (only on first load)
             if (!append) {
                 const topFive = urlData.slice(0, 5);
@@ -309,7 +330,7 @@
                 allArchiveData = [...newArchiveItems];
 
                 if (topFive.length > 0) {
-                    let html = '<div class="featured-banner">🔥 Top 5 Shareable URLs</div><div class="featured-block">';
+                    let html = '<div class="featured-banner">🔥 Top 5 Album Art</div><div class="featured-block">';
 
                     topFive.forEach((item, index) => {
                         const rank = index + 1;
@@ -321,11 +342,11 @@
                         html += `
                             <div class="top-ranked-item">
                                 <div class="rank-badge" style="background-color: ${badgeColor};">${rank}</div>
+                                ${getArtworkHtml(item)}
                                 <div class="content-row" style="flex-grow: 1; align-items: center; width: 100%; display: flex; gap: 15px; min-width: 0;">
-                                    <div style="flex-grow: 1; min-width: 0;">
-                                        <p class="playlist-desc truncate-text" style="margin:0;" title="${item.title}: ${item.desc}">
-                                            <strong>${item.title}:</strong> ${item.desc}
-                                        </p>
+                                    <div class="track-details">
+                                        <p class="track-title truncate-text" title="${item.title}">${item.title}</p>
+                                        <p class="track-artist truncate-text" title="${item.desc}">${item.desc || 'Various Artists'}</p>
                                         <span class="conversion-count">${item.count} conversions</span>
                                     </div>
                                     <button class="sc-share-button" onclick="copyLink(this, '${item.link}')" style="flex-shrink: 0; background: linear-gradient(90deg, #f59e0b 0%, #ea580c 100%); color:white; border:none;">
@@ -367,16 +388,18 @@
                         monthHTML += `
                             <article class="week-archive-block archive-item">
                                 <h4 class="date-label" style="font-size:0.8rem; margin:0 0 8px 0; color:#94a3b8;">${item.count} Conversions • Last used ${item.date}</h4>
-                                <div class="content-row" style="display: flex; align-items: center; gap: 15px; min-width: 0;">
-                                    <div style="flex-grow: 1; min-width: 0;">
-                                        <p class="playlist-desc truncate-text" style="margin:0; font-size:0.95rem;" title="${item.title}: ${item.desc}">
-                                            <strong>${item.title}:</strong> ${item.desc}
-                                        </p>
+                                <div style="display: flex; align-items: center; gap: 15px; width: 100%;">
+                                    ${getArtworkHtml(item)}
+                                    <div class="content-row" style="flex-grow: 1; align-items: center; display: flex; gap: 15px; min-width: 0; width: 100%;">
+                                        <div class="track-details">
+                                            <p class="track-title truncate-text" style="font-size:0.95rem;" title="${item.title}">${item.title}</p>
+                                            <p class="track-artist truncate-text" style="font-size:0.85rem;" title="${item.desc}">${item.desc || 'Various Artists'}</p>
+                                        </div>
+                                        <button class="sc-share-button text-btn" onclick="copyLink(this, '${item.link}')" style="flex-shrink: 0; margin-left:auto; display:flex; align-items:center; gap:6px; color:#2980b9;">
+                                            <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
+                                            <span>Copy Link</span>
+                                        </button>
                                     </div>
-                                    <button class="sc-share-button text-btn" onclick="copyLink(this, '${item.link}')" style="flex-shrink: 0; margin-left:auto; display:flex; align-items:center; gap:6px; color:#2980b9;">
-                                        <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
-                                        <span>Copy Link</span>
-                                    </button>
                                 </div>
                             </article>
                         `;
