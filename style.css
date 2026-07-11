@@ -330,7 +330,7 @@ body {
     gap: 12px; 
     margin: 0;
     flex: 1; 
-    min-width: 240px;
+    min-width: 280px;
     justify-content: center;
     background: #f8fafc;
     border: 1px solid #e2e8f0;
@@ -352,6 +352,7 @@ body {
     letter-spacing: 0.5px;
     box-shadow: 0 2px 4px rgba(245, 158, 11, 0.3);
     display: inline-block;
+    white-space: nowrap;
 }
 
 .inline-ai-toggle .toggle-text {
