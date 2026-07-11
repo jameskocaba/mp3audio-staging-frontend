@@ -46,7 +46,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Point this to your PRODUCTION backend URL
     // Ensure this EXACTLY matches your Render PROD web service URL
-    const BACKEND_URL = 'https://audio-converter-backend.onrender.com';
+    const BACKEND_URL = 'https://mp3audio-staging.onrender.com';
     let currentSessionId = null;
     let pollTimeout = null;
     let isGuestUser = true;
