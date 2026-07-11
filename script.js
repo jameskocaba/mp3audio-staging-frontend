@@ -350,21 +350,31 @@ document.addEventListener('DOMContentLoaded', () => {
 
             try {
                 // Wake up/spin up server if inactive before requesting magic link
-                try {
-                    let isServerActive = false;
-                    const wakeUpPromise = fetch(`${BACKEND_URL}/health`).then(() => { isServerActive = true; });
-                    const timeoutPromise = new Promise(resolve => setTimeout(resolve, 1500));
+                let isServerActive = false;
+                const startTime = Date.now();
+                const maxWaitMs = 60000; // wait up to 60 seconds
+                const intervalMs = 2000;  // ping every 2 seconds
 
-                    await Promise.race([wakeUpPromise, timeoutPromise]);
-
-                    if (!isServerActive) {
-                        if (authMessage) {
-                            authMessage.textContent = 'Spinning up server, please wait (up to 50 seconds)...';
+                while (Date.now() - startTime < maxWaitMs) {
+                    try {
+                        const res = await fetch(`${BACKEND_URL}/health`);
+                        if (res.ok) {
+                            isServerActive = true;
+                            break;
                         }
-                        await wakeUpPromise;
+                    } catch (err) {
+                        console.log("Server spin up in progress, waiting...");
                     }
-                } catch (err) {
-                    console.warn("Pre-flight magic link wake up ping failed, continuing...", err);
+
+                    if (authMessage) {
+                        const elapsed = Math.round((Date.now() - startTime) / 1000);
+                        authMessage.textContent = `Spinning up server, please wait (${elapsed}s)...`;
+                    }
+                    await new Promise(resolve => setTimeout(resolve, intervalMs));
+                }
+
+                if (!isServerActive) {
+                    console.warn("Pre-flight magic link wake up ping timed out or failed, continuing...");
                 }
 
                 if (authMessage) {
