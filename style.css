@@ -1353,3 +1353,35 @@ footer p { margin: 0 0 10px 0; }
 .pro-subscription-card::before {
     background: linear-gradient(90deg, #3b82f6 0%, #2563eb 100%);
 }
+
+/* =========================================
+   18. MOBILE RESPONSIVE TOGGLES & CARD PADDING
+   ========================================= */
+@media (max-width: 600px) {
+    .process-card {
+        padding: 16px;
+    }
+    
+    .options-row {
+        gap: 12px !important;
+        margin-top: 12px !important;
+        margin-bottom: 12px !important;
+    }
+    
+    .inline-ai-toggle {
+        min-width: unset;
+        width: 100%;
+        gap: 8px;
+        padding: 8px 12px;
+    }
+    
+    .inline-ai-toggle .toggle-text {
+        flex-wrap: wrap;
+        gap: 4px 8px;
+    }
+    
+    .inline-ai-toggle .feature-title {
+        white-space: normal !important;
+        font-size: 0.85rem !important;
+    }
+}
