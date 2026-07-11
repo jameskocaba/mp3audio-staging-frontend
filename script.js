@@ -278,16 +278,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (userEmailDisplay) userEmailDisplay.textContent = data.email;
                 if (logoutBtn) logoutBtn.classList.remove('hidden');
 
-                if (data.subscription_active) {
-                    if (subscriptionBadge) subscriptionBadge.classList.remove('hidden');
-                    if (workspacePricingContainer) workspacePricingContainer.classList.add('hidden');
-                    if (paidCreditsDisplay) paidCreditsDisplay.textContent = 'Unlimited (Pro)';
-                } else {
-                    if (subscriptionBadge) subscriptionBadge.classList.add('hidden');
-                    if (workspacePricingContainer) workspacePricingContainer.classList.remove('hidden');
-                    if (buyCreditsBtn) buyCreditsBtn.classList.remove('hidden');
-                    if (subscribeBtn) subscribeBtn.classList.remove('hidden');
-                }
+                if (subscriptionBadge) subscriptionBadge.classList.add('hidden');
+                if (workspacePricingContainer) workspacePricingContainer.classList.remove('hidden');
+                if (buyCreditsBtn) buyCreditsBtn.classList.remove('hidden');
                 if (loginFormContainer) loginFormContainer.classList.add('hidden');
             } else {
                 isGuestUser = true;

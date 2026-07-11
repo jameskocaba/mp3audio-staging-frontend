@@ -194,10 +194,9 @@
                 <h2 class="main-subheadline">
                     Automatically embed high-resolution album cover art, tag music metadata, and transcribe lyrics with AI.
                 </h2>
-                <p class="h1-subtext">
-                    The first <strong>five tags are free, then 1 credit per track</strong>. 
-                    Audio enhancement and lyrics are <strong>premium upgrades</strong>. 
-                    <em>Guest users must keep this tab open while processing.</em>
+                <p class="subtitle" style="font-size: 1.05rem; margin-top: 5px; color: #475569;">
+                    Conversions cost 1 credit per track.
+                    Audio enhancement and lyrics are optional upgrades that require additional credits.
                 </p>
             </header>
 
@@ -229,8 +228,7 @@
                     </div>
 
                     <div class="options-row" style="flex-wrap: wrap; justify-content: center; gap: 20px; margin-top: 20px;">
-                        <div class="inline-ai-toggle"
-                            style="background: #ecfdf5; border: 1px solid #a7f3d0; padding: 8px 16px; border-radius: 8px;">
+                        <div class="inline-ai-toggle">
                             <label class="switch" aria-label="Add Album Art & Tags">
                                 <input type="checkbox" id="autoAddAlbumArt" name="autoAddAlbumArt" checked>
                                 <span class="slider round"></span>
@@ -241,8 +239,7 @@
                                     Album Art & Tags</span>
                                 <div
                                     style="display: flex; align-items: center; justify-content: space-between; margin-top: 2px;">
-                                    <span
-                                        style="background: #10b981; color: white; padding: 2px 6px; border-radius: 6px; font-size: 0.7rem; font-weight: bold;">5 FREE, THEN 1 CREDIT/TRACK</span>
+                                    <span class="premium-badge">+1 CREDIT/TRACK</span>
                                 </div>
                             </div>
                         </div>
@@ -260,7 +257,7 @@
                                     Bitrate (320k)</span>
                                 <div
                                     style="display: flex; align-items: center; justify-content: space-between; margin-top: 2px;">
-                                    <span class="premium-badge">PRO</span>
+                                    <span class="premium-badge">+1 CREDIT/TRACK</span>
                                 </div>
                             </div>
                         </div>
@@ -276,7 +273,7 @@
                                     Lyrics</span>
                                 <div
                                     style="display: flex; align-items: center; justify-content: space-between; margin-top: 2px;">
-                                    <span class="premium-badge">PRO</span>
+                                    <span class="premium-badge">+10 CREDITS/TRACK</span>
                                 </div>
                             </div>
                         </div>
@@ -317,14 +314,11 @@
                         <h3 style="margin: 0; color: #92400e; font-size: 1.15rem; font-weight: 800;">Log In & Buy Credits
                         </h3>
                     </div>
-                    <p style="font-size: 0.9rem; color: #92400e; margin-bottom: 10px; line-height: 1.5;"><strong>Need to
-                             process more than 5 tracks or files over 50MB?</strong> Enter your email below to receive a
-                        secure login link. Once inside, you can upgrade your account:</p>
+                    <p style="font-size: 0.9rem; color: #92400e; margin-bottom: 10px; line-height: 1.5;"><strong>Convert your music collections with Pay-As-You-Go credits.</strong> Enter your email below to receive a secure login link. Once inside, you can purchase track credits:</p>
                     <ul
                         style="font-size: 0.9rem; color: #92400e; margin-bottom: 18px; line-height: 1.5; padding-left: 20px;">
-                        <li style="margin-bottom: 5px;"><strong>Pay As You Go ($5.00):</strong> 350 Track Credits, no
+                        <li style="margin-bottom: 5px;"><strong>Pay As You Go ($2.00):</strong> 350 Track Credits, no
                             expiration.</li>
-                        <li style="margin-bottom: 5px;"><strong>Pro Subscription ($15.00/mo):</strong> Unlimited processing.</li>
                     </ul>
                     <div class="unified-search-bar" style="margin-bottom: 5px; border-color: #fcd34d;">
                         <input type="email" id="loginEmail" placeholder="you@example.com" autocomplete="email"
@@ -337,26 +331,14 @@
 
                 <!-- Relocated Pricing Tiers in Main Workspace -->
                 <div id="workspacePricingContainer" class="hidden">
-                    <div class="workspace-tier-card pay-as-you-go-card">
+                    <div class="workspace-tier-card pay-as-you-go-card" style="margin: 0 auto; max-width: 320px; width: 100%;">
                         <h4 style="margin: 0 0 10px 0; color: #334155; font-size: 1.15rem; font-weight: 800;">Pay As You Go</h4>
-                        <div style="font-size: 1.8rem; font-weight: bold; color: #0f172a; margin-bottom: 15px;">$5.00</div>
+                        <div style="font-size: 1.8rem; font-weight: bold; color: #0f172a; margin-bottom: 15px;">$2.00</div>
                         <p style="font-size: 0.9rem; color: #64748b; margin-bottom: 20px; line-height: 1.6; flex-grow: 1;">
                             350 Track Credits<br>No Expiration<br>Priority Queue
                         </p>
                         <button id="buyCreditsBtn" class="premium-btn hidden"
                             style="width: 100%; padding: 12px; font-size: 0.95rem; font-weight: bold;">Buy Credits</button>
-                    </div>
-                    <div class="workspace-tier-card pro-subscription-card">
-                        <div style="position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: #3b82f6; color: white; padding: 3px 12px; border-radius: 12px; font-size: 0.75rem; font-weight: bold; letter-spacing: 0.5px; z-index: 1;">
-                            BEST VALUE</div>
-                        <h4 style="margin: 0 0 10px 0; color: #1d4ed8; font-size: 1.15rem; font-weight: 800;">Pro Subscription</h4>
-                        <div style="font-size: 1.8rem; font-weight: bold; color: #1e3a8a; margin-bottom: 15px;">
-                            $15.00<span style="font-size: 0.95rem; color: #64748b; font-weight: normal;">/mo</span></div>
-                        <p style="font-size: 0.9rem; color: #64748b; margin-bottom: 20px; line-height: 1.6; flex-grow: 1;">
-                            Unlimited Processing<br>All Premium Features<br>Top Priority Queue
-                        </p>
-                        <button id="subscribeBtn" class="premium-btn hidden"
-                            style="width: 100%; padding: 12px; font-size: 0.95rem; font-weight: bold; background: linear-gradient(90deg, #3b82f6 0%, #2563eb 100%);">Subscribe Now</button>
                     </div>
                 </div>
             </div>
@@ -446,7 +428,7 @@
                         </button>
                         <div class="faq-panel">
                             <div class="faq-content">
-                                <p>You can always process up to 5 tracks completely for free. Additionally, with a $5.00 payment, you can upgrade your account to process up to 350 files per ZIP upload, skip the queue, and access Pro features.</p>
+                                <p>You can process up to 350 files per ZIP upload using paid credits, which also lets you skip the queue and access premium features like lyric transcription and audio upscaling.</p>
                             </div>
                         </div>
                     </div>
@@ -470,7 +452,7 @@
                         </button>
                         <div class="faq-panel">
                             <div class="faq-content">
-                                <p>Because processing high-quality audio and transcribing lyrics is resource-intensive, jobs are handled in a queue. If the server is busy, you will be given a queue position and an estimated wait time. <strong>Premium Priority:</strong> Jobs processed using paid credits automatically skip ahead of free users in the queue.</p>
+                                <p>Because processing high-quality audio and transcribing lyrics is resource-intensive, jobs are handled in a queue. If the server is busy, you will be given a queue position and an estimated wait time. <strong>Priority Queue:</strong> Jobs are processed in order, with paid credits granting access to our priority queue.</p>
                             </div>
                         </div>
                     </div>
