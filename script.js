@@ -353,24 +353,36 @@ document.addEventListener('DOMContentLoaded', () => {
                 let isServerActive = false;
                 const startTime = Date.now();
                 const maxWaitMs = 60000; // wait up to 60 seconds
-                const intervalMs = 2000;  // ping every 2 seconds
+                const pingIntervalMs = 3000; // ping every 3 seconds
+                let lastPingTime = 0;
 
                 while (Date.now() - startTime < maxWaitMs) {
-                    try {
-                        const res = await fetch(`${BACKEND_URL}/health`);
-                        if (res.ok) {
-                            isServerActive = true;
-                            break;
-                        }
-                    } catch (err) {
-                        console.log("Server spin up in progress, waiting...");
-                    }
+                    const now = Date.now();
+                    const elapsed = Math.round((now - startTime) / 1000);
 
                     if (authMessage) {
-                        const elapsed = Math.round((Date.now() - startTime) / 1000);
                         authMessage.textContent = `Spinning up server, please wait (${elapsed}s)...`;
                     }
-                    await new Promise(resolve => setTimeout(resolve, intervalMs));
+
+                    // Ping backend health endpoint every 3 seconds
+                    if (now - lastPingTime >= pingIntervalMs) {
+                        lastPingTime = now;
+                        try {
+                            const controller = new AbortController();
+                            const timeoutId = setTimeout(() => controller.abort(), 2500); // 2.5s timeout for ping
+                            const res = await fetch(`${BACKEND_URL}/health`, { signal: controller.signal });
+                            clearTimeout(timeoutId);
+                            if (res.ok) {
+                                isServerActive = true;
+                                break;
+                            }
+                        } catch (err) {
+                            console.log("Server spin up in progress...");
+                        }
+                    }
+
+                    // Sleep for 1 second to update the counter smoothly
+                    await new Promise(resolve => setTimeout(resolve, 1000));
                 }
 
                 if (!isServerActive) {
