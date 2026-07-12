@@ -1152,6 +1152,14 @@ footer p { margin: 0 0 10px 0; }
     gap: 20px;
 }
 
+@media (min-width: 768px) {
+    .seo-feature-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 24px 32px;
+    }
+}
+
 .seo-feature-card {
     display: flex;
     gap: 14px;
@@ -1171,18 +1179,22 @@ footer p { margin: 0 0 10px 0; }
     box-shadow: 0 2px 5px rgba(22, 163, 74, 0.08);
 }
 
+.seo-feature-text {
+    flex: 1;
+}
+
 .seo-feature-card h3 {
-    font-size: 0.92rem;
+    font-size: 0.95rem;
     color: #1e293b;
     font-weight: 700;
-    margin: 0 0 5px 0;
+    margin: 0 0 6px 0;
 }
 
 .seo-feature-card p {
-    font-size: 0.82rem;
+    font-size: 0.85rem;
     color: #64748b;
     margin: 0;
-    line-height: 1.45;
+    line-height: 1.5;
 }
 
 /* =========================================
