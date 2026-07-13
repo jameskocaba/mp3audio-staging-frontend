@@ -351,6 +351,7 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 // Wake up/spin up server if inactive before requesting magic link
                 let isServerActive = false;
+                let pingAttempts = 0;
                 const startTime = Date.now();
                 const maxWaitMs = 120000; // Wait up to 120 seconds (2 minutes)
                 const pingIntervalMs = 3000; // Ping every 3 seconds
@@ -367,6 +368,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     // Ping backend health endpoint every 3 seconds
                     if (now - lastPingTime >= pingIntervalMs) {
                         lastPingTime = now;
+                        pingAttempts++;
                         try {
                             const controller = new AbortController();
                             const timeoutId = setTimeout(() => controller.abort(), 2500); // 2.5s timeout for ping
@@ -389,9 +391,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     console.warn("Pre-flight magic link wake up ping timed out or failed, continuing...");
                 }
 
-                // If the server had to spin up, wait 60 seconds to ensure it is completely ready
-                const spinUpDuration = Math.round((Date.now() - startTime) / 1000);
-                if (spinUpDuration >= 4) {
+                // If the server was inactive and had to spin up (more than 1 ping attempt required),
+                // wait 60 seconds to ensure the database and background migrations are completely ready.
+                if (pingAttempts > 1) {
                     const delaySeconds = 60;
                     for (let elapsed = 0; elapsed <= delaySeconds; elapsed++) {
                         if (authMessage) {
