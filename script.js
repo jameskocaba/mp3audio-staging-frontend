@@ -351,32 +351,52 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 // Wake up/spin up server if inactive before requesting magic link
                 let isServerActive = false;
-                try {
-                    const controller = new AbortController();
-                    const timeoutId = setTimeout(() => controller.abort(), 2000); // 2s quick check
-                    const res = await fetch(`${BACKEND_URL}/health?check_db=true`, { signal: controller.signal });
-                    clearTimeout(timeoutId);
-                    if (res.ok) {
-                        isServerActive = true;
+                const startTime = Date.now();
+                const maxWaitMs = 120000; // Wait up to 120 seconds (2 minutes)
+                const pingIntervalMs = 3000; // Ping every 3 seconds
+                let lastPingTime = 0;
+
+                while (Date.now() - startTime < maxWaitMs) {
+                    const now = Date.now();
+                    const elapsed = Math.round((now - startTime) / 1000);
+
+                    if (authMessage) {
+                        authMessage.textContent = `Spinning up server, please wait (may take up to 90s) (${elapsed}s)...`;
                     }
-                } catch (e) {
-                    console.log("Server is currently inactive, initiating wake-up process...");
+
+                    // Ping backend health endpoint every 3 seconds
+                    if (now - lastPingTime >= pingIntervalMs) {
+                        lastPingTime = now;
+                        try {
+                            const controller = new AbortController();
+                            const timeoutId = setTimeout(() => controller.abort(), 2500); // 2.5s timeout for ping
+                            const res = await fetch(`${BACKEND_URL}/health?check_db=true`, { signal: controller.signal });
+                            clearTimeout(timeoutId);
+                            if (res.ok) {
+                                isServerActive = true;
+                                break;
+                            }
+                        } catch (err) {
+                            console.log("Server spin up in progress...");
+                        }
+                    }
+
+                    // Sleep for 1 second to update the counter smoothly
+                    await new Promise(resolve => setTimeout(resolve, 1000));
                 }
 
                 if (!isServerActive) {
-                    // Server is inactive/sleeping. Start a 60-second wake-up/countdown sequence.
-                    const wakeUpSeconds = 60;
-                    for (let elapsed = 0; elapsed <= wakeUpSeconds; elapsed++) {
+                    console.warn("Pre-flight magic link wake up ping timed out or failed, continuing...");
+                }
+
+                // If the server had to spin up, wait 60 seconds to ensure it is completely ready
+                const spinUpDuration = Math.round((Date.now() - startTime) / 1000);
+                if (spinUpDuration >= 4) {
+                    const delaySeconds = 60;
+                    for (let elapsed = 0; elapsed <= delaySeconds; elapsed++) {
                         if (authMessage) {
-                            authMessage.textContent = `Spinning up server, please wait (may take up to 60s) (${elapsed}s)...`;
+                            authMessage.textContent = `Server active! Initializing database, please wait (${elapsed}s / ${delaySeconds}s)...`;
                         }
-                        
-                        // Ping the health endpoint every 5 seconds to wake/keep waking the server
-                        if (elapsed % 5 === 0) {
-                            fetch(`${BACKEND_URL}/health?check_db=true`).catch(() => {});
-                        }
-                        
-                        // Sleep for 1 second
                         await new Promise(resolve => setTimeout(resolve, 1000));
                     }
                 }
