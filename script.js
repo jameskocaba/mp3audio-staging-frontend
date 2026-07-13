@@ -349,56 +349,36 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             try {
-                // Wake up/spin up server if inactive before requesting magic link
+                // Check if server is active with a quick ping
                 let isServerActive = false;
-                let pingAttempts = 0;
-                const startTime = Date.now();
-                const maxWaitMs = 120000; // Wait up to 120 seconds (2 minutes)
-                const pingIntervalMs = 3000; // Ping every 3 seconds
-                let lastPingTime = 0;
-
-                while (Date.now() - startTime < maxWaitMs) {
-                    const now = Date.now();
-                    const elapsed = Math.round((now - startTime) / 1000);
-
-                    if (authMessage) {
-                        authMessage.textContent = `Spinning up server, please wait (may take up to 90s) (${elapsed}s)...`;
+                try {
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), 2000); // 2s quick check
+                    const res = await fetch(`${BACKEND_URL}/health?check_db=true`, { signal: controller.signal });
+                    clearTimeout(timeoutId);
+                    if (res.ok) {
+                        isServerActive = true;
                     }
-
-                    // Ping backend health endpoint every 3 seconds
-                    if (now - lastPingTime >= pingIntervalMs) {
-                        lastPingTime = now;
-                        pingAttempts++;
-                        try {
-                            const controller = new AbortController();
-                            const timeoutId = setTimeout(() => controller.abort(), 2500); // 2.5s timeout for ping
-                            const res = await fetch(`${BACKEND_URL}/health?check_db=true`, { signal: controller.signal });
-                            clearTimeout(timeoutId);
-                            if (res.ok) {
-                                isServerActive = true;
-                                break;
-                            }
-                        } catch (err) {
-                            console.log("Server spin up in progress...");
-                        }
-                    }
-
-                    // Sleep for 1 second to update the counter smoothly
-                    await new Promise(resolve => setTimeout(resolve, 1000));
+                } catch (e) {
+                    console.log("Server is inactive, initiating wake-up...");
                 }
 
                 if (!isServerActive) {
-                    console.warn("Pre-flight magic link wake up ping timed out or failed, continuing...");
-                }
-
-                // If the server was inactive and had to spin up (more than 1 ping attempt required),
-                // wait 60 seconds to ensure the database and background migrations are completely ready.
-                if (pingAttempts > 1) {
+                    // Trigger Render wake-up by sending a background fetch (non-blocking)
+                    fetch(`${BACKEND_URL}/health?check_db=true`).catch(() => {});
+                    
+                    // Wait exactly 60 seconds for the server to spin up and database to initialize
                     const delaySeconds = 60;
                     for (let elapsed = 0; elapsed <= delaySeconds; elapsed++) {
                         if (authMessage) {
-                            authMessage.textContent = `Server active! Initializing database, please wait (${elapsed}s / ${delaySeconds}s)...`;
+                            authMessage.textContent = `Spinning up server, please wait (may take up to 60s) (${elapsed}s)...`;
                         }
+                        
+                        // Keep pinging every 5 seconds to ensure Render keeps spawning/booting
+                        if (elapsed > 0 && elapsed % 5 === 0) {
+                            fetch(`${BACKEND_URL}/health?check_db=true`).catch(() => {});
+                        }
+                        
                         await new Promise(resolve => setTimeout(resolve, 1000));
                     }
                 }
