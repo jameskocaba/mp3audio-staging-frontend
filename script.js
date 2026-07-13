@@ -47,6 +47,33 @@ document.addEventListener('DOMContentLoaded', () => {
     // Point this to your PRODUCTION backend URL
     // Ensure this EXACTLY matches your Render PROD web service URL
     const BACKEND_URL = 'https://mp3audio-staging.onrender.com';
+
+    // Intercept fetch calls to inject the Authorization header for cookie-blocked environments (e.g. mobile Safari)
+    const originalFetch = window.fetch;
+    window.fetch = function (input, init = {}) {
+        let url = typeof input === 'string' ? input : (input instanceof Request ? input.url : '');
+        if (url && url.startsWith(BACKEND_URL)) {
+            if (typeof input === 'string') {
+                init = init || {};
+                init.headers = init.headers || {};
+                const token = localStorage.getItem('session_token');
+                if (token) {
+                    if (init.headers instanceof Headers) {
+                        if (!init.headers.has('Authorization')) {
+                            init.headers.set('Authorization', `Bearer ${token}`);
+                        }
+                    } else {
+                        if (!init.headers['Authorization']) {
+                            init.headers['Authorization'] = `Bearer ${token}`;
+                        }
+                    }
+                }
+                init.credentials = 'include';
+            }
+        }
+        return originalFetch(input, init);
+    };
+
     let currentSessionId = null;
     let pollTimeout = null;
     let isGuestUser = true;
@@ -268,6 +295,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const response = await fetch(`${BACKEND_URL}/auth/me`, { credentials: 'include' });
             const data = await response.json();
 
+            if (data.token) {
+                localStorage.setItem('session_token', data.token);
+            }
 
             if (paidCreditsDisplay) paidCreditsDisplay.textContent = data.paid_track_credits;
 
@@ -319,6 +349,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (data.success) {
                     if (urlMessage) {
                         urlMessage.classList.add('hidden');
+                    }
+                    if (data.token) {
+                        localStorage.setItem('session_token', data.token);
                     }
                     showToast('Login successful! Welcome back.', 'success');
                     checkAuth();
@@ -422,6 +455,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (logoutBtn) {
         logoutBtn.addEventListener('click', async (e) => {
             if (e && e.preventDefault) e.preventDefault();
+            localStorage.removeItem('session_token');
             await fetch(`${BACKEND_URL}/auth/logout`, { method: 'POST', credentials: 'include' });
             window.location.reload();
         });
