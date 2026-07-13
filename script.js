@@ -370,7 +370,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         try {
                             const controller = new AbortController();
                             const timeoutId = setTimeout(() => controller.abort(), 2500); // 2.5s timeout for ping
-                            const res = await fetch(`${BACKEND_URL}/health`, { signal: controller.signal });
+                            const res = await fetch(`${BACKEND_URL}/health?check_db=true`, { signal: controller.signal });
                             clearTimeout(timeoutId);
                             if (res.ok) {
                                 isServerActive = true;
