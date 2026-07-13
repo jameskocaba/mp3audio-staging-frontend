@@ -361,7 +361,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     const elapsed = Math.round((now - startTime) / 1000);
 
                     if (authMessage) {
-                        authMessage.textContent = `Spinning up server, please wait (${elapsed}s)...`;
+                        authMessage.textContent = `Spinning up server, please wait (may take up to 90s) (${elapsed}s)...`;
                     }
 
                     // Ping backend health endpoint every 3 seconds
