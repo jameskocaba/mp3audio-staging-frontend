@@ -352,7 +352,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Wake up/spin up server if inactive before requesting magic link
                 let isServerActive = false;
                 const startTime = Date.now();
-                const maxWaitMs = 60000; // wait up to 60 seconds
+                const maxWaitMs = 90000; // wait up to 90 seconds
                 const pingIntervalMs = 3000; // ping every 3 seconds
                 let lastPingTime = 0;
 
