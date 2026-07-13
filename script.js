@@ -394,13 +394,53 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
                 console.log("Attempting to send magic link to:", `${BACKEND_URL}/auth/login`);
-                const response = await fetch(`${BACKEND_URL}/auth/login`, {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email })
-                });
+                let response = null;
+                let lastError = null;
+                const attempts = 3;
+                
+                for (let i = 0; i < attempts; i++) {
+                    try {
+                        const controller = new AbortController();
+                        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout for each attempt
+                        const attemptRes = await fetch(`${BACKEND_URL}/auth/login`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ email }),
+                            signal: controller.signal
+                        });
+                        clearTimeout(timeoutId);
+                        
+                        if (attemptRes.ok) {
+                            response = attemptRes;
+                            break;
+                        }
+                        
+                        // If it's a transient 5xx error, we retry. Otherwise we stop retrying.
+                        if (attemptRes.status >= 500 && attemptRes.status <= 504) {
+                            console.warn(`Transient server error ${attemptRes.status} on login attempt ${i + 1}, retrying...`);
+                            response = attemptRes; // hold onto last response in case we run out of retries
+                            if (i < attempts - 1) {
+                                await new Promise(resolve => setTimeout(resolve, 1500));
+                                continue;
+                            }
+                        } else {
+                            response = attemptRes;
+                            break;
+                        }
+                    } catch (err) {
+                        console.error(`Login attempt ${i + 1} failed:`, err);
+                        lastError = err;
+                        if (i < attempts - 1) {
+                            await new Promise(resolve => setTimeout(resolve, 1500));
+                        }
+                    }
+                }
 
-                console.log("Backend Response Status:", response.status);
+                if (!response && lastError) {
+                    throw lastError;
+                }
 
-                if (response.ok) {
+                if (response && response.ok) {
                     if (authMessage) {
                         authMessage.textContent = '';
                     }
@@ -408,7 +448,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     sendLinkBtn.disabled = false;
                     sendLinkBtn.textContent = 'Send Link';
                 } else {
-                    const errorData = await response.json().catch(() => ({}));
+                    if (authMessage) {
+                        authMessage.textContent = '';
+                    }
+                    const errorData = response ? await response.json().catch(() => ({})) : {};
                     console.error("Backend Error Data:", errorData);
                     showToast(errorData.error || 'Failed to send link.', 'error');
                     sendLinkBtn.disabled = false;
@@ -416,7 +459,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             } catch (error) {
                 console.error("Fetch/Network Error:", error);
-                showToast('Network error. Try again.', 'error');
+                if (authMessage) {
+                    authMessage.textContent = '';
+                }
+                showToast('Network error or server unavailable. Try again.', 'error');
                 sendLinkBtn.disabled = false;
                 sendLinkBtn.textContent = 'Send Link';
             }
