@@ -354,7 +354,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 try {
                     const controller = new AbortController();
                     const timeoutId = setTimeout(() => controller.abort(), 2000); // 2s quick check
-                    const res = await fetch(`${BACKEND_URL}/health?check_db=true`, { signal: controller.signal });
+                    const res = await fetch(`${BACKEND_URL}/health`, { signal: controller.signal });
                     clearTimeout(timeoutId);
                     if (res.ok) {
                         isServerActive = true;
@@ -364,8 +364,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
                 if (!isServerActive) {
-                    // Trigger Render wake-up by sending a background fetch (non-blocking)
-                    fetch(`${BACKEND_URL}/health?check_db=true`).catch(() => {});
+                    // Trigger Render wake-up by sending a single non-blocking ping
+                    fetch(`${BACKEND_URL}/health`).catch(() => {});
                     
                     // Wait exactly 60 seconds for the server to spin up and database to initialize
                     const delaySeconds = 60;
@@ -373,12 +373,6 @@ document.addEventListener('DOMContentLoaded', () => {
                         if (authMessage) {
                             authMessage.textContent = `Spinning up server, please wait (may take up to 60s) (${elapsed}s)...`;
                         }
-                        
-                        // Keep pinging every 5 seconds to ensure Render keeps spawning/booting
-                        if (elapsed > 0 && elapsed % 5 === 0) {
-                            fetch(`${BACKEND_URL}/health?check_db=true`).catch(() => {});
-                        }
-                        
                         await new Promise(resolve => setTimeout(resolve, 1000));
                     }
                 }
@@ -388,53 +382,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
                 console.log("Attempting to send magic link to:", `${BACKEND_URL}/auth/login`);
-                let response = null;
-                let lastError = null;
-                const attempts = 3;
-                
-                for (let i = 0; i < attempts; i++) {
-                    try {
-                        const controller = new AbortController();
-                        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout for each attempt
-                        const attemptRes = await fetch(`${BACKEND_URL}/auth/login`, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ email }),
-                            signal: controller.signal
-                        });
-                        clearTimeout(timeoutId);
-                        
-                        if (attemptRes.ok) {
-                            response = attemptRes;
-                            break;
-                        }
-                        
-                        // If it's a transient 5xx error, we retry. Otherwise we stop retrying.
-                        if (attemptRes.status >= 500 && attemptRes.status <= 504) {
-                            console.warn(`Transient server error ${attemptRes.status} on login attempt ${i + 1}, retrying...`);
-                            response = attemptRes; // hold onto last response in case we run out of retries
-                            if (i < attempts - 1) {
-                                await new Promise(resolve => setTimeout(resolve, 1500));
-                                continue;
-                            }
-                        } else {
-                            response = attemptRes;
-                            break;
-                        }
-                    } catch (err) {
-                        console.error(`Login attempt ${i + 1} failed:`, err);
-                        lastError = err;
-                        if (i < attempts - 1) {
-                            await new Promise(resolve => setTimeout(resolve, 1500));
-                        }
-                    }
-                }
+                const response = await fetch(`${BACKEND_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email })
+                });
 
-                if (!response && lastError) {
-                    throw lastError;
-                }
+                console.log("Backend Response Status:", response.status);
 
-                if (response && response.ok) {
+                if (response.ok) {
                     if (authMessage) {
                         authMessage.textContent = '';
                     }
@@ -445,7 +401,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (authMessage) {
                         authMessage.textContent = '';
                     }
-                    const errorData = response ? await response.json().catch(() => ({})) : {};
+                    const errorData = await response.json().catch(() => ({}));
                     console.error("Backend Error Data:", errorData);
                     showToast(errorData.error || 'Failed to send link.', 'error');
                     sendLinkBtn.disabled = false;
