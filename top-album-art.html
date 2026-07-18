@@ -349,10 +349,12 @@
                                         <p class="track-artist truncate-text" title="${item.desc}">${item.desc || 'Various Artists'}</p>
                                         <span class="conversion-count">${item.count} conversions</span>
                                     </div>
-                                    <button class="sc-share-button" onclick="copyLink(this, '${item.link}')" style="flex-shrink: 0; background: linear-gradient(90deg, #f59e0b 0%, #ea580c 100%); color:white; border:none;">
-                                        <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
-                                        <span>Copy Playlist</span>
-                                    </button>
+                                    <div class="actions-wrapper" style="display: flex; align-items: center; gap: 12px; flex-shrink: 0;">
+                                        <a href="index.html?url=${encodeURIComponent(item.link)}" class="sc-share-button" style="text-decoration: none; display: inline-flex; align-items: center; gap: 6px; background: linear-gradient(90deg, #f59e0b 0%, #ea580c 100%); color: white; border: none;">
+                                            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+                                            <span>Add Album Art</span>
+                                        </a>
+                                    </div>
                                 </div>
                             </div>
                         `;
@@ -395,10 +397,12 @@
                                             <p class="track-title truncate-text" style="font-size:0.95rem;" title="${item.title}">${item.title}</p>
                                             <p class="track-artist truncate-text" style="font-size:0.85rem;" title="${item.desc}">${item.desc || 'Various Artists'}</p>
                                         </div>
-                                        <button class="sc-share-button text-btn" onclick="copyLink(this, '${item.link}')" style="flex-shrink: 0; margin-left:auto; display:flex; align-items:center; gap:6px; color:#2980b9;">
-                                            <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
-                                            <span>Copy Link</span>
-                                        </button>
+                                        <div class="actions-wrapper" style="display: flex; align-items: center; gap: 12px; margin-left: auto; flex-shrink: 0;">
+                                            <a href="index.html?url=${encodeURIComponent(item.link)}" class="sc-share-button text-btn" style="display: flex; align-items: center; gap: 4px; color: #2980b9; text-decoration: none; font-weight: 600; font-size: 0.85rem;">
+                                                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+                                                <span>Add Album Art</span>
+                                            </a>
+                                        </div>
                                     </div>
                                 </div>
                             </article>

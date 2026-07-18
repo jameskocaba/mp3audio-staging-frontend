@@ -113,6 +113,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const urlParams = new URLSearchParams(window.location.search);
 
+    // --- POPULATE URL FROM QUERY PARAMETER ---
+    const queryUrl = urlParams.get('url');
+    if (queryUrl) {
+        if (urlInput) {
+            urlInput.value = queryUrl;
+            sessionStorage.setItem('savedUrl', queryUrl);
+        }
+        if (autoAddAlbumArtInput) {
+            autoAddAlbumArtInput.checked = true;
+        }
+    }
+
     // --- STRIPE CHECKOUT REDIRECT HANDLER ---
     const successParam = urlParams.get('success');
     const canceledParam = urlParams.get('canceled');
