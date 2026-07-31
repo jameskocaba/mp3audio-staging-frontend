@@ -104,7 +104,31 @@ def generate_html(supported_platforms):
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Supported Platforms | MP3aud.io</title>
-    <meta name="description" content="A list of the {platform_count} platforms currently supported by MP3aud.io for audio extraction.">
+    <meta name="title" content="Supported Platforms | MP3aud.io">
+    <meta name="description" content="Explore the {platform_count} platforms supported by MP3aud.io, the ultimate web-based music album art tagger, downloader, and audio enhancer for high-quality audio extraction and metadata editing.">
+    <meta name="keywords" content="web-based music album art tagger downloader and audio enhancer, web-based music album art tagger, album art downloader, audio enhancer, supported audio platforms, soundcloud downloader, bandcamp metadata tagger, mp3 tag editor">
+    <meta name="author" content="MP3aud.io">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://mp3aud.io/supported-sites.html">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://mp3aud.io/supported-sites.html">
+    <meta property="og:site_name" content="MP3aud.io">
+    <meta property="og:title" content="Supported Platforms | MP3aud.io">
+    <meta property="og:description" content="Explore the platforms supported by MP3aud.io, the ultimate web-based music album art tagger, downloader, and audio enhancer for high-quality audio extraction and metadata editing.">
+    <meta property="og:image" content="https://mp3aud.io/og-image.jpg">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="Supported Platforms - MP3aud.io">
+    <meta property="og:locale" content="en_US">
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="https://mp3aud.io/supported-sites.html">
+    <meta name="twitter:title" content="Supported Platforms | MP3aud.io">
+    <meta name="twitter:description" content="Explore the platforms supported by MP3aud.io, the ultimate web-based music album art tagger, downloader, and audio enhancer for high-quality audio extraction and metadata editing.">
+    <meta name="twitter:image" content="https://mp3aud.io/og-image.jpg">
     <link rel="icon" type="image/png" href="favicon.png">
     <link rel="apple-touch-icon" href="favicon.png">
     <meta name="theme-color" content="#FF5500">
