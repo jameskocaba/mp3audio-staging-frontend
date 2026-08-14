@@ -355,6 +355,141 @@
                 </div>
             </div>
 
+            <!-- =========================================
+                 INTERACTIVE BEFORE / AFTER AUDIO PREVIEWER
+                 ========================================= -->
+            <section class="audio-preview-section" id="audioEnhancerPreviewer" aria-label="Interactive Audio Enhancer Demo">
+                <div class="preview-badge">
+                    <span class="preview-badge-pulse"></span>
+                    <span>LIVE INTERACTIVE PREVIEW</span>
+                </div>
+                
+                <h2 class="preview-title">Hear the AI Audio Enhancement Difference</h2>
+                <p class="preview-subtitle">
+                    Toggle in real-time between raw, muffled low-bitrate audio and our studio-grade 320kbps AI-restored output.
+                    Hear the restored high frequencies, punchy low-end, and expansive dynamic clarity.
+                </p>
+
+                <div class="preview-player-card">
+                    <!-- Preset Selection Tabs -->
+                    <div class="preset-tabs" role="tablist" aria-label="Audio sample presets">
+                        <button class="preset-tab active" data-preset="vocals" role="tab" aria-selected="true">
+                            <span class="tab-icon">🎙️</span>
+                            <span class="tab-label">Vocals &amp; Speech</span>
+                            <span class="tab-sub">De-muffler &amp; Air</span>
+                        </button>
+                        <button class="preset-tab" data-preset="hiphop" role="tab" aria-selected="false">
+                            <span class="tab-icon">🎧</span>
+                            <span class="tab-label">Beats &amp; Bass</span>
+                            <span class="tab-sub">Punchy Sub &amp; 320k Highs</span>
+                        </button>
+                        <button class="preset-tab" data-preset="acoustic" role="tab" aria-selected="false">
+                            <span class="tab-icon">🎸</span>
+                            <span class="tab-label">Acoustic &amp; Strings</span>
+                            <span class="tab-sub">Resonance &amp; Dynamic Range</span>
+                        </button>
+                        <label class="preset-tab custom-tab" title="Test with your own MP3 or audio file">
+                            <span class="tab-icon">📁</span>
+                            <span class="tab-label">Test Your File</span>
+                            <span class="tab-sub">Instant Live Demo</span>
+                            <input type="file" id="previewCustomAudioInput" accept="audio/*" style="display: none;">
+                        </label>
+                    </div>
+
+                    <!-- Visualizer Canvas & Mode Header -->
+                    <div class="visualizer-container">
+                        <div class="visualizer-overlay-info">
+                            <div class="mode-indicator" id="previewModeIndicator">
+                                <span class="indicator-dot enhanced"></span>
+                                <span class="indicator-text" id="indicatorText">AI ENHANCED (320kbps HD)</span>
+                            </div>
+                            <div class="spectrum-badge" id="spectrumBadge">
+                                Full Spectrum 20Hz – 20kHz
+                            </div>
+                        </div>
+                        <canvas id="enhancerVisualizerCanvas" width="800" height="180"></canvas>
+                        <div class="waveform-progress-bar" id="waveformProgressContainer">
+                            <div class="waveform-progress-fill" id="waveformProgressFill"></div>
+                        </div>
+                    </div>
+
+                    <!-- Main A/B Switcher Deck -->
+                    <div class="ab-control-deck">
+                        <div class="ab-switch-wrapper">
+                            <button class="ab-btn" id="btnBefore" type="button">
+                                <span class="ab-btn-tag">BEFORE</span>
+                                <span class="ab-btn-name">Original Audio</span>
+                                <span class="ab-btn-spec">96–128 kbps • Muffled</span>
+                            </button>
+
+                            <div class="ab-slider-container">
+                                <div class="slider-labels">
+                                    <span>Original (0%)</span>
+                                    <span class="slider-hint">Drag to crossfade</span>
+                                    <span>Enhanced (100%)</span>
+                                </div>
+                                <input type="range" id="abCrossfadeSlider" min="0" max="100" value="100" aria-label="Crossfade between original and enhanced audio">
+                            </div>
+
+                            <button class="ab-btn active" id="btnAfter" type="button">
+                                <span class="ab-btn-tag">AFTER</span>
+                                <span class="ab-btn-name">AI Enhanced</span>
+                                <span class="ab-btn-spec">320 kbps • Studio Clarity</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Player Controls Row -->
+                    <div class="preview-transport-row">
+                        <button class="preview-play-btn" id="previewPlayBtn" aria-label="Play or pause audio preview">
+                            <svg id="playIcon" viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
+                                <polygon points="6 3 20 12 6 21 6 3"></polygon>
+                            </svg>
+                            <svg id="pauseIcon" class="hidden" viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
+                                <rect x="6" y="4" width="4" height="16"></rect>
+                                <rect x="14" y="4" width="4" height="16"></rect>
+                            </svg>
+                        </button>
+
+                        <div class="preview-time-display">
+                            <span id="previewCurrentTime">0:00</span> / <span id="previewTotalTime">0:15</span>
+                        </div>
+
+                        <div class="preview-enhancement-metrics">
+                            <span class="metric-pill">
+                                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                                </svg>
+                                Clarity +4.5dB
+                            </span>
+                            <span class="metric-pill">
+                                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                                    <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                                </svg>
+                                320k Highs
+                            </span>
+                            <span class="metric-pill">
+                                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                                </svg>
+                                Studio -14 LUFS
+                            </span>
+                        </div>
+
+                        <div class="preview-cta-wrapper">
+                            <button id="previewTryOnFilesBtn" class="preview-cta-btn">
+                                <span>Enhance My Tracks</span>
+                                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <line x1="12" y1="19" x2="12" y2="5"></line>
+                                    <polyline points="5 12 12 5 19 12"></polyline>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
 
             <section class="seo-features-section" aria-label="Features & Benefits">
                 <h2 class="seo-section-title">Why Choose MP3aud.io as Your Web-Based Album Art Tagger, Downloader & Audio Enhancer?</h2>
