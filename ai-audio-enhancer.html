@@ -243,12 +243,13 @@
                             <span class="tab-label">Acoustic &amp; Strings</span>
                             <span class="tab-sub">Resonance &amp; Dynamic Range</span>
                         </button>
-                        <label class="preset-tab custom-tab" title="Test with your own MP3 or audio file">
+                        <div class="preset-tab custom-tab" id="testFileTab" role="tab" aria-selected="false"
+                            title="Test with your own MP3 or audio file" tabindex="0">
                             <span class="tab-icon">📁</span>
-                            <span class="tab-label">Test Your File</span>
-                            <span class="tab-sub">Instant Live Demo</span>
-                            <input type="file" id="previewCustomAudioInput" accept="audio/*" style="display: none;">
-                        </label>
+                            <span class="tab-label" id="testFileTabLabel">Test Your File</span>
+                            <span class="tab-sub" id="testFileTabSub">Instant Live Demo</span>
+                            <input type="file" id="previewCustomAudioInput" accept="audio/*,.mp3,.wav,.flac,.aac,.ogg,.m4a,.wma,.opus" style="display: none;">
+                        </div>
                     </div>
 
                     <!-- Visualizer Canvas & Mode Header -->

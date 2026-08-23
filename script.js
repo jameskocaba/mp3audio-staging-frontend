@@ -1465,6 +1465,28 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         // Custom User File Upload
+        const customTabEl = document.querySelector('.custom-tab');
+        if (customTabEl && customAudioInput) {
+            customTabEl.addEventListener('click', () => {
+                if (activePreset === 'custom' && customBuffer) {
+                    customAudioInput.value = '';
+                    customAudioInput.click();
+                } else if (customBuffer) {
+                    presetTabs.forEach(t => {
+                        t.classList.remove('active');
+                        t.setAttribute('aria-selected', 'false');
+                    });
+                    customTabEl.classList.add('active');
+                    customTabEl.setAttribute('aria-selected', 'true');
+                    activePreset = 'custom';
+                    playAudio(0);
+                } else {
+                    customAudioInput.value = '';
+                    customAudioInput.click();
+                }
+            });
+        }
+
         if (customAudioInput) {
             customAudioInput.addEventListener('change', async (e) => {
                 const file = e.target.files[0];
@@ -1480,8 +1502,11 @@ document.addEventListener('DOMContentLoaded', () => {
                         t.classList.remove('active');
                         t.setAttribute('aria-selected', 'false');
                     });
-                    const customTab = customAudioInput.closest('.custom-tab');
-                    if (customTab) customTab.classList.add('active');
+                    const customTab = customAudioInput.closest('.custom-tab') || customTabEl;
+                    if (customTab) {
+                        customTab.classList.add('active');
+                        customTab.setAttribute('aria-selected', 'true');
+                    }
 
                     playAudio(0);
                 } catch (err) {
