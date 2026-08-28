@@ -14,6 +14,35 @@ body {
     overflow-x: hidden;
 }
 
+body.home-page {
+    background-color: #f8fafc;
+    background-image: 
+        linear-gradient(180deg, rgba(248, 250, 252, 0.45) 0%, rgba(248, 250, 252, 0.78) 480px, #f8fafc 1050px),
+        url('images/superhero-beach-clean.jpg');
+    background-size: cover;
+    background-position: top center;
+    background-repeat: no-repeat;
+    background-attachment: scroll;
+}
+
+body.home-page .main-content {
+    background: transparent;
+}
+
+body.home-page .app-header {
+    background: rgba(255, 255, 255, 0.82);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(226, 232, 240, 0.7);
+}
+
+body.home-page .process-card,
+body.home-page .page-card,
+body.home-page .auth-box {
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+}
+
 .container {
     width: 100%;
     max-width: 100%;
