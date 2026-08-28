@@ -17,30 +17,303 @@ body {
 body.home-page {
     background-color: #f8fafc;
     background-image: 
-        linear-gradient(180deg, rgba(248, 250, 252, 0.45) 0%, rgba(248, 250, 252, 0.78) 480px, #f8fafc 1050px),
+        linear-gradient(180deg, rgba(248, 250, 252, 0) 0%, rgba(248, 250, 252, 0.05) 480px, rgba(248, 250, 252, 0.85) 680px, #f8fafc 750px),
         url('images/superhero-beach-clean.jpg');
-    background-size: cover;
+    background-size: 100% auto;
     background-position: top center;
     background-repeat: no-repeat;
     background-attachment: scroll;
 }
 
 body.home-page .main-content {
-    background: transparent;
+    background: transparent !important;
 }
 
 body.home-page .app-header {
-    background: rgba(255, 255, 255, 0.82);
+    background: rgba(255, 255, 255, 0.85);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    border-bottom: 1px solid rgba(226, 232, 240, 0.7);
+    border-bottom: 1px solid rgba(226, 232, 240, 0.8);
 }
 
 body.home-page .process-card,
 body.home-page .page-card,
 body.home-page .auth-box {
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    background: rgba(255, 255, 255, 0.94);
+    box-shadow: 0 15px 35px rgba(15, 23, 42, 0.08);
+}
+
+/* Compact Frosted Glass Centered Hero Drag and Drop Card */
+.hero-dropzone-wrapper {
+    width: 100%;
+    max-width: 600px;
+    margin: 15px auto clamp(220px, 26vw, 340px) auto;
+    display: flex;
+    justify-content: center;
+    box-sizing: border-box;
+}
+
+body.home-page .hero-dropzone-wrapper #conversionToolContainer {
+    width: 100%;
+    margin: 0;
+    padding: 14px 16px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.65) !important;
+    backdrop-filter: blur(12px) saturate(150%);
+    -webkit-backdrop-filter: blur(12px) saturate(150%);
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+}
+
+.hero-dropzone-wrapper .upload-container {
+    gap: 0;
+    margin-bottom: 0;
+}
+
+.hero-dropzone-wrapper .large-dropzone {
+    padding: 14px 12px;
+    border: 2px dashed rgba(59, 130, 246, 0.5);
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    transition: all 0.2s ease;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.hero-dropzone-wrapper .large-dropzone:hover {
+    border-color: #3b82f6;
+    background: rgba(255, 255, 255, 0.7);
+}
+
+.hero-dropzone-wrapper .large-dropzone svg {
+    width: 26px;
+    height: 26px;
+    margin-bottom: 2px;
+    color: #2563eb;
+}
+
+.hero-dropzone-wrapper .large-dropzone span {
+    font-size: 0.86rem;
+    font-weight: 600;
+    color: #1e293b;
+}
+
+/* Aligned Controls Row: Process button fills space between counter and reset */
+.hero-dropzone-wrapper .dropzone-controls-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 10px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.hero-dropzone-wrapper .file-counter {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin: 0;
+    flex-shrink: 0;
+}
+
+.hero-dropzone-wrapper .counter-badge {
+    padding: 6px 10px;
+    font-size: 0.74rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    border-radius: 6px;
+    line-height: 1;
+    background: rgba(255, 255, 255, 0.8);
+    color: #334155;
+    border: 1px solid rgba(226, 232, 240, 0.9);
+    white-space: nowrap;
+}
+
+.hero-dropzone-wrapper .counter-badge svg {
+    color: #3b82f6;
+}
+
+.hero-dropzone-wrapper .counter-badge.selected-badge {
+    background: #e0f2fe;
+    color: #0369a1;
+    border-color: #bae6fd;
+}
+
+.hero-dropzone-wrapper #convertBtn {
+    flex: 1;
+    margin: 0;
+    padding: 8px 14px;
+    font-size: 0.88rem;
+    font-weight: 700;
+    border-radius: 8px;
+    cursor: pointer;
+    background: #2ecc71;
+    color: white;
+    border: none;
+    box-shadow: 0 3px 10px rgba(46, 204, 113, 0.3);
+    transition: all 0.2s ease;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.hero-dropzone-wrapper #convertBtn:hover {
+    background: #27ae60;
+    transform: translateY(-1px);
+}
+
+.hero-dropzone-wrapper #resetBtn {
+    flex-shrink: 0;
+    margin: 0;
+    padding: 8px 12px;
+    font-size: 0.84rem;
+    font-weight: 600;
+    border-radius: 8px;
+    cursor: pointer;
+    background: rgba(255, 255, 255, 0.8);
+    color: #475569;
+    border: 1px solid rgba(203, 213, 225, 0.9);
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.hero-dropzone-wrapper #resetBtn:hover {
+    background: #ffffff;
+    color: #0f172a;
+}
+
+/* Aligned 3-Column Options Grid (Album Art, Bitrate, Lyrics) */
+.hero-dropzone-wrapper .options-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 6px;
+    margin-top: 10px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.hero-dropzone-wrapper .compact-toggle {
+    min-width: 0 !important;
+    max-width: 100%;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255, 255, 255, 0.7);
+    border: 1px solid rgba(226, 232, 240, 0.85);
+    padding: 6px 8px;
+    border-radius: 8px;
+    min-height: 42px;
+    box-sizing: border-box;
+    transition: all 0.2s ease;
+}
+
+.hero-dropzone-wrapper .compact-toggle:hover {
+    border-color: #cbd5e1;
+    background: rgba(255, 255, 255, 0.95);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.hero-dropzone-wrapper .compact-toggle .switch {
+    width: 32px;
+    height: 18px;
+    flex-shrink: 0;
+    margin: 0;
+}
+
+.hero-dropzone-wrapper .compact-toggle .switch .slider:before {
+    height: 12px;
+    width: 12px;
+    left: 3px;
+    bottom: 3px;
+}
+
+.hero-dropzone-wrapper .compact-toggle .switch input:checked + .slider:before {
+    transform: translateX(14px);
+}
+
+.hero-dropzone-wrapper .compact-toggle .toggle-text {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    min-width: 0;
+    flex: 1;
+    overflow: hidden;
+}
+
+.hero-dropzone-wrapper .compact-toggle .feature-title {
+    font-size: 0.74rem;
+    font-weight: 700;
+    color: #1e293b;
+    line-height: 1.15;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
+    width: 100%;
+}
+
+.hero-dropzone-wrapper .compact-toggle .premium-badge {
+    font-size: 0.58rem;
+    padding: 1px 5px;
+    margin-top: 2px;
+    display: inline-block;
+    align-self: center;
+    text-align: center;
+    border-radius: 4px;
+    line-height: 1.2;
+    margin-left: 0;
+}
+
+.hero-dropzone-wrapper #status {
+    margin-top: 8px;
+    font-size: 0.82rem;
+}
+
+/* Header & Subheader Below Hero */
+body.home-page .logo-container {
+    text-align: center;
+    max-width: 840px;
+    margin: 0 auto 50px auto;
+    padding: 0 16px;
+    box-sizing: border-box;
+}
+
+body.home-page .logo-container .main-headline {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+body.home-page .logo-container .main-subheadline {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+body.home-page .logo-container .header-note {
+    margin: 12px auto 0 auto;
+}
+
+/* Account & Credits Section Above FAQs */
+.account-credits-section {
+    width: 100%;
+    max-width: 820px;
+    margin: 60px auto 40px auto;
+    box-sizing: border-box;
+}
+
+.account-credits-section #rightSideColumn {
+    width: 100%;
 }
 
 .container {

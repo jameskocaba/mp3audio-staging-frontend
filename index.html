@@ -158,21 +158,9 @@
 
     <main class="main-content">
         <div class="content-container">
-            <header class="logo-container">
-                <h1 class="main-headline">Web-Based Music Album Art Tagger, Downloader & Audio Enhancer</h1>
-                <h2 class="main-subheadline">
-                    The ultimate web-based music album art tagger, downloader, and audio enhancer. Automatically fetch and embed high-resolution
-                    album art, edit ID3 metadata, upscale audio quality, and transcribe lyrics directly in your browser with no software required.
-                </h2>
-                <p class="subtitle" style="font-size: 1.05rem; margin-top: 5px; color: #475569;">
-                    Conversions cost 1 credit per track.
-                    Audio enhancement and lyrics are optional upgrades that require additional credits.
-                </p>
-            </header>
-
             <div id="urlMessage" class="hidden"></div>
 
-            <div class="workspace-layout">
+            <div class="hero-dropzone-wrapper">
                 <section id="conversionToolContainer" class="process-card" aria-label="Audio processing tool"
                     style="margin-top: 10px;">
 
@@ -191,60 +179,63 @@
                             <span id="fileInputText" style="pointer-events: none; font-weight: 500;">Click to select files,
                                 or drag & drop here...</span>
                         </label>
-                        <div class="action-buttons">
+                        <div class="dropzone-controls-row">
+                            <div id="fileCounter" class="file-counter">
+                                <div class="counter-badge global-badge">
+                                    <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor"
+                                        stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                        <line x1="18" y1="20" x2="18" y2="10"></line>
+                                        <line x1="12" y1="20" x2="12" y2="4"></line>
+                                        <line x1="6" y1="20" x2="6" y2="14"></line>
+                                    </svg>
+                                    <span><strong id="globalCountVal">18,450</strong> Processed</span>
+                                </div>
+                                <div id="selectedTracksBadge" class="counter-badge selected-badge hidden">
+                                    <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor"
+                                        stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M9 18V5l12-2v13"></path>
+                                        <circle cx="6" cy="18" r="3"></circle>
+                                        <circle cx="18" cy="16" r="3"></circle>
+                                    </svg>
+                                    <span id="fileCountVal">0 Loaded</span>
+                                </div>
+                            </div>
                             <button id="convertBtn" aria-label="Process files">Process</button>
                             <button id="resetBtn" aria-label="Reset form">Reset</button>
                         </div>
                     </div>
 
-                    <div class="options-row" style="flex-wrap: wrap; justify-content: center; gap: 20px; margin-top: 20px;">
-                        <div class="inline-ai-toggle">
+                    <div class="options-grid">
+                        <div class="inline-ai-toggle compact-toggle">
                             <label class="switch" aria-label="Add Album Art & Tags">
                                 <input type="checkbox" id="autoAddAlbumArt" name="autoAddAlbumArt" checked>
                                 <span class="slider round"></span>
                             </label>
-                            <div class="toggle-text" style="flex: 1;">
-                                <span class="feature-title"
-                                    style="font-size: 0.90rem; font-weight: 700; color: #1e293b; display: block; white-space: nowrap;">Add
-                                    Album Art & Tags</span>
-                                <div
-                                    style="display: flex; align-items: center; justify-content: space-between; margin-top: 2px;">
-                                    <span class="premium-badge">+1 CREDIT/TRACK</span>
-                                </div>
+                            <div class="toggle-text">
+                                <span class="feature-title">Album Art &amp; Tags</span>
+                                <span class="premium-badge free-badge">Free (1-5)</span>
                             </div>
                         </div>
-                    </div>
 
-                    <div class="options-row" style="flex-wrap: wrap; justify-content: center; gap: 20px; margin-top: 15px;">
-                        <div class="inline-ai-toggle">
+                        <div class="inline-ai-toggle compact-toggle">
                             <label class="switch" aria-label="Increase Bitrate to 320k">
                                 <input type="checkbox" id="increaseQuality" name="increaseQuality">
                                 <span class="slider round"></span>
                             </label>
-                            <div class="toggle-text" style="flex: 1;">
-                                <span class="feature-title"
-                                    style="font-size: 0.90rem; font-weight: 700; color: #1e293b; display: block; white-space: nowrap;">Increase
-                                    Bitrate (320k)</span>
-                                <div
-                                    style="display: flex; align-items: center; justify-content: space-between; margin-top: 2px;">
-                                    <span class="premium-badge">+1 CREDIT/TRACK</span>
-                                </div>
+                            <div class="toggle-text">
+                                <span class="feature-title">320k Bitrate</span>
+                                <span class="premium-badge">1 Credit</span>
                             </div>
                         </div>
 
-                        <div class="inline-ai-toggle">
+                        <div class="inline-ai-toggle compact-toggle">
                             <label class="switch" aria-label="Transcribe Lyrics">
                                 <input type="checkbox" id="attachLyrics" name="attachLyrics">
                                 <span class="slider round"></span>
                             </label>
-                            <div class="toggle-text" style="flex: 1;">
-                                <span class="feature-title"
-                                    style="font-size: 0.90rem; font-weight: 700; color: #1e293b; display: block; white-space: nowrap;">Attach
-                                    Lyrics</span>
-                                <div
-                                    style="display: flex; align-items: center; justify-content: space-between; margin-top: 2px;">
-                                    <span class="premium-badge">+10 CREDITS/TRACK</span>
-                                </div>
+                            <div class="toggle-text">
+                                <span class="feature-title">Attach Lyrics</span>
+                                <span class="premium-badge">10 Credits</span>
                             </div>
                         </div>
                     </div>
@@ -273,45 +264,19 @@
                         <ul id="downloadList"></ul>
                     </div>
                 </section>
-
-                <div id="loginFormContainer" class="auth-box"
-                    style="border: 2px solid #fde68a; background: #fffbeb; box-shadow: 0 8px 20px rgba(245, 158, 11, 0.15); border-radius: 12px; padding: 25px; box-sizing: border-box;">
-                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
-                        <svg viewBox="0 0 24 24" width="24" height="24" stroke="#d97706" stroke-width="2" fill="none"
-                            stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
-                        </svg>
-                        <h3 style="margin: 0; color: #92400e; font-size: 1.15rem; font-weight: 800;">Log In & Buy Credits
-                        </h3>
-                    </div>
-                    <p style="font-size: 0.9rem; color: #92400e; margin-bottom: 10px; line-height: 1.5;"><strong>Convert your music collections with Pay-As-You-Go credits.</strong> Enter your email below to receive a secure login link. Once inside, you can purchase track credits:</p>
-                    <ul
-                        style="font-size: 0.9rem; color: #92400e; margin-bottom: 18px; line-height: 1.5; padding-left: 20px;">
-                        <li style="margin-bottom: 5px;"><strong>Pay As You Go ($2.00):</strong> 350 Track Credits, no
-                            expiration.</li>
-                    </ul>
-                    <div class="unified-search-bar" style="margin-bottom: 5px; border-color: #fcd34d;">
-                        <input type="email" id="loginEmail" placeholder="you@example.com" autocomplete="email"
-                            style="background: white;">
-                        <button id="sendLinkBtn" style="background: linear-gradient(90deg, #f59e0b 0%, #ea580c 100%);">Send Link</button>
-                    </div>
-                    <div id="authMessage"
-                        style="font-size: 0.85rem; font-weight: bold; text-align: center; margin-top: 10px;"></div>
-                </div>
-
-                <!-- Relocated Pricing Tiers in Main Workspace -->
-                <div id="workspacePricingContainer" class="hidden">
-                    <div class="workspace-tier-card pay-as-you-go-card" style="margin: 0 auto; max-width: 320px; width: 100%;">
-                        <h4 style="margin: 0 0 10px 0; color: #334155; font-size: 1.15rem; font-weight: 800;">Pay As You Go</h4>
-                        <div style="font-size: 1.8rem; font-weight: bold; color: #0f172a; margin-bottom: 15px;">$2.00</div>
-                        <p style="font-size: 0.9rem; color: #64748b; margin-bottom: 20px; line-height: 1.6; flex-grow: 1;">
-                            350 Track Credits<br>No Expiration<br>Priority Queue
-                        </p>
-                        <button id="buyCreditsBtn" class="premium-btn hidden"
-                            style="width: 100%; padding: 12px; font-size: 0.95rem; font-weight: bold;">Buy Credits</button>
-                    </div>
-                </div>
             </div>
+
+            <header class="logo-container">
+                <h1 class="main-headline">Web-Based Music Album Art Tagger, Downloader & Audio Enhancer</h1>
+                <h2 class="main-subheadline">
+                    The ultimate web-based music album art tagger, downloader, and audio enhancer. Automatically fetch and embed high-resolution
+                    album art, edit ID3 metadata, upscale audio quality, and transcribe lyrics directly in your browser with no software required.
+                </h2>
+                <p class="subtitle" style="font-size: 1.05rem; margin-top: 5px; color: #475569;">
+                    Conversions cost 1 credit per track.
+                    Audio enhancement and lyrics are optional upgrades that require additional credits.
+                </p>
+            </header>
 
             <!-- =========================================
                  INTERACTIVE BEFORE / AFTER AUDIO PREVIEWER
@@ -491,6 +456,51 @@
                         <div class="seo-feature-text">
                             <h3>Batch File Processing</h3>
                             <p>Upload and process entire folders of tracks in one click. Our background processing pipeline works smoothly, organizing your enhanced and tagged music library into a clean, ready-to-download ZIP archive.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- =========================================
+                 ACCOUNT, LOGIN & BUY CREDITS SECTION
+                 ========================================= -->
+            <section class="account-credits-section" id="accountSection" aria-label="Account and credits management">
+                <div id="rightSideColumn">
+                    <div id="loginFormContainer" class="auth-box"
+                        style="border: 2px solid #fde68a; background: #fffbeb; box-shadow: 0 8px 20px rgba(245, 158, 11, 0.15); border-radius: 12px; padding: 25px; box-sizing: border-box;">
+                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                            <svg viewBox="0 0 24 24" width="24" height="24" stroke="#d97706" stroke-width="2" fill="none"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                            </svg>
+                            <h3 style="margin: 0; color: #92400e; font-size: 1.15rem; font-weight: 800;">Log In & Buy Credits
+                            </h3>
+                        </div>
+                        <p style="font-size: 0.9rem; color: #92400e; margin-bottom: 10px; line-height: 1.5;"><strong>Convert your music collections with Pay-As-You-Go credits.</strong> Enter your email below to receive a secure login link. Once inside, you can purchase track credits:</p>
+                        <ul
+                            style="font-size: 0.9rem; color: #92400e; margin-bottom: 18px; line-height: 1.5; padding-left: 20px;">
+                            <li style="margin-bottom: 5px;"><strong>Pay As You Go ($2.00):</strong> 350 Track Credits, no
+                                expiration.</li>
+                        </ul>
+                        <div class="unified-search-bar" style="margin-bottom: 5px; border-color: #fcd34d;">
+                            <input type="email" id="loginEmail" placeholder="you@example.com" autocomplete="email"
+                                style="background: white;">
+                            <button id="sendLinkBtn" style="background: linear-gradient(90deg, #f59e0b 0%, #ea580c 100%);">Send Link</button>
+                        </div>
+                        <div id="authMessage"
+                            style="font-size: 0.85rem; font-weight: bold; text-align: center; margin-top: 10px;"></div>
+                    </div>
+
+                    <!-- Relocated Pricing Tiers in Main Workspace -->
+                    <div id="workspacePricingContainer" class="hidden">
+                        <div class="workspace-tier-card pay-as-you-go-card" style="margin: 0 auto; max-width: 320px; width: 100%;">
+                            <h4 style="margin: 0 0 10px 0; color: #334155; font-size: 1.15rem; font-weight: 800;">Pay As You Go</h4>
+                            <div style="font-size: 1.8rem; font-weight: bold; color: #0f172a; margin-bottom: 15px;">$2.00</div>
+                            <p style="font-size: 0.9rem; color: #64748b; margin-bottom: 20px; line-height: 1.6; flex-grow: 1;">
+                                350 Track Credits<br>No Expiration<br>Priority Queue
+                            </p>
+                            <button id="buyCreditsBtn" class="premium-btn hidden"
+                                style="width: 100%; padding: 12px; font-size: 0.95rem; font-weight: bold;">Buy Credits</button>
                         </div>
                     </div>
                 </div>
