@@ -63,8 +63,14 @@ body.home-page .hero-dropzone-wrapper #conversionToolContainer {
     background: rgba(255, 255, 255, 0.65) !important;
     backdrop-filter: blur(12px) saturate(150%);
     -webkit-backdrop-filter: blur(12px) saturate(150%);
-    border: 1px solid rgba(255, 255, 255, 0.8);
+    border: none !important;
+    border-top: none !important;
     box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+}
+
+body.home-page .hero-dropzone-wrapper #conversionToolContainer::before {
+    display: none !important;
+    content: none !important;
 }
 
 .hero-dropzone-wrapper .upload-container {
@@ -345,15 +351,29 @@ body.home-page .logo-container .header-note {
 }
 
 .free-tier-card {
-    border: 2px solid #a7f3d0 !important;
+    border: none !important;
+    border-top: none !important;
     background: #f0fdf4 !important;
-    box-shadow: 0 8px 22px rgba(16, 185, 129, 0.12);
+    box-shadow: 0 8px 24px rgba(16, 185, 129, 0.12) !important;
 }
 
-.payg-tier-card {
-    border: 2px solid #fde68a !important;
+.free-tier-card::before {
+    display: none !important;
+    content: none !important;
+}
+
+.payg-tier-card,
+#loginFormContainer {
+    border: none !important;
+    border-top: none !important;
     background: #fffbeb !important;
-    box-shadow: 0 8px 22px rgba(245, 158, 11, 0.12);
+    box-shadow: 0 8px 24px rgba(245, 158, 11, 0.12) !important;
+}
+
+.payg-tier-card::before,
+#loginFormContainer::before {
+    display: none !important;
+    content: none !important;
 }
 
 .plan-card-header {
