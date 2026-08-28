@@ -887,19 +887,19 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // --- MOBILE SIDEBAR DRAWER TOGGLE ---
+    // --- MOBILE HEADER NAV DRAWER TOGGLE ---
     const menuToggle = document.querySelector('.menu-toggle');
-    const sidebarNav = document.querySelector('.sidebar-nav');
-    if (menuToggle && sidebarNav) {
+    const headerNav = document.querySelector('.header-nav');
+    if (menuToggle && headerNav) {
         menuToggle.addEventListener('click', (e) => {
             e.stopPropagation();
-            sidebarNav.classList.toggle('open');
+            headerNav.classList.toggle('open');
         });
 
-        // Close sidebar if user clicks outside of it on mobile
+        // Close nav if user clicks outside of it on mobile
         document.addEventListener('click', (e) => {
-            if (sidebarNav.classList.contains('open') && !sidebarNav.contains(e.target) && e.target !== menuToggle) {
-                sidebarNav.classList.remove('open');
+            if (headerNav.classList.contains('open') && !headerNav.contains(e.target) && e.target !== menuToggle) {
+                headerNav.classList.remove('open');
             }
         });
     }
