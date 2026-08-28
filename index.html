@@ -466,29 +466,71 @@
                  ========================================= -->
             <section class="account-credits-section" id="accountSection" aria-label="Account and credits management">
                 <div id="rightSideColumn">
-                    <div id="loginFormContainer" class="auth-box"
-                        style="border: 2px solid #fde68a; background: #fffbeb; box-shadow: 0 8px 20px rgba(245, 158, 11, 0.15); border-radius: 12px; padding: 25px; box-sizing: border-box;">
-                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
-                            <svg viewBox="0 0 24 24" width="24" height="24" stroke="#d97706" stroke-width="2" fill="none"
-                                stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
-                            </svg>
-                            <h3 style="margin: 0; color: #92400e; font-size: 1.15rem; font-weight: 800;">Log In & Buy Credits
-                            </h3>
+                    <!-- 2-Column Side-by-Side Pricing Cards: Free Tier & Pay As You Go -->
+                    <div class="pricing-cards-grid">
+                        <!-- Free Tier Card -->
+                        <div class="pricing-plan-card free-tier-card auth-box">
+                            <div>
+                                <div class="plan-card-header">
+                                    <div class="plan-title-row">
+                                        <svg viewBox="0 0 24 24" width="22" height="22" stroke="#059669" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M20 6L9 17l-5-5"></path>
+                                        </svg>
+                                        <h3 class="plan-card-title free-title">Free Tier</h3>
+                                    </div>
+                                    <span class="plan-pill free-pill">NO SIGNUP REQ.</span>
+                                </div>
+                                <div class="plan-price-row">
+                                    <span class="plan-price free-price">$0</span>
+                                    <span class="plan-price-period free-period">/ 5 Free Track Conversions</span>
+                                </div>
+                                <p class="plan-card-desc free-desc">
+                                    <strong>Instant in-browser conversions with zero commitments.</strong> Perfect for tagging songs, ripping CDs, and quick albums:
+                                </p>
+                                <ul class="plan-features-list free-list">
+                                    <li><strong>5 Free track conversions</strong> every session</li>
+                                    <li><strong>Auto Apple Music Ultra-HD Cover Art</strong> (up to 3000px)</li>
+                                    <li><strong>Full ID3 Metadata Tagging</strong> (Artist, Title, Album, Year)</li>
+                                    <li><strong>1-Click ZIP Batch Download</strong> &amp; local processing</li>
+                                </ul>
+                            </div>
+                            <a href="#dropZone" class="btn-free-action">Start Converting Free</a>
                         </div>
-                        <p style="font-size: 0.9rem; color: #92400e; margin-bottom: 10px; line-height: 1.5;"><strong>Convert your music collections with Pay-As-You-Go credits.</strong> Enter your email below to receive a secure login link. Once inside, you can purchase track credits:</p>
-                        <ul
-                            style="font-size: 0.9rem; color: #92400e; margin-bottom: 18px; line-height: 1.5; padding-left: 20px;">
-                            <li style="margin-bottom: 5px;"><strong>Pay As You Go ($2.00):</strong> 350 Track Credits, no
-                                expiration.</li>
-                        </ul>
-                        <div class="unified-search-bar" style="margin-bottom: 5px; border-color: #fcd34d;">
-                            <input type="email" id="loginEmail" placeholder="you@example.com" autocomplete="email"
-                                style="background: white;">
-                            <button id="sendLinkBtn" style="background: linear-gradient(90deg, #f59e0b 0%, #ea580c 100%);">Send Link</button>
+
+                        <!-- Pay As You Go Card -->
+                        <div id="loginFormContainer" class="pricing-plan-card payg-tier-card auth-box">
+                            <div>
+                                <div class="plan-card-header">
+                                    <div class="plan-title-row">
+                                        <svg viewBox="0 0 24 24" width="22" height="22" stroke="#d97706" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                                        </svg>
+                                        <h3 class="plan-card-title payg-title">Pay As You Go</h3>
+                                    </div>
+                                    <span class="plan-pill payg-pill">NO EXPIRATION</span>
+                                </div>
+                                <div class="plan-price-row">
+                                    <span class="plan-price payg-price">$2.00</span>
+                                    <span class="plan-price-period payg-period">/ 350 Track Credits</span>
+                                </div>
+                                <p class="plan-card-desc payg-desc">
+                                    <strong>Convert entire collections with flexible AI credits.</strong> Enter your email below to log in or purchase credits:
+                                </p>
+                                <ul class="plan-features-list payg-list">
+                                    <li><strong>350 Track Credits</strong> (~$0.0057 per conversion)</li>
+                                    <li><strong>AI 320k Bitrate Enhancer</strong> (1 credit per track)</li>
+                                    <li><strong>AI Synced Lyrics Transcription</strong> (10 credits per track)</li>
+                                    <li><strong>Credits never expire</strong> &middot; No recurring subscriptions</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <div class="unified-search-bar payg-search-bar">
+                                    <input type="email" id="loginEmail" placeholder="you@example.com" autocomplete="email">
+                                    <button id="sendLinkBtn">Send Link</button>
+                                </div>
+                                <div id="authMessage"></div>
+                            </div>
                         </div>
-                        <div id="authMessage"
-                            style="font-size: 0.85rem; font-weight: bold; text-align: center; margin-top: 10px;"></div>
                     </div>
 
                     <!-- Relocated Pricing Tiers in Main Workspace -->
