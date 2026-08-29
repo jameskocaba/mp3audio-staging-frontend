@@ -125,7 +125,7 @@ body.home-page .hero-dropzone-wrapper #conversionToolContainer::before {
 .hero-dropzone-wrapper .file-counter {
     display: flex;
     align-items: center;
-    gap: 4px;
+    gap: 6px;
     margin: 0;
     flex-shrink: 0;
 }
@@ -143,10 +143,12 @@ body.home-page .hero-dropzone-wrapper #conversionToolContainer::before {
     color: #334155;
     border: 1px solid rgba(226, 232, 240, 0.9);
     white-space: nowrap;
+    transition: all 0.2s ease;
 }
 
 .hero-dropzone-wrapper .counter-badge svg {
     color: #3b82f6;
+    flex-shrink: 0;
 }
 
 .hero-dropzone-wrapper .counter-badge.selected-badge {
@@ -156,7 +158,8 @@ body.home-page .hero-dropzone-wrapper #conversionToolContainer::before {
 }
 
 .hero-dropzone-wrapper #convertBtn {
-    flex: 1;
+    flex: 1 1 auto;
+    min-width: 0;
     margin: 0;
     padding: 8px 14px;
     font-size: 0.88rem;
@@ -167,7 +170,7 @@ body.home-page .hero-dropzone-wrapper #conversionToolContainer::before {
     color: white;
     border: none;
     box-shadow: 0 3px 10px rgba(46, 204, 113, 0.3);
-    transition: all 0.2s ease;
+    transition: all 0.2s ease, flex 0.2s ease;
     text-align: center;
     white-space: nowrap;
 }
@@ -195,6 +198,21 @@ body.home-page .hero-dropzone-wrapper #conversionToolContainer::before {
 .hero-dropzone-wrapper #resetBtn:hover {
     background: #ffffff;
     color: #0f172a;
+}
+
+@media (max-width: 580px) {
+    .hero-dropzone-wrapper .dropzone-controls-row {
+        flex-wrap: wrap;
+    }
+    .hero-dropzone-wrapper .file-counter {
+        width: 100%;
+        justify-content: space-between;
+        margin-bottom: 2px;
+    }
+    .hero-dropzone-wrapper #convertBtn {
+        flex: 1 1 auto;
+        min-width: 120px;
+    }
 }
 
 /* Aligned 3-Column Options Grid (Album Art, Bitrate, Lyrics) */

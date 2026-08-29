@@ -43,6 +43,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const downloadArea = document.getElementById('downloadArea');
     const downloadList = document.getElementById('downloadList');
     const conversionSummary = document.getElementById('conversionSummary');
+    const fileCounter = document.getElementById('fileCounter');
+    const fileCountVal = document.getElementById('fileCountVal');
+    const selectedTracksBadge = document.getElementById('selectedTracksBadge');
 
     // Point this to your PRODUCTION backend URL
     // Ensure this EXACTLY matches your Render PROD web service URL
@@ -182,11 +185,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 fileInputText.style.fontWeight = '600';
                 fileInputText.style.color = '#1e293b';
+
+                if (selectedTracksBadge && fileCountVal) {
+                    fileCountVal.textContent = `${fileCount} Track${fileCount > 1 ? 's' : ''} Loaded`;
+                    selectedTracksBadge.classList.remove('hidden');
+                }
             } else {
                 // This case handles when the user opens the file dialog and cancels it.
                 fileInputText.textContent = 'Click to select files, or drag & drop here...';
                 fileInputText.style.fontWeight = 'normal';
                 fileInputText.style.color = '#64748b';
+
+                if (selectedTracksBadge) selectedTracksBadge.classList.add('hidden');
             }
         });
     }
@@ -583,6 +593,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (thumbnailContainer) thumbnailContainer.classList.add('hidden');
         if (currentThumbnail) currentThumbnail.src = '';
         if (progressBar) progressBar.classList.add('hidden');
+        if (selectedTracksBadge) selectedTracksBadge.classList.add('hidden');
         resetUI();
     };
 
@@ -1570,4 +1581,23 @@ document.addEventListener('DOMContentLoaded', () => {
         // Initialize visualizer idle loop on page load
         startVisualizerLoop();
     })();
+
+    // --- FETCH GLOBAL STATS ON LOAD ---
+    const fetchGlobalStats = async () => {
+        try {
+            const res = await fetch(`${BACKEND_URL}/api/stats`);
+            const data = await res.json();
+            if (data.success && data.total_tracks) {
+                const globalCountVal = document.getElementById('globalCountVal');
+                if (globalCountVal) {
+                    globalCountVal.textContent = data.total_tracks.toLocaleString();
+                }
+            }
+        } catch (err) {
+            console.error("Failed to fetch global stats:", err);
+        }
+    };
+
+    fetchGlobalStats();
+    window.fetchGlobalStats = fetchGlobalStats;
 });
