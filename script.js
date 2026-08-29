@@ -340,10 +340,23 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // --- MAGIC LINK VERIFICATION ---
+    // --- MAGIC LINK VERIFICATION & PREVIEW ---
     const token = urlParams.get('token');
+    const preview = urlParams.get('preview');
 
-    if (token) {
+    if (preview === 'login' || preview === 'logged_in') {
+        if (conversionToolContainer) conversionToolContainer.classList.remove('hidden');
+        if (userDashboard) userDashboard.classList.remove('hidden');
+        if (guestPricingGrid) guestPricingGrid.classList.add('hidden');
+        if (headerUserNav) headerUserNav.classList.remove('hidden');
+        if (headerLoginLink) headerLoginLink.classList.add('hidden');
+        if (userEmailDisplay) userEmailDisplay.textContent = 'alex@example.com';
+        if (paidCreditsDisplay) paidCreditsDisplay.textContent = '350';
+        if (headerPaidCreditsDisplay) headerPaidCreditsDisplay.textContent = '350';
+        if (workspacePricingContainer) workspacePricingContainer.classList.remove('hidden');
+        if (buyCreditsBtn) buyCreditsBtn.classList.remove('hidden');
+        if (loginFormContainer) loginFormContainer.classList.add('hidden');
+    } else if (token) {
         if (urlMessage) {
             urlMessage.innerHTML = `<div class="alert-message" style="background:#eff6ff; color:#1e40af; border:1px solid #bfdbfe;">Verifying secure link...</div>`;
             urlMessage.classList.remove('hidden');
