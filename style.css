@@ -713,6 +713,14 @@ body.home-page .logo-container .header-note {
     letter-spacing: -0.02em;
 }
 
+/* Orange gradient accent on headline keywords */
+.main-headline .accent {
+    background: linear-gradient(90deg, #FF5500 0%, #e8630a 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
 .main-subheadline {
     font-size: 1.125rem !important;
     color: #475569;
