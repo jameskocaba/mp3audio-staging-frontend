@@ -60,12 +60,11 @@ body.home-page .hero-dropzone-wrapper #conversionToolContainer {
     margin: 0;
     padding: 16px 20px 10px 20px;
     border-radius: 14px;
-    background: rgba(255, 255, 255, 0.65) !important;
-    backdrop-filter: blur(12px) saturate(150%);
-    -webkit-backdrop-filter: blur(12px) saturate(150%);
-    border: none !important;
-    border-top: none !important;
-    box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+    background: rgba(255, 255, 255, 0.25) !important;
+    backdrop-filter: blur(8px) saturate(140%);
+    -webkit-backdrop-filter: blur(8px) saturate(140%);
+    border: 1px solid rgba(255, 255, 255, 0.45) !important;
+    box-shadow: 0 16px 36px rgba(15, 23, 42, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.5);
 }
 
 body.home-page .hero-dropzone-wrapper #conversionToolContainer::before {
@@ -83,9 +82,9 @@ body.home-page .hero-dropzone-wrapper #conversionToolContainer::before {
     min-height: 105px;
     border: 2px dashed rgba(59, 130, 246, 0.55);
     border-radius: 10px;
-    background: rgba(255, 255, 255, 0.45);
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
+    background: rgba(255, 255, 255, 0.18);
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
     transition: all 0.2s ease;
     cursor: pointer;
     display: flex;
@@ -96,7 +95,7 @@ body.home-page .hero-dropzone-wrapper #conversionToolContainer::before {
 
 .hero-dropzone-wrapper .large-dropzone:hover {
     border-color: #3b82f6;
-    background: rgba(255, 255, 255, 0.75);
+    background: rgba(255, 255, 255, 0.35);
 }
 
 .hero-dropzone-wrapper .large-dropzone svg {
@@ -104,12 +103,14 @@ body.home-page .hero-dropzone-wrapper #conversionToolContainer::before {
     height: 36px;
     margin-bottom: 6px;
     color: #2563eb;
+    filter: drop-shadow(0 1px 2px rgba(255, 255, 255, 0.6));
 }
 
 .hero-dropzone-wrapper .large-dropzone span {
     font-size: 0.94rem;
     font-weight: 600;
-    color: #1e293b;
+    color: #0f172a;
+    text-shadow: 0 1px 3px rgba(255, 255, 255, 0.8);
 }
 
 /* Aligned Controls Row: Process button fills space between counter and reset */
@@ -139,22 +140,24 @@ body.home-page .hero-dropzone-wrapper #conversionToolContainer::before {
     gap: 5px;
     border-radius: 6px;
     line-height: 1;
-    background: rgba(255, 255, 255, 0.8);
-    color: #334155;
-    border: 1px solid rgba(226, 232, 240, 0.9);
+    background: rgba(255, 255, 255, 0.45);
+    color: #1e293b;
+    border: 1px solid rgba(255, 255, 255, 0.6);
     white-space: nowrap;
     transition: all 0.2s ease;
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
 }
 
 .hero-dropzone-wrapper .counter-badge svg {
-    color: #3b82f6;
+    color: #2563eb;
     flex-shrink: 0;
 }
 
 .hero-dropzone-wrapper .counter-badge.selected-badge {
-    background: #e0f2fe;
+    background: rgba(224, 242, 254, 0.65);
     color: #0369a1;
-    border-color: #bae6fd;
+    border-color: rgba(186, 230, 253, 0.8);
 }
 
 .hero-dropzone-wrapper #convertBtn {
@@ -188,15 +191,17 @@ body.home-page .hero-dropzone-wrapper #conversionToolContainer::before {
     font-weight: 600;
     border-radius: 8px;
     cursor: pointer;
-    background: rgba(255, 255, 255, 0.8);
-    color: #475569;
-    border: 1px solid rgba(203, 213, 225, 0.9);
+    background: rgba(255, 255, 255, 0.45);
+    color: #334155;
+    border: 1px solid rgba(255, 255, 255, 0.6);
     transition: all 0.2s ease;
     white-space: nowrap;
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
 }
 
 .hero-dropzone-wrapper #resetBtn:hover {
-    background: #ffffff;
+    background: rgba(255, 255, 255, 0.8);
     color: #0f172a;
 }
 
@@ -232,8 +237,10 @@ body.home-page .hero-dropzone-wrapper #conversionToolContainer::before {
     display: flex;
     align-items: center;
     gap: 6px;
-    background: rgba(255, 255, 255, 0.7);
-    border: 1px solid rgba(226, 232, 240, 0.85);
+    background: rgba(255, 255, 255, 0.38);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
     padding: 6px 8px;
     border-radius: 8px;
     min-height: 42px;
@@ -242,8 +249,8 @@ body.home-page .hero-dropzone-wrapper #conversionToolContainer::before {
 }
 
 .hero-dropzone-wrapper .compact-toggle:hover {
-    border-color: #cbd5e1;
-    background: rgba(255, 255, 255, 0.95);
+    border-color: rgba(255, 255, 255, 0.9);
+    background: rgba(255, 255, 255, 0.65);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
@@ -279,7 +286,7 @@ body.home-page .hero-dropzone-wrapper #conversionToolContainer::before {
 .hero-dropzone-wrapper .compact-toggle .feature-title {
     font-size: 0.74rem;
     font-weight: 700;
-    color: #1e293b;
+    color: #0f172a;
     line-height: 1.15;
     text-align: center;
     white-space: nowrap;
@@ -287,6 +294,7 @@ body.home-page .hero-dropzone-wrapper #conversionToolContainer::before {
     text-overflow: ellipsis;
     display: block;
     width: 100%;
+    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.7);
 }
 
 .hero-dropzone-wrapper .compact-toggle .premium-badge {
@@ -305,7 +313,9 @@ body.home-page .hero-dropzone-wrapper #conversionToolContainer::before {
     margin-top: 6px;
     margin-bottom: 0;
     font-size: 0.80rem;
-    color: #64748b;
+    color: #1e293b;
+    font-weight: 600;
+    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
     line-height: 1.1;
 }
 
