@@ -220,14 +220,21 @@ body.home-page .hero-dropzone-wrapper #conversionToolContainer::before {
     }
 }
 
-/* Aligned 3-Column Options Grid (Album Art, Bitrate, Lyrics) */
+/* Aligned 4-Column Options Grid (Album Art, Bitrate, Video to MP3, Lyrics) */
 .hero-dropzone-wrapper .options-grid {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 6px;
     margin-top: 10px;
     width: 100%;
     box-sizing: border-box;
+}
+
+@media (max-width: 640px) {
+    .hero-dropzone-wrapper .options-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 6px;
+    }
 }
 
 .hero-dropzone-wrapper .compact-toggle {

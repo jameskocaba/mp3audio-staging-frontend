@@ -28,6 +28,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const transcribeInput = document.getElementById('transcribeAudio');
     const fileInput = document.getElementById('fileInput');
     const increaseQualityInput = document.getElementById('increaseQuality');
+    const videoToMp3Input = document.getElementById('videoToMp3');
     const attachLyricsInput = document.getElementById('attachLyrics');
     const autoAddAlbumArtInput = document.getElementById('autoAddAlbumArt');
     const fileInputText = document.getElementById('fileInputText');
@@ -189,6 +190,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (selectedTracksBadge && fileCountVal) {
                     fileCountVal.textContent = `${fileCount} Track${fileCount > 1 ? 's' : ''} Loaded`;
                     selectedTracksBadge.classList.remove('hidden');
+                }
+
+                // Auto-detect if video files were uploaded and automatically check the Video to MP3 toggle
+                const videoExts = ['mp4', 'mov', 'm4v', 'webm', 'mkv', 'avi', 'flv', 'wmv', '3gp', 'ts'];
+                let hasVideo = false;
+                for (let i = 0; i < fileInput.files.length; i++) {
+                    const ext = fileInput.files[i].name.split('.').pop().toLowerCase();
+                    if (videoExts.includes(ext)) { hasVideo = true; break; }
+                }
+                if (hasVideo && videoToMp3Input) {
+                    videoToMp3Input.checked = true;
                 }
             } else {
                 // This case handles when the user opens the file dialog and cancels it.
@@ -579,6 +591,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (transcribeInput) transcribeInput.checked = false;
         if (fileInput) fileInput.value = '';
         if (increaseQualityInput) increaseQualityInput.checked = false;
+        if (videoToMp3Input) videoToMp3Input.checked = false;
         if (attachLyricsInput) attachLyricsInput.checked = false;
         if (autoAddAlbumArtInput) autoAddAlbumArtInput.checked = true;
         if (fileInputText) {
@@ -811,6 +824,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     formData.append('files', fileInput.files[i]);
                 }
                 if (increaseQualityInput && increaseQualityInput.checked) formData.append('increase_quality', 'true');
+                if (videoToMp3Input && videoToMp3Input.checked) formData.append('video_to_mp3', 'true');
                 if (attachLyricsInput && attachLyricsInput.checked) formData.append('attach_lyrics', 'true');
                 if (autoAddAlbumArtInput && autoAddAlbumArtInput.checked) formData.append('auto_add_album_art', 'true');
 
