@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 1. User Dashboard & Auth UI Elements
     const userDashboard = document.getElementById('userDashboard');
+    const guestPricingGrid = document.getElementById('guestPricingGrid');
     const loginFormContainer = document.getElementById('loginFormContainer');
     const conversionToolContainer = document.getElementById('conversionToolContainer');
     const loginEmail = document.getElementById('loginEmail');
@@ -13,6 +14,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const authMessage = document.getElementById('authMessage');
     const userEmailDisplay = document.getElementById('userEmailDisplay');
     const paidCreditsDisplay = document.getElementById('paidCreditsDisplay');
+    const headerPaidCreditsDisplay = document.getElementById('headerPaidCreditsDisplay');
+    const headerUserNav = document.getElementById('headerUserNav');
+    const headerLoginLink = document.getElementById('headerLoginLink');
+    const headerLogoutBtn = document.getElementById('headerLogoutBtn');
     const logoutBtn = document.getElementById('logoutBtn');
     const buyCreditsBtn = document.getElementById('buyCreditsBtn');
     const subscribeBtn = document.getElementById('subscribeBtn');
@@ -50,7 +55,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Point this to your PRODUCTION backend URL
     // Ensure this EXACTLY matches your Render PROD web service URL
-    const BACKEND_URL = 'https://mp3audio-staging.onrender.com';
+    const BACKEND_URL = 'https://audio-converter-backend.onrender.com';
 
     // Intercept fetch calls to inject the Authorization header for cookie-blocked environments (e.g. mobile Safari)
     const originalFetch = window.fetch;
@@ -154,6 +159,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     fileInputText.textContent = 'Click to select files, or drag & drop here...';
                     fileInputText.style.fontWeight = 'normal';
                     fileInputText.style.color = '#64748b';
+                    if (selectedTracksBadge) selectedTracksBadge.classList.add('hidden');
                     return;
                 }
 
@@ -333,13 +339,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 localStorage.setItem('session_token', data.token);
             }
 
-            if (paidCreditsDisplay) paidCreditsDisplay.textContent = data.paid_track_credits;
+            const credits = (data.paid_track_credits !== undefined && data.paid_track_credits !== null) ? data.paid_track_credits : 0;
+            if (paidCreditsDisplay) paidCreditsDisplay.textContent = credits;
+            if (headerPaidCreditsDisplay) headerPaidCreditsDisplay.textContent = credits;
 
             if (data.authenticated) {
                 isGuestUser = false;
                 // User is logged in/paid
                 if (userDashboard) userDashboard.classList.remove('hidden');
-                if (userEmailDisplay) userEmailDisplay.textContent = data.email;
+                if (guestPricingGrid) guestPricingGrid.classList.add('hidden');
+                if (headerUserNav) headerUserNav.classList.remove('hidden');
+                if (headerLoginLink) headerLoginLink.classList.add('hidden');
+                if (userEmailDisplay) userEmailDisplay.textContent = data.email || 'Active User';
                 if (logoutBtn) logoutBtn.classList.remove('hidden');
 
                 if (subscriptionBadge) subscriptionBadge.classList.add('hidden');
@@ -350,6 +361,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 isGuestUser = true;
                 // User is a guest
                 if (userDashboard) userDashboard.classList.add('hidden');
+                if (guestPricingGrid) guestPricingGrid.classList.remove('hidden');
+                if (headerUserNav) headerUserNav.classList.add('hidden');
+                if (headerLoginLink) headerLoginLink.classList.remove('hidden');
                 if (workspacePricingContainer) workspacePricingContainer.classList.add('hidden');
                 if (loginFormContainer) loginFormContainer.classList.remove('hidden');
             }
@@ -357,6 +371,9 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error('Auth Check Failed', error);
             // Fallback for offline mode/guests
             if (userDashboard) userDashboard.classList.add('hidden');
+            if (guestPricingGrid) guestPricingGrid.classList.remove('hidden');
+            if (headerUserNav) headerUserNav.classList.add('hidden');
+            if (headerLoginLink) headerLoginLink.classList.remove('hidden');
             if (workspacePricingContainer) workspacePricingContainer.classList.add('hidden');
             if (loginFormContainer) loginFormContainer.classList.remove('hidden');
         }
@@ -499,13 +516,28 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    if (logoutBtn) {
-        logoutBtn.addEventListener('click', async (e) => {
-            if (e && e.preventDefault) e.preventDefault();
-            localStorage.removeItem('session_token');
-            await fetch(`${BACKEND_URL}/auth/logout`, { method: 'POST', credentials: 'include' });
-            window.location.reload();
+    if (loginEmail && sendLinkBtn) {
+        loginEmail.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                sendLinkBtn.click();
+            }
         });
+    }
+
+    const handleLogout = async (e) => {
+        if (e && e.preventDefault) e.preventDefault();
+        localStorage.removeItem('session_token');
+        await fetch(`${BACKEND_URL}/auth/logout`, { method: 'POST', credentials: 'include' });
+        window.location.reload();
+    };
+
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', handleLogout);
+    }
+
+    if (headerLogoutBtn) {
+        headerLogoutBtn.addEventListener('click', handleLogout);
     }
 
     if (buyCreditsBtn) {
@@ -607,6 +639,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (currentThumbnail) currentThumbnail.src = '';
         if (progressBar) progressBar.classList.add('hidden');
         if (selectedTracksBadge) selectedTracksBadge.classList.add('hidden');
+        if (fileCountVal) fileCountVal.textContent = '0 Tracks Loaded';
         resetUI();
     };
 
@@ -704,6 +737,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (data.completed > 0) {
                     statusDiv.innerHTML = `<p style="color: #2ecc71; font-weight: bold; font-size: 1.1rem;">✅ Success! Processed ${data.completed} of ${data.total} tracks.</p>`;
                     showToast(`Success! Processed ${data.completed} of ${data.total} tracks.`, 'success');
+                    if (window.fetchGlobalStats) window.fetchGlobalStats();
                 } else {
                     statusDiv.innerHTML = `<p style="color: #ef4444; font-weight: bold; font-size: 1.1rem;">⚠️ Process Finished: 0 tracks processed.</p>`;
                     showToast(`No tracks could be processed.`, 'error');
@@ -717,12 +751,43 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
 
                     if (data.completed > 0) {
+                        const downloadUrl = `${BACKEND_URL}${data.zip_path}`;
+                        const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(downloadUrl)}`;
+
                         downloadList.innerHTML = `
                             <li>
-                                <a href="${BACKEND_URL}${data.zip_path}" class="zip-btn" target="_blank">
+                                <a href="${downloadUrl}" class="zip-btn" target="_blank">
                                     <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                                    Download ZIP Archive
+                                    Download Complete ZIP Archive
                                 </a>
+                            </li>
+                            <li style="margin-top: 12px; list-style: none;">
+                                <div class="ringtone-download-card">
+                                    <div class="ringtone-download-header">
+                                        <div class="rt-dl-info">
+                                            <span class="rt-dl-icon">📱</span>
+                                            <div class="rt-dl-text">
+                                                <strong>Cellular Phone Ringtone Ready</strong>
+                                                <p>Includes standard MP3 (Android) and M4R (iPhone) formats.</p>
+                                            </div>
+                                        </div>
+                                        <div class="rt-dl-actions">
+                                            <button type="button" class="ringtone-guide-btn" onclick="openModal('ringtoneModal')">
+                                                <span>📖 Setup Directions</span>
+                                            </button>
+                                            <button type="button" class="ringtone-qr-toggle-btn" onclick="window.toggleRingtoneQr()">
+                                                <span>📱 Scan to Mobile</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div id="ringtoneQrBox" class="ringtone-qr-box" style="display: none;">
+                                        <img src="${qrCodeUrl}" alt="Scan QR Code to download on mobile" width="130" height="130" loading="lazy">
+                                        <div class="ringtone-qr-desc">
+                                            <h4>Scan with Phone Camera</h4>
+                                            <p>Point your iPhone or Android camera at this code to download the ringtone files directly to your phone without cords or emails.</p>
+                                        </div>
+                                    </div>
+                                </div>
                             </li>
                         `;
                     } else {
@@ -824,9 +889,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     formData.append('files', fileInput.files[i]);
                 }
                 if (increaseQualityInput && increaseQualityInput.checked) formData.append('increase_quality', 'true');
-                if (videoToMp3Input && videoToMp3Input.checked) formData.append('video_to_mp3', 'true');
+                if (videoToMp3Input && videoToMp3Input.checked) {
+                    formData.append('video_to_mp3', 'true');
+                    formData.append('is_ringtone', 'true');
+                }
                 if (attachLyricsInput && attachLyricsInput.checked) formData.append('attach_lyrics', 'true');
                 if (autoAddAlbumArtInput && autoAddAlbumArtInput.checked) formData.append('auto_add_album_art', 'true');
+                if (startTimeInput && startTimeInput.value.trim()) formData.append('start_time', startTimeInput.value.trim());
+                if (endTimeInput && endTimeInput.value.trim()) formData.append('end_time', endTimeInput.value.trim());
 
                 response = await fetch(`${BACKEND_URL}/process_local_files`, {
                     method: 'POST',
@@ -837,6 +907,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const startTime = startTimeInput ? startTimeInput.value.trim() : '';
                 const endTime = endTimeInput ? endTimeInput.value.trim() : '';
                 const transcribeAudio = transcribeInput ? transcribeInput.checked : false;
+                const isVideo = videoToMp3Input ? videoToMp3Input.checked : false;
 
                 response = await fetch(`${BACKEND_URL}/start_conversion`, {
                     method: 'POST',
@@ -847,6 +918,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         start_time: startTime,
                         end_time: endTime,
                         transcribe_audio: transcribeAudio,
+                        video_to_mp3: isVideo,
+                        is_ringtone: isVideo,
                         auto_add_album_art: autoAddAlbumArtInput ? autoAddAlbumArtInput.checked : false
                     })
                 });
@@ -974,628 +1047,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // =========================================================================
-    // --- INTERACTIVE BEFORE / AFTER AUDIO PREVIEWER ENGINE & VISUALIZER ---
-    // =========================================================================
-    (function initAudioPreviewer() {
-        const previewSection = document.getElementById('audioEnhancerPreviewer');
-        if (!previewSection) return;
-
-        const canvas = document.getElementById('enhancerVisualizerCanvas');
-        const canvasCtx = canvas ? canvas.getContext('2d') : null;
-        const playBtn = document.getElementById('previewPlayBtn');
-        const playIcon = document.getElementById('playIcon');
-        const pauseIcon = document.getElementById('pauseIcon');
-        const btnBefore = document.getElementById('btnBefore');
-        const btnAfter = document.getElementById('btnAfter');
-        const crossfadeSlider = document.getElementById('abCrossfadeSlider');
-        const progressContainer = document.getElementById('waveformProgressContainer');
-        const progressFill = document.getElementById('waveformProgressFill');
-        const currentTimeEl = document.getElementById('previewCurrentTime');
-        const totalTimeEl = document.getElementById('previewTotalTime');
-        const modeIndicator = document.getElementById('previewModeIndicator');
-        const indicatorText = document.getElementById('indicatorText');
-        const spectrumBadge = document.getElementById('spectrumBadge');
-        const presetTabs = document.querySelectorAll('.preset-tab[data-preset]');
-        const customAudioInput = document.getElementById('previewCustomAudioInput');
-        const tryOnFilesBtn = document.getElementById('previewTryOnFilesBtn');
-
-        let audioCtx = null;
-        let isPlaying = false;
-        let activePreset = 'vocals';
-        let crossfadeValue = 1.0; // 0.0 = 100% Before, 1.0 = 100% After
-        let currentSourceNode = null;
-        let startTime = 0;
-        let pauseOffset = 0;
-        let audioDuration = 12.0;
-        let animationFrameId = null;
-
-        // DSP Nodes
-        let gainBefore = null;
-        let gainAfter = null;
-        let masterGain = null;
-        let analyserNode = null;
-        let customBuffer = null;
-
-        // Procedural Audio Buffer Cache
-        const bufferCache = {};
-
-        function getAudioContext() {
-            if (!audioCtx) {
-                const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-                audioCtx = new AudioContextClass();
-            }
-            if (audioCtx.state === 'suspended') {
-                audioCtx.resume();
-            }
-            return audioCtx;
-        }
-
-        // Synthesize rich, authentic procedural music loops for each preset
-        function synthesizePresetBuffer(ctx, preset) {
-            if (bufferCache[preset]) return bufferCache[preset];
-
-            const sampleRate = ctx.sampleRate;
-            const duration = 12.0; // 12-second loop
-            const totalSamples = Math.floor(sampleRate * duration);
-            const buffer = ctx.createBuffer(2, totalSamples, sampleRate);
-            const leftChannel = buffer.getChannelData(0);
-            const rightChannel = buffer.getChannelData(1);
-
-            const bpm = preset === 'hiphop' ? 90 : (preset === 'acoustic' ? 105 : 95);
-            const beatDuration = 60 / bpm;
-
-            for (let i = 0; i < totalSamples; i++) {
-                const t = i / sampleRate;
-                const beat = (t % beatDuration) / beatDuration;
-                const totalBeats = t / beatDuration;
-                let sampleL = 0;
-                let sampleR = 0;
-
-                if (preset === 'vocals') {
-                    // Formant-synthesized vocal melody + warm chord accompaniment
-                    const chords = [
-                        [220.0, 261.63, 329.63], // Am
-                        [174.61, 220.0, 261.63], // F
-                        [130.81, 164.81, 196.0], // C
-                        [196.0, 246.94, 293.66]  // G
-                    ];
-                    const chordIdx = Math.floor(totalBeats / 4) % chords.length;
-                    const curChord = chords[chordIdx];
-
-                    // Vocal Lead / Formant (ah / oh)
-                    const melodyFreqs = [440, 523.25, 659.25, 587.33, 440, 392, 523.25, 659.25];
-                    const noteIdx = Math.floor(totalBeats * 2) % melodyFreqs.length;
-                    const f0 = melodyFreqs[noteIdx];
-                    const vocalEnv = Math.exp(-beat * 2.5) * (0.8 + 0.2 * Math.sin(2 * Math.PI * 5 * t));
-                    
-                    // Formants at f0, 3*f0, 5*f0
-                    const lead = (Math.sin(2 * Math.PI * f0 * t) * 0.5 + 
-                                  Math.sin(2 * Math.PI * f0 * 2.01 * t) * 0.25 + 
-                                  Math.sin(2 * Math.PI * f0 * 3.98 * t) * 0.15 +
-                                  Math.sin(2 * Math.PI * f0 * 6.02 * t) * 0.08) * vocalEnv;
-
-                    // Warm pad backing
-                    let pad = 0;
-                    for (let c = 0; c < curChord.length; c++) {
-                        pad += Math.sin(2 * Math.PI * curChord[c] * t) * 0.12;
-                        pad += Math.sin(2 * Math.PI * curChord[c] * 2 * t) * 0.04;
-                    }
-
-                    // Gentle acoustic percussion / shakers
-                    const shaker = (Math.random() * 2 - 1) * Math.exp(-(beat % 0.25) * 20) * 0.08;
-
-                    sampleL = lead * 0.7 + pad * 0.6 + shaker * 0.5;
-                    sampleR = lead * 0.7 + pad * 0.6 + shaker * 0.5;
-
-                } else if (preset === 'hiphop') {
-                    // 808 Sub Kick + Snare + Trap Hi-Hats + Synth Chords
-                    const isKick = (totalBeats % 4 === 0 || totalBeats % 4 === 2.5);
-                    const kickEnv = isKick ? Math.exp(-beat * 6.0) : 0;
-                    const kickFreq = 55 * Math.exp(-beat * 14.0) + 40;
-                    const kick = Math.sin(2 * Math.PI * kickFreq * t) * kickEnv * 0.8;
-
-                    // Snare on beat 2 and 4
-                    const isSnare = (Math.floor(totalBeats) % 2 === 1 && beat < 0.35);
-                    const snareEnv = isSnare ? Math.exp(-(beat) * 12.0) : 0;
-                    const snare = ((Math.random() * 2 - 1) * 0.4 + Math.sin(2 * Math.PI * 180 * t) * 0.3) * snareEnv;
-
-                    // Hi-Hats (16th notes with velocity accents)
-                    const hatPhase = (totalBeats * 4) % 1;
-                    const hatEnv = Math.exp(-hatPhase * 25.0);
-                    const hatNoise = (Math.random() * 2 - 1) * hatEnv * 0.15;
-
-                    // Lo-fi Rhodes Synth Chords
-                    const hiphopChords = [146.83, 174.61, 220.0]; // Dm
-                    let chordsSound = 0;
-                    for (let c = 0; c < hiphopChords.length; c++) {
-                        chordsSound += Math.sin(2 * Math.PI * hiphopChords[c] * t) * 0.12;
-                        chordsSound += Math.sin(2 * Math.PI * hiphopChords[c] * 2 * t) * 0.05;
-                    }
-
-                    sampleL = kick * 0.9 + snare * 0.6 + hatNoise * 0.4 + chordsSound * 0.4;
-                    sampleR = kick * 0.9 + snare * 0.6 + hatNoise * 0.6 + chordsSound * 0.4;
-
-                } else { // acoustic
-                    // Acoustic Guitar Arpeggio & Harmonics
-                    const guitarPattern = [164.81, 220.0, 261.63, 329.63, 440.0, 329.63, 261.63, 220.0];
-                    const noteIdx = Math.floor(totalBeats * 4) % guitarPattern.length;
-                    const noteFreq = guitarPattern[noteIdx];
-                    const notePhase = (totalBeats * 4) % 1;
-                    const pluckEnv = Math.exp(-notePhase * 4.5);
-
-                    // Guitar harmonics
-                    const pluck = (
-                        Math.sin(2 * Math.PI * noteFreq * t) * 0.5 +
-                        Math.sin(2 * Math.PI * noteFreq * 2 * t) * 0.25 +
-                        Math.sin(2 * Math.PI * noteFreq * 3 * t) * 0.15 +
-                        Math.sin(2 * Math.PI * noteFreq * 4 * t) * 0.08 +
-                        (Math.random() * 2 - 1) * Math.exp(-notePhase * 30) * 0.1
-                    ) * pluckEnv;
-
-                    // Ambient Room shimmer
-                    const bassNote = Math.sin(2 * Math.PI * 110 * t) * 0.18;
-
-                    sampleL = pluck * 0.75 + bassNote * 0.5;
-                    sampleR = pluck * 0.65 + bassNote * 0.5;
-                }
-
-                // Smooth loop boundary fade
-                const fadeDur = 0.05;
-                let boundaryGain = 1.0;
-                if (t < fadeDur) boundaryGain = t / fadeDur;
-                if (t > duration - fadeDur) boundaryGain = (duration - t) / fadeDur;
-
-                leftChannel[i] = sampleL * boundaryGain * 0.75;
-                rightChannel[i] = sampleR * boundaryGain * 0.75;
-            }
-
-            bufferCache[preset] = buffer;
-            return buffer;
-        }
-
-        // Build DSP Chain
-        function buildDSPChain(ctx) {
-            // Master Output & Analyzer
-            masterGain = ctx.createGain();
-            masterGain.gain.value = 1.0;
-
-            analyserNode = ctx.createAnalyser();
-            analyserNode.fftSize = 128;
-            analyserNode.smoothingTimeConstant = 0.82;
-
-            masterGain.connect(analyserNode);
-            analyserNode.connect(ctx.destination);
-
-            // --- BEFORE CHAIN (Low-Bitrate 96k Emulation) ---
-            gainBefore = ctx.createGain();
-            gainBefore.gain.value = 0.0;
-
-            // Lowpass at 3.8kHz (removes high frequencies like low-bitrate MP3)
-            const lowpassBefore = ctx.createBiquadFilter();
-            lowpassBefore.type = 'lowpass';
-            lowpassBefore.frequency.value = 3800;
-            lowpassBefore.Q.value = 0.7;
-
-            // Boxy mid resonance
-            const midMuffle = ctx.createBiquadFilter();
-            midMuffle.type = 'peaking';
-            midMuffle.frequency.value = 420;
-            midMuffle.gain.value = 2.5;
-            midMuffle.Q.value = 1.5;
-
-            // Flat compression
-            const compBefore = ctx.createDynamicsCompressor();
-            compBefore.threshold.value = -12;
-            compBefore.ratio.value = 4;
-
-            lowpassBefore.connect(midMuffle);
-            midMuffle.connect(compBefore);
-            compBefore.connect(gainBefore);
-            gainBefore.connect(masterGain);
-
-            // --- AFTER CHAIN (AI Enhanced 320k Studio Restoration) ---
-            gainAfter = ctx.createGain();
-            gainAfter.gain.value = 1.0;
-
-            // High-shelf clarity exciter (+4.8dB @ 8.5kHz)
-            const highShelfAfter = ctx.createBiquadFilter();
-            highShelfAfter.type = 'highshelf';
-            highShelfAfter.frequency.value = 8500;
-            highShelfAfter.gain.value = 4.8;
-
-            // Deep punch low-shelf (+3.2dB @ 75Hz)
-            const lowShelfAfter = ctx.createBiquadFilter();
-            lowShelfAfter.type = 'lowshelf';
-            lowShelfAfter.frequency.value = 75;
-            lowShelfAfter.gain.value = 3.2;
-
-            // Anti-mud notch filter (-2.2dB @ 320Hz)
-            const notchAfter = ctx.createBiquadFilter();
-            notchAfter.type = 'peaking';
-            notchAfter.frequency.value = 320;
-            notchAfter.gain.value = -2.2;
-            notchAfter.Q.value = 1.2;
-
-            // Studio Master transparent multiband compressor
-            const compAfter = ctx.createDynamicsCompressor();
-            compAfter.threshold.value = -16;
-            compAfter.ratio.value = 2.5;
-            compAfter.attack.value = 0.01;
-            compAfter.release.value = 0.15;
-
-            highShelfAfter.connect(lowShelfAfter);
-            lowShelfAfter.connect(notchAfter);
-            notchAfter.connect(compAfter);
-            compAfter.connect(gainAfter);
-            gainAfter.connect(masterGain);
-
-            return {
-                inputBefore: lowpassBefore,
-                inputAfter: highShelfAfter
-            };
-        }
-
-        let dspInputs = null;
-
-        function updateCrossfade(val) {
-            crossfadeValue = val; // 0.0 (Before) to 1.0 (After)
-            if (gainBefore && gainAfter && audioCtx) {
-                const now = audioCtx.currentTime;
-                // Equal-power crossfade curve
-                const gainB = Math.cos(crossfadeValue * 0.5 * Math.PI);
-                const gainA = Math.sin(crossfadeValue * 0.5 * Math.PI);
-                gainBefore.gain.setTargetAtTime(gainB, now, 0.02);
-                gainAfter.gain.setTargetAtTime(gainA, now, 0.02);
-            }
-
-            // Update UI
-            if (crossfadeValue >= 0.6) {
-                btnAfter.classList.add('active');
-                btnBefore.classList.remove('active');
-                if (modeIndicator) {
-                    modeIndicator.className = 'mode-indicator';
-                    indicatorText.textContent = 'AI ENHANCED (320kbps HD)';
-                    indicatorText.style.color = '#38bdf8';
-                }
-                if (spectrumBadge) {
-                    spectrumBadge.textContent = 'Full Spectrum 20Hz – 20kHz';
-                    spectrumBadge.style.color = '#38bdf8';
-                }
-            } else if (crossfadeValue <= 0.4) {
-                btnBefore.classList.add('active');
-                btnAfter.classList.remove('active');
-                if (modeIndicator) {
-                    modeIndicator.className = 'mode-indicator original';
-                    indicatorText.textContent = 'BEFORE (Original 96–128kbps)';
-                    indicatorText.style.color = '#f59e0b';
-                }
-                if (spectrumBadge) {
-                    spectrumBadge.textContent = 'Low-Pass Rolloff @ 3.8kHz';
-                    spectrumBadge.style.color = '#f59e0b';
-                }
-            } else {
-                btnBefore.classList.remove('active');
-                btnAfter.classList.remove('active');
-                if (modeIndicator) {
-                    indicatorText.textContent = `A/B CROSSFADE (${Math.round(crossfadeValue * 100)}%)`;
-                    indicatorText.style.color = '#cbd5e1';
-                }
-            }
-        }
-
-        function playAudio(offset = 0) {
-            const ctx = getAudioContext();
-            if (!dspInputs) {
-                dspInputs = buildDSPChain(ctx);
-            }
-
-            stopAudio(false);
-
-            let buffer = null;
-            if (activePreset === 'custom' && customBuffer) {
-                buffer = customBuffer;
-            } else {
-                buffer = synthesizePresetBuffer(ctx, activePreset);
-            }
-
-            audioDuration = buffer.duration;
-            totalTimeEl.textContent = formatTime(audioDuration);
-
-            const source = ctx.createBufferSource();
-            source.buffer = buffer;
-            source.loop = true;
-
-            // Connect to both Before and After DSP chains
-            source.connect(dspInputs.inputBefore);
-            source.connect(dspInputs.inputAfter);
-
-            const currentOffset = offset % audioDuration;
-            source.start(0, currentOffset);
-            startTime = ctx.currentTime - currentOffset;
-            currentSourceNode = source;
-            isPlaying = true;
-
-            playIcon.classList.add('hidden');
-            pauseIcon.classList.remove('hidden');
-
-            updateCrossfade(crossfadeValue);
-            startVisualizerLoop();
-        }
-
-        function stopAudio(resetPosition = true) {
-            if (currentSourceNode) {
-                try {
-                    currentSourceNode.stop();
-                    currentSourceNode.disconnect();
-                } catch (e) {}
-                currentSourceNode = null;
-            }
-            isPlaying = false;
-            playIcon.classList.remove('hidden');
-            pauseIcon.classList.add('hidden');
-
-            if (resetPosition) {
-                pauseOffset = 0;
-                if (progressFill) progressFill.style.width = '0%';
-                if (currentTimeEl) currentTimeEl.textContent = '0:00';
-            }
-        }
-
-        function togglePlay() {
-            const ctx = getAudioContext();
-            if (isPlaying) {
-                pauseOffset = (ctx.currentTime - startTime) % audioDuration;
-                stopAudio(false);
-            } else {
-                playAudio(pauseOffset);
-            }
-        }
-
-        function formatTime(sec) {
-            const m = Math.floor(sec / 60);
-            const s = Math.floor(sec % 60);
-            return `${m}:${s < 10 ? '0' : ''}${s}`;
-        }
-
-        // Real-Time Canvas Spectrum Visualizer Loop
-        function startVisualizerLoop() {
-            if (animationFrameId) cancelAnimationFrame(animationFrameId);
-
-            const bufferLength = analyserNode ? analyserNode.frequencyBinCount : 64;
-            const dataArray = new Uint8Array(bufferLength);
-
-            function render() {
-                if (!canvasCtx || !canvas) return;
-
-                const width = canvas.width;
-                const height = canvas.height;
-
-                canvasCtx.clearRect(0, 0, width, height);
-
-                // Background grid lines
-                canvasCtx.strokeStyle = 'rgba(255, 255, 255, 0.04)';
-                canvasCtx.lineWidth = 1;
-                for (let y = 30; y < height; y += 30) {
-                    canvasCtx.beginPath();
-                    canvasCtx.moveTo(0, y);
-                    canvasCtx.lineTo(width, y);
-                    canvasCtx.stroke();
-                }
-
-                if (isPlaying && analyserNode && audioCtx) {
-                    analyserNode.getByteFrequencyData(dataArray);
-
-                    // Update time and progress bar
-                    const currentPos = (audioCtx.currentTime - startTime) % audioDuration;
-                    const progressPercent = (currentPos / audioDuration) * 100;
-                    if (progressFill) progressFill.style.width = `${progressPercent}%`;
-                    if (currentTimeEl) currentTimeEl.textContent = formatTime(currentPos);
-                } else if (!isPlaying) {
-                    // Gentle ambient idle waveform
-                    const idleTime = Date.now() * 0.003;
-                    for (let i = 0; i < bufferLength; i++) {
-                        dataArray[i] = Math.max(12, Math.sin(i * 0.2 + idleTime) * 20 + 25);
-                    }
-                }
-
-                // Draw Frequency Spectrum Bars
-                const barCount = 42;
-                const barSpacing = 4;
-                const totalSpacing = (barCount - 1) * barSpacing;
-                const barWidth = (width - totalSpacing) / barCount;
-
-                for (let i = 0; i < barCount; i++) {
-                    const dataIdx = Math.floor((i / barCount) * (bufferLength * 0.75));
-                    let value = dataArray[dataIdx] || 0;
-
-                    // If in "Before" mode, high frequencies roll off visually
-                    if (crossfadeValue < 0.5 && i > barCount * 0.45) {
-                        const rollOffFactor = Math.max(0.05, 1.0 - (i - barCount * 0.45) / (barCount * 0.4));
-                        value = value * rollOffFactor * (1.0 - crossfadeValue * 0.8);
-                    }
-
-                    const barHeight = Math.max(4, (value / 255) * (height - 20));
-                    const x = i * (barWidth + barSpacing);
-                    const y = height - barHeight;
-
-                    // Dynamic gradient depending on A/B state
-                    const grad = canvasCtx.createLinearGradient(0, height, 0, y);
-                    if (crossfadeValue > 0.6) {
-                        grad.addColorStop(0, '#0284c7');
-                        grad.addColorStop(0.5, '#38bdf8');
-                        grad.addColorStop(1, '#c084fc');
-                    } else if (crossfadeValue < 0.4) {
-                        grad.addColorStop(0, '#b45309');
-                        grad.addColorStop(0.6, '#f59e0b');
-                        grad.addColorStop(1, '#fde68a');
-                    } else {
-                        grad.addColorStop(0, '#475569');
-                        grad.addColorStop(0.5, '#38bdf8');
-                        grad.addColorStop(1, '#f59e0b');
-                    }
-
-                    canvasCtx.fillStyle = grad;
-                    canvasCtx.beginPath();
-                    canvasCtx.roundRect(x, y, barWidth, barHeight, [3, 3, 0, 0]);
-                    canvasCtx.fill();
-
-                    // Glow Peak Dot
-                    if (value > 40) {
-                        canvasCtx.fillStyle = crossfadeValue > 0.5 ? '#e0f2fe' : '#fef3c7';
-                        canvasCtx.fillRect(x, Math.max(2, y - 4), barWidth, 2);
-                    }
-                }
-
-                animationFrameId = requestAnimationFrame(render);
-            }
-
-            render();
-        }
-
-        // --- EVENT LISTENERS ---
-        if (playBtn) {
-            playBtn.addEventListener('click', togglePlay);
-        }
-
-        if (btnBefore) {
-            btnBefore.addEventListener('click', () => {
-                crossfadeSlider.value = 0;
-                updateCrossfade(0.0);
-            });
-        }
-
-        if (btnAfter) {
-            btnAfter.addEventListener('click', () => {
-                crossfadeSlider.value = 100;
-                updateCrossfade(1.0);
-            });
-        }
-
-        if (crossfadeSlider) {
-            crossfadeSlider.addEventListener('input', (e) => {
-                const val = parseFloat(e.target.value) / 100;
-                updateCrossfade(val);
-            });
-        }
-
-        // Preset Tabs Switching
-        presetTabs.forEach(tab => {
-            tab.addEventListener('click', () => {
-                const preset = tab.getAttribute('data-preset');
-                if (preset === activePreset) return;
-
-                presetTabs.forEach(t => {
-                    t.classList.remove('active');
-                    t.setAttribute('aria-selected', 'false');
-                });
-                tab.classList.add('active');
-                tab.setAttribute('aria-selected', 'true');
-
-                activePreset = preset;
-                if (isPlaying) {
-                    playAudio(0);
-                } else {
-                    pauseOffset = 0;
-                    if (progressFill) progressFill.style.width = '0%';
-                }
-            });
-        });
-
-        // Custom User File Upload
-        const customTabEl = document.querySelector('.custom-tab');
-        if (customTabEl && customAudioInput) {
-            customTabEl.addEventListener('click', () => {
-                if (activePreset === 'custom' && customBuffer) {
-                    customAudioInput.value = '';
-                    customAudioInput.click();
-                } else if (customBuffer) {
-                    presetTabs.forEach(t => {
-                        t.classList.remove('active');
-                        t.setAttribute('aria-selected', 'false');
-                    });
-                    customTabEl.classList.add('active');
-                    customTabEl.setAttribute('aria-selected', 'true');
-                    activePreset = 'custom';
-                    playAudio(0);
-                } else {
-                    customAudioInput.value = '';
-                    customAudioInput.click();
-                }
-            });
-        }
-
-        if (customAudioInput) {
-            customAudioInput.addEventListener('change', async (e) => {
-                const file = e.target.files[0];
-                if (!file) return;
-
-                const ctx = getAudioContext();
-                try {
-                    const arrayBuffer = await file.arrayBuffer();
-                    customBuffer = await ctx.decodeAudioData(arrayBuffer);
-                    activePreset = 'custom';
-
-                    presetTabs.forEach(t => {
-                        t.classList.remove('active');
-                        t.setAttribute('aria-selected', 'false');
-                    });
-                    const customTab = customAudioInput.closest('.custom-tab') || customTabEl;
-                    if (customTab) {
-                        customTab.classList.add('active');
-                        customTab.setAttribute('aria-selected', 'true');
-                    }
-
-                    playAudio(0);
-                } catch (err) {
-                    console.error("Error decoding audio file for preview:", err);
-                    alert("Could not decode this audio file. Please try an MP3, WAV, or OGG file.");
-                }
-            });
-        }
-
-        // Scrubbing on Timeline
-        if (progressContainer) {
-            progressContainer.addEventListener('click', (e) => {
-                const rect = progressContainer.getBoundingClientRect();
-                const clickPos = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
-                const targetTime = clickPos * audioDuration;
-
-                if (isPlaying) {
-                    playAudio(targetTime);
-                } else {
-                    pauseOffset = targetTime;
-                    if (progressFill) progressFill.style.width = `${clickPos * 100}%`;
-                    if (currentTimeEl) currentTimeEl.textContent = formatTime(targetTime);
-                }
-            });
-        }
-
-        // CTA: Enhance My Tracks button
-        if (tryOnFilesBtn) {
-            tryOnFilesBtn.addEventListener('click', () => {
-                const uploadContainer = document.getElementById('conversionToolContainer') || document.getElementById('dropZone');
-                const upscaleAudioCheckbox = document.getElementById('upscaleAudio');
-
-                if (upscaleAudioCheckbox) {
-                    upscaleAudioCheckbox.checked = true;
-                }
-
-                if (uploadContainer) {
-                    uploadContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    uploadContainer.style.transition = 'box-shadow 0.3s ease';
-                    uploadContainer.style.boxShadow = '0 0 25px rgba(255, 85, 0, 0.4)';
-                    setTimeout(() => {
-                        uploadContainer.style.boxShadow = '';
-                    }, 1800);
-                }
-            });
-        }
-
-        // Initialize visualizer idle loop on page load
-        startVisualizerLoop();
-    })();
-
     // --- FETCH GLOBAL STATS ON LOAD ---
     const fetchGlobalStats = async () => {
         try {
@@ -1614,4 +1065,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     fetchGlobalStats();
     window.fetchGlobalStats = fetchGlobalStats;
-});
+
+    // --- MOBILE QR CODE BRIDGE TOGGLE ---
+    window.toggleRingtoneQr = function() {
+        const box = document.getElementById('ringtoneQrBox');
+        if (box) {
+            box.style.display = box.style.display === 'none' ? 'flex' : 'none';
+        }
+    };
+});

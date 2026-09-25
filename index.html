@@ -129,7 +129,8 @@
         <div class="header-container">
             <div class="header-brand">
                 <button class="menu-toggle" aria-label="Toggle Navigation">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
                         <line x1="3" y1="12" x2="21" y2="12"></line>
                         <line x1="3" y1="6" x2="21" y2="6"></line>
                         <line x1="3" y1="18" x2="21" y2="18"></line>
@@ -142,7 +143,9 @@
             <nav class="header-nav" aria-label="Main Navigation">
                 <ul class="header-nav-list">
                     <li><a href="index.html" class="header-nav-link active">Converter</a></li>
+                    <li><a href="video-to-ringtone.html" class="header-nav-link">Ringtone Maker</a></li>
                     <li><a href="ai-audio-enhancer.html" class="header-nav-link">Audio Enhancer</a></li>
+                    <li><a href="audio-inspector.html" class="header-nav-link">Audio Inspector</a></li>
                     <li><a href="supported-sites.html" class="header-nav-link">Supported Sites</a></li>
                     <li><a href="top-album-art.html" class="header-nav-link">Top Album Art</a></li>
                     <li><a href="shop.html" class="header-nav-link">Gear Shop</a></li>
@@ -150,10 +153,19 @@
                 </ul>
             </nav>
             <div class="header-actions">
+                <a href="#accountSection" id="headerLoginLink" class="header-auth-link">Sign In / Pricing</a>
+                <div id="headerUserNav" class="header-user-badge hidden">
+                    <a href="#accountSection" class="header-credit-chip" title="View credits &amp; account">
+                        <span class="header-credit-icon">⚡</span>
+                        <span class="header-credit-text"><strong id="headerPaidCreditsDisplay">0</strong> Credits</span>
+                    </a>
+                    <button id="headerLogoutBtn" class="header-logout-chip" title="Sign Out">Log Out</button>
+                </div>
                 <a href="https://www.instagram.com/mp3aud.io?igsh=ZXljNzMxaGtqdWwz&utm_source=qr" target="_blank"
-                    aria-label="Follow us on Instagram" style="color: #64748b; display: flex; align-items: center; transition: color 0.2s;">
-                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor"
-                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    aria-label="Follow us on Instagram"
+                    style="color: #64748b; display: flex; align-items: center; transition: color 0.2s;">
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
                         <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
                         <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
                         <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
@@ -183,7 +195,8 @@
                                 <polyline points="7 9 12 4 17 9"></polyline>
                                 <line x1="12" y1="4" x2="12" y2="16"></line>
                             </svg>
-                            <span id="fileInputText" style="pointer-events: none; font-weight: 500;">Click to select files,
+                            <span id="fileInputText" style="pointer-events: none; font-weight: 500;">Click to select
+                                files,
                                 or drag & drop here...</span>
                         </label>
                         <div class="dropzone-controls-row">
@@ -236,13 +249,21 @@
                         </div>
 
                         <div class="inline-ai-toggle compact-toggle">
-                            <label class="switch" aria-label="Convert Video to MP3">
+                            <label class="switch" aria-label="Convert Video to MP3 & Phone Ringtone">
                                 <input type="checkbox" id="videoToMp3" name="videoToMp3">
                                 <span class="slider round"></span>
                             </label>
                             <div class="toggle-text">
-                                <span class="feature-title">Video to MP3</span>
-                                <span class="premium-badge">5 Credits</span>
+                                <div class="toggle-title-row">
+                                    <span class="feature-title">Video to MP3</span>
+                                    <button type="button" class="ringtone-info-trigger" onclick="openModal('ringtoneModal')" title="View Phone Ringtone Setup Directions" aria-label="Phone Ringtone Setup Directions">
+                                        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                            <rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect>
+                                            <line x1="12" y1="18" x2="12.01" y2="18"></line>
+                                        </svg>
+                                    </button>
+                                </div>
+                                <span class="premium-badge">5 Credits &middot; Ringtone</span>
                             </div>
                         </div>
 
@@ -263,7 +284,7 @@
                         <button id="cancelBtn" class="hidden" aria-label="Cancel processing">Cancel</button>
                     </div>
 
-                    <div id="thumbnailContainer" class="hidden" style="margin-top: 20px; text-align: center;">
+                    <div id="thumbnailContainer" class="hidden" style="margin-top: 10px; text-align: center;">
                         <img id="currentThumbnail" src="" alt="Media Thumbnail"
                             style="max-width: 160px; width: 100%; height: auto; border-radius: 8px; box-shadow: 0 6px 12px rgba(0,0,0,0.15); transition: opacity 0.3s ease;">
                     </div>
@@ -285,33 +306,65 @@
             </div>
 
             <header class="logo-container">
-                <h1 class="main-headline">Web-Based Music Album Art Tagger, Downloader & Audio Enhancer</h1>
+                <div class="header-eyebrow">
+                    <svg viewBox="0 0 24 24" width="10" height="10" fill="#FF5500">
+                        <polygon
+                            points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                    </svg>
+                    AI-Powered Music Tagging
+                </div>
+                <h1 class="main-headline">The Force Behind Your <span class="accent">Music Library</span></h1>
                 <h2 class="main-subheadline">
-                    The ultimate web-based music album art tagger, downloader, and audio enhancer. Automatically fetch and embed high-resolution
-                    album art, edit ID3 metadata, upscale audio quality, and transcribe lyrics directly in your browser with no software required.
+                    Converting videos to MP3 or organizing tracks ripped from CDs, vinyl, and cassettes?
+                    Automatically apply high-resolution album art, edit ID3 metadata, and transcribe lyrics &mdash;
+                    no software required.
                 </h2>
-                <p class="subtitle" style="font-size: 1.05rem; margin-top: 5px; color: #475569;">
-                    Conversions cost 1 credit per track.
-                    Audio enhancement and lyrics are optional upgrades that require additional credits.
+                <p class="header-note">
+                    Your first 5 conversions are always free &middot; Additional conversions cost 1 credit or more per
+                    track
                 </p>
             </header>
 
             <!-- =========================================
-                 INTERACTIVE BEFORE / AFTER AUDIO PREVIEWER
+                 INTERACTIVE BEFORE / AFTER AUDIO PREVIEWER DECK
                  ========================================= -->
-            <section class="audio-preview-section" id="audioEnhancerPreviewer" aria-label="Interactive Audio Enhancer Demo">
-                <div class="preview-badge">
-                    <span class="preview-badge-pulse"></span>
-                    <span>LIVE INTERACTIVE PREVIEW</span>
+            <section class="audio-preview-section" id="audioEnhancerPreviewer"
+                aria-label="Interactive Audio Enhancer Demo">
+                <div class="preview-header">
+                    <div class="preview-badge">
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor"
+                            stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                            <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                        </svg>
+                        <span>Interactive Audio Enhancer Demo</span>
+                    </div>
+                    <h2 class="preview-title">Hear the Before &amp; After Difference</h2>
+                    <p class="preview-subtitle">Listen to real-time audio samples or upload your own tracks. Toggle
+                        between muffled 96–128kbps originals and crystal-clear 320kbps AI-enhanced masters.</p>
                 </div>
-                
-                <h2 class="preview-title">Hear the AI Audio Enhancement Difference</h2>
-                <p class="preview-subtitle">
-                    Toggle in real-time between raw, muffled low-bitrate audio and our studio-grade 320kbps AI-restored output.
-                    Hear the restored high frequencies, punchy low-end, and expansive dynamic clarity.
-                </p>
 
                 <div class="preview-player-card">
+                    <!-- Master Tool Switcher Tabs -->
+                    <div class="master-deck-tabs" role="tablist" aria-label="Audio tool mode selection">
+                        <button type="button" class="master-deck-tab active" id="masterTabEnhancer" role="tab"
+                            aria-selected="true">
+                            <span class="master-tab-icon">🎚️</span>
+                            <div class="master-tab-content">
+                                <span class="master-tab-title">AI Sound Enhancer</span>
+                                <span class="master-tab-desc">Listen &amp; A/B Crossfade Sound</span>
+                            </div>
+                        </button>
+                        <button type="button" class="master-deck-tab" id="masterTabInspector" role="tab"
+                            aria-selected="false">
+                            <span class="master-tab-icon">📊</span>
+                            <div class="master-tab-content">
+                                <span class="master-tab-title">True Bitrate Inspector</span>
+                                <span class="master-tab-desc">Audit 22kHz Cutoffs &amp; Purity</span>
+                            </div>
+                        </button>
+                    </div>
+
                     <!-- Preset Selection Tabs -->
                     <div class="preset-tabs" role="tablist" aria-label="Audio sample presets">
                         <button class="preset-tab active" data-preset="vocals" role="tab" aria-selected="true">
@@ -325,38 +378,78 @@
                             <span class="tab-sub">Punchy Sub &amp; 320k Highs</span>
                         </button>
                         <button class="preset-tab" data-preset="acoustic" role="tab" aria-selected="false">
-                            <span class="tab-icon">🎸</span>
-                            <span class="tab-label">Acoustic &amp; Strings</span>
+                            <span class="tab-icon">🎹</span>
+                            <span class="tab-label">Piano &amp; Acoustic</span>
                             <span class="tab-sub">Resonance &amp; Dynamic Range</span>
                         </button>
-                        <div class="preset-tab custom-tab" id="testFileTab" role="tab" aria-selected="false"
-                            title="Test with your own MP3 or audio file" tabindex="0">
-                            <span class="tab-icon">📁</span>
-                            <span class="tab-label" id="testFileTabLabel">Test Your File</span>
-                            <span class="tab-sub" id="testFileTabSub">Instant Live Demo</span>
-                            <input type="file" id="previewCustomAudioInput" accept="audio/*,.mp3,.wav,.flac,.aac,.ogg,.m4a,.wma,.opus" style="display: none;">
+                    </div>
+
+                    <!-- Dedicated Preview Drag & Drop Window -->
+                    <div class="preview-dropzone-wrapper">
+                        <label for="previewCustomAudioInput" class="preview-dropzone-box" id="previewDropzoneBox">
+                            <input type="file" id="previewCustomAudioInput"
+                                accept="audio/*,.mp3,.wav,.flac,.aac,.ogg,.m4a,.wma,.opus" style="display: none;">
+                            <svg class="preview-dropzone-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="17 8 12 3 7 8"></polyline>
+                                <line x1="12" y1="3" x2="12" y2="15"></line>
+                            </svg>
+                            <div class="preview-dropzone-text">
+                                <span class="preview-dropzone-main">Drag &amp; Drop Your Own Audio File Here to
+                                    Test</span>
+                                <span class="preview-dropzone-sub">Click to browse or drop any MP3, WAV, FLAC &bull;
+                                    100% processed in your browser</span>
+                            </div>
+                        </label>
+
+                        <!-- Loaded File Banner Pill -->
+                        <div class="preview-loaded-file-pill" id="previewLoadedFilePill">
+                            <div class="loaded-file-info">
+                                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor"
+                                    stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M9 18V5l12-2v13"></path>
+                                    <circle cx="6" cy="18" r="3"></circle>
+                                    <circle cx="18" cy="16" r="3"></circle>
+                                </svg>
+                                <span id="previewLoadedFileName">my_track.mp3</span>
+                                <span style="color: #86efac; font-size: 0.75rem; font-weight: 500;"
+                                    id="previewLoadedFileSize">(3.2 MB)</span>
+                            </div>
+                            <button type="button" class="loaded-file-clear-btn" id="previewLoadedFileClearBtn"
+                                title="Unload custom file and return to studio presets">
+                                Unload File &times;
+                            </button>
                         </div>
                     </div>
 
                     <!-- Visualizer Canvas & Mode Header -->
                     <div class="visualizer-container">
-                        <div class="visualizer-overlay-info">
-                            <div class="mode-indicator" id="previewModeIndicator">
-                                <span class="indicator-dot enhanced"></span>
-                                <span class="indicator-text" id="indicatorText">AI ENHANCED (320kbps HD)</span>
+
+                        <!-- Spectrogram Cutoff Overlay -->
+                        <div class="spectrogram-cutoff-overlay" id="spectrogramOverlay">
+                            <div class="cutoff-grid-line line-20k">
+                                <span class="cutoff-tag">20 kHz — True 320kbps HD</span>
+                                <span>20,000 Hz</span>
                             </div>
-                            <div class="spectrum-badge" id="spectrumBadge">
-                                Full Spectrum 20Hz – 20kHz
+                            <div class="cutoff-grid-line line-16k">
+                                <span class="cutoff-tag">15.5–16 kHz — 128kbps Cutoff</span>
+                                <span>16,000 Hz</span>
+                            </div>
+                            <div class="cutoff-grid-line line-10k">
+                                <span class="cutoff-tag">10.5 kHz — Muffled Level</span>
+                                <span>10,500 Hz</span>
                             </div>
                         </div>
+
                         <canvas id="enhancerVisualizerCanvas" width="800" height="180"></canvas>
                         <div class="waveform-progress-bar" id="waveformProgressContainer">
                             <div class="waveform-progress-fill" id="waveformProgressFill"></div>
                         </div>
                     </div>
 
-                    <!-- Main A/B Switcher Deck -->
-                    <div class="ab-control-deck">
+                    <!-- Control Deck (Mode 1: Enhancer A/B Crossfader) -->
+                    <div class="ab-control-deck" id="enhancerControlsDeck">
                         <div class="ab-switch-wrapper">
                             <button class="ab-btn" id="btnBefore" type="button">
                                 <span class="ab-btn-tag">BEFORE</span>
@@ -370,7 +463,8 @@
                                     <span class="slider-hint">Drag to crossfade</span>
                                     <span>Enhanced (100%)</span>
                                 </div>
-                                <input type="range" id="abCrossfadeSlider" min="0" max="100" value="100" aria-label="Crossfade between original and enhanced audio">
+                                <input type="range" id="abCrossfadeSlider" min="0" max="100" value="100"
+                                    aria-label="Crossfade between original and enhanced audio">
                             </div>
 
                             <button class="ab-btn active" id="btnAfter" type="button">
@@ -381,101 +475,431 @@
                         </div>
                     </div>
 
+                    <!-- Control Deck (Mode 2: Inspector Diagnostic HUD) -->
+                    <div class="deck-inspector-hud" id="inspectorControlsDeck" style="display: none;">
+                        <div class="deck-hud-pill">
+                            <div class="deck-hud-label">Audio Purity Grade</div>
+                            <div class="deck-hud-val" id="deckPurityGrade" style="color: #4ade80;">GRADE A+</div>
+                            <div class="deck-hud-sub" id="deckPuritySub">Studio Master (20kHz+ Highs)</div>
+                        </div>
+                        <div class="deck-hud-pill">
+                            <div class="deck-hud-label">Frequency Cutoff</div>
+                            <div class="deck-hud-val" id="deckCutoffVal">21,400 Hz</div>
+                            <div class="deck-hud-sub" id="deckCutoffSub">No artificial lowpass shelf</div>
+                        </div>
+                        <div class="deck-hud-pill">
+                            <div class="deck-hud-label">Estimated True Bitrate</div>
+                            <div class="deck-hud-val" id="deckBitrateVal" style="color: #4ade80;">True 320 kbps</div>
+                            <div class="deck-hud-sub" id="deckBitrateSub">Verified authentic master</div>
+                        </div>
+                    </div>
+
                     <!-- Player Controls Row -->
                     <div class="preview-transport-row">
                         <button class="preview-play-btn" id="previewPlayBtn" aria-label="Play or pause audio preview">
                             <svg id="playIcon" viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
                                 <polygon points="6 3 20 12 6 21 6 3"></polygon>
                             </svg>
-                            <svg id="pauseIcon" class="hidden" viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
+                            <svg id="pauseIcon" class="hidden" viewBox="0 0 24 24" width="22" height="22"
+                                fill="currentColor" style="display:none;">
                                 <rect x="6" y="4" width="4" height="16"></rect>
                                 <rect x="14" y="4" width="4" height="16"></rect>
                             </svg>
                         </button>
 
                         <div class="preview-time-display">
-                            <span id="previewCurrentTime">0:00</span> / <span id="previewTotalTime">0:15</span>
+                            <span id="previewCurrentTime">0:00</span> / <span id="previewTotalTime">0:16</span>
                         </div>
 
-                        <div class="preview-enhancement-metrics">
+                        <div class="preview-enhancement-metrics" id="enhancerMetrics">
                             <span class="metric-pill">
-                                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+                                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor"
+                                    stroke-width="2">
                                     <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
                                 </svg>
                                 Clarity +4.5dB
                             </span>
                             <span class="metric-pill">
-                                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+                                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor"
+                                    stroke-width="2">
                                     <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
                                     <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
                                 </svg>
                                 320k Highs
                             </span>
                             <span class="metric-pill">
-                                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+                                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor"
+                                    stroke-width="2">
                                     <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
                                 </svg>
                                 Studio -14 LUFS
                             </span>
                         </div>
 
-                        <div class="preview-cta-wrapper">
-                            <button id="previewTryOnFilesBtn" class="preview-cta-btn">
-                                <span>Enhance My Tracks</span>
-                                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                    <line x1="12" y1="19" x2="12" y2="5"></line>
-                                    <polyline points="5 12 12 5 19 12"></polyline>
+                        <div class="preview-cta-wrapper" id="enhancerCtaWrap">
+                            <button class="preview-cta-btn"
+                                onclick="document.getElementById('dropZone').scrollIntoView({behavior:'smooth'})">
+                                <span>Enhance My Tracks Now</span>
+                                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor"
+                                    stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                                    <polyline points="12 5 19 12 12 19"></polyline>
                                 </svg>
                             </button>
+                        </div>
+
+                        <div class="preview-cta-wrapper" id="inspectorCtaWrap" style="display: none;">
+                            <a href="audio-inspector.html" class="preview-cta-btn" style="text-decoration: none;">
+                                <span>Open Full Spectrogram Studio</span>
+                                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor"
+                                    stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                                    <polyline points="12 5 19 12 12 19"></polyline>
+                                </svg>
+                            </a>
                         </div>
                     </div>
                 </div>
             </section>
 
-
-            <section class="seo-features-section" aria-label="Features & Benefits">
-                <h2 class="seo-section-title">Why Choose MP3aud.io as Your Web-Based Album Art Tagger, Downloader & Audio Enhancer?</h2>
-                
-                <div class="seo-feature-grid">
-                    <div class="seo-feature-card">
-                        <div class="seo-feature-icon">
-                            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
-                        </div>
-                        <div class="seo-feature-text">
-                            <h3>Web-Based Album Art Tagger, Downloader & Audio Enhancer</h3>
-                            <p>Automatically find, fetch, and embed high-resolution album cover art directly into your audio file tags. As a complete web-based music album art tagger, downloader, and audio enhancer, MP3aud.io keeps your music library visually organized and sounding pristine across all devices and media players.</p>
-                        </div>
+            <section class="comparison-section" aria-label="Feature &amp; Benefit Comparison">
+                <div class="comparison-header">
+                    <div class="comparison-badge">
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor"
+                            stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <polygon
+                                points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2">
+                            </polygon>
+                        </svg>
+                        <span>Feature Comparison</span>
                     </div>
+                    <h2 class="comparison-title">How MP3aud.io Compares</h2>
+                    <p class="comparison-subtitle">Fast, automated in-browser video-to-MP3 conversion, AI tagging, and audio enhancement vs.
+                        traditional desktop tools.</p>
+                </div>
 
-                    <div class="seo-feature-card">
-                        <div class="seo-feature-icon">
-                            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>
-                        </div>
-                        <div class="seo-feature-text">
-                            <h3>AI-Powered Lyric Transcription</h3>
-                            <p>Our advanced artificial intelligence listens to your audio tracks, transcribes the lyrics with incredible accuracy, and embeds the text metadata right into the MP3 file tags for synchronized display on any device.</p>
-                        </div>
-                    </div>
-
-                    <div class="seo-feature-card">
-                        <div class="seo-feature-icon">
-                            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
-                        </div>
-                        <div class="seo-feature-text">
-                            <h3>High-Fidelity Audio Enhancer</h3>
-                            <p>Upscale and normalize audio files to 320kbps MP3 format. Improve sound clarity, boost audio definition, and ensure balanced volumes across your entire local music library.</p>
-                        </div>
-                    </div>
-
-                    <div class="seo-feature-card">
-                        <div class="seo-feature-icon">
-                            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path><line x1="12" y1="11" x2="12" y2="17"></line><line x1="9" y1="14" x2="15" y2="14"></line></svg>
-                        </div>
-                        <div class="seo-feature-text">
-                            <h3>Batch File Processing</h3>
-                            <p>Upload and process entire folders of tracks in one click. Our background processing pipeline works smoothly, organizing your enhanced and tagged music library into a clean, ready-to-download ZIP archive.</p>
-                        </div>
-                    </div>
+                <!-- Clean Comparison Table -->
+                <div class="comparison-table-wrapper">
+                    <table class="comparison-table">
+                        <thead>
+                            <tr>
+                                <th>Capability</th>
+                                <th class="col-highlight">
+                                    <div class="mp3audio-brand-cell">
+                                        <span class="brand-name">MP3aud.io</span>
+                                        <span class="brand-tag">★ Web AI</span>
+                                    </div>
+                                </th>
+                                <th>Mp3tag</th>
+                                <th>MusicBrainz</th>
+                                <th>Manual / DAW</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="feature-title-cell">100% In-Browser (No Install)</td>
+                                <td class="col-highlight">
+                                    <span class="status-pill status-highlight-yes">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+                                            stroke-linecap="round" stroke-linejoin="round">
+                                            <polyline points="20 6 9 17 4 12"></polyline>
+                                        </svg>
+                                        Instant Web App
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="status-pill status-no">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+                                            stroke-linecap="round" stroke-linejoin="round">
+                                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                                        </svg>
+                                        App Install Req.
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="status-pill status-no">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+                                            stroke-linecap="round" stroke-linejoin="round">
+                                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                                        </svg>
+                                        App Install Req.
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="status-pill status-no">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+                                            stroke-linecap="round" stroke-linejoin="round">
+                                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                                        </svg>
+                                        Multiple Tools
+                                    </span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="feature-title-cell">Video to MP3 Conversion</td>
+                                <td class="col-highlight">
+                                    <span class="status-pill status-highlight-yes">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+                                            stroke-linecap="round" stroke-linejoin="round">
+                                            <polyline points="20 6 9 17 4 12"></polyline>
+                                        </svg>
+                                        Built-In (MP4, MOV, WebM)
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="status-pill status-no">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+                                            stroke-linecap="round" stroke-linejoin="round">
+                                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                                        </svg>
+                                        No Video Support
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="status-pill status-no">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+                                            stroke-linecap="round" stroke-linejoin="round">
+                                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                                        </svg>
+                                        Audio Only
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="status-pill status-partial">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                                            stroke-linecap="round" stroke-linejoin="round">
+                                            <circle cx="12" cy="12" r="10"></circle>
+                                            <line x1="12" y1="8" x2="12" y2="12"></line>
+                                            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                                        </svg>
+                                        Separate Converter Req.
+                                    </span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="feature-title-cell">3000px Ultra-HD Cover Art</td>
+                                <td class="col-highlight">
+                                    <span class="status-pill status-highlight-yes">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+                                            stroke-linecap="round" stroke-linejoin="round">
+                                            <polyline points="20 6 9 17 4 12"></polyline>
+                                        </svg>
+                                        Auto Apple Music HD
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="status-pill status-partial">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                                            stroke-linecap="round" stroke-linejoin="round">
+                                            <circle cx="12" cy="12" r="10"></circle>
+                                            <line x1="12" y1="8" x2="12" y2="12"></line>
+                                            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                                        </svg>
+                                        Manual Search
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="status-pill status-partial">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                                            stroke-linecap="round" stroke-linejoin="round">
+                                            <circle cx="12" cy="12" r="10"></circle>
+                                            <line x1="12" y1="8" x2="12" y2="12"></line>
+                                            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                                        </svg>
+                                        Community DB
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="status-pill status-no">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+                                            stroke-linecap="round" stroke-linejoin="round">
+                                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                                        </svg>
+                                        Manual Crop
+                                    </span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="feature-title-cell">AI Lyric Transcription</td>
+                                <td class="col-highlight">
+                                    <span class="status-pill status-highlight-yes">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+                                            stroke-linecap="round" stroke-linejoin="round">
+                                            <polyline points="20 6 9 17 4 12"></polyline>
+                                        </svg>
+                                        Auto Synced AI
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="status-pill status-no">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+                                            stroke-linecap="round" stroke-linejoin="round">
+                                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                                        </svg>
+                                        Manual Paste
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="status-pill status-no">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+                                            stroke-linecap="round" stroke-linejoin="round">
+                                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                                        </svg>
+                                        No Lyrics
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="status-pill status-no">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+                                            stroke-linecap="round" stroke-linejoin="round">
+                                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                                        </svg>
+                                        Manual Scraping
+                                    </span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="feature-title-cell">320kbps AI Audio Enhancer</td>
+                                <td class="col-highlight">
+                                    <span class="status-pill status-highlight-yes">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+                                            stroke-linecap="round" stroke-linejoin="round">
+                                            <polyline points="20 6 9 17 4 12"></polyline>
+                                        </svg>
+                                        Studio EQ &amp; 320k
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="status-pill status-no">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+                                            stroke-linecap="round" stroke-linejoin="round">
+                                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                                        </svg>
+                                        Metadata Only
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="status-pill status-no">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+                                            stroke-linecap="round" stroke-linejoin="round">
+                                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                                        </svg>
+                                        Metadata Only
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="status-pill status-no">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+                                            stroke-linecap="round" stroke-linejoin="round">
+                                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                                        </svg>
+                                        Requires DAW
+                                    </span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="feature-title-cell">1-Click Batch Folder ZIP</td>
+                                <td class="col-highlight">
+                                    <span class="status-pill status-highlight-yes">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+                                            stroke-linecap="round" stroke-linejoin="round">
+                                            <polyline points="20 6 9 17 4 12"></polyline>
+                                        </svg>
+                                        Instant ZIP Export
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="status-pill status-partial">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                                            stroke-linecap="round" stroke-linejoin="round">
+                                            <circle cx="12" cy="12" r="10"></circle>
+                                            <line x1="12" y1="8" x2="12" y2="12"></line>
+                                            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                                        </svg>
+                                        Local Files Only
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="status-pill status-partial">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                                            stroke-linecap="round" stroke-linejoin="round">
+                                            <circle cx="12" cy="12" r="10"></circle>
+                                            <line x1="12" y1="8" x2="12" y2="12"></line>
+                                            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                                        </svg>
+                                        Multi-Step
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="status-pill status-no">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+                                            stroke-linecap="round" stroke-linejoin="round">
+                                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                                        </svg>
+                                        One-By-One
+                                    </span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="feature-title-cell">Cross-Platform &amp; Mobile</td>
+                                <td class="col-highlight">
+                                    <span class="status-pill status-highlight-yes">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+                                            stroke-linecap="round" stroke-linejoin="round">
+                                            <polyline points="20 6 9 17 4 12"></polyline>
+                                        </svg>
+                                        All Devices &amp; Web
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="status-pill status-partial">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                                            stroke-linecap="round" stroke-linejoin="round">
+                                            <circle cx="12" cy="12" r="10"></circle>
+                                            <line x1="12" y1="8" x2="12" y2="12"></line>
+                                            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                                        </svg>
+                                        Desktop Only
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="status-pill status-partial">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                                            stroke-linecap="round" stroke-linejoin="round">
+                                            <circle cx="12" cy="12" r="10"></circle>
+                                            <line x1="12" y1="8" x2="12" y2="12"></line>
+                                            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                                        </svg>
+                                        Desktop Only
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="status-pill status-partial">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                                            stroke-linecap="round" stroke-linejoin="round">
+                                            <circle cx="12" cy="12" r="10"></circle>
+                                            <line x1="12" y1="8" x2="12" y2="12"></line>
+                                            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                                        </svg>
+                                        Varies by OS
+                                    </span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </section>
 
@@ -484,14 +908,101 @@
                  ========================================= -->
             <section class="account-credits-section" id="accountSection" aria-label="Account and credits management">
                 <div id="rightSideColumn">
-                    <!-- 2-Column Side-by-Side Pricing Cards: Free Tier & Pay As You Go -->
-                    <div class="pricing-cards-grid">
+                    <!-- Logged In View: Account Dashboard & Buy Credits Side-by-Side -->
+                    <div id="userDashboard" class="pricing-cards-grid hidden">
+                        <!-- Account Details Card -->
+                        <div class="pricing-plan-card user-dashboard-card auth-box">
+                            <div>
+                                <div class="plan-card-header">
+                                    <div class="plan-title-row">
+                                        <svg viewBox="0 0 24 24" width="22" height="22" stroke="#2563eb"
+                                            stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                            <circle cx="12" cy="7" r="4"></circle>
+                                        </svg>
+                                        <h3 class="plan-card-title user-account-title">My Account</h3>
+                                    </div>
+                                    <span class="plan-pill user-active-pill">● LOGGED IN</span>
+                                </div>
+                                <div class="user-info-row">
+                                    <span class="user-info-label">Active Account</span>
+                                    <div id="userEmailDisplay" class="user-email-badge">...</div>
+                                </div>
+                                <div class="user-credit-balance-box">
+                                    <span class="credit-balance-subtitle">Available AI Track Credits</span>
+                                    <div class="credit-balance-count">
+                                        <span id="paidCreditsDisplay">0</span>
+                                        <span class="credit-balance-unit">Credits</span>
+                                    </div>
+                                </div>
+                                <ul class="plan-features-list user-account-list">
+                                    <li><strong>Cover Art &amp; ID3 Tagging:</strong> Free</li>
+                                    <li><strong>AI 320k Enhancer:</strong> 1 credit / track</li>
+                                    <li><strong>Video to MP3:</strong> 5 credits / track</li>
+                                    <li><strong>AI Synced Lyrics:</strong> 10 credits / track</li>
+                                    <li><strong>Priority Processing Queue:</strong> Active</li>
+                                </ul>
+                            </div>
+                            <div class="account-card-footer">
+                                <button id="logoutBtn" class="btn-logout-action">Sign Out</button>
+                            </div>
+                        </div>
+
+                        <!-- Buy Credits Card (Logged In) -->
+                        <div id="workspacePricingContainer" class="pricing-plan-card payg-tier-card auth-box">
+                            <div>
+                                <div class="plan-card-header">
+                                    <div class="plan-title-row">
+                                        <svg viewBox="0 0 24 24" width="22" height="22" stroke="#d97706"
+                                            stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                                        </svg>
+                                        <h3 class="plan-card-title payg-title">Add Track Credits</h3>
+                                    </div>
+                                    <span class="plan-pill payg-pill">NO EXPIRATION</span>
+                                </div>
+                                <div class="plan-price-row">
+                                    <span class="plan-price payg-price">$3.99</span>
+                                    <span class="plan-price-period payg-period">/ 350 Track Credits</span>
+                                </div>
+                                <p class="plan-card-desc payg-desc">
+                                    <strong>Instant credit top-up.</strong> Credits never expire and immediately unlock
+                                    batch high-speed AI processing:
+                                </p>
+                                <ul class="plan-features-list payg-list">
+                                    <li><strong>+350 Track Credits</strong> (~$0.011 per conversion)</li>
+                                    <li><strong>AI 320k Bitrate Enhancer</strong> (1 credit per track)</li>
+                                    <li><strong>Video to MP3 Conversion</strong> (5 credits per track)</li>
+                                    <li><strong>AI Synced Lyrics Transcription</strong> (10 credits per track)</li>
+                                    <li><strong>Priority Queue access</strong> to skip busy queues</li>
+                                    <li><strong>One-time purchase</strong> &middot; No recurring monthly fees</li>
+                                </ul>
+                            </div>
+                            <div class="buy-credits-action-wrap">
+                                <button id="buyCreditsBtn" class="premium-btn buy-credits-btn">Buy 350 Credits
+                                    ($3.99)</button>
+                                <span class="secure-checkout-hint">
+                                    <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor"
+                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                                        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                                    </svg>
+                                    Instant Stripe Checkout &middot; Encrypted &amp; Secure
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Guest / Logged Out View: Free Tier & Pay As You Go Login -->
+                    <div id="guestPricingGrid" class="pricing-cards-grid">
                         <!-- Free Tier Card -->
                         <div class="pricing-plan-card free-tier-card auth-box">
                             <div>
                                 <div class="plan-card-header">
                                     <div class="plan-title-row">
-                                        <svg viewBox="0 0 24 24" width="22" height="22" stroke="#059669" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                        <svg viewBox="0 0 24 24" width="22" height="22" stroke="#059669"
+                                            stroke-width="2.5" fill="none" stroke-linecap="round"
+                                            stroke-linejoin="round">
                                             <path d="M20 6L9 17l-5-5"></path>
                                         </svg>
                                         <h3 class="plan-card-title free-title">Free Tier</h3>
@@ -503,7 +1014,8 @@
                                     <span class="plan-price-period free-period">/ 5 Free Track Conversions</span>
                                 </div>
                                 <p class="plan-card-desc free-desc">
-                                    <strong>Instant in-browser conversions with zero commitments.</strong> Perfect for tagging songs, ripping CDs, and quick albums:
+                                    <strong>Instant in-browser conversions with zero commitments.</strong> Perfect for
+                                    tagging songs, ripping CDs, and quick albums:
                                 </p>
                                 <ul class="plan-features-list free-list">
                                     <li><strong>5 Free track conversions</strong> every session</li>
@@ -520,7 +1032,8 @@
                             <div>
                                 <div class="plan-card-header">
                                     <div class="plan-title-row">
-                                        <svg viewBox="0 0 24 24" width="22" height="22" stroke="#d97706" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                        <svg viewBox="0 0 24 24" width="22" height="22" stroke="#d97706"
+                                            stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
                                             <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
                                         </svg>
                                         <h3 class="plan-card-title payg-title">Pay As You Go</h3>
@@ -532,7 +1045,8 @@
                                     <span class="plan-price-period payg-period">/ 350 Track Credits</span>
                                 </div>
                                 <p class="plan-card-desc payg-desc">
-                                    <strong>Convert entire collections with flexible AI credits.</strong> Enter your email below to log in or purchase credits:
+                                    <strong>Convert entire collections with flexible AI credits.</strong> Enter your
+                                    email below to log in or purchase credits:
                                 </p>
                                 <ul class="plan-features-list payg-list">
                                     <li><strong>350 Track Credits</strong> (~$0.011 per conversion)</li>
@@ -544,24 +1058,12 @@
                             </div>
                             <div>
                                 <div class="unified-search-bar payg-search-bar">
-                                    <input type="email" id="loginEmail" placeholder="you@example.com" autocomplete="email">
+                                    <input type="email" id="loginEmail" placeholder="you@example.com"
+                                        autocomplete="email">
                                     <button id="sendLinkBtn">Send Link</button>
                                 </div>
                                 <div id="authMessage"></div>
                             </div>
-                        </div>
-                    </div>
-
-                    <!-- Relocated Pricing Tiers in Main Workspace -->
-                    <div id="workspacePricingContainer" class="hidden">
-                        <div class="workspace-tier-card pay-as-you-go-card" style="margin: 0 auto; max-width: 320px; width: 100%;">
-                            <h4 style="margin: 0 0 10px 0; color: #334155; font-size: 1.15rem; font-weight: 800;">Pay As You Go</h4>
-                            <div style="font-size: 1.8rem; font-weight: bold; color: #0f172a; margin-bottom: 15px;">$3.99</div>
-                            <p style="font-size: 0.9rem; color: #64748b; margin-bottom: 20px; line-height: 1.6; flex-grow: 1;">
-                                350 Track Credits<br>No Expiration<br>Priority Queue
-                            </p>
-                            <button id="buyCreditsBtn" class="premium-btn hidden"
-                                style="width: 100%; padding: 12px; font-size: 0.95rem; font-weight: bold;">Buy Credits</button>
                         </div>
                     </div>
                 </div>
@@ -572,24 +1074,14 @@
                 <div class="faq-accordion">
                     <div class="faq-item">
                         <button class="faq-trigger" aria-expanded="false">
-                            <span>Is MP3aud.io a free web-based music album art tagger, downloader, and audio enhancer?</span>
-                            <span class="faq-icon">+</span>
-                        </button>
-                        <div class="faq-panel">
-                            <div class="faq-content">
-                                <p>Yes! MP3aud.io is a fast, free, web-based music album art tagger, downloader, and audio enhancer. Simply drag and drop your music files or folders, and our tool will automatically search, fetch, and embed high-resolution cover artwork, update ID3 metadata tags, and upscale audio quality for instant download.</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="faq-item">
-                        <button class="faq-trigger" aria-expanded="false">
                             <span>How do I process my local audio files?</span>
                             <span class="faq-icon">+</span>
                         </button>
                         <div class="faq-panel">
                             <div class="faq-content">
-                                <p>Simply drag and drop your music files or folders into the dropzone, select your desired enhancements (like Attach Lyrics or Add Album Art & Tags), and click "Process". Our system will process the files and generate an organized ZIP file.</p>
+                                <p>Simply drag and drop your music files or folders into the dropzone, select your
+                                    desired enhancements (like Attach Lyrics or Add Album Art & Tags), and click
+                                    "Process". Our system will process the files and generate an organized ZIP file.</p>
                             </div>
                         </div>
                     </div>
@@ -601,7 +1093,9 @@
                         </button>
                         <div class="faq-panel">
                             <div class="faq-content">
-                                <p>When activated, our backend uses advanced AI to physically listen to the audio track and transcribe the lyrics. It then takes those lyrics and physically embeds them into the metadata tag of your final audio file so it shows up in media players!</p>
+                                <p>When activated, our backend uses advanced AI to physically listen to the audio track
+                                    and transcribe the lyrics. It then takes those lyrics and physically embeds them
+                                    into the metadata tag of your final audio file so it shows up in media players!</p>
                             </div>
                         </div>
                     </div>
@@ -613,7 +1107,9 @@
                         </button>
                         <div class="faq-panel">
                             <div class="faq-content">
-                                <p>No! By default, this tool preserves your original file format (e.g., WAV stays WAV). However, if you explicitly toggle "Increase Bitrate (320k)", the system will upsample your audio and convert it to a standard high-fidelity MP3.</p>
+                                <p>No! By default, this tool preserves your original file format (e.g., WAV stays WAV).
+                                    However, if you explicitly toggle "Increase Bitrate (320k)", the system will
+                                    upsample your audio and convert it to a standard high-fidelity MP3.</p>
                             </div>
                         </div>
                     </div>
@@ -625,7 +1121,9 @@
                         </button>
                         <div class="faq-panel">
                             <div class="faq-content">
-                                <p>You can process up to 350 files per ZIP upload using paid credits, which also lets you skip the queue and access premium features like lyric transcription and audio upscaling.</p>
+                                <p>You can process up to 350 files per ZIP upload using paid credits, which also lets
+                                    you skip the queue and access premium features like lyric transcription and audio
+                                    upscaling.</p>
                             </div>
                         </div>
                     </div>
@@ -637,7 +1135,9 @@
                         </button>
                         <div class="faq-panel">
                             <div class="faq-content">
-                                <p>If you are signed into an account, you do not need to keep the tab open. We will automatically email you a secure download link once your organized ZIP file is ready. Note: <strong>This link automatically expires after 1 hour</strong>.</p>
+                                <p>If you are signed into an account, you do not need to keep the tab open. We will
+                                    automatically email you a secure download link once your organized ZIP file is
+                                    ready. Note: <strong>This link automatically expires after 1 hour</strong>.</p>
                             </div>
                         </div>
                     </div>
@@ -649,7 +1149,11 @@
                         </button>
                         <div class="faq-panel">
                             <div class="faq-content">
-                                <p>Because processing high-quality audio and transcribing lyrics is resource-intensive, jobs are handled in a queue. If the server is busy, you will be given a queue position and an estimated wait time. <strong>Priority Queue:</strong> Jobs are processed in order, with paid credits granting access to our priority queue.</p>
+                                <p>Because processing high-quality audio and transcribing lyrics is resource-intensive,
+                                    jobs are handled in a queue. If the server is busy, you will be given a queue
+                                    position and an estimated wait time. <strong>Priority Queue:</strong> Jobs are
+                                    processed in order, with paid credits granting access to our priority queue.
+                                </p>
                             </div>
                         </div>
                     </div>
@@ -722,7 +1226,8 @@
                     send a one-time "Download Ready" notification. They are not stored permanently or sold.</li>
                 <li><strong>Your Files:</strong> Converted MP3s, ZIP archives, and generated text files are temporarily
                     stored on our server to allow you to download them. They are automatically and permanently deleted
-                    <strong>1 hour</strong> after the last update to your session.</li>
+                    <strong>1 hour</strong> after the last update to your session.
+                </li>
             </ul>
             <p><strong>Third-Party AI Processing:</strong></p>
             <ul>
@@ -810,6 +1315,230 @@
         </div>
     </div>
 
+    <!-- =========================================
+         CELLULAR PHONE RINGTONE STEP-BY-STEP MODAL
+         ========================================= -->
+    <div id="ringtoneModal" class="modal" role="dialog" aria-labelledby="ringtoneModalTitle" aria-hidden="true">
+        <div class="modal-content ringtone-modal-content">
+            <span class="close" onclick="closeModal('ringtoneModal')" aria-label="Close modal">&times;</span>
+            
+            <div class="rt-modal-header">
+                <div class="rt-eyebrow">
+                    <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect>
+                        <line x1="12" y1="18" x2="12.01" y2="18"></line>
+                    </svg>
+                    <span>Cellular Ringtone Setup</span>
+                </div>
+                <h2 id="ringtoneModalTitle">Set as Cellular Phone Ringtone</h2>
+                <p class="rt-sub">Follow these step-by-step directions to install your converted audio as a custom ringtone, text alert, or alarm tone on your phone.</p>
+            </div>
+
+            <!-- Platform Switcher Tabs -->
+            <div class="rt-platform-tabs" role="tablist" aria-label="Smartphone Operating System Selection">
+                <button type="button" class="rt-platform-tab active" id="rtTabIos" role="tab" aria-selected="true" onclick="switchRingtonePlatform('ios')">
+                    <span class="rt-tab-ico">🍏</span>
+                    <span>Apple iPhone (iOS)</span>
+                </button>
+                <button type="button" class="rt-platform-tab" id="rtTabAndroid" role="tab" aria-selected="false" onclick="switchRingtonePlatform('android')">
+                    <span class="rt-tab-ico">🤖</span>
+                    <span>Android</span>
+                </button>
+            </div>
+
+            <!-- Apple iPhone Panel -->
+            <div id="rtPanelIos" class="rt-panel active" role="tabpanel" aria-labelledby="rtTabIos">
+                <!-- Method Switcher: GarageBand vs PC -->
+                <div class="rt-method-switch" role="group" aria-label="iPhone setup method">
+                    <button type="button" class="rt-method-btn active" id="rtBtnGb" onclick="switchIosMethod('gb')">
+                        <span>✨ Direct on iPhone (GarageBand)</span>
+                    </button>
+                    <button type="button" class="rt-method-btn" id="rtBtnPc" onclick="switchIosMethod('pc')">
+                        <span>💻 Via Mac / Windows PC</span>
+                    </button>
+                </div>
+
+                <!-- View 1: GarageBand (No PC Needed) -->
+                <div id="rtViewGb" class="rt-method-view active">
+                    <div class="rt-alert-banner">
+                        <span class="rt-alert-icon">💡</span>
+                        <p><strong>No Computer Needed!</strong> Uses Apple's free <strong>GarageBand</strong> app (available free in the App Store). Apple requires custom ringtones to be under 40 seconds.</p>
+                    </div>
+
+                    <div class="rt-steps-list">
+                        <div class="rt-step-card">
+                            <div class="rt-step-badge">1</div>
+                            <div class="rt-step-body">
+                                <strong>Save Download to Files</strong>
+                                <p>Tap <strong>Download</strong> on MP3aud.io. When prompted by Safari, tap <em>Download</em> to save the audio into your iPhone's <strong>Files</strong> app (under <code>Downloads</code>).</p>
+                            </div>
+                        </div>
+
+                        <div class="rt-step-card">
+                            <div class="rt-step-badge">2</div>
+                            <div class="rt-step-body">
+                                <strong>Open GarageBand &amp; Audio Recorder</strong>
+                                <p>Open the free <strong>GarageBand</strong> app. Swipe through the instruments until you see <strong>Audio Recorder</strong>, then tap it.</p>
+                            </div>
+                        </div>
+
+                        <div class="rt-step-card">
+                            <div class="rt-step-badge">3</div>
+                            <div class="rt-step-body">
+                                <strong>Switch to Tracks View</strong>
+                                <p>Tap the <strong>Tracks icon</strong> near the top-left (looks like a wall of horizontal audio bars, 3rd icon from the left) to view the project timeline.</p>
+                            </div>
+                        </div>
+
+                        <div class="rt-step-card">
+                            <div class="rt-step-badge">4</div>
+                            <div class="rt-step-body">
+                                <strong>Import Converted Audio</strong>
+                                <p>Tap the <strong>Loop icon</strong> (top right, next to gear) &rarr; tap the <strong>Files</strong> tab &rarr; tap <em>"Browse items from the Files app"</em> &rarr; touch &amp; drag your downloaded audio file onto the timeline track.</p>
+                            </div>
+                        </div>
+
+                        <div class="rt-step-card">
+                            <div class="rt-step-badge">5</div>
+                            <div class="rt-step-body">
+                                <strong>Save Project to "My Songs"</strong>
+                                <p>Tap the <strong>downward triangle</strong> icon in the top-left corner &rarr; tap <strong>My Songs</strong>. Your project will appear in your GarageBand browser.</p>
+                            </div>
+                        </div>
+
+                        <div class="rt-step-card">
+                            <div class="rt-step-badge">6</div>
+                            <div class="rt-step-body">
+                                <strong>Share as Ringtone</strong>
+                                <p>Long-press (touch and hold) your song project &rarr; tap <strong>Share</strong> &rarr; choose <strong>Ringtone</strong> &rarr; enter a name for your ringtone &rarr; tap <strong>Export</strong> in the top right.</p>
+                            </div>
+                        </div>
+
+                        <div class="rt-step-card">
+                            <div class="rt-step-badge">7</div>
+                            <div class="rt-step-body">
+                                <strong>Set as Default Ringtone</strong>
+                                <p>When the export succeeds, tap <strong>"Use sound as..."</strong> &rarr; select <strong>Standard Ringtone</strong>, <strong>Text Tone</strong>, or <strong>Assign to Contact</strong>!</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- View 2: Mac / Windows PC Cable Sync -->
+                <div id="rtViewPc" class="rt-method-view">
+                    <div class="rt-alert-banner">
+                        <span class="rt-alert-icon">⚡</span>
+                        <p><strong>Fast Cable Sync!</strong> Transfer the generated <code>.m4r</code> ringtone directly to your iPhone using Finder (Mac) or iTunes / Apple Devices (Windows).</p>
+                    </div>
+
+                    <div class="rt-steps-list">
+                        <div class="rt-step-card">
+                            <div class="rt-step-badge">1</div>
+                            <div class="rt-step-body">
+                                <strong>Download .M4R File on Computer</strong>
+                                <p>Download the ringtone package from MP3aud.io to your computer and locate the <code>.m4r</code> file.</p>
+                            </div>
+                        </div>
+
+                        <div class="rt-step-card">
+                            <div class="rt-step-badge">2</div>
+                            <div class="rt-step-body">
+                                <strong>Connect iPhone via Cable</strong>
+                                <p>Plug your iPhone into your Mac or PC using your Lightning or USB-C charging cable.</p>
+                            </div>
+                        </div>
+
+                        <div class="rt-step-card">
+                            <div class="rt-step-badge">3</div>
+                            <div class="rt-step-body">
+                                <strong>Drag &amp; Drop to iPhone</strong>
+                                <p><strong>On Mac (Finder):</strong> Open Finder &rarr; click your iPhone in the left sidebar &rarr; drag and drop the <code>.m4r</code> file directly onto the iPhone window.<br><strong>On Windows:</strong> Open <em>iTunes</em> (or <em>Apple Devices</em> app) &rarr; select your device &rarr; click <strong>Tones</strong> &rarr; drag the <code>.m4r</code> file into the list.</p>
+                            </div>
+                        </div>
+
+                        <div class="rt-step-card">
+                            <div class="rt-step-badge">4</div>
+                            <div class="rt-step-body">
+                                <strong>Select on iPhone</strong>
+                                <p>On your iPhone, open <strong>Settings &rarr; Sounds &amp; Haptics &rarr; Ringtone</strong>. Your new custom tone will appear at the very top under <em>Custom</em>!</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Android Panel -->
+            <div id="rtPanelAndroid" class="rt-panel" role="tabpanel" aria-labelledby="rtTabAndroid">
+                <div class="rt-alert-banner">
+                    <span class="rt-alert-icon">🤖</span>
+                    <p><strong>Universal MP3 Support!</strong> Android lets you set any MP3 file as your phone ringtone, notification tone, or alarm sound directly in Settings with no extra software needed.</p>
+                </div>
+
+                <div class="rt-steps-list">
+                    <div class="rt-step-card">
+                        <div class="rt-step-badge">1</div>
+                        <div class="rt-step-body">
+                            <strong>Download the MP3 Track</strong>
+                            <p>Tap <strong>Download</strong> on MP3aud.io to save your converted MP3 file to your phone's <code>Downloads</code> folder.</p>
+                        </div>
+                    </div>
+
+                    <div class="rt-step-card">
+                        <div class="rt-step-badge">2</div>
+                        <div class="rt-step-body">
+                            <strong>Open Sound Settings</strong>
+                            <p>Open your Android phone's <strong>Settings</strong> app &rarr; scroll down and tap <strong>Sound &amp; vibration</strong> (or <em>Sounds and vibration</em> on Samsung Galaxy).</p>
+                        </div>
+                    </div>
+
+                    <div class="rt-step-card">
+                        <div class="rt-step-badge">3</div>
+                        <div class="rt-step-body">
+                            <strong>Select Phone Ringtone</strong>
+                            <p>Tap <strong>Phone ringtone</strong> (or choose SIM 1 / SIM 2 if you have dual SIM cards active).</p>
+                        </div>
+                    </div>
+
+                    <div class="rt-step-card">
+                        <div class="rt-step-badge">4</div>
+                        <div class="rt-step-body">
+                            <strong>Add Custom Audio Track</strong>
+                            <p><strong>On Samsung Galaxy:</strong> Tap the <strong>+</strong> (plus icon) in the top-right corner of the screen.<br><strong>On Google Pixel, Motorola, OnePlus:</strong> Tap <strong>My Sounds</strong> &rarr; tap the <strong>+ Add Ringtone</strong> button at the bottom.</p>
+                        </div>
+                    </div>
+
+                    <div class="rt-step-card">
+                        <div class="rt-step-badge">5</div>
+                        <div class="rt-step-body">
+                            <strong>Pick Track &amp; Save</strong>
+                            <p>Select your downloaded MP3 audio file from your files or music picker and tap <strong>Done</strong> or <strong>Save</strong>. Your ringtone is now set!</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="rt-tip-card">
+                    <span class="rt-tip-badge">VIP Pro-Tip</span>
+                    <p>Want a unique ringtone for specific people? Open your <strong>Contacts</strong> app &rarr; select a contact &rarr; tap <strong>Edit</strong> (or More) &rarr; tap <strong>Ringtone</strong> and choose your custom sound so you know who is calling before looking at your screen!</p>
+                </div>
+            </div>
+
+            <!-- Modal Action Footer -->
+            <div class="rt-modal-footer">
+                <button type="button" class="rt-copy-btn" id="rtCopyBtn" onclick="copyRingtoneDirections()">
+                    <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                    </svg>
+                    <span>Copy Directions</span>
+                </button>
+                <div class="rt-footer-right">
+                    <a href="video-to-ringtone.html" class="rt-full-guide-link">Read In-Depth Guide &rarr;</a>
+                    <button type="button" class="rt-close-btn" onclick="closeModal('ringtoneModal')">Done</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         function openModal(modalId) {
             var modal = document.getElementById(modalId);
@@ -824,6 +1553,961 @@
                 event.target.style.display = "none";
             }
         }
+
+        /* ── Ringtone Modal Functions ── */
+        function switchRingtonePlatform(platform) {
+            var tabIos = document.getElementById('rtTabIos');
+            var tabAndroid = document.getElementById('rtTabAndroid');
+            var panelIos = document.getElementById('rtPanelIos');
+            var panelAndroid = document.getElementById('rtPanelAndroid');
+
+            if (platform === 'ios') {
+                if (tabIos) { tabIos.classList.add('active'); tabIos.setAttribute('aria-selected', 'true'); }
+                if (tabAndroid) { tabAndroid.classList.remove('active'); tabAndroid.setAttribute('aria-selected', 'false'); }
+                if (panelIos) panelIos.classList.add('active');
+                if (panelAndroid) panelAndroid.classList.remove('active');
+            } else {
+                if (tabAndroid) { tabAndroid.classList.add('active'); tabAndroid.setAttribute('aria-selected', 'true'); }
+                if (tabIos) { tabIos.classList.remove('active'); tabIos.setAttribute('aria-selected', 'false'); }
+                if (panelAndroid) panelAndroid.classList.add('active');
+                if (panelIos) panelIos.classList.remove('active');
+            }
+        }
+
+        function switchIosMethod(method) {
+            var btnGb = document.getElementById('rtBtnGb');
+            var btnPc = document.getElementById('rtBtnPc');
+            var viewGb = document.getElementById('rtViewGb');
+            var viewPc = document.getElementById('rtViewPc');
+
+            if (method === 'gb') {
+                if (btnGb) btnGb.classList.add('active');
+                if (btnPc) btnPc.classList.remove('active');
+                if (viewGb) viewGb.classList.add('active');
+                if (viewPc) viewPc.classList.remove('active');
+            } else {
+                if (btnPc) btnPc.classList.add('active');
+                if (btnGb) btnGb.classList.remove('active');
+                if (viewPc) viewPc.classList.add('active');
+                if (viewGb) viewGb.classList.remove('active');
+            }
+        }
+
+        function copyRingtoneDirections() {
+            var activePanel = document.querySelector('.rt-panel.active');
+            if (!activePanel) return;
+
+            var textLines = [];
+            var title = activePanel.id === 'rtPanelIos' ? "Apple iPhone Custom Ringtone Directions" : "Android Custom Ringtone Directions";
+            textLines.push("📱 " + title + " (via MP3aud.io)");
+            textLines.push("----------------------------------------");
+
+            var cards = activePanel.querySelectorAll('.rt-method-view.active .rt-step-card, .rt-panel.active > .rt-steps-list .rt-step-card');
+            if (!cards || cards.length === 0) {
+                cards = activePanel.querySelectorAll('.rt-step-card');
+            }
+
+            cards.forEach(function (c, idx) {
+                var bold = c.querySelector('strong') ? c.querySelector('strong').innerText : "Step " + (idx + 1);
+                var desc = c.querySelector('p') ? c.querySelector('p').innerText : "";
+                textLines.push((idx + 1) + ". " + bold + " - " + desc);
+            });
+
+            var copyText = textLines.join("\n\n");
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(copyText).then(function () {
+                    var btn = document.getElementById('rtCopyBtn');
+                    if (btn) {
+                        var originalHtml = btn.innerHTML;
+                        btn.innerHTML = '<span>✅ Copied to Clipboard!</span>';
+                        setTimeout(function () { btn.innerHTML = originalHtml; }, 2500);
+                    }
+                }).catch(function (err) {
+                    console.error("Clipboard copy error:", err);
+                });
+            }
+        }
+
+        /* ── FAQ Accordion ── */
+        document.querySelectorAll('.faq-trigger').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var isOpen = this.getAttribute('aria-expanded') === 'true';
+                // Close all
+                document.querySelectorAll('.faq-trigger').forEach(function (b) {
+                    b.setAttribute('aria-expanded', 'false');
+                    b.querySelector('.faq-icon').textContent = '+';
+                    var panel = b.nextElementSibling;
+                    panel.style.maxHeight = null;
+                    panel.style.opacity = '0';
+                });
+                // Open clicked if it was closed
+                if (!isOpen) {
+                    this.setAttribute('aria-expanded', 'true');
+                    this.querySelector('.faq-icon').textContent = '\u2212';
+                    var panel = this.nextElementSibling;
+                    panel.style.maxHeight = panel.scrollHeight + 'px';
+                    panel.style.opacity = '1';
+                }
+            });
+        });
+
+        /* ── Before/After Audio Preview (100% Interactive & Sound-Reactive) ── */
+        (function () {
+            var canvas = document.getElementById('enhancerVisualizerCanvas');
+            var playBtn = document.getElementById('previewPlayBtn');
+            var playIcon = document.getElementById('playIcon');
+            var pauseIcon = document.getElementById('pauseIcon');
+            var fill = document.getElementById('waveformProgressFill') || document.getElementById('waveformFill');
+            var waveformBar = document.getElementById('waveformProgressContainer') || document.getElementById('waveformBar');
+            var currentTimeDisplay = document.getElementById('previewCurrentTime');
+            var totalTimeDisplay = document.getElementById('previewTotalTime');
+            var timeDisplay = document.getElementById('previewTimeDisplay'); // fallback
+            var slider = document.getElementById('abCrossfadeSlider');
+            var btnBefore = document.getElementById('btnBefore');
+            var btnAfter = document.getElementById('btnAfter');
+            var modeLabel = document.getElementById('indicatorText') || document.getElementById('modeLabel');
+            var modeIndicator = document.getElementById('previewModeIndicator') || document.getElementById('modeIndicator');
+            var spectrumBadge = document.getElementById('spectrumBadge');
+
+            if (!canvas) return;
+
+            /* ---- Canvas setup ---- */
+            function resizeCanvas() {
+                canvas.width = canvas.offsetWidth * (window.devicePixelRatio || 1);
+                canvas.height = canvas.offsetHeight * (window.devicePixelRatio || 1);
+            }
+            resizeCanvas();
+            var ctx2d = canvas.getContext('2d');
+
+            /* ---- State ---- */
+            var isPlaying = false;
+            var animFrame = null;
+            var userFileLoaded = false;
+            var currentPresetIndex = 0;
+            var currentBuffer = null;
+            var presetBuffers = {};
+            var startedAt = 0;
+            var pausedAt = 0;
+            var currentDuration = 16;
+            var isScrubbing = false;
+
+            /* ---- Web Audio Graph ---- */
+            var audioCtx = null;
+            var analyser = null;
+            var freqData = null;
+            var sourceNode = null;
+            var masterGain = null;
+            var beforeFilter = null;
+            var beforeGain = null;
+            var afterFilter = null;
+            var afterGain = null;
+
+            function initAudioCtx() {
+                if (audioCtx) {
+                    if (audioCtx.state === 'suspended') audioCtx.resume();
+                    return;
+                }
+                var AudioContextClass = window.AudioContext || window.webkitAudioContext;
+                audioCtx = new AudioContextClass();
+
+                analyser = audioCtx.createAnalyser();
+                analyser.fftSize = 512;
+                analyser.smoothingTimeConstant = 0.82;
+                freqData = new Uint8Array(analyser.frequencyBinCount);
+
+                masterGain = audioCtx.createGain();
+                masterGain.gain.value = 0.85;
+
+                // Before Path: 10.5kHz lowpass filter (simulating lossy/muffled low bitrate MP3)
+                beforeFilter = audioCtx.createBiquadFilter();
+                beforeFilter.type = 'lowpass';
+                beforeFilter.frequency.value = 10200;
+                beforeFilter.Q.value = 1.0;
+                beforeGain = audioCtx.createGain();
+
+                // After Path: High-shelf brightness enhancer (+4.5dB at 5.5kHz)
+                afterFilter = audioCtx.createBiquadFilter();
+                afterFilter.type = 'highshelf';
+                afterFilter.frequency.value = 5500;
+                afterFilter.gain.value = 4.5;
+                afterGain = audioCtx.createGain();
+
+                // Connect to master -> analyser -> speakers
+                beforeGain.connect(masterGain);
+                afterGain.connect(masterGain);
+                masterGain.connect(analyser);
+                analyser.connect(audioCtx.destination);
+
+                updateFilterGains();
+            }
+
+            function getAfterRatio() {
+                return parseInt(slider ? slider.value : 100) / 100;
+            }
+
+            function updateFilterGains() {
+                if (!beforeGain || !afterGain || !audioCtx) return;
+                var ratio = getAfterRatio();
+                var now = audioCtx.currentTime;
+                // Smooth equal-power crossfade
+                var beforeVol = Math.cos(ratio * 0.5 * Math.PI);
+                var afterVol = Math.sin(ratio * 0.5 * Math.PI);
+                beforeGain.gain.setValueAtTime(beforeVol, now);
+                afterGain.gain.setValueAtTime(afterVol, now);
+            }
+
+            /* ---- Procedural High-Fidelity Audio Synth (Zero External MP3 Deps) ---- */
+            function createPresetAudioBuffer(presetIdx) {
+                if (presetBuffers[presetIdx]) return presetBuffers[presetIdx];
+                initAudioCtx();
+
+                var sampleRate = audioCtx.sampleRate || 44100;
+                var dur = (presetIdx === 2) ? 18 : 16;
+                var totalSamples = Math.floor(sampleRate * dur);
+                var buf = audioCtx.createBuffer(2, totalSamples, sampleRate);
+                var left = buf.getChannelData(0);
+                var right = buf.getChannelData(1);
+
+                function noteFreq(midi) { return 440 * Math.pow(2, (midi - 69) / 12); }
+
+                if (presetIdx === 0) {
+                    // PRESET 0: ROCK CLASSIC (120 BPM)
+                    var bpm = 120;
+                    var beatSec = 60 / bpm;
+                    var totalBeats = Math.floor(dur / beatSec);
+
+                    for (var beat = 0; beat < totalBeats; beat++) {
+                        var beatStart = Math.floor(beat * beatSec * sampleRate);
+                        var isKick = (beat % 4 === 0 || beat % 4 === 2 || (beat % 8 === 6));
+                        var isSnare = (beat % 4 === 1 || beat % 4 === 3);
+
+                        // Kick drum
+                        if (isKick) {
+                            var kLen = Math.floor(0.35 * sampleRate);
+                            for (var s = 0; s < kLen && (beatStart + s) < totalSamples; s++) {
+                                var t = s / sampleRate;
+                                var f = 130 * Math.exp(-t * 22) + 45;
+                                var env = Math.exp(-t * 12);
+                                var val = Math.sin(2 * Math.PI * f * t) * env * 0.9;
+                                left[beatStart + s] += val;
+                                right[beatStart + s] += val;
+                            }
+                        }
+
+                        // Snare drum
+                        if (isSnare) {
+                            var sLen = Math.floor(0.28 * sampleRate);
+                            for (var s = 0; s < sLen && (beatStart + s) < totalSamples; s++) {
+                                var t = s / sampleRate;
+                                var noise = (Math.random() * 2 - 1) * Math.exp(-t * 18) * 0.45;
+                                var tone = Math.sin(2 * Math.PI * 185 * t) * Math.exp(-t * 24) * 0.4;
+                                var val = noise + tone;
+                                left[beatStart + s] += val;
+                                right[beatStart + s] += val;
+                            }
+                        }
+
+                        // 8th-note Hi-hats
+                        for (var sub = 0; sub < 2; sub++) {
+                            var hStart = beatStart + Math.floor(sub * 0.5 * beatSec * sampleRate);
+                            var hLen = Math.floor(0.06 * sampleRate);
+                            for (var s = 0; s < hLen && (hStart + s) < totalSamples; s++) {
+                                var t = s / sampleRate;
+                                var hVal = (Math.random() * 2 - 1) * Math.exp(-t * 70) * (sub === 1 ? 0.16 : 0.22);
+                                left[hStart + s] += hVal * 0.7;
+                                right[hStart + s] += hVal * 1.0;
+                            }
+                        }
+                    }
+
+                    // Rock Bass & Electric Guitar Riff
+                    var bassNotes = [40, 40, 43, 45, 38, 38, 40, 43]; // E, E, G, A, D, D, E, G
+                    var leadNotes = [64, 67, 69, 71, 67, 69, 64, 62]; // E, G, A, B, G, A, E, D
+
+                    for (var b = 0; b < totalBeats; b++) {
+                        var bStart = Math.floor(b * beatSec * sampleRate);
+                        var bLen = Math.floor(beatSec * sampleRate);
+                        var bFreq = noteFreq(bassNotes[b % bassNotes.length]);
+                        var lFreq = noteFreq(leadNotes[b % leadNotes.length]);
+
+                        for (var s = 0; s < bLen && (bStart + s) < totalSamples; s++) {
+                            var t = s / sampleRate;
+                            // Driving bass (saw + sub)
+                            var bassEnv = Math.exp(-t * 3.5);
+                            var bWave = (Math.sin(2 * Math.PI * bFreq * t) + 0.5 * Math.sin(4 * Math.PI * bFreq * t)) * bassEnv * 0.35;
+                            // Lead guitar with harmonics & drive
+                            var lEnv = Math.exp(-t * 2.2);
+                            var lWave = (Math.sin(2 * Math.PI * lFreq * t) + 0.4 * Math.sin(6 * Math.PI * lFreq * t) + 0.25 * Math.sin(10 * Math.PI * lFreq * t)) * lEnv * 0.22;
+                            // Slight overdrive distortion
+                            lWave = Math.tanh(lWave * 2.2) * 0.25;
+
+                            left[bStart + s] += bWave + lWave * 0.85;
+                            right[bStart + s] += bWave + lWave * 1.15;
+                        }
+                    }
+
+                } else if (presetIdx === 1) {
+                    // PRESET 1: JAZZ SESSION (96 BPM)
+                    var bpm = 96;
+                    var beatSec = 60 / bpm;
+                    var totalBeats = Math.floor(dur / beatSec);
+
+                    // Swing ride cymbal & acoustic brush
+                    for (var b = 0; b < totalBeats; b++) {
+                        var bStart = Math.floor(b * beatSec * sampleRate);
+                        var swingOffset = Math.floor(0.66 * beatSec * sampleRate);
+
+                        // Swing ride taps
+                        [0, swingOffset].forEach(function (offset, idx) {
+                            var rStart = bStart + offset;
+                            var rLen = Math.floor(0.18 * sampleRate);
+                            for (var s = 0; s < rLen && (rStart + s) < totalSamples; s++) {
+                                var t = s / sampleRate;
+                                var val = (Math.random() * 2 - 1) * Math.exp(-t * 35) * (idx === 1 ? 0.15 : 0.22);
+                                left[rStart + s] += val * 0.9;
+                                right[rStart + s] += val * 0.6;
+                            }
+                        });
+
+                        // Walking bass line
+                        var jazzBass = [38, 41, 43, 44, 45, 43, 41, 38];
+                        var freq = noteFreq(jazzBass[b % jazzBass.length]);
+                        var bLen = Math.floor(beatSec * sampleRate);
+                        for (var s = 0; s < bLen && (bStart + s) < totalSamples; s++) {
+                            var t = s / sampleRate;
+                            var val = Math.sin(2 * Math.PI * freq * t) * Math.exp(-t * 2.8) * 0.45;
+                            left[bStart + s] += val;
+                            right[bStart + s] += val;
+                        }
+                    }
+
+                    // Electric Rhodes 7th Chords
+                    var chords = [
+                        [50, 53, 57, 60], // Dm7
+                        [43, 47, 50, 53], // G7
+                        [48, 52, 55, 59], // Cmaj7
+                        [45, 49, 52, 55]  // A7
+                    ];
+
+                    for (var c = 0; c < Math.floor(totalBeats / 2); c++) {
+                        var cStart = Math.floor(c * 2 * beatSec * sampleRate);
+                        var chord = chords[c % chords.length];
+                        var cLen = Math.floor(2 * beatSec * sampleRate);
+
+                        chord.forEach(function (n, nIdx) {
+                            var f = noteFreq(n);
+                            for (var s = 0; s < cLen && (cStart + s) < totalSamples; s++) {
+                                var t = s / sampleRate;
+                                var tremolo = 1 + 0.15 * Math.sin(2 * Math.PI * 4.5 * t);
+                                var val = (Math.sin(2 * Math.PI * f * t) + 0.3 * Math.sin(4 * Math.PI * f * t)) * Math.exp(-t * 1.5) * 0.12 * tremolo;
+                                var pan = (nIdx % 2 === 0) ? 0.7 : 1.3;
+                                left[cStart + s] += val * pan;
+                                right[cStart + s] += val * (2 - pan);
+                            }
+                        });
+                    }
+
+                } else {
+                    // PRESET 2: PIANO BALLAD (72 BPM)
+                    var bpm = 72;
+                    var beatSec = 60 / bpm;
+                    var totalBeats = Math.floor(dur / beatSec);
+
+                    var pianoProgression = [
+                        [48, 55, 60, 64, 67], // C major
+                        [47, 55, 59, 62, 67], // G/B
+                        [45, 52, 57, 60, 64], // Am
+                        [41, 48, 53, 57, 60]  // F
+                    ];
+
+                    for (var bar = 0; bar < Math.floor(totalBeats / 4); bar++) {
+                        var barStart = Math.floor(bar * 4 * beatSec * sampleRate);
+                        var chord = pianoProgression[bar % pianoProgression.length];
+
+                        // Arpeggiated acoustic piano notes
+                        for (var a = 0; a < 8; a++) {
+                            var nStart = barStart + Math.floor(a * 0.5 * beatSec * sampleRate);
+                            var n = chord[a % chord.length] + (a >= 4 ? 12 : 0);
+                            var f = noteFreq(n);
+                            var nLen = Math.floor(2.5 * sampleRate);
+
+                            for (var s = 0; s < nLen && (nStart + s) < totalSamples; s++) {
+                                var t = s / sampleRate;
+                                // Acoustic piano decay with rich overtones
+                                var val = (Math.sin(2 * Math.PI * f * t) * 0.7
+                                    + Math.sin(4 * Math.PI * f * t) * 0.25
+                                    + Math.sin(6 * Math.PI * f * t) * 0.1) * Math.exp(-t * 2.2) * 0.18;
+                                var pan = 0.8 + (a / 8) * 0.4;
+                                left[nStart + s] += val * pan;
+                                right[nStart + s] += val * (2 - pan);
+                            }
+                        }
+                    }
+                }
+
+                // Master Normalization & Soft Limiter
+                var maxPeak = 0;
+                for (var i = 0; i < totalSamples; i++) {
+                    if (Math.abs(left[i]) > maxPeak) maxPeak = Math.abs(left[i]);
+                    if (Math.abs(right[i]) > maxPeak) maxPeak = Math.abs(right[i]);
+                }
+                if (maxPeak > 0) {
+                    var gainMult = 0.82 / maxPeak;
+                    for (var i = 0; i < totalSamples; i++) {
+                        left[i] = Math.tanh(left[i] * gainMult);
+                        right[i] = Math.tanh(right[i] * gainMult);
+                    }
+                }
+
+                presetBuffers[presetIdx] = buf;
+                return buf;
+            }
+
+            /* ---- Vertical Spectrum Equalizer Visualizer ---- */
+            var NUM_BARS = 48;
+            var peaks = new Float32Array(NUM_BARS);
+            var barHeights = new Float32Array(NUM_BARS);
+
+            function getSpectrumGradient(h, afterRatio) {
+                var grad = ctx2d.createLinearGradient(0, h, 0, 0);
+                var r1 = Math.round(217 + (2 - 217) * afterRatio);
+                var g1 = Math.round(119 + (132 - 119) * afterRatio);
+                var b1 = Math.round(6 + (199 - 6) * afterRatio);
+
+                var r2 = Math.round(245 + (14 - 245) * afterRatio);
+                var g2 = Math.round(158 + (165 - 158) * afterRatio);
+                var b2 = Math.round(11 + (233 - 11) * afterRatio);
+
+                var r3 = Math.round(251 + (56 - 251) * afterRatio);
+                var g3 = Math.round(191 + (189 - 191) * afterRatio);
+                var b3 = Math.round(36 + (248 - 36) * afterRatio);
+
+                grad.addColorStop(0, 'rgba(' + r1 + ',' + g1 + ',' + b1 + ', 0.25)');
+                grad.addColorStop(0.5, 'rgba(' + r2 + ',' + g2 + ',' + b2 + ', 0.75)');
+                grad.addColorStop(1, 'rgba(' + r3 + ',' + g3 + ',' + b3 + ', 1.0)');
+                return grad;
+            }
+
+            function getPeakColor(afterRatio) {
+                var r = Math.round(251 + (56 - 251) * afterRatio);
+                var g = Math.round(191 + (189 - 191) * afterRatio);
+                var b = Math.round(36 + (248 - 36) * afterRatio);
+                return 'rgba(' + r + ',' + g + ',' + b + ', 0.95)';
+            }
+
+            function renderVerticalBars(targetHeights, afterRatio) {
+                var w = canvas.width, h = canvas.height;
+                ctx2d.clearRect(0, 0, w, h);
+
+                var numBars = NUM_BARS;
+                var gap = 3 * (window.devicePixelRatio || 1);
+                var totalGaps = gap * (numBars - 1);
+                var barWidth = Math.max(2, (w - totalGaps) / numBars);
+                var grad = getSpectrumGradient(h, afterRatio);
+                var peakColor = getPeakColor(afterRatio);
+
+                for (var i = 0; i < numBars; i++) {
+                    barHeights[i] = barHeights[i] * 0.65 + targetHeights[i] * 0.35;
+                    var val = barHeights[i];
+                    var barH = Math.max(3, val * (h - 12));
+                    var x = i * (barWidth + gap);
+                    var y = h - barH;
+
+                    if (barH >= peaks[i]) {
+                        peaks[i] = barH;
+                    } else {
+                        peaks[i] = Math.max(3, peaks[i] - 1.4 * (window.devicePixelRatio || 1));
+                    }
+
+                    ctx2d.fillStyle = grad;
+                    ctx2d.beginPath();
+                    var radius = Math.min(barWidth / 2, 3);
+                    if (ctx2d.roundRect) {
+                        ctx2d.roundRect(x, y, barWidth, barH, [radius, radius, 0, 0]);
+                    } else {
+                        ctx2d.rect(x, y, barWidth, barH);
+                    }
+                    ctx2d.fill();
+
+                    var peakY = h - peaks[i] - 2;
+                    if (peakY < h - 4) {
+                        ctx2d.fillStyle = peakColor;
+                        ctx2d.fillRect(x, Math.max(1, peakY), barWidth, 2);
+                    }
+                }
+            }
+
+            function updateTimeDisplay(pos, total) {
+                if (currentTimeDisplay) currentTimeDisplay.textContent = fmtTime(pos);
+                if (totalTimeDisplay) totalTimeDisplay.textContent = fmtTime(total);
+                if (timeDisplay) timeDisplay.textContent = fmtTime(pos) + ' / ' + fmtTime(total);
+            }
+
+            /* Live FFT Sound-Reactive Animation Loop */
+            function realLoop() {
+                if (analyser && isPlaying) {
+                    analyser.getByteFrequencyData(freqData);
+                    var afterRatio = getAfterRatio();
+                    var targets = new Float32Array(NUM_BARS);
+                    var binCount = freqData.length;
+
+                    for (var i = 0; i < NUM_BARS; i++) {
+                        var startBin = Math.floor(Math.pow(i / NUM_BARS, 1.8) * (binCount - 2));
+                        var endBin = Math.max(startBin + 1, Math.floor(Math.pow((i + 1) / NUM_BARS, 1.8) * (binCount - 1)));
+                        var sum = 0;
+                        var count = 0;
+                        for (var b = startBin; b <= endBin && b < binCount; b++) {
+                            sum += freqData[b];
+                            count++;
+                        }
+                        var avg = (count > 0 ? (sum / count) : 0) / 255;
+                        var freqScale = 1 + (i / NUM_BARS) * 0.75;
+                        targets[i] = Math.min(0.98, avg * freqScale);
+                    }
+                    renderVerticalBars(targets, afterRatio);
+
+                    // Update Progress & Time
+                    if (!isScrubbing) {
+                        var pos = audioCtx.currentTime - startedAt + pausedAt;
+                        if (pos >= currentDuration) {
+                            pos = 0;
+                            pausedAt = 0;
+                            startedAt = audioCtx.currentTime;
+                            buildAndPlaySource(0);
+                        }
+                        if (fill) fill.style.width = ((pos / currentDuration) * 100) + '%';
+                        updateTimeDisplay(pos, currentDuration);
+                    }
+                }
+
+                if (isPlaying) {
+                    animFrame = requestAnimationFrame(realLoop);
+                }
+            }
+
+            function fmtTime(s) {
+                s = Math.max(0, Math.floor(s));
+                var m = Math.floor(s / 60);
+                var sec = s % 60;
+                return m + ':' + (sec < 10 ? '0' : '') + sec;
+            }
+
+            function idle() {
+                var afterRatio = getAfterRatio();
+                var idleTargets = new Float32Array(NUM_BARS);
+                for (var i = 0; i < NUM_BARS; i++) {
+                    idleTargets[i] = 0.04 + Math.sin(i * 0.25) * 0.02;
+                }
+                renderVerticalBars(idleTargets, afterRatio);
+            }
+            idle();
+
+            /* ---- Playback Control ---- */
+            function buildAndPlaySource(offset) {
+                initAudioCtx();
+                if (sourceNode) {
+                    try { sourceNode.stop(); } catch (e) { }
+                    sourceNode.disconnect();
+                    sourceNode = null;
+                }
+
+                if (!currentBuffer) {
+                    currentBuffer = userFileLoaded ? currentBuffer : createPresetAudioBuffer(currentPresetIndex);
+                }
+                currentDuration = currentBuffer.duration;
+
+                sourceNode = audioCtx.createBufferSource();
+                sourceNode.buffer = currentBuffer;
+                sourceNode.loop = false;
+
+                // Split signal into Before (lowpass) and After (highshelf) paths
+                sourceNode.connect(beforeFilter);
+                beforeFilter.connect(beforeGain);
+
+                sourceNode.connect(afterFilter);
+                afterFilter.connect(afterGain);
+
+                updateFilterGains();
+
+                sourceNode.start(0, offset);
+                startedAt = audioCtx.currentTime - offset;
+            }
+
+            function playAudio() {
+                initAudioCtx();
+                buildAndPlaySource(pausedAt);
+                isPlaying = true;
+                playIcon.style.display = 'none';
+                pauseIcon.style.display = '';
+                animFrame = requestAnimationFrame(realLoop);
+            }
+
+            function pauseAudio() {
+                if (audioCtx) {
+                    pausedAt = audioCtx.currentTime - startedAt + pausedAt;
+                    if (pausedAt >= currentDuration) pausedAt = 0;
+                }
+                if (sourceNode) {
+                    try { sourceNode.stop(); } catch (e) { }
+                    sourceNode = null;
+                }
+                isPlaying = false;
+                playIcon.style.display = '';
+                pauseIcon.style.display = 'none';
+                if (animFrame) cancelAnimationFrame(animFrame);
+                idle();
+            }
+
+            playBtn.addEventListener('click', function () {
+                if (isPlaying) {
+                    pauseAudio();
+                } else {
+                    playAudio();
+                }
+            });
+
+            /* ---- Interactive Seeking on Soundwave & Progress Bar ---- */
+            function seekToRatio(ratio) {
+                ratio = Math.max(0, Math.min(1, ratio));
+                if (!currentBuffer) {
+                    currentBuffer = userFileLoaded ? currentBuffer : createPresetAudioBuffer(currentPresetIndex);
+                    currentDuration = currentBuffer.duration;
+                }
+                var newPos = ratio * currentDuration;
+                pausedAt = newPos;
+                if (fill) fill.style.width = (ratio * 100) + '%';
+                updateTimeDisplay(newPos, currentDuration);
+
+                if (isPlaying) {
+                    buildAndPlaySource(newPos);
+                }
+            }
+
+            function handleScrubEvent(e, elem) {
+                var rect = elem.getBoundingClientRect();
+                var clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                var ratio = (clientX - rect.left) / rect.width;
+                seekToRatio(ratio);
+            }
+
+            // Click/drag on progress bar
+            if (waveformBar) {
+                waveformBar.addEventListener('click', function (e) { handleScrubEvent(e, this); });
+                waveformBar.addEventListener('mousedown', function (e) {
+                    isScrubbing = true;
+                    handleScrubEvent(e, this);
+                    function onMove(me) { handleScrubEvent(me, waveformBar); }
+                    function onUp() {
+                        isScrubbing = false;
+                        window.removeEventListener('mousemove', onMove);
+                        window.removeEventListener('mouseup', onUp);
+                    }
+                    window.addEventListener('mousemove', onMove);
+                    window.addEventListener('mouseup', onUp);
+                });
+            }
+
+            // Click/drag directly on the vertical bar visualizer canvas
+            canvas.addEventListener('click', function (e) { handleScrubEvent(e, this); });
+            canvas.addEventListener('mousedown', function (e) {
+                isScrubbing = true;
+                handleScrubEvent(e, this);
+                function onMove(me) { handleScrubEvent(me, canvas); }
+                function onUp() {
+                    isScrubbing = false;
+                    window.removeEventListener('mousemove', onMove);
+                    window.removeEventListener('mouseup', onUp);
+                }
+                window.addEventListener('mousemove', onMove);
+                window.addEventListener('mouseup', onUp);
+            });
+
+            // Touch support for mobile seeking
+            [waveformBar, canvas].filter(Boolean).forEach(function (el) {
+                el.addEventListener('touchstart', function (e) {
+                    isScrubbing = true;
+                    handleScrubEvent(e, this);
+                }, { passive: true });
+                el.addEventListener('touchmove', function (e) {
+                    if (isScrubbing) handleScrubEvent(e, this);
+                }, { passive: true });
+                el.addEventListener('touchend', function () {
+                    isScrubbing = false;
+                });
+            });
+
+            /* ---- Master Tool Switcher (Enhancer vs Inspector) ---- */
+            var currentDeckMode = 'enhancer'; // 'enhancer' or 'inspector'
+            var masterTabEnhancer = document.getElementById('masterTabEnhancer');
+            var masterTabInspector = document.getElementById('masterTabInspector');
+            var enhancerControlsDeck = document.getElementById('enhancerControlsDeck');
+            var inspectorControlsDeck = document.getElementById('inspectorControlsDeck');
+            var enhancerCtaWrap = document.getElementById('enhancerCtaWrap');
+            var inspectorCtaWrap = document.getElementById('inspectorCtaWrap');
+            var enhancerMetrics = document.getElementById('enhancerMetrics');
+            var spectrogramOverlay = document.getElementById('spectrogramOverlay');
+            var deckPurityGrade = document.getElementById('deckPurityGrade');
+            var deckCutoffVal = document.getElementById('deckCutoffVal');
+            var deckBitrateVal = document.getElementById('deckBitrateVal');
+            var deckPuritySub = document.getElementById('deckPuritySub');
+
+            function setMasterDeckMode(mode) {
+                currentDeckMode = mode;
+                var isEnhancer = mode === 'enhancer';
+
+                if (masterTabEnhancer) {
+                    masterTabEnhancer.classList.toggle('active', isEnhancer);
+                    masterTabEnhancer.setAttribute('aria-selected', isEnhancer ? 'true' : 'false');
+                }
+                if (masterTabInspector) {
+                    masterTabInspector.classList.toggle('active', !isEnhancer);
+                    masterTabInspector.setAttribute('aria-selected', !isEnhancer ? 'true' : 'false');
+                }
+
+                if (enhancerControlsDeck) enhancerControlsDeck.style.display = isEnhancer ? '' : 'none';
+                if (inspectorControlsDeck) inspectorControlsDeck.style.display = isEnhancer ? 'none' : 'grid';
+                if (enhancerCtaWrap) enhancerCtaWrap.style.display = isEnhancer ? '' : 'none';
+                if (inspectorCtaWrap) inspectorCtaWrap.style.display = isEnhancer ? 'none' : '';
+                if (enhancerMetrics) enhancerMetrics.style.display = isEnhancer ? '' : 'none';
+                if (spectrogramOverlay) spectrogramOverlay.classList.toggle('active', !isEnhancer);
+
+                updateABMode();
+            }
+
+            if (masterTabEnhancer && masterTabInspector) {
+                masterTabEnhancer.addEventListener('click', function () {
+                    setMasterDeckMode('enhancer');
+                });
+                masterTabInspector.addEventListener('click', function () {
+                    setMasterDeckMode('inspector');
+                });
+            }
+
+            /* ---- A/B Mode & Crossfader ---- */
+            function updateABMode() {
+                var val = parseInt(slider.value);
+                var isAfter = val >= 50;
+                btnBefore.classList.toggle('active', !isAfter);
+                btnAfter.classList.toggle('active', isAfter);
+
+                if (currentDeckMode === 'inspector') {
+                    if (isAfter) {
+                        if (modeLabel) modeLabel.textContent = '🟢 PURITY: GRADE A (20kHz+ TRUE 320k)';
+                        if (spectrumBadge) spectrumBadge.textContent = '20kHz+ Full Studio Spectrum';
+                        if (modeIndicator) {
+                            var dot = modeIndicator.querySelector('.indicator-dot');
+                            if (dot) dot.className = 'indicator-dot enhanced';
+                        }
+                        if (deckPurityGrade) { deckPurityGrade.textContent = 'GRADE A+'; deckPurityGrade.style.color = '#4ade80'; }
+                        if (deckCutoffVal) deckCutoffVal.textContent = '21,800 Hz';
+                        if (deckBitrateVal) { deckBitrateVal.textContent = 'True 320 kbps'; deckBitrateVal.style.color = '#4ade80'; }
+                        if (deckPuritySub) deckPuritySub.textContent = 'Studio Master (20kHz+ Highs)';
+                    } else {
+                        if (modeLabel) modeLabel.textContent = '🔴 CUTOFF: 10.5kHz (MUFFLED / LOW BITRATE)';
+                        if (spectrumBadge) spectrumBadge.textContent = 'Severe Roll-off at 10.5kHz';
+                        if (modeIndicator) {
+                            var dot = modeIndicator.querySelector('.indicator-dot');
+                            if (dot) dot.className = 'indicator-dot original';
+                        }
+                        if (deckPurityGrade) { deckPurityGrade.textContent = 'GRADE F'; deckPurityGrade.style.color = '#f87171'; }
+                        if (deckCutoffVal) deckCutoffVal.textContent = '10,500 Hz';
+                        if (deckBitrateVal) { deckBitrateVal.textContent = '128 kbps (Muffled)'; deckBitrateVal.style.color = '#f87171'; }
+                        if (deckPuritySub) deckPuritySub.textContent = 'Severe high-frequency cutoff';
+                    }
+                } else {
+                    if (isAfter) {
+                        if (modeLabel) modeLabel.textContent = userFileLoaded ? 'ENHANCED (HD EQ)' : 'AI ENHANCED (320kbps HD)';
+                        if (spectrumBadge) spectrumBadge.textContent = 'Full Spectrum 20Hz – 20kHz';
+                        if (modeIndicator) {
+                            var dot = modeIndicator.querySelector('.indicator-dot');
+                            if (dot) dot.className = 'indicator-dot enhanced';
+                        }
+                    } else {
+                        if (modeLabel) modeLabel.textContent = 'ORIGINAL AUDIO (96-128K)';
+                        if (spectrumBadge) spectrumBadge.textContent = 'Muffled Highs (Lowpass Filter)';
+                        if (modeIndicator) {
+                            var dot = modeIndicator.querySelector('.indicator-dot');
+                            if (dot) dot.className = 'indicator-dot original';
+                        }
+                    }
+                }
+
+                updateFilterGains();
+                if (!isPlaying) idle();
+            }
+
+            if (slider) slider.addEventListener('input', updateABMode);
+
+            btnBefore.addEventListener('click', function () {
+                slider.value = 0;
+                updateABMode();
+            });
+            btnAfter.addEventListener('click', function () {
+                slider.value = 100;
+                updateABMode();
+            });
+
+            /* ---- Preset Song Tabs Handling ---- */
+            var presetKeyMap = {
+                'vocals': 0,
+                'hiphop': 1,
+                'acoustic': 2
+            };
+            var userAudioBuffer = null;
+            var previewDropzoneBox = document.getElementById('previewDropzoneBox');
+            var previewCustomAudioInput = document.getElementById('previewCustomAudioInput');
+            var previewLoadedFilePill = document.getElementById('previewLoadedFilePill');
+            var previewLoadedFileName = document.getElementById('previewLoadedFileName');
+            var previewLoadedFileSize = document.getElementById('previewLoadedFileSize');
+            var previewLoadedFileClearBtn = document.getElementById('previewLoadedFileClearBtn');
+
+            document.querySelectorAll('.preset-tab').forEach(function (tab) {
+                tab.addEventListener('click', function (e) {
+                    if (this.hasAttribute('data-preset')) {
+                        document.querySelectorAll('.preset-tab').forEach(function (t) {
+                            t.classList.remove('active');
+                            t.setAttribute('aria-selected', 'false');
+                        });
+                        this.classList.add('active');
+                        this.setAttribute('aria-selected', 'true');
+
+                        // Reset user file if active
+                        userFileLoaded = false;
+                        if (previewLoadedFilePill) previewLoadedFilePill.style.display = 'none';
+                        if (previewDropzoneBox) previewDropzoneBox.style.display = '';
+
+                        var pVal = this.getAttribute('data-preset');
+                        var pIdx = (presetKeyMap[pVal] !== undefined) ? presetKeyMap[pVal] : parseInt(pVal || 0);
+                        currentPresetIndex = pIdx;
+                        currentBuffer = createPresetAudioBuffer(pIdx);
+                        currentDuration = currentBuffer.duration;
+                        pausedAt = 0;
+                        if (fill) fill.style.width = '0%';
+                        updateTimeDisplay(0, currentDuration);
+                        updateABMode();
+
+                        if (isPlaying) {
+                            buildAndPlaySource(0);
+                        }
+                    }
+                });
+
+                tab.addEventListener('keydown', function (e) {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        this.click();
+                    }
+                });
+            });
+
+            /* ---- Dedicated Drag & Drop Audio File Loader ---- */
+            function loadAudioFile(file) {
+                if (!file) return;
+                var isAudio = (file.type && file.type.match(/audio/)) || /\.(mp3|wav|flac|aac|ogg|m4a|wma|opus)$/i.test(file.name);
+                if (!isAudio) {
+                    alert('Please select an audio file (MP3, WAV, FLAC, AAC, etc.)');
+                    return;
+                }
+                var name = file.name;
+                var sizeMb = (file.size / (1024 * 1024)).toFixed(1);
+
+                if (isPlaying) pauseAudio();
+                pausedAt = 0;
+
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    initAudioCtx();
+                    audioCtx.decodeAudioData(e.target.result.slice(0), function (buf) {
+                        userAudioBuffer = buf;
+                        currentBuffer = buf;
+                        currentDuration = buf.duration;
+                        userFileLoaded = true;
+
+                        // De-select preset tabs
+                        document.querySelectorAll('.preset-tab').forEach(function (t) {
+                            t.classList.remove('active');
+                            t.setAttribute('aria-selected', 'false');
+                        });
+
+                        // Show loaded file banner pill
+                        if (previewDropzoneBox) previewDropzoneBox.style.display = 'none';
+                        if (previewLoadedFilePill) previewLoadedFilePill.style.display = 'flex';
+                        if (previewLoadedFileName) previewLoadedFileName.textContent = name.length > 28 ? (name.substring(0, 25) + '…') : name;
+                        if (previewLoadedFileSize) previewLoadedFileSize.textContent = '(' + sizeMb + ' MB)';
+
+                        updateTimeDisplay(0, currentDuration);
+                        if (fill) fill.style.width = '0%';
+                        updateABMode();
+                        playAudio();
+                    }, function () {
+                        alert('Could not decode this audio file. Please try another MP3 or WAV.');
+                    });
+                };
+                reader.readAsArrayBuffer(file);
+            }
+
+            if (previewCustomAudioInput) {
+                previewCustomAudioInput.addEventListener('change', function () {
+                    if (this.files && this.files[0]) loadAudioFile(this.files[0]);
+                });
+            }
+
+            if (previewDropzoneBox) {
+                previewDropzoneBox.addEventListener('dragover', function (e) {
+                    e.preventDefault();
+                    this.classList.add('dragover');
+                });
+                previewDropzoneBox.addEventListener('dragleave', function () {
+                    this.classList.remove('dragover');
+                });
+                previewDropzoneBox.addEventListener('drop', function (e) {
+                    e.preventDefault();
+                    this.classList.remove('dragover');
+                    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+                        loadAudioFile(e.dataTransfer.files[0]);
+                    }
+                });
+            }
+
+            if (previewLoadedFileClearBtn) {
+                previewLoadedFileClearBtn.addEventListener('click', function (e) {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    if (isPlaying) pauseAudio();
+                    userFileLoaded = false;
+                    userAudioBuffer = null;
+                    pausedAt = 0;
+
+                    if (previewCustomAudioInput) previewCustomAudioInput.value = '';
+                    if (previewLoadedFilePill) previewLoadedFilePill.style.display = 'none';
+                    if (previewDropzoneBox) previewDropzoneBox.style.display = '';
+
+                    currentPresetIndex = 0;
+                    currentBuffer = createPresetAudioBuffer(0);
+                    currentDuration = currentBuffer.duration;
+
+                    document.querySelectorAll('.preset-tab').forEach(function (t, idx) {
+                        if (idx === 0) {
+                            t.classList.add('active');
+                            t.setAttribute('aria-selected', 'true');
+                        } else {
+                            t.classList.remove('active');
+                            t.setAttribute('aria-selected', 'false');
+                        }
+                    });
+
+                    if (fill) fill.style.width = '0%';
+                    updateTimeDisplay(0, currentDuration);
+                    updateABMode();
+                    idle();
+                });
+            }
+
+            window.addEventListener('resize', function () {
+                resizeCanvas();
+                if (!isPlaying) idle();
+            });
+        })();
     </script>
 
     <script src="script.js?v=7"></script>
