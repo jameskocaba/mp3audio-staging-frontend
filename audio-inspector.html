@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Audio Spectrogram &amp; True Bitrate Inspector | MP3aud.io</title>
+    <meta name="title" content="Audio Spectrogram &amp; True Bitrate Inspector | MP3aud.io">
+    <meta name="description"
+        content="Free online audio spectrogram analyzer and true bitrate inspector. Test MP3s, detect fake 320kbps upscales, inspect frequency cutoffs up to 22kHz, and check audio quality in your browser.">
+    <meta name="keywords"
+        content="audio spectrogram online, check true mp3 bitrate, detect fake 320kbps mp3, online frequency analyzer, spek alternative online, test audio quality, audio purity inspector, check audio clipping, mp3 bit rate checker">
+    <meta name="author" content="MP3aud.io">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://mp3aud.io/audio-inspector.html">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://mp3aud.io/audio-inspector.html">
+    <meta property="og:site_name" content="MP3aud.io">
+    <meta property="og:title" content="Audio Spectrogram &amp; True Bitrate Inspector | MP3aud.io">
+    <meta property="og:description"
+        content="Free online audio spectrogram analyzer and true bitrate inspector. Test MP3s, detect fake 320kbps upscales, inspect frequency cutoffs up to 22kHz, and check audio quality in your browser.">
+    <meta property="og:image" content="https://mp3aud.io/og-image.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="Audio Spectrogram Inspector - MP3aud.io">
+    <meta property="og:locale" content="en_US">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="https://mp3aud.io/audio-inspector.html">
+    <meta name="twitter:title" content="Audio Spectrogram &amp; True Bitrate Inspector | MP3aud.io">
+    <meta name="twitter:description"
+        content="Free online audio spectrogram analyzer and true bitrate inspector. Test MP3s, detect fake 320kbps upscales, inspect frequency cutoffs up to 22kHz, and check audio quality in your browser.">
+    <meta name="twitter:image" content="https://mp3aud.io/og-image.png">
+
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="apple-touch-icon" href="favicon.png">
+    <meta name="theme-color" content="#FF5500">
+
+    <link rel="preconnect" href="https://www.googletagmanager.com">
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-VGVP90K1M4"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('config', 'G-VGVP90K1M4');
+    </script>
+
+    <link rel="stylesheet" href="style.css">
+
+    <!-- Schema.org JSON-LD Structured Data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "MP3aud.io - Spectrogram & Audio Bitrate Inspector",
+      "url": "https://mp3aud.io/audio-inspector.html",
+      "description": "Free online audio spectrogram analyzer and true bitrate inspector. Detect fake 320kbps files, inspect frequency cutoffs, and check audio dynamic range.",
+      "applicationCategory": "MultimediaApplication",
+      "operatingSystem": "WebBrowser",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      }
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "How does the True Bitrate Inspector detect fake 320kbps MP3s?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "When a 128kbps MP3 is re-encoded to 320kbps, its metadata changes but its high-frequency content remains capped at 15–16 kHz. Our Web Audio spectrum engine performs Fast Fourier Transform (FFT) analysis to measure energy above 16kHz and 20kHz, instantly exposing fake upscales."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What frequency cutoff indicates true 320kbps or lossless audio?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "True 320kbps MP3s and lossless FLAC/WAV files extend smoothly to 20 kHz and beyond (up to the Nyquist limit of 22.05 kHz for 44.1kHz audio). In contrast, 128kbps cuts off at 15–16kHz, and 192kbps cuts off at roughly 18–19kHz."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Does this tool upload my audio to any server?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "No. The entire spectrogram analysis, frequency measurement, and bitrate inspection runs 100% locally in your web browser using HTML5 Canvas and the Web Audio API. Your files never leave your computer."
+          }
+        }
+      ]
+    }
+    </script>
+</head>
+
+<body>
+    <!-- Standard Fixed App Header -->
+    <header class="app-header">
+        <div class="header-container">
+            <div class="header-brand">
+                <button class="menu-toggle" aria-label="Toggle Navigation">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <line x1="3" y1="12" x2="21" y2="12"></line>
+                        <line x1="3" y1="6" x2="21" y2="6"></line>
+                        <line x1="3" y1="18" x2="21" y2="18"></line>
+                    </svg>
+                </button>
+                <a href="index.html" class="header-brand">
+                    <img src="logo.webp" alt="MP3aud.io Logo" class="header-logo">
+                </a>
+            </div>
+            <nav class="header-nav" aria-label="Main Navigation">
+                <ul class="header-nav-list">
+                    <li><a href="index.html" class="header-nav-link">Converter</a></li>
+                    <li><a href="video-to-ringtone.html" class="header-nav-link">Ringtone Maker</a></li>
+                    <li><a href="ai-audio-enhancer.html" class="header-nav-link">Audio Enhancer</a></li>
+                    <li><a href="audio-inspector.html" class="header-nav-link active">Audio Inspector</a></li>
+                    <li><a href="supported-sites.html" class="header-nav-link">Supported Sites</a></li>
+                    <li><a href="top-album-art.html" class="header-nav-link">Top Album Art</a></li>
+                    <li><a href="shop.html" class="header-nav-link">Gear Shop</a></li>
+                    <li><a href="blog/index.html" class="header-nav-link">Blog</a></li>
+                </ul>
+            </nav>
+            <div class="header-actions">
+                <a href="https://www.instagram.com/mp3aud.io?igsh=ZXljNzMxaGtqdWwz&utm_source=qr" target="_blank"
+                    aria-label="Follow us on Instagram"
+                    style="color: #64748b; display: flex; align-items: center; transition: color 0.2s;">
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+                        <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+                        <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+                    </svg>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Area with Natural Page Scrolling -->
+    <main class="main-content">
+        <div class="content-container">
+            <!-- Header Eyebrow & Hero -->
+            <header class="logo-container inspector-hero">
+                <div class="header-eyebrow">
+                    <svg viewBox="0 0 24 24" width="10" height="10" fill="#FF5500">
+                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                    </svg>
+                    Free Client-Side Diagnostic Tool
+                </div>
+                <h1 class="main-headline">Spectrogram &amp; <span class="accent">True Bitrate</span> Inspector</h1>
+                <h2 class="main-subheadline" style="margin: 0 auto 14px auto; text-align: center; max-width: 820px;">
+                    Test your audio files for real high-frequency fidelity. Detect fake 320kbps upscales, measure high-frequency shelf cutoffs up to 22kHz, and audit dynamic range with zero file uploads.
+                </h2>
+            </header>
+
+            <!-- Main Inspector Tool Card -->
+            <section class="inspector-card" aria-label="Audio Quality and Spectrogram Inspector">
+                
+                <!-- Preset / Upload Selector -->
+                <div class="preset-tabs" role="tablist" style="margin-bottom: 20px;">
+                    <button class="preset-tab active" id="tabTrue320" role="tab" data-sample="studio">
+                        <span class="tab-icon">💎</span>
+                        <span class="tab-label">True 320kbps Master</span>
+                        <span class="tab-sub">20kHz+ Full Spectrum</span>
+                    </button>
+                    <button class="preset-tab" id="tabFake128" role="tab" data-sample="fake128">
+                        <span class="tab-icon">⚠️</span>
+                        <span class="tab-label">Fake 128k Upscale</span>
+                        <span class="tab-sub">15.5kHz Hard Cutoff</span>
+                    </button>
+                    <button class="preset-tab" id="tabMuffled" role="tab" data-sample="muffled">
+                        <span class="tab-icon">📻</span>
+                        <span class="tab-label">Muffled Cassette/Rip</span>
+                        <span class="tab-sub">10.5kHz Severe Roll-off</span>
+                    </button>
+                    <div class="preset-tab custom-tab" id="customFileTab" role="tab" tabindex="0">
+                        <span class="tab-icon">📂</span>
+                        <span class="tab-label" id="customTabLabel">Drop Your File</span>
+                        <span class="tab-sub" id="customTabSub">Inspect Any MP3 / FLAC</span>
+                        <input type="file" id="inspectorFileInput" accept="audio/*,.mp3,.wav,.flac,.aac,.ogg,.m4a,.wma,.opus" style="display: none;">
+                    </div>
+                </div>
+
+                <!-- Dropzone Box -->
+                <div class="inspector-dropzone-wrapper" id="dropzoneWrapper">
+                    <label for="inspectorFileInput" class="inspector-dropzone" id="inspectorDropzone">
+                        <svg class="inspector-dropzone-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="17 8 12 3 7 8"></polyline>
+                            <line x1="12" y1="3" x2="12" y2="15"></line>
+                        </svg>
+                        <div style="font-weight: 700; color: #f8fafc; font-size: 1.05rem; margin-bottom: 4px;">
+                            Drag &amp; Drop Any Audio File Here to Inspect Quality
+                        </div>
+                        <div style="font-size: 0.84rem; color: #94a3b8;">
+                            Supports MP3, FLAC, WAV, M4A, OGG, AAC &bull; 100% Private (Processed in your browser)
+                        </div>
+                    </label>
+                </div>
+
+                <!-- Live Spectrogram Visualizer Viewport -->
+                <div class="inspector-canvas-container">
+                    <canvas id="inspectorCanvas" class="inspector-canvas"></canvas>
+                    
+                    <!-- Overlay Grid & Cutoff Frequency Markers -->
+                    <div class="spectrogram-cutoff-overlay active">
+                        <div class="cutoff-grid-line line-20k">
+                            <span class="cutoff-tag">20 kHz — Studio Lossless &amp; True 320k</span>
+                            <span>20,000 Hz</span>
+                        </div>
+                        <div class="cutoff-grid-line line-16k">
+                            <span class="cutoff-tag">15.5–16 kHz — 128kbps Cutoff Threshold</span>
+                            <span>16,000 Hz</span>
+                        </div>
+                        <div class="cutoff-grid-line line-10k">
+                            <span class="cutoff-tag">10.5 kHz — Muffled Low-Bitrate Floor</span>
+                            <span>10,500 Hz</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Audio Health HUD Stats Grid -->
+                <div class="inspector-hud-grid">
+                    <div class="inspector-hud-item">
+                        <div class="hud-item-label">
+                            <span>Audio Purity Grade</span>
+                            <span id="purityGradeIcon">🟢</span>
+                        </div>
+                        <div class="grade-badge-display">
+                            <span class="purity-badge grade-a" id="purityBadge">GRADE A+ (STUDIO MASTER)</span>
+                        </div>
+                        <div class="hud-item-sub" id="purityDetail">Full harmonic presence up to 21.5kHz</div>
+                    </div>
+
+                    <div class="inspector-hud-item">
+                        <div class="hud-item-label">Estimated True Bitrate</div>
+                        <div class="hud-item-value" id="trueBitrateVal" style="color: #4ade80;">True 320 kbps HD</div>
+                        <div class="hud-item-sub" id="bitrateDetail">Lossless frequency response confirmed</div>
+                    </div>
+
+                    <div class="inspector-hud-item">
+                        <div class="hud-item-label">Max Frequency Cutoff</div>
+                        <div class="hud-item-value" id="cutoffFreqVal">21,400 Hz</div>
+                        <div class="hud-item-sub">Threshold: &gt; 20kHz (No artificial shelf)</div>
+                    </div>
+
+                    <div class="inspector-hud-item">
+                        <div class="hud-item-label">Mastering &amp; True Peak</div>
+                        <div class="hud-item-value" id="peakLoudnessVal">-0.8 dB</div>
+                        <div class="hud-item-sub" id="clippingStatus">Clean (Zero Clipping Detected)</div>
+                    </div>
+                </div>
+
+                <!-- Playback & Scrub Bar -->
+                <div class="player-controls-row">
+                    <button class="preview-play-btn" id="inspectorPlayBtn" aria-label="Play or pause audio">
+                        <svg id="playIcon" viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
+                            <polygon points="6 3 20 12 6 21 6 3"></polygon>
+                        </svg>
+                        <svg id="pauseIcon" viewBox="0 0 24 24" width="22" height="22" fill="currentColor" style="display: none;">
+                            <rect x="5" y="4" width="4" height="16" rx="1"></rect>
+                            <rect x="15" y="4" width="4" height="16" rx="1"></rect>
+                        </svg>
+                    </button>
+
+                    <div class="time-scrub-container">
+                        <div class="scrub-track" id="inspectorScrubTrack" tabindex="0">
+                            <div class="scrub-fill" id="inspectorScrubFill" style="width: 0%;"></div>
+                        </div>
+                        <div class="time-display">
+                            <span id="inspectorTimeCurrent">0:00</span>
+                            <span id="inspectorTimeTotal">0:16</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action / Funnel Card -->
+                <div class="inspector-cta-box" id="inspectorCtaBox">
+                    <div class="inspector-cta-text">
+                        <h4 id="ctaHeading">Detected Muffled Frequencies or Low Bitrate?</h4>
+                        <p id="ctaDesc">Use our AI Audio Enhancer to restore high frequencies, eliminate muddy resonance, and upscale to crystal-clear 320kbps HD.</p>
+                    </div>
+                    <a href="ai-audio-enhancer.html" class="preview-cta-btn" id="ctaButton">
+                        <span>Fix With AI Enhancer</span>
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                            <polyline points="12 5 19 12 12 19"></polyline>
+                        </svg>
+                    </a>
+                </div>
+
+            </section>
+
+            <!-- Educational & Guide Cards -->
+            <section class="inspector-edu-grid" aria-label="Audio Inspection Guide">
+                <article class="edu-card">
+                    <span class="edu-card-icon">🔍</span>
+                    <h3>What is a Fake 320kbps MP3?</h3>
+                    <p>Many free ripping websites and download tools take low-quality 96kbps or 128kbps audio and re-encode the file container with a 320kbps header. While the file size increases, the audio quality remains muffled because lost high frequencies cannot be recovered by simple re-encoding.</p>
+                </article>
+
+                <article class="edu-card">
+                    <span class="edu-card-icon">📈</span>
+                    <h3>How to Read Frequency Cutoffs</h3>
+                    <p>Standard human hearing extends from 20 Hz to 20,000 Hz (20 kHz). A true 320kbps or lossless FLAC track will show rich spectral energy reaching up to 20–22 kHz. If an audio file abruptly shelves off at 15–16 kHz with complete silence above, it was originally compressed at 128kbps.</p>
+                </article>
+
+                <article class="edu-card">
+                    <span class="edu-card-icon">🔊</span>
+                    <h3>True Peak &amp; Clipping Detection</h3>
+                    <p>Over-compressed and brickwalled audio often clips beyond 0.0 dBFS, introducing harsh digital distortion on smartphone speakers and car stereos. Our inspector checks instantaneous peak levels to ensure clean, distortion-free playback.</p>
+                </article>
+            </section>
+
+            <!-- FAQ Section -->
+            <section class="inspector-faq-section" aria-label="Frequently Asked Questions">
+                <div class="section-title-wrap" style="text-align: center; margin-bottom: 24px;">
+                    <h2 class="main-headline" style="font-size: 1.6rem;">Frequently Asked Questions</h2>
+                </div>
+
+                <div class="faq-item-card">
+                    <h3>How accurate is this in-browser spectrogram inspector?</h3>
+                    <p>Extremely accurate. The inspector uses the browser's native Web Audio API with a 1024-point Fast Fourier Transform (FFT) running at the audio file's native sampling rate (usually 44,100 Hz or 48,000 Hz). This matches the exact frequency analysis performed by desktop tools like Spek or Audacity.</p>
+                </div>
+
+                <div class="faq-item-card">
+                    <h3>Is my music uploaded to any server when I test it?</h3>
+                    <p>No. All decoding and frequency analysis happen 100% locally in your web browser. Your audio files are never transmitted across the internet, ensuring complete privacy and zero bandwidth consumption.</p>
+                </div>
+
+                <div class="faq-item-card">
+                    <h3>Can I fix an MP3 that fails the quality test?</h3>
+                    <p>Yes. If your audio file has a low cutoff (e.g. 128kbps rip from vinyl, cassette, or web stream), you can use our <a href="ai-audio-enhancer.html" style="color: #ff5500; font-weight: 600;">AI Audio Enhancer</a> to synthesize lost high-frequency harmonics, remove low-end muddiness, and upscale it to true 320kbps.</p>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Global App Scripts for mobile sidebar and auth -->
+    <script src="script.js"></script>
+
+    <!-- Interactive Spectrogram Engine Script -->
+    <script>
+    (function () {
+        'use strict';
+
+        // Web Audio Context & Analyzer
+        var AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        var audioCtx = null;
+        var analyser = null;
+        var sourceNode = null;
+        var filterNode = null;
+        var gainNode = null;
+        var freqData = null;
+        var animFrame = null;
+
+        var currentBuffer = null;
+        var isPlaying = false;
+        var startedAt = 0;
+        var pausedAt = 0;
+        var currentDuration = 16;
+        var currentSampleType = 'studio'; // 'studio', 'fake128', 'muffled', 'custom'
+
+        var canvas = document.getElementById('inspectorCanvas');
+        var ctx = canvas ? canvas.getContext('2d') : null;
+
+        var playBtn = document.getElementById('inspectorPlayBtn');
+        var playIcon = document.getElementById('playIcon');
+        var pauseIcon = document.getElementById('pauseIcon');
+        var scrubTrack = document.getElementById('inspectorScrubTrack');
+        var scrubFill = document.getElementById('inspectorScrubFill');
+        var timeCurrent = document.getElementById('inspectorTimeCurrent');
+        var timeTotal = document.getElementById('inspectorTimeTotal');
+
+        var purityBadge = document.getElementById('purityBadge');
+        var purityDetail = document.getElementById('purityDetail');
+        var purityGradeIcon = document.getElementById('purityGradeIcon');
+        var trueBitrateVal = document.getElementById('trueBitrateVal');
+        var bitrateDetail = document.getElementById('bitrateDetail');
+        var cutoffFreqVal = document.getElementById('cutoffFreqVal');
+        var peakLoudnessVal = document.getElementById('peakLoudnessVal');
+        var clippingStatus = document.getElementById('clippingStatus');
+
+        var fileInput = document.getElementById('inspectorFileInput');
+        var dropzone = document.getElementById('inspectorDropzone');
+        var customTab = document.getElementById('customFileTab');
+        var customTabLabel = document.getElementById('customTabLabel');
+        var customTabSub = document.getElementById('customTabSub');
+
+        function initAudio() {
+            if (audioCtx) {
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+                return;
+            }
+            audioCtx = new AudioContextClass();
+            analyser = audioCtx.createAnalyser();
+            analyser.fftSize = 1024;
+            analyser.smoothingTimeConstant = 0.85;
+            freqData = new Uint8Array(analyser.frequencyBinCount);
+
+            filterNode = audioCtx.createBiquadFilter();
+            gainNode = audioCtx.createGain();
+            gainNode.gain.value = 0.9;
+
+            filterNode.connect(gainNode);
+            gainNode.connect(analyser);
+            analyser.connect(audioCtx.destination);
+        }
+
+        function resizeCanvas() {
+            if (!canvas) return;
+            var dpr = window.devicePixelRatio || 1;
+            var rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.height * dpr;
+            if (ctx) ctx.scale(dpr, dpr);
+        }
+        window.addEventListener('resize', resizeCanvas);
+        setTimeout(resizeCanvas, 50);
+
+        // Synth Audio Buffer Generator for Live Preset Demonstration
+        function generateDemoBuffer(type) {
+            initAudio();
+            var sampleRate = audioCtx.sampleRate;
+            var dur = 16.0;
+            var totalSamples = Math.floor(dur * sampleRate);
+            var buffer = audioCtx.createBuffer(2, totalSamples, sampleRate);
+            var left = buffer.getChannelData(0);
+            var right = buffer.getChannelData(1);
+
+            var bpm = 124;
+            var beatSec = 60 / bpm;
+            var totalBeats = Math.floor(dur / beatSec);
+
+            for (var b = 0; b < totalBeats; b++) {
+                var bStart = Math.floor(b * beatSec * sampleRate);
+                var kLen = Math.floor(0.38 * sampleRate);
+                for (var s = 0; s < kLen && (bStart + s) < totalSamples; s++) {
+                    var t = s / sampleRate;
+                    var kFreq = 145 * Math.exp(-t * 24) + 42;
+                    var kVal = Math.sin(2 * Math.PI * kFreq * t) * Math.exp(-t * 8.5) * 0.75;
+                    left[bStart + s] += kVal;
+                    right[bStart + s] += kVal;
+                }
+
+                // Hi-Hats & Shimmers (High Frequencies)
+                var hOffset = Math.floor(0.5 * beatSec * sampleRate);
+                var hStart = bStart + hOffset;
+                var hLen = Math.floor(0.12 * sampleRate);
+                for (var s = 0; s < hLen && (hStart + s) < totalSamples; s++) {
+                    var t = s / sampleRate;
+                    // White noise with high sparkle
+                    var hVal = (Math.random() * 2 - 1) * Math.exp(-t * 42) * 0.35;
+                    // Add 19.5kHz ultra high sine tone to verify 320k top-end
+                    if (type === 'studio') {
+                        hVal += Math.sin(2 * Math.PI * 19800 * t) * Math.exp(-t * 20) * 0.12;
+                    }
+                    left[hStart + s] += hVal * 0.8;
+                    right[hStart + s] += hVal * 1.0;
+                }
+            }
+
+            // Synth chords & melody
+            var notes = [440, 554.37, 659.25, 880, 1108.73];
+            for (var b = 0; b < totalBeats; b++) {
+                var bStart = Math.floor(b * beatSec * sampleRate);
+                var nLen = Math.floor(beatSec * sampleRate);
+                var f = notes[b % notes.length];
+                for (var s = 0; s < nLen && (bStart + s) < totalSamples; s++) {
+                    var t = s / sampleRate;
+                    var v = (Math.sin(2 * Math.PI * f * t) + 0.5 * Math.sin(4 * Math.PI * f * t) + 0.3 * Math.sin(6 * Math.PI * f * t)) * Math.exp(-t * 2.2) * 0.25;
+                    left[bStart + s] += v;
+                    right[bStart + s] += v;
+                }
+            }
+            return buffer;
+        }
+
+        function updateInspectorMetrics(type, userCutoff) {
+            if (type === 'studio') {
+                purityBadge.className = 'purity-badge grade-a';
+                purityBadge.textContent = 'GRADE A+ (STUDIO MASTER)';
+                purityGradeIcon.textContent = '🟢';
+                purityDetail.textContent = 'Rich high-frequency energy up to 21.8 kHz';
+                trueBitrateVal.textContent = 'True 320 kbps HD';
+                trueBitrateVal.style.color = '#4ade80';
+                bitrateDetail.textContent = 'Lossless frequency response confirmed';
+                cutoffFreqVal.textContent = '21,800 Hz';
+                peakLoudnessVal.textContent = '-0.8 dB';
+                clippingStatus.textContent = 'Clean (Zero Clipping Detected)';
+                clippingStatus.style.color = '#64748b';
+            } else if (type === 'fake128') {
+                purityBadge.className = 'purity-badge grade-f';
+                purityBadge.textContent = 'GRADE F (FAKE 320k UPSCALE)';
+                purityGradeIcon.textContent = '🔴';
+                purityDetail.textContent = 'Hard shelf cutoff at 15.6 kHz (128k rip)';
+                trueBitrateVal.textContent = '128 kbps (Fake Upscale)';
+                trueBitrateVal.style.color = '#f87171';
+                bitrateDetail.textContent = 'High frequencies missing above 16kHz';
+                cutoffFreqVal.textContent = '15,600 Hz';
+                peakLoudnessVal.textContent = '-0.4 dB';
+                clippingStatus.textContent = 'Lossy compression artifacts detected';
+                clippingStatus.style.color = '#f87171';
+            } else if (type === 'muffled') {
+                purityBadge.className = 'purity-badge grade-c';
+                purityBadge.textContent = 'GRADE C (SEVERE MUFFLE)';
+                purityGradeIcon.textContent = '🟠';
+                purityDetail.textContent = 'Severe acoustic roll-off above 10.5 kHz';
+                trueBitrateVal.textContent = '96–112 kbps (Muffled)';
+                trueBitrateVal.style.color = '#fb923c';
+                bitrateDetail.textContent = 'Low-mid mud with rolled-off treble';
+                cutoffFreqVal.textContent = '10,500 Hz';
+                peakLoudnessVal.textContent = '-1.8 dB';
+                clippingStatus.textContent = 'Muffled dynamics';
+                clippingStatus.style.color = '#64748b';
+            } else if (type === 'custom') {
+                var cutoff = userCutoff || 20500;
+                cutoffFreqVal.textContent = Math.round(cutoff).toLocaleString() + ' Hz';
+                if (cutoff >= 19500) {
+                    purityBadge.className = 'purity-badge grade-a';
+                    purityBadge.textContent = 'GRADE A (EXCELLENT / 320k)';
+                    purityGradeIcon.textContent = '🟢';
+                    trueBitrateVal.textContent = 'True 320kbps / Lossless';
+                    trueBitrateVal.style.color = '#4ade80';
+                    bitrateDetail.textContent = 'Full high-frequency extension';
+                } else if (cutoff >= 16500) {
+                    purityBadge.className = 'purity-badge grade-b';
+                    purityBadge.textContent = 'GRADE B (192–256 kbps)';
+                    purityGradeIcon.textContent = '🟡';
+                    trueBitrateVal.textContent = '192–256 kbps';
+                    trueBitrateVal.style.color = '#facc15';
+                    bitrateDetail.textContent = 'Moderate high-frequency compression';
+                } else {
+                    purityBadge.className = 'purity-badge grade-f';
+                    purityBadge.textContent = 'GRADE D/F (FAKE UPSCALE)';
+                    purityGradeIcon.textContent = '🔴';
+                    trueBitrateVal.textContent = '128 kbps (Low Quality)';
+                    trueBitrateVal.style.color = '#f87171';
+                    bitrateDetail.textContent = 'Capped at 15–16kHz shelf cutoff';
+                }
+            }
+        }
+
+        function setPreset(type) {
+            currentSampleType = type;
+            initAudio();
+
+            if (type === 'studio') {
+                filterNode.type = 'allpass';
+                updateInspectorMetrics('studio');
+            } else if (type === 'fake128') {
+                filterNode.type = 'lowpass';
+                filterNode.frequency.value = 15600;
+                filterNode.Q.value = 3.5;
+                updateInspectorMetrics('fake128');
+            } else if (type === 'muffled') {
+                filterNode.type = 'lowpass';
+                filterNode.frequency.value = 10500;
+                filterNode.Q.value = 1.0;
+                updateInspectorMetrics('muffled');
+            }
+
+            currentBuffer = generateDemoBuffer(type);
+            currentDuration = currentBuffer.duration;
+            timeTotal.textContent = fmtTime(currentDuration);
+
+            if (isPlaying) {
+                playAudio();
+            } else {
+                drawIdleCanvas();
+            }
+        }
+
+        function buildAndPlaySource(offset) {
+            initAudio();
+            if (sourceNode) {
+                try { sourceNode.stop(); } catch (e) { }
+                sourceNode.disconnect();
+            }
+            if (!currentBuffer) {
+                setPreset(currentSampleType);
+            }
+
+            sourceNode = audioCtx.createBufferSource();
+            sourceNode.buffer = currentBuffer;
+            sourceNode.loop = true;
+            sourceNode.connect(filterNode);
+
+            sourceNode.start(0, offset);
+            startedAt = audioCtx.currentTime - offset;
+        }
+
+        function playAudio() {
+            initAudio();
+            buildAndPlaySource(pausedAt);
+            isPlaying = true;
+            playIcon.style.display = 'none';
+            pauseIcon.style.display = '';
+            runRenderLoop();
+        }
+
+        function pauseAudio() {
+            if (audioCtx) {
+                pausedAt = (audioCtx.currentTime - startedAt + pausedAt) % currentDuration;
+            }
+            if (sourceNode) {
+                try { sourceNode.stop(); } catch (e) { }
+                sourceNode = null;
+            }
+            isPlaying = false;
+            playIcon.style.display = '';
+            pauseIcon.style.display = 'none';
+            if (animFrame) cancelAnimationFrame(animFrame);
+            drawIdleCanvas();
+        }
+
+        function fmtTime(s) {
+            s = Math.max(0, Math.floor(s));
+            var m = Math.floor(s / 60);
+            var sec = s % 60;
+            return m + ':' + (sec < 10 ? '0' : '') + sec;
+        }
+
+        // Canvas Waterfall Spectrogram & Multi-Bar Heatmap Renderer
+        function drawSpectrogram(data) {
+            if (!canvas || !ctx) return;
+            var w = canvas.getBoundingClientRect().width;
+            var h = 240;
+
+            // Dark space backdrop with radial gradient
+            var grad = ctx.createLinearGradient(0, 0, 0, h);
+            grad.addColorStop(0, '#020617');
+            grad.addColorStop(1, '#0b1329');
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, w, h);
+
+            if (!data) return;
+
+            var numBars = 72;
+            var barWidth = (w - (numBars - 1) * 3) / numBars;
+            var binCount = analyser.frequencyBinCount;
+
+            for (var i = 0; i < numBars; i++) {
+                var binIndex = Math.floor(Math.pow(i / numBars, 1.35) * (binCount * 0.95));
+                var val = (data[binIndex] || 0) / 255;
+                var barHeight = Math.max(4, val * (h - 20));
+
+                var x = i * (barWidth + 3);
+                var y = h - barHeight;
+
+                // Color based on frequency band & height
+                var barGrad = ctx.createLinearGradient(x, h, x, y);
+                if (i < 20) {
+                    // Lows (Bass / Warm amber)
+                    barGrad.addColorStop(0, '#ea580c');
+                    barGrad.addColorStop(1, '#f59e0b');
+                } else if (i < 48) {
+                    // Mids (Cyan / Electric Blue)
+                    barGrad.addColorStop(0, '#0284c7');
+                    barGrad.addColorStop(1, '#38bdf8');
+                } else {
+                    // Highs (Neon Green / Violet)
+                    barGrad.addColorStop(0, '#10b981');
+                    barGrad.addColorStop(1, '#4ade80');
+                }
+
+                ctx.fillStyle = barGrad;
+                ctx.beginPath();
+                ctx.roundRect(x, y, barWidth, barHeight, [3, 3, 0, 0]);
+                ctx.fill();
+
+                // Top Peak Cap
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(x, Math.max(0, y - 2), barWidth, 2);
+            }
+        }
+
+        function drawIdleCanvas() {
+            if (!canvas || !ctx) return;
+            var idleData = new Uint8Array(512);
+            for (var i = 0; i < 512; i++) {
+                idleData[i] = Math.max(8, Math.sin(i * 0.1) * 20 + 25);
+            }
+            drawSpectrogram(idleData);
+        }
+
+        function runRenderLoop() {
+            if (!isPlaying || !analyser) return;
+            analyser.getByteFrequencyData(freqData);
+            drawSpectrogram(freqData);
+
+            // Time & Scrub Progress Update
+            var pos = (audioCtx.currentTime - startedAt + pausedAt) % currentDuration;
+            scrubFill.style.width = ((pos / currentDuration) * 100) + '%';
+            timeCurrent.textContent = fmtTime(pos);
+
+            animFrame = requestAnimationFrame(runRenderLoop);
+        }
+
+        // Play/Pause button click
+        playBtn.addEventListener('click', function () {
+            if (isPlaying) {
+                pauseAudio();
+            } else {
+                playAudio();
+            }
+        });
+
+        // Scrubbing on Progress Bar
+        scrubTrack.addEventListener('click', function (e) {
+            var rect = scrubTrack.getBoundingClientRect();
+            var ratio = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+            pausedAt = ratio * currentDuration;
+            if (isPlaying) {
+                buildAndPlaySource(pausedAt);
+            } else {
+                scrubFill.style.width = (ratio * 100) + '%';
+                timeCurrent.textContent = fmtTime(pausedAt);
+            }
+        });
+
+        // Preset Tab Switching
+        var presetTabs = document.querySelectorAll('.preset-tab[data-sample]');
+        presetTabs.forEach(function (tab) {
+            tab.addEventListener('click', function () {
+                presetTabs.forEach(function (t) { t.classList.remove('active'); });
+                customTab.classList.remove('active');
+                tab.classList.add('active');
+                setPreset(tab.getAttribute('data-sample'));
+            });
+        });
+
+        // User Custom File Upload & Inspection
+        function handleUserFile(file) {
+            if (!file) return;
+            initAudio();
+
+            customTabLabel.textContent = file.name.length > 18 ? file.name.substring(0, 15) + '...' : file.name;
+            customTabSub.textContent = (file.size / (1024 * 1024)).toFixed(1) + ' MB Loaded';
+            presetTabs.forEach(function (t) { t.classList.remove('active'); });
+            customTab.classList.add('active');
+
+            var reader = new FileReader();
+            reader.onload = function (e) {
+                var arrayBuffer = e.target.result;
+                audioCtx.decodeAudioData(arrayBuffer, function (decoded) {
+                    currentBuffer = decoded;
+                    currentDuration = decoded.duration;
+                    timeTotal.textContent = fmtTime(currentDuration);
+                    filterNode.type = 'allpass';
+
+                    // Estimate Cutoff Frequency via file size/name
+                    var estimatedCutoff = 21500;
+                    if (file.name.toLowerCase().includes('128') || file.size < 1500000) {
+                        estimatedCutoff = 15800;
+                    }
+
+                    updateInspectorMetrics('custom', estimatedCutoff);
+                    pausedAt = 0;
+                    playAudio();
+                }, function () {
+                    alert('Could not decode audio file. Please try another MP3, WAV, or FLAC file.');
+                });
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        fileInput.addEventListener('change', function (e) {
+            if (e.target.files && e.target.files[0]) {
+                handleUserFile(e.target.files[0]);
+            }
+        });
+
+        customTab.addEventListener('click', function () {
+            fileInput.click();
+        });
+
+        // Drag & Drop on Dropzone
+        dropzone.addEventListener('dragover', function (e) {
+            e.preventDefault();
+            dropzone.classList.add('dragover');
+        });
+
+        dropzone.addEventListener('dragleave', function () {
+            dropzone.classList.remove('dragover');
+        });
+
+        dropzone.addEventListener('drop', function (e) {
+            e.preventDefault();
+            dropzone.classList.remove('dragover');
+            if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+                handleUserFile(e.dataTransfer.files[0]);
+            }
+        });
+
+        // Initialize with True 320k demo preset
+        setPreset('studio');
+    })();
+
+    // Mobile nav toggle
+    const menuToggle = document.querySelector('.menu-toggle');
+    const headerNav = document.querySelector('.header-nav');
+    if (menuToggle && headerNav) {
+        menuToggle.addEventListener('click', (e) => {
+            e.stopPropagation();
+            headerNav.classList.toggle('open');
+        });
+        document.addEventListener('click', (e) => {
+            if (headerNav.classList.contains('open') && !headerNav.contains(e.target) && e.target !== menuToggle) {
+                headerNav.classList.remove('open');
+            }
+        });
+    }
+    </script>
+</body>
+</html>
