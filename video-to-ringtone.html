@@ -77,7 +77,7 @@
         {
           "@type": "HowToStep",
           "name": "Install on Android via Settings",
-          "text": "Download the MP3 to phone, go to Settings > Sound & vibration > Phone ringtone, and tap + to add your sound.",
+          "text": "Convert the MP3 on MP3aud.io, save to phone, go to Settings > Sound & vibration > Phone ringtone, and tap + to add your sound.",
           "position": 3
         }
       ]
@@ -107,7 +107,6 @@
                     <li><a href="index.html" class="header-nav-link">Converter</a></li>
                     <li><a href="video-to-ringtone.html" class="header-nav-link active">Ringtone Maker</a></li>
                     <li><a href="ai-audio-enhancer.html" class="header-nav-link">Audio Enhancer</a></li>
-                    <li><a href="audio-inspector.html" class="header-nav-link">Audio Inspector</a></li>
                     <li><a href="supported-sites.html" class="header-nav-link">Supported Sites</a></li>
                     <li><a href="top-album-art.html" class="header-nav-link">Top Album Art</a></li>
                     <li><a href="shop.html" class="header-nav-link">Gear Shop</a></li>
@@ -115,7 +114,6 @@
                 </ul>
             </nav>
             <div class="header-actions">
-                <a href="index.html#accountSection" class="header-auth-link">Sign In / Pricing</a>
                 <a href="https://www.instagram.com/mp3aud.io?igsh=ZXljNzMxaGtqdWwz&utm_source=qr" target="_blank"
                     aria-label="Follow us on Instagram"
                     style="color: #64748b; display: flex; align-items: center; transition: color 0.2s;">
@@ -132,36 +130,28 @@
 
     <main class="main-content">
         <div class="content-container">
-            <!-- Hero Eyebrow & Headline -->
-            <header class="logo-container ringtone-hero" style="text-align: center; max-width: 860px; margin: 25px auto 30px auto; display: flex; flex-direction: column; align-items: center;">
-                <div class="header-eyebrow">
-                    <svg viewBox="0 0 24 24" width="12" height="12" fill="#FF5500">
-                        <rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect>
-                        <line x1="12" y1="18" x2="12.01" y2="18"></line>
-                    </svg>
-                    Step-by-Step Directions
+            <!-- Hero Header matching Audio Enhancer style -->
+            <header class="logo-container inspector-hero" style="margin-bottom: 24px;">
+                <div class="preview-badge" style="margin-bottom: 14px;">
+                    <span class="preview-badge-pulse"></span>
+                    <span>FREE RINGTONE MAKER &amp; SETUP GUIDE</span>
                 </div>
-                <h1 class="main-headline" style="text-align: center;">Cellular Phone Ringtone <span class="accent">Setup Guide</span></h1>
-                <h2 class="main-subheadline" style="max-width: 800px; margin: 0 auto 16px auto; text-align: center;">
+                <h1 class="main-headline">Ringtone <span class="accent">Maker</span> &amp; Setup Guide</h1>
+                <h2 class="main-subheadline" style="margin: 0 auto 14px auto; text-align: center; max-width: 820px;">
                     Learn how to convert any video or audio clip on MP3aud.io and install it as your custom ringtone, text tone, or alarm on Apple iPhone (iOS) and Android smartphones.
                 </h2>
-                
-                <!-- Quick Link Back to Converter CTA -->
-                <div style="display: flex; justify-content: center; gap: 14px; margin-top: 22px; flex-wrap: wrap;">
-                    <a href="index.html" class="zip-btn" style="padding: 12px 24px; text-decoration: none; border-radius: 10px; font-weight: 700; display: inline-flex; align-items: center; gap: 8px;">
-                        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                            <line x1="19" y1="12" x2="5" y2="12"></line>
-                            <polyline points="12 19 5 12 12 5"></polyline>
-                        </svg>
-                        Convert Video at MP3aud.io
-                    </a>
+                <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 14px;">
+                    <span class="metric-pill" style="background: white; border-color: #cbd5e1; color: #1e293b;">⚡ iPhone (.M4R) &amp; Android (.MP3)</span>
+                    <span class="metric-pill" style="background: white; border-color: #cbd5e1; color: #1e293b;">📱 Direct On-Phone &amp; USB Sync</span>
+                    <span class="metric-pill" style="background: white; border-color: #cbd5e1; color: #1e293b;">✂️ 30s Auto Trim Ready</span>
+                    <span class="metric-pill" style="background: white; border-color: #cbd5e1; color: #1e293b;">💯 100% Free &amp; Browser-Based</span>
                 </div>
             </header>
 
-            <!-- In-Depth Step-by-Step Directions Guide -->
-            <section class="ringtone-guide-section" style="max-width: 760px; margin: 10px auto 0 auto; width: 100%;" aria-label="Phone Ringtone Installation Guide">
+            <!-- In-Depth Step-by-Step Directions Guide Card -->
+            <section class="ringtone-guide-section" aria-label="Phone Ringtone Installation Guide">
                 <!-- Platform Tabs -->
-                <div class="rt-platform-tabs" style="max-width: 520px; margin: 0 auto 28px auto;" role="tablist">
+                <div class="rt-platform-tabs" style="max-width: 520px; margin: 0 auto 24px auto;" role="tablist">
                     <button type="button" class="rt-platform-tab active" id="rtTabIosPage" role="tab" aria-selected="true" onclick="switchGuidePlatform('ios')">
                         <span class="rt-tab-ico">🍏</span>
                         <span>Apple iPhone (iOS)</span>
@@ -173,8 +163,8 @@
                 </div>
 
                 <!-- iOS Guide Panel -->
-                <div id="rtGuidePanelIos" class="rt-panel active" style="max-width: 760px; margin: 0 auto;">
-                    <div class="rt-method-switch" style="max-width: 500px; margin: 0 auto 22px auto;">
+                <div id="rtGuidePanelIos" class="rt-panel active">
+                    <div class="rt-method-switch" style="max-width: 480px; margin: 0 auto 20px auto;">
                         <button type="button" class="rt-method-btn active" id="rtBtnGbPage" onclick="switchGuideIosMethod('gb')">
                             <span>✨ Direct on iPhone (GarageBand)</span>
                         </button>
@@ -184,7 +174,7 @@
                     </div>
 
                     <!-- GarageBand View -->
-                    <div id="rtGuideViewGb" class="rt-method-view active" style="max-width: 760px; margin: 0 auto;">
+                    <div id="rtGuideViewGb" class="rt-method-view active">
                         <div class="rt-alert-banner">
                             <span class="rt-alert-icon">💡</span>
                             <p><strong>The Easiest On-Device iPhone Method!</strong> Apple requires all custom ringtones to be under 40 seconds (we recommend 25–30s). Using the free <strong>GarageBand</strong> app (pre-installed or free from the App Store), you can create and set custom ringtones without ever touching a computer.</p>
@@ -194,8 +184,8 @@
                             <div class="rt-step-card">
                                 <div class="rt-step-badge">1</div>
                                 <div class="rt-step-body">
-                                    <strong>Convert Video &amp; Download to Files</strong>
-                                    <p>Go to the <a href="index.html" style="color: #FF5500; font-weight: 600;">MP3aud.io Converter</a>, upload your video, and tap <strong>Download</strong>. In Mobile Safari, tap <em>Download</em> to save the audio into your iPhone's <strong>Files</strong> app (under <code>Downloads</code>).</p>
+                                    <strong>Convert Video &amp; Save to Files</strong>
+                                    <p>Go to the <a href="index.html" style="color: #FF5500; font-weight: 600;">MP3aud.io Converter</a>, upload your video, and tap <strong>Convert</strong>. In Mobile Safari, tap <em>Download</em> to save the audio into your iPhone's <strong>Files</strong> app (under <code>Downloads</code>).</p>
                                 </div>
                             </div>
                             <div class="rt-step-card">
@@ -244,7 +234,7 @@
                     </div>
 
                     <!-- PC/Mac Cable View -->
-                    <div id="rtGuideViewPc" class="rt-method-view" style="max-width: 760px; margin: 0 auto;">
+                    <div id="rtGuideViewPc" class="rt-method-view">
                         <div class="rt-alert-banner">
                             <span class="rt-alert-icon">⚡</span>
                             <p><strong>Fast Cable Drag &amp; Drop:</strong> If you're on a laptop or desktop computer, transfer the generated <code>.m4r</code> file directly to your connected iPhone using Finder or iTunes.</p>
@@ -254,8 +244,8 @@
                             <div class="rt-step-card">
                                 <div class="rt-step-badge">1</div>
                                 <div class="rt-step-body">
-                                    <strong>Convert &amp; Download .M4R File on Computer</strong>
-                                    <p>Convert your video on <a href="index.html" style="color: #FF5500; font-weight: 600;">MP3aud.io</a> and download the archive containing the native <code>.m4r</code> iPhone ringtone file.</p>
+                                    <strong>Convert &amp; Save .M4R File on Computer</strong>
+                                    <p>Convert your video on <a href="index.html" style="color: #FF5500; font-weight: 600;">MP3aud.io</a> and tap <strong>Convert</strong> to download the archive containing the native <code>.m4r</code> iPhone ringtone file.</p>
                                 </div>
                             </div>
                             <div class="rt-step-card">
@@ -284,7 +274,7 @@
                 </div>
 
                 <!-- Android Guide Panel -->
-                <div id="rtGuidePanelAndroid" class="rt-panel" style="max-width: 760px; margin: 0 auto;">
+                <div id="rtGuidePanelAndroid" class="rt-panel">
                     <div class="rt-alert-banner">
                         <span class="rt-alert-icon">🤖</span>
                         <p><strong>Native MP3 Compatibility:</strong> Android natively supports custom MP3 files for ringtones, notifications, and alarms without needing any 3rd-party apps or computer syncing.</p>
@@ -294,8 +284,8 @@
                         <div class="rt-step-card">
                             <div class="rt-step-badge">1</div>
                             <div class="rt-step-body">
-                                <strong>Convert &amp; Download the MP3 Track</strong>
-                                <p>Convert your video on <a href="index.html" style="color: #FF5500; font-weight: 600;">MP3aud.io</a> and tap <strong>Download</strong> to save the audio file directly into your phone's <code>Downloads</code> folder.</p>
+                                <strong>Convert &amp; Save the MP3 Track</strong>
+                                <p>Convert your video on <a href="index.html" style="color: #FF5500; font-weight: 600;">MP3aud.io</a> and tap <strong>Convert</strong> to save the audio file directly into your phone's <code>Downloads</code> folder.</p>
                             </div>
                         </div>
                         <div class="rt-step-card">
@@ -323,7 +313,7 @@
                             <div class="rt-step-badge">5</div>
                             <div class="rt-step-body">
                                 <strong>Select Your Converted Audio</strong>
-                                <p>Select your downloaded MP3 file from your audio picker and tap <strong>Done</strong>. Your new ringtone is active immediately!</p>
+                                <p>Select your converted MP3 file from your audio picker and tap <strong>Done</strong>. Your new ringtone is active immediately!</p>
                             </div>
                         </div>
                     </div>
@@ -335,93 +325,109 @@
                 </div>
             </section>
 
-            <!-- Format Comparison Table -->
-            <section style="margin: 50px auto; max-width: 820px;" aria-label="Smartphone Ringtone Format Specifications">
-                <div style="text-align: center; margin-bottom: 20px;">
-                    <h3 style="font-size: 1.4rem; font-weight: 800; color: #0f172a; margin: 0 0 6px 0;">iPhone vs Android Ringtone Technical Specs</h3>
-                    <p style="font-size: 0.88rem; color: #64748b; margin: 0;">MP3aud.io automatically tailors your audio output to meet strict carrier and operating system requirements.</p>
-                </div>
-
-                <div style="overflow-x: auto; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.03);">
-                    <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.88rem;">
-                        <thead>
-                            <tr style="background: #f8fafc; border-bottom: 2px solid #e2e8f0;">
-                                <th style="padding: 14px 16px; font-weight: 700; color: #1e293b;">Specification</th>
-                                <th style="padding: 14px 16px; font-weight: 700; color: #1e293b;">🍏 Apple iPhone (iOS)</th>
-                                <th style="padding: 14px 16px; font-weight: 700; color: #1e293b;">🤖 Android (Samsung, Pixel, etc.)</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr style="border-bottom: 1px solid #f1f5f9;">
-                                <td style="padding: 12px 16px; font-weight: 600; color: #0f172a;">Primary File Format</td>
-                                <td style="padding: 12px 16px; color: #334155;"><code>.m4r</code> (MPEG-4 Audio / AAC)</td>
-                                <td style="padding: 12px 16px; color: #334155;"><code>.mp3</code> (or <code>.m4a</code>, <code>.ogg</code>)</td>
-                            </tr>
-                            <tr style="border-bottom: 1px solid #f1f5f9;">
-                                <td style="padding: 12px 16px; font-weight: 600; color: #0f172a;">Maximum Duration</td>
-                                <td style="padding: 12px 16px; color: #334155;"><strong>40 seconds hard limit</strong> (30s text tone)</td>
-                                <td style="padding: 12px 16px; color: #334155;">No hard limit (loops naturally)</td>
-                            </tr>
-                            <tr style="border-bottom: 1px solid #f1f5f9;">
-                                <td style="padding: 12px 16px; font-weight: 600; color: #0f172a;">Recommended Bitrate</td>
-                                <td style="padding: 12px 16px; color: #334155;">256kbps AAC (Crystal clarity on speakers)</td>
-                                <td style="padding: 12px 16px; color: #334155;">320kbps MP3 (Highest quality)</td>
-                            </tr>
-                            <tr style="border-bottom: 1px solid #f1f5f9;">
-                                <td style="padding: 12px 16px; font-weight: 600; color: #0f172a;">Direct On-Phone Setup</td>
-                                <td style="padding: 12px 16px; color: #334155;">Yes (via free GarageBand app)</td>
-                                <td style="padding: 12px 16px; color: #334155;">Yes (directly in Settings &gt; Sounds)</td>
-                            </tr>
-                            <tr>
-                                <td style="padding: 12px 16px; font-weight: 600; color: #0f172a;">MP3aud.io Export</td>
-                                <td style="padding: 12px 16px; color: #FF5500; font-weight: 700;">✅ Included (.m4r)</td>
-                                <td style="padding: 12px 16px; color: #FF5500; font-weight: 700;">✅ Included (.mp3)</td>
-                            </tr>
-                        </tbody>
-                    </table>
+            <!-- Technical Comparison Matrix matching Audio Enhancer style -->
+            <section class="seo-features-section" style="margin-top: 50px;">
+                <h2 class="seo-section-title">iPhone vs. Android: Technical Ringtone Specs</h2>
+                <div style="background: white; border: 1px solid #e2e8f0; border-radius: 14px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.03); margin-top: 20px;">
+                    <div style="display: grid; grid-template-columns: 2fr 3fr 3fr; background: #f8fafc; padding: 14px 20px; font-weight: 800; font-size: 0.85rem; border-bottom: 1px solid #e2e8f0; color: #475569;">
+                        <div>SPECIFICATION</div>
+                        <div style="color: #d97706;">🍏 APPLE IPHONE (iOS)</div>
+                        <div style="color: #0284c7;">🤖 ANDROID (SAMSUNG, PIXEL, ETC.)</div>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 2fr 3fr 3fr; padding: 16px 20px; border-bottom: 1px solid #f1f5f9; font-size: 0.9rem;">
+                        <strong style="color: #1e293b;">Primary File Format</strong>
+                        <span style="color: #64748b;"><code>.m4r</code> (MPEG-4 Audio / AAC)</span>
+                        <span style="color: #0284c7; font-weight: 700;"><code>.mp3</code> (or <code>.m4a</code>, <code>.ogg</code>)</span>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 2fr 3fr 3fr; padding: 16px 20px; border-bottom: 1px solid #f1f5f9; font-size: 0.9rem;">
+                        <strong style="color: #1e293b;">Maximum Duration</strong>
+                        <span style="color: #64748b;"><strong>40 seconds hard limit</strong> (30s text tone)</span>
+                        <span style="color: #0284c7; font-weight: 700;">No hard limit (loops naturally)</span>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 2fr 3fr 3fr; padding: 16px 20px; border-bottom: 1px solid #f1f5f9; font-size: 0.9rem;">
+                        <strong style="color: #1e293b;">Recommended Bitrate</strong>
+                        <span style="color: #64748b;">256kbps AAC (Crystal clarity on speakers)</span>
+                        <span style="color: #0284c7; font-weight: 700;">320kbps MP3 (Highest quality)</span>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 2fr 3fr 3fr; padding: 16px 20px; border-bottom: 1px solid #f1f5f9; font-size: 0.9rem;">
+                        <strong style="color: #1e293b;">Direct On-Phone Setup</strong>
+                        <span style="color: #64748b;">Yes (via free GarageBand app)</span>
+                        <span style="color: #0284c7; font-weight: 700;">Yes (directly in Settings &gt; Sounds)</span>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 2fr 3fr 3fr; padding: 16px 20px; font-size: 0.9rem;">
+                        <strong style="color: #1e293b;">MP3aud.io Export</strong>
+                        <span style="color: #FF5500; font-weight: 700;">✅ Included (.m4r)</span>
+                        <span style="color: #FF5500; font-weight: 700;">✅ Included (.mp3)</span>
+                    </div>
                 </div>
             </section>
 
-            <!-- Bottom CTA Section -->
-            <section style="text-align: center; margin: 40px auto 20px auto; padding: 32px 24px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 16px; max-width: 820px;">
-                <h3 style="font-size: 1.35rem; font-weight: 800; color: #0f172a; margin: 0 0 8px 0;">Ready to Create Your Custom Ringtone?</h3>
-                <p style="font-size: 0.92rem; color: #64748b; margin: 0 0 18px 0;">Upload your video clip or paste a link to get your formatted MP3 &amp; M4R ringtone files in seconds.</p>
-                <a href="index.html" class="zip-btn" style="display: inline-flex; align-items: center; gap: 8px; padding: 12px 26px; font-size: 0.95rem; border-radius: 8px; text-decoration: none;">
-                    <span>Open MP3aud.io Converter</span>
+            <!-- FAQ Accordion Section matching Audio Enhancer style -->
+            <section class="faq-section" id="faqSection" style="margin-top: 40px; margin-bottom: 30px;">
+                <h2 class="faq-section-title">Frequently Asked Questions</h2>
+                <div class="faq-accordion">
+                    <div class="faq-item">
+                        <button class="faq-trigger" aria-expanded="false">
+                            <span>Why does Apple limit custom iPhone ringtones to 40 seconds?</span>
+                            <span class="faq-icon">+</span>
+                        </button>
+                        <div class="faq-panel">
+                            <div class="faq-content">
+                                <p>Apple enforces a strict 40-second ceiling on all custom iOS ringtones (and 30 seconds for text alert tones). If a ringtone file exceeds 40 seconds, iOS will either reject the sync or truncate the audio. MP3aud.io lets you trim the exact snippet you want so your tone loops seamlessly without getting cut off.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="faq-item">
+                        <button class="faq-trigger" aria-expanded="false">
+                            <span>Can I convert a YouTube clip or TikTok video to a ringtone?</span>
+                            <span class="faq-icon">+</span>
+                        </button>
+                        <div class="faq-panel">
+                            <div class="faq-content">
+                                <p>Yes! Simply paste the public video link into the <a href="index.html" style="color: #FF5500; font-weight: 600;">MP3aud.io Converter</a>. Our engine extracts the high-quality audio track and outputs ready-to-use MP3 and M4R ringtone files.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="faq-item">
+                        <button class="faq-trigger" aria-expanded="false">
+                            <span>How can I make my custom ringtone louder on my phone?</span>
+                            <span class="faq-icon">+</span>
+                        </button>
+                        <div class="faq-panel">
+                            <div class="faq-content">
+                                <p>When converting your video on MP3aud.io, enabling the <strong>320k Bitrate</strong> option optimizes the dynamic audio spectrum. Additionally, our audio pipeline automatically applies loudness normalization so speech and music sound clear and audible on mobile speakers.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="faq-item">
+                        <button class="faq-trigger" aria-expanded="false">
+                            <span>Do I need to pay to create phone ringtones on MP3aud.io?</span>
+                            <span class="faq-icon">+</span>
+                        </button>
+                        <div class="faq-panel">
+                            <div class="faq-content">
+                                <p>Your first 5 conversions on MP3aud.io are completely free. If you have video files or want premium 320k upscales, you can use affordable credits or sign up for an unlimited plan.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Final CTA Banner matching Audio Enhancer style -->
+            <div style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); border-radius: 16px; padding: 36px 24px; text-align: center; margin: 40px 0 60px 0; border: 1px solid rgba(255,255,255,0.1); color: white;">
+                <h3 style="font-size: 1.6rem; font-weight: 800; margin: 0 0 10px 0;">Ready to Create Your Custom Ringtone?</h3>
+                <p style="color: #94a3b8; max-width: 600px; margin: 0 auto 20px auto; font-size: 0.95rem;">Upload your video clip or paste a link to get your formatted MP3 &amp; M4R ringtone files in seconds.</p>
+                <a href="index.html" class="preview-cta-btn" style="text-decoration: none; padding: 14px 28px; font-size: 1rem;">
+                    <span>Open MP3 Converter &amp; Ringtone Maker</span>
                     <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                         <line x1="5" y1="12" x2="19" y2="12"></line>
                         <polyline points="12 5 19 12 12 19"></polyline>
                     </svg>
                 </a>
-            </section>
-
-            <!-- Frequently Asked Questions -->
-            <section class="inspector-faq-section" style="max-width: 820px; margin: 40px auto;" aria-label="Ringtone FAQs">
-                <div style="text-align: center; margin-bottom: 25px;">
-                    <div class="rt-eyebrow">Help &amp; Troubleshooting</div>
-                    <h3 style="font-size: 1.5rem; font-weight: 800; color: #0f172a; margin: 6px 0;">Frequently Asked Questions</h3>
-                </div>
-
-                <div class="faq-item-card">
-                    <h3>Why does Apple limit custom iPhone ringtones to 40 seconds?</h3>
-                    <p>Apple enforces a strict 40-second ceiling on all custom iOS ringtones (and 30 seconds for text alert tones). If a ringtone file exceeds 40 seconds, iOS will either reject the sync or truncate the audio. MP3aud.io lets you trim the exact snippet you want so your tone loops seamlessly without getting cut off.</p>
-                </div>
-
-                <div class="faq-item-card">
-                    <h3>Can I convert a YouTube clip or TikTok video to a ringtone?</h3>
-                    <p>Yes! Simply paste the public video link into the <a href="index.html" style="color: #FF5500; font-weight: 600;">MP3aud.io Converter</a>. Our engine extracts the high-quality audio track and outputs ready-to-use MP3 and M4R ringtone files.</p>
-                </div>
-
-                <div class="faq-item-card">
-                    <h3>How can I make my custom ringtone louder on my phone?</h3>
-                    <p>When converting your video on MP3aud.io, enabling the <strong>320k Bitrate</strong> option optimizes the dynamic audio spectrum. Additionally, our audio pipeline automatically applies loudness normalization so speech and music sound clear and audible on mobile speakers.</p>
-                </div>
-
-                <div class="faq-item-card">
-                    <h3>Do I need to pay to create phone ringtones on MP3aud.io?</h3>
-                    <p>Your first 5 conversions on MP3aud.io are completely free. If you have video files or want premium 320k upscales, you can use affordable credits or sign up for an unlimited plan.</p>
-                </div>
-            </section>
+            </div>
 
             <!-- Standard Site Footer -->
             <footer>
@@ -517,14 +523,43 @@
         }
 
         // Mobile header navigation drawer toggle
-        const menuToggle = document.querySelector('.menu-toggle');
-        const headerNav = document.querySelector('.header-nav');
+        var menuToggle = document.querySelector('.menu-toggle');
+        var headerNav = document.querySelector('.header-nav');
         if (menuToggle && headerNav) {
-            menuToggle.addEventListener('click', (e) => {
+            menuToggle.addEventListener('click', function (e) {
                 e.stopPropagation();
                 headerNav.classList.toggle('open');
             });
         }
+
+        // Interactive FAQ accordion click handling
+        document.querySelectorAll('.faq-trigger').forEach(function (trigger) {
+            trigger.addEventListener('click', function () {
+                var item = trigger.closest('.faq-item');
+                var panel = item.querySelector('.faq-panel');
+                var isExpanded = trigger.getAttribute('aria-expanded') === 'true';
+
+                document.querySelectorAll('.faq-item').forEach(function (otherItem) {
+                    if (otherItem !== item) {
+                        otherItem.classList.remove('active');
+                        var otherPanel = otherItem.querySelector('.faq-panel');
+                        if (otherPanel) otherPanel.style.maxHeight = null;
+                        var otherTrigger = otherItem.querySelector('.faq-trigger');
+                        if (otherTrigger) otherTrigger.setAttribute('aria-expanded', 'false');
+                    }
+                });
+
+                if (isExpanded) {
+                    item.classList.remove('active');
+                    panel.style.maxHeight = null;
+                    trigger.setAttribute('aria-expanded', 'false');
+                } else {
+                    item.classList.add('active');
+                    panel.style.maxHeight = panel.scrollHeight + 'px';
+                    trigger.setAttribute('aria-expanded', 'true');
+                }
+            });
+        });
     </script>
 </body>
 
