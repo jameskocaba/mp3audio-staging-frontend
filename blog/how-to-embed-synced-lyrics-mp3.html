@@ -66,6 +66,14 @@
                 </a>
             </div>
             <div class="header-actions">
+                <a href="../index.html#accountSection" id="headerLoginLink" class="header-auth-link">Sign In / Pricing</a>
+                <div id="headerUserNav" class="header-user-badge hidden">
+                    <a href="../index.html#accountSection" class="header-credit-chip" title="View credits &amp; account">
+                        <span class="header-credit-icon">⚡</span>
+                        <span class="header-credit-text"><strong id="headerPaidCreditsDisplay">0</strong> Credits</span>
+                    </a>
+                    <button id="headerLogoutBtn" class="header-logout-chip" title="Sign Out">Log Out</button>
+                </div>
                 <a href="https://www.instagram.com/mp3aud.io?igsh=ZXljNzMxaGtqdWwz&utm_source=qr" target="_blank"
                     aria-label="Follow us on Instagram"
                     style="color: #64748b; display: flex; align-items: center; transition: color 0.2s;">
@@ -282,5 +290,6 @@
             menuToggle.addEventListener('click', () => sidebar.classList.toggle('open'));
         }
     </script>
+    <script src="../auth-nav.js"></script>
 </body>
 </html>
