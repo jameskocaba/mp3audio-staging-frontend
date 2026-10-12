@@ -351,7 +351,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     videoToMp3Badge.textContent = '5 Credits';
                 } else {
                     videoToMp3Badge.className = 'premium-badge free-badge';
-                    videoToMp3Badge.innerHTML = '1st Free &middot; 5 Cr.';
+                    videoToMp3Badge.textContent = 'First Free';
                 }
             }
 
@@ -388,7 +388,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     videoToMp3Badge.textContent = '5 Credits';
                 } else {
                     videoToMp3Badge.className = 'premium-badge free-badge';
-                    videoToMp3Badge.innerHTML = '1st Free &middot; 5 Cr.';
+                    videoToMp3Badge.textContent = 'First Free';
                 }
             }
             // Fallback for offline mode/guests
