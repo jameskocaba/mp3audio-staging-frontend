@@ -34,6 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const fileInput = document.getElementById('fileInput');
     const increaseQualityInput = document.getElementById('increaseQuality');
     const videoToMp3Input = document.getElementById('videoToMp3');
+    const videoToMp3Badge = document.getElementById('videoToMp3Badge');
     const attachLyricsInput = document.getElementById('attachLyrics');
     const autoAddAlbumArtInput = document.getElementById('autoAddAlbumArt');
     const fileInputText = document.getElementById('fileInputText');
@@ -343,6 +344,17 @@ document.addEventListener('DOMContentLoaded', () => {
             if (paidCreditsDisplay) paidCreditsDisplay.textContent = credits;
             if (headerPaidCreditsDisplay) headerPaidCreditsDisplay.textContent = credits;
 
+            const freeVideoUsed = Boolean(data.free_video_used || (localStorage.getItem('free_video_converted') === 'true'));
+            if (videoToMp3Badge) {
+                if (freeVideoUsed) {
+                    videoToMp3Badge.className = 'premium-badge';
+                    videoToMp3Badge.textContent = '5 Credits';
+                } else {
+                    videoToMp3Badge.className = 'premium-badge free-badge';
+                    videoToMp3Badge.innerHTML = '1st Free &middot; 5 Cr.';
+                }
+            }
+
             if (data.authenticated) {
                 isGuestUser = false;
                 // User is logged in/paid
@@ -369,6 +381,16 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         } catch (error) {
             console.error('Auth Check Failed', error);
+            const freeVideoUsed = localStorage.getItem('free_video_converted') === 'true';
+            if (videoToMp3Badge) {
+                if (freeVideoUsed) {
+                    videoToMp3Badge.className = 'premium-badge';
+                    videoToMp3Badge.textContent = '5 Credits';
+                } else {
+                    videoToMp3Badge.className = 'premium-badge free-badge';
+                    videoToMp3Badge.innerHTML = '1st Free &middot; 5 Cr.';
+                }
+            }
             // Fallback for offline mode/guests
             if (userDashboard) userDashboard.classList.add('hidden');
             if (guestPricingGrid) guestPricingGrid.classList.remove('hidden');
@@ -737,6 +759,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (data.completed > 0) {
                     statusDiv.innerHTML = `<p style="color: #2ecc71; font-weight: bold; font-size: 1.1rem;">✅ Success! Processed ${data.completed} of ${data.total} tracks.</p>`;
                     showToast(`Success! Processed ${data.completed} of ${data.total} tracks.`, 'success');
+                    if (videoToMp3Input && videoToMp3Input.checked) {
+                        localStorage.setItem('free_video_converted', 'true');
+                    }
                     if (window.fetchGlobalStats) window.fetchGlobalStats();
                 } else {
                     statusDiv.innerHTML = `<p style="color: #ef4444; font-weight: bold; font-size: 1.1rem;">⚠️ Process Finished: 0 tracks processed.</p>`;
