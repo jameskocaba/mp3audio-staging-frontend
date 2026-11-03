@@ -835,6 +835,7 @@ body.messenger-body {
 }
 
 .btn-play-all-chat,
+.btn-new-playlist-chat,
 .btn-download-playlist-zip {
     display: inline-flex;
     align-items: center;
@@ -855,6 +856,17 @@ body.messenger-body {
 
 .btn-play-all-chat:hover {
     background: var(--brand-emerald-hover);
+}
+
+.btn-new-playlist-chat {
+    background: rgba(255, 255, 255, 0.1);
+    color: #f8fafc;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.btn-new-playlist-chat:hover {
+    background: rgba(255, 255, 255, 0.18);
+    border-color: var(--brand-emerald);
 }
 
 .btn-download-playlist-zip {
