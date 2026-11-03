@@ -612,8 +612,13 @@ document.addEventListener('DOMContentLoaded', () => {
         return Promise.race([enrichPromise, timeoutPromise]);
     }
 
-    // --- Conversational Memory & Human DJ Persona State ---
+    // --- Conversational Memory & AI Personal Assistant State ---
     const assistantMemory = {
+        userName: localStorage.getItem('mp3audio_user_name') || '',
+        userMood: '',
+        userActivity: '',
+        likedGenres: [],
+        likedArtists: [],
         lastVibeKey: '',
         lastPlaylistTitle: '',
         lastTracks: [],
@@ -623,6 +628,8 @@ document.addEventListener('DOMContentLoaded', () => {
         lastArtistDiscussed: '',
         pendingVibeKey: '',
         pendingTopic: '',
+        awaitingPlaylistVibe: false,
+        lastAssistantQuestion: '',
         turnCount: 0
     };
 
@@ -1416,48 +1423,79 @@ document.addEventListener('DOMContentLoaded', () => {
     const MUSIC_JOKES = [
         "😂 Why did the synthesizer break up with the acoustic guitar?\n\nBecause they just couldn't find the right *frequency*—and the guitar had way too many *strings* attached! 🎹🎸",
         "😂 How do you know when a drummer is knocking at your front door?\n\nThe knocking speeds up, slows down, and never quite comes in on the one! 🥁",
-        "😂 Why are jazz musicians so great at conversation?\n\nBecause even when they make a mistake, they just repeat it twice, smile, and call it *improvisation*! 🎷"
+        "😂 Why are jazz musicians so great at conversation?\n\nBecause even when they make a mistake, they just repeat it twice, smile, and call it *improvisation*! 🎷",
+        "😂 Why was the piano having trouble making friends?\n\nBecause it kept being too *key*-pish and couldn't stop *pedaling* rumors! 🎹",
+        "😂 Why did the singer climb a ladder on stage?\n\nTo reach the *high notes*! 🎤"
     ];
 
     async function fetchLiveConversationalAiReply(userText) {
         try {
             const activeTracksContext = (assistantMemory.lastTracks && assistantMemory.lastTracks.length > 0)
-                ? `\nCurrent playlist on screen: ${assistantMemory.lastTracks.slice(0, 6).map((t, i) => `#${i + 1} "${t.title}" by ${t.artist} (${t.year || ''})`).join(', ')}.`
+                ? ` Current playlist on screen: ${assistantMemory.lastTracks.slice(0, 6).map((t, i) => `#${i + 1} "${t.title}" by ${t.artist} (${t.year || ''})`).join(', ')}.`
                 : '';
-            const sysMsg =
-                "You are a warm, down-to-earth human friend and personal music DJ chatting via text message on MP3aud.io." +
-                activeTracksContext +
-                "\nRules:\n" +
-                "- Reply like a real person texting a friend: natural, casual, and concise (1 to 2 short sentences max).\n" +
-                "- Never use bullet points, numbered lists, or robotic assistant disclaimers.\n" +
-                "- Respond directly to what the user just said (whether it's about their day, weather, work, life, food, hobbies, or music) and ask a natural follow-up question to keep the back-and-forth conversation going.\n" +
-                "- Do NOT push playlists unless the user brings up wanting to listen to music.";
+            const userContext = assistantMemory.userName
+                ? ` The user's name is ${assistantMemory.userName}. Address them by name naturally.`
+                : '';
+            const moodContext = assistantMemory.userMood
+                ? ` User mentioned feeling: ${assistantMemory.userMood}.`
+                : '';
+            const activityContext = assistantMemory.userActivity
+                ? ` User current activity: ${assistantMemory.userActivity}.`
+                : '';
 
-            const recentHistory = chatHistory.slice(-8).map(m => ({
+            const sysMsg =
+                `You are MP3aud.io, an empathetic, highly intelligent AI personal assistant for music and daily conversation.` +
+                userContext + moodContext + activityContext + activeTracksContext +
+                `\nRules:\n` +
+                `- Talk naturally and warmly like a personal friend and music concierge texting via messenger.\n` +
+                `- Keep responses concise and engaging (1 to 2 short sentences).\n` +
+                `- Never use robotic assistant disclaimers, numbered bullet lists, or repetitive scripted greetings.\n` +
+                `- Acknowledge what the user said with genuine empathy or enthusiasm, and ALWAYS ask an interactive follow-up question to keep the back-and-forth conversation flowing.\n` +
+                `- Do NOT output a playlist of songs unless the user explicitly asks to make, build, or play a playlist.`;
+
+            const recentHistory = chatHistory.slice(-6).map(m => ({
                 role: m.role === 'assistant' ? 'assistant' : 'user',
-                content: String(m.content || '').slice(0, 350)
+                content: String(m.content || '').slice(0, 300)
             }));
             if (recentHistory.length === 0 || recentHistory[recentHistory.length - 1].content !== userText) {
                 recentHistory.push({ role: 'user', content: userText });
             }
 
-            const resp = await fetchWithTimeout('https://text.pollinations.ai/openai', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    model: 'openai',
-                    messages: [{ role: 'system', content: sysMsg }, ...recentHistory],
-                    temperature: 0.75
-                })
-            }, 2200);
+            // Strategy 1: OpenAI-compatible POST
+            try {
+                const resp = await fetchWithTimeout('https://text.pollinations.ai/openai', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        model: 'openai',
+                        messages: [{ role: 'system', content: sysMsg }, ...recentHistory],
+                        temperature: 0.75
+                    })
+                }, 3200);
 
-            if (resp && resp.ok) {
-                const data = await resp.json();
-                const content = data && data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content;
-                if (content && typeof content === 'string' && content.trim().length > 2) {
-                    return content.trim();
+                if (resp && resp.ok) {
+                    const data = await resp.json();
+                    const content = data && data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content;
+                    if (content && typeof content === 'string' && !content.includes('Free limit reached') && content.trim().length > 2) {
+                        return content.trim();
+                    }
                 }
-            }
+            } catch (_) {}
+
+            // Strategy 2: GET fallback with query params
+            try {
+                const encPrompt = encodeURIComponent(userText.slice(0, 160));
+                const encSys = encodeURIComponent(sysMsg.slice(0, 220));
+                const getResp = await fetchWithTimeout(`https://text.pollinations.ai/${encPrompt}?system=${encSys}`, {
+                    method: 'GET'
+                }, 2800);
+                if (getResp && getResp.ok) {
+                    const text = await getResp.text();
+                    if (text && !text.includes('Free limit reached') && !text.includes('Please wait') && text.trim().length > 2) {
+                        return text.trim();
+                    }
+                }
+            } catch (_) {}
         } catch (_) {}
         return null;
     }
@@ -1465,14 +1503,53 @@ document.addEventListener('DOMContentLoaded', () => {
     async function generateConversationalReply(rawText, lower) {
         assistantMemory.turnCount++;
 
-        // Track any genre or mood mentioned in the conversation so we remember it if they later ask for a playlist
+        // 1. Detect and remember user's name if shared
+        const nameMatch = rawText.match(/\b(?:my name is|i am|i'm|im|call me)\s+([A-Z][a-z]{1,18}|[a-z]{2,18})\b/i);
+        let justIntroducedName = false;
+        if (nameMatch && !/^(listening|looking|feeling|doing|tired|here|fine|good|ok|chilling|working|ready|sorry|happy|sad|bored|stressed)$/i.test(nameMatch[1])) {
+            const rawName = nameMatch[1];
+            assistantMemory.userName = rawName.charAt(0).toUpperCase() + rawName.slice(1).toLowerCase();
+            try { localStorage.setItem('mp3audio_user_name', assistantMemory.userName); } catch (_) {}
+            justIntroducedName = true;
+        }
+        const userDisplayName = assistantMemory.userName ? ` ${assistantMemory.userName}` : '';
+
+        // 2. Track user mood if expressed
+        if (/\b(tired|exhausted|beat|drained|sleepy|worn out|long day)\b/i.test(lower)) {
+            assistantMemory.userMood = 'tired';
+        } else if (/\b(stressed|anxious|overwhelmed|hectic|crazy day|stressful)\b/i.test(lower)) {
+            assistantMemory.userMood = 'stressed';
+        } else if (/\b(hyped|excited|pumped|energized|great|amazing|awesome|so good|happy)\b/i.test(lower)) {
+            assistantMemory.userMood = 'hyped';
+        } else if (/\b(sad|down|bummed|rough|bad day|depressed|heartbroken)\b/i.test(lower)) {
+            assistantMemory.userMood = 'down';
+        } else if (/\b(bored|nothing to do|boring)\b/i.test(lower)) {
+            assistantMemory.userMood = 'bored';
+        }
+
+        // 3. Track user activity if expressed
+        if (/\b(cook|cooking|dinner|lunch|baking|recipe|food|eating|meal)\b/i.test(lower)) {
+            assistantMemory.userActivity = 'cooking';
+        } else if (/\b(study|studying|homework|exam|finals|reading|class|lecture)\b/i.test(lower)) {
+            assistantMemory.userActivity = 'studying';
+        } else if (/\b(gym|workout|working out|running|lift|lifting|cardio|training)\b/i.test(lower)) {
+            assistantMemory.userActivity = 'workout';
+        } else if (/\b(drive|driving|traffic|road trip|car|commute|commuting)\b/i.test(lower)) {
+            assistantMemory.userActivity = 'driving';
+        } else if (/\b(work|working|office|job|boss|shift|meeting|desk)\b/i.test(lower)) {
+            assistantMemory.userActivity = 'working';
+        } else if (/\b(relaxing|chilling|couch|sofa|bed|resting|unwinding|peace)\b/i.test(lower)) {
+            assistantMemory.userActivity = 'relaxing';
+        }
+
+        // Track genre or mood presets mentioned
         const mentionedVibe = detectVibeKeyFromText(lower);
         if (mentionedVibe) {
             assistantMemory.pendingVibeKey = mentionedVibe;
             assistantMemory.lastGenreDiscussed = mentionedVibe;
         }
 
-        // Try live conversational AI first for natural, open-ended human back-and-forth
+        // Try live conversational AI first for dynamic, open-ended intelligence
         const liveAiReply = await fetchLiveConversationalAiReply(rawText);
         if (liveAiReply) {
             return {
@@ -1483,34 +1560,176 @@ document.addEventListener('DOMContentLoaded', () => {
             };
         }
 
-        // 1. Weather conversation & follow-ups
-        if (/\b(weather|rain|raining|rainy|sunny|sun|snow|snowing|forecast|temperature|degrees|windy|cloudy|storm|chilly|cold outside|hot outside|warm outside|humid|breezy)\b/i.test(lower)) {
-            assistantMemory.lastConvCategory = 'weather';
-            if (/\b(how is|how's|what is|what's|hows|whats)\b.*\b(weather|outside|temp)\b/i.test(lower) || /^weather\??$/i.test(lower)) {
+        // =========================================================================
+        // Context-Aware Multi-Turn AI Personal Assistant Synthesizer (Fallback & State Engine)
+        // =========================================================================
+
+        // A. Name Introduction
+        if (justIntroducedName) {
+            return {
+                success: true,
+                mode: 'chat',
+                reply: `Great to meet you, **${assistantMemory.userName}**! 🎧 I'm your AI personal assistant for music. I can curate custom playlists, dig up artist trivia, pull up 320kbps MP3s or custom phone ringtones, or just chat with you about life and music.\n\nWhat kind of sounds are you in the mood for today?`,
+                tracks: []
+            };
+        }
+
+        // B. Assistant Identity & Capabilities ("who are you", "what can you do", "help", "how does this work")
+        if (/\b(who are you|what are you|what can you do|how does this work|how do you work|help me|what are your features|commands)\b/i.test(lower)) {
+            return {
+                success: true,
+                mode: 'chat',
+                reply: `I'm your **AI Personal Assistant & Music DJ** on MP3aud.io! 🎧 Think of me like a music-obsessed friend who also has instant access to millions of songs. Here's what we can do together:\n\n• **Curate Custom Playlists:** Tell me any vibe, mood, decade, or activity and I'll build you a 6-track mix.\n• **Instant Audio & MP3s:** Preview full audio bubbles right in our chat, or download 320kbps MP3s with HD Apple Music cover art.\n• **Music Discovery & Trivia:** Ask me about any artist, album, release year, or backstories.\n• **Custom Phone Ringtones:** Extract custom iPhone (\`.m4r\`) and Android (\`.mp3\`) ringtones in one click.\n• **Everyday Conversation:** Chat with me about your day, work, cooking, or whatever is on your mind!\n\nWhat would you like to explore today${userDisplayName}?`,
+                tracks: []
+            };
+        }
+
+        // C. Greetings & Check-ins ("hi", "hello", "hey", "sup", "what's up", "good morning")
+        if (/^(hi|hey|hello|yo|sup|what's up|whats up|howdy|hiya|good morning|good afternoon|good evening|morning|evening)[!.?\s]*$/i.test(lower)) {
+            assistantMemory.lastConvCategory = 'greeting';
+            if (assistantMemory.turnCount <= 2) {
                 return {
                     success: true,
                     mode: 'chat',
-                    reply: "It's a comfortable 72° here inside the studio booth! ☀️🎧 How's the weather looking outside your window right now—sunny and warm, rainy, or chilly?",
-                    suggestions: [
-                        "It's sunny and nice out",
-                        "Rainy and gray today",
-                        "Pretty chilly outside",
-                        "Hot and sunny here"
-                    ],
+                    reply: `Hey${userDisplayName}! 👋 How's your day going so far? We can chat about whatever's on your mind, explore new music, or whenever you want me to put together a playlist, just let me know.`,
                     tracks: []
                 };
             }
+            return {
+                success: true,
+                mode: 'chat',
+                reply: `Hey again${userDisplayName}! 🎧 What's on your mind right now—how's the rest of your day shaping up?`,
+                tracks: []
+            };
+        }
+
+        // D. How are you / Status check
+        if (/^(hey|hi|hello|yo)?\s*(how are you|how's it going|hows it going|how are things|how do you do|what are you up to|wyd|you good|how's your day|hows your day)[!.?\s]*$/i.test(lower)) {
+            assistantMemory.lastConvCategory = 'day_status';
+            const recentMix = assistantMemory.lastPlaylistTitle
+                ? ` Still vibing to that **${assistantMemory.lastPlaylistTitle}** mix from earlier!`
+                : ` Just hanging out in the studio and listening to some records.`;
+            return {
+                success: true,
+                mode: 'chat',
+                reply: `I'm doing great, thanks for asking${userDisplayName}! 🎧${recentMix} How has your day been treating you—smooth sailing or pretty busy?`,
+                tracks: []
+            };
+        }
+
+        // E. Gratitude & Compliments
+        if (/^(thanks|thank you|thx|ty|appreciate it|love it|love this|this is fire|fire|awesome|amazing|great picks|so good|dope|nice|cool|perfect|you're the best|you rock|haha|lol|lmao|that's funny|thats funny)[!.?\s]*$/i.test(lower)) {
+            const lastMix = assistantMemory.lastPlaylistTitle;
+            return {
+                success: true,
+                mode: 'chat',
+                reply: lastMix
+                    ? `Anytime${userDisplayName}! 🙌 Really glad you're enjoying **${lastMix}**. Which track on that list hits best for you, or what else are you up to today?`
+                    : `Haha anytime${userDisplayName}! 🙌 Always fun hanging out and chatting with you. What else is going on with your day?`,
+                tracks: []
+            };
+        }
+
+        // F. User Moods & Emotional Support
+        if (assistantMemory.userMood === 'tired') {
+            return {
+                success: true,
+                mode: 'chat',
+                reply: `I feel that—some days really drain the battery${userDisplayName}. 🛋️ Make sure to give yourself some downtime today. Are you able to kick back and rest for a bit, or do you still have more to get through?`,
+                tracks: []
+            };
+        }
+        if (assistantMemory.userMood === 'stressed') {
+            return {
+                success: true,
+                mode: 'chat',
+                reply: `Take a deep breath${userDisplayName}—you're doing the best you can, and things will smooth out. 💙 Do you want to vent for a second, or would you rather put on some calming, ambient music to quiet the noise?`,
+                tracks: []
+            };
+        }
+        if (assistantMemory.userMood === 'hyped') {
+            return {
+                success: true,
+                mode: 'chat',
+                reply: `Love that energy${userDisplayName}! 🔥 Always an amazing feeling when things are rolling along smoothly. What's bringing the good vibes today?`,
+                tracks: []
+            };
+        }
+        if (assistantMemory.userMood === 'down') {
+            return {
+                success: true,
+                mode: 'chat',
+                reply: `I'm really sorry you're feeling down today${userDisplayName}. Sending you warm vibes. 🤍 Do you want to talk about what's going on, or would some gentle acoustic songs be a comforting companion right now?`,
+                tracks: []
+            };
+        }
+        if (assistantMemory.userMood === 'bored') {
+            return {
+                success: true,
+                mode: 'chat',
+                reply: `Boredom is just an open invitation for discovering something new! 🎲 Want me to hit you with a mind-blowing music trivia fact, play a music guessing game, or put together a surprise mix for you?`,
+                tracks: []
+            };
+        }
+
+        // G. User Activities
+        if (assistantMemory.userActivity === 'cooking') {
+            return {
+                success: true,
+                mode: 'chat',
+                reply: `Cooking is an art form! 🍝 What are you whipping up in the kitchen? I find that cooking with great background jazz or warm acoustic tunes makes everything taste better.`,
+                tracks: []
+            };
+        }
+        if (assistantMemory.userActivity === 'studying') {
+            return {
+                success: true,
+                mode: 'chat',
+                reply: `Lock in${userDisplayName}! 📚 Deep work takes focus. What subject or project are you tackling? If you want background focus beats with zero distracting vocals, just say the word.`,
+                tracks: []
+            };
+        }
+        if (assistantMemory.userActivity === 'workout') {
+            return {
+                success: true,
+                mode: 'chat',
+                reply: `Get after it!! 💪 Consistent effort always pays off. What are you training today—heavy lifting, cardio, or a full-body session?`,
+                tracks: []
+            };
+        }
+        if (assistantMemory.userActivity === 'driving') {
+            return {
+                success: true,
+                mode: 'chat',
+                reply: `Nothing beats the open road with great sound! 🚗 Where are you driving to—a long road trip or just running errands around town?`,
+                tracks: []
+            };
+        }
+        if (assistantMemory.userActivity === 'working') {
+            return {
+                success: true,
+                mode: 'chat',
+                reply: `I hear you—staying locked in on work takes real energy! 💯 What kind of projects are you tackling today, or are you counting down the hours until you can wrap up?`,
+                tracks: []
+            };
+        }
+        if (assistantMemory.userActivity === 'relaxing') {
+            return {
+                success: true,
+                mode: 'chat',
+                reply: `Honestly, taking a real breather and slowing the pace down is undefeated. ☕✨ Are you having a quiet night in, or got plans for later?`,
+                tracks: []
+            };
+        }
+
+        // H. Weather Conversation
+        if (/\b(weather|rain|raining|rainy|sunny|sun|snow|snowing|forecast|temperature|degrees|windy|cloudy|storm|chilly|cold outside|hot outside|warm outside|humid|breezy)\b/i.test(lower)) {
+            assistantMemory.lastConvCategory = 'weather';
             if (/\b(rain|raining|rainy|storm|cloudy|gray|gloomy|overcast)\b/i.test(lower)) {
                 return {
                     success: true,
                     mode: 'chat',
-                    reply: "Honestly, rainy days have a whole cozy vibe of their own 🌧️ It's the best excuse to stay inside, grab something warm to drink, and take it slow. Do you get to stay in and relax today, or do you have to head out in it?",
-                    suggestions: [
-                        "Staying inside and relaxing today",
-                        "Working from home today",
-                        "Have to head out later unfortunately",
-                        "Drinking coffee and watching the rain"
-                    ],
+                    reply: `Honestly, rainy days have a whole cozy vibe of their own 🌧️ It's the best excuse to stay inside, grab something warm to drink, and take it slow. Do you get to stay in and relax today, or do you have to head out in it?`,
                     tracks: []
                 };
             }
@@ -1518,251 +1737,63 @@ document.addEventListener('DOMContentLoaded', () => {
                 return {
                     success: true,
                     mode: 'chat',
-                    reply: "Brr, definitely a stay-warm-indoors kind of day! ❄️ Hopefully you don't have to be out in the cold too long. What are you up to today—working or taking it easy?",
-                    suggestions: [
-                        "Staying warm inside!",
-                        "Working today",
-                        "Just taking it easy at home",
-                        "Grabbing some hot coffee or tea"
-                    ],
+                    reply: `Brr, definitely a stay-warm-indoors kind of day! ❄️ Hopefully you don't have to be out in the cold too long. What are you up to today—working or taking it easy?`,
                     tracks: []
                 };
             }
             return {
                 success: true,
                 mode: 'chat',
-                reply: "Ooh, you can't beat nice weather like that! ☀️ Are you getting a chance to get outside and enjoy it today, or stuck indoors?",
-                suggestions: [
-                    "Getting outside for a bit!",
-                    "Stuck working indoors today",
-                    "Going for a walk or drive later",
-                    "Just relaxing at home"
-                ],
+                reply: `You can't beat nice weather like that! ☀️ It's a comfortable 72° inside the studio booth. Are you getting a chance to get outside and enjoy it today, or stuck indoors?`,
                 tracks: []
             };
         }
 
-        // 2. Replies to "How's your day going?" / Positive status updates ("pretty good", "doing well", "not bad", "great")
-        if (/^(going\s+)?(pretty\s+good|really\s+good|so\s+good|good|great|doing\s+well|doing\s+good|not\s+bad|can't\s+complain|cant\s+complain|all\s+good|solid|fine|alright|okay|ok|decent)(\s+thanks|\s+thank\s+you)?(\s+how\s+about\s+you|\s+and\s+you|\s+you)?[!.?\s]*$/i.test(lower)) {
-            assistantMemory.lastConvCategory = 'day_status';
+        // I. Music Recommendations & "What should I listen to?"
+        if (/\b(what should i listen to|recommend|recommend me|what to listen to|give me a recommendation|who should i listen to|need some music|want some music)\b/i.test(lower)) {
+            assistantMemory.lastConvCategory = 'recommendation';
             return {
                 success: true,
                 mode: 'chat',
-                reply: "Glad to hear it! 🙌 Always nice when the day is rolling along smoothly. What are you up to right now—working on something, taking a break, or just hanging out?",
-                suggestions: [
-                    "Just taking a quick break",
-                    "Working right now",
-                    "Relaxing at home",
-                    "Listening to some music"
-                ],
+                reply: `I'd love to help you discover something great${userDisplayName}! 🎶 To point you in the right direction: are you looking for 1) **High-energy beats** to pump you up, 2) **Chill, atmospheric grooves** to relax, or 3) **Classic, lyrical storytelling**? Let me know which direction calls to you!`,
                 tracks: []
             };
         }
 
-        // 3. Real-life moments & emotions (empathize & continue the back-and-forth without pushing playlists)
-        const lifeMoment = detectHumanLifeMoment(lower);
-        if (lifeMoment) {
-            assistantMemory.pendingVibeKey = lifeMoment.vibeKey;
-            assistantMemory.lastConvCategory = lifeMoment.convCategory || 'day_status';
+        // J. Music Trivia & Facts
+        if (/\b(fact|trivia|did you know|something interesting|random fact|story|distract me)\b/i.test(lower)) {
+            const fact = MUSIC_TRIVIA_FACTS[assistantMemory.turnCount % MUSIC_TRIVIA_FACTS.length];
             return {
                 success: true,
                 mode: 'chat',
-                reply: lifeMoment.chatReply,
-                suggestions: lifeMoment.chatSuggestions,
+                reply: `${fact}\n\nCrazy how many iconic songs almost didn't happen, right? Did you know that one already, or was it new to you?`,
                 tracks: []
             };
         }
 
-        // 4. Work, school, commuting, or daily routine conversation
-        if (/\b(work|working|job|boss|office|meeting|meetings|shift|clocked out|off the clock|done for the day|grinding|school|class|homework|studying|exam|project|errands| indoors)\b/i.test(lower)) {
-            assistantMemory.lastConvCategory = 'work_school';
-            if (/\b(off the clock|done for the day|clocked out|finished|finally done|home from work)\b/i.test(lower)) {
-                return {
-                    success: true,
-                    mode: 'chat',
-                    reply: "Best feeling of the whole day right there! 🎉 Once you're finally done with work, what's your go-to move to unwind—kicking back with a show, cooking something good, or putting on some music?",
-                    suggestions: [
-                        "Kicking back with a good show",
-                        "Cooking or grabbing dinner",
-                        "Putting on some music",
-                        "Doing absolutely nothing for an hour"
-                    ],
-                    tracks: []
-                };
-            }
-            return {
-                success: true,
-                mode: 'chat',
-                reply: "I hear you—staying locked in on work takes real energy! 💯 What kind of work or projects are you tackling today, or are you counting down until you can wrap up?",
-                suggestions: [
-                    "Counting down until I can wrap up!",
-                    "Working from home today",
-                    "Just taking a quick 5-minute breather",
-                    "What kind of music helps you focus?"
-                ],
-                tracks: []
-            };
-        }
-
-        // 5. Relaxing, home, food, drinks, shows, games, or hobbies
-        if (/\b(couch|sofa|tea|coffee|bed|relaxing|resting|breather|staying in|staying warm|patio|walk|tv|show|movie|movies|netflix|game|gaming|playing|pasta|pizza|food|eating|lunch|breakfast|takeout|recipe)\b/i.test(lower)) {
-            assistantMemory.lastConvCategory = 'relaxing';
-            if (/\b(pasta|pizza|food|eating|lunch|breakfast|takeout|recipe|making|cooking)\b/i.test(lower)) {
-                return {
-                    success: true,
-                    mode: 'chat',
-                    reply: "Now you're making me hungry! 😋 Good food honestly makes any day ten times better. Are you having a quiet night in after eating, or got plans for later?",
-                    suggestions: [
-                        "Quiet night in tonight!",
-                        "Watching a movie or show after",
-                        "Hanging out with friends",
-                        "What kind of music do you like?"
-                    ],
-                    tracks: []
-                };
-            }
-            if (/\b(tv|show|movie|movies|netflix|watching|game|gaming)\b/i.test(lower)) {
-                return {
-                    success: true,
-                    mode: 'chat',
-                    reply: "Ooh nice! 🍿 Watching anything good lately or playing a favorite game? I'm always on the lookout for great movie soundtracks too.",
-                    suggestions: [
-                        "Rewatching an old favorite",
-                        "Checking out something new",
-                        "What are your favorite movie soundtracks?",
-                        "Tell me a cool music fact"
-                    ],
-                    tracks: []
-                };
-            }
-            return {
-                success: true,
-                mode: 'chat',
-                reply: "Honestly, taking a real breather and slowing the pace down is undefeated. ☕✨ Do you have a chill week ahead, or has it been a busy one?",
-                suggestions: [
-                    "Pretty chill week so far",
-                    "It's been a super busy week",
-                    "Looking forward to the weekend",
-                    "What music have you been into lately?"
-                ],
-                tracks: []
-            };
-        }
-
-        // 6. Questions about the assistant's own favorites, taste, jokes, or music trivia
-        if (/\b(your favorite|what do you like|what kind of music do you|what music are you|what music have you|who is your favorite|what's your favorite|best song|best artist|favorite album|movie soundtrack)\b/i.test(lower)) {
-            assistantMemory.lastConvCategory = 'genre_chat';
-            return {
-                success: true,
-                mode: 'chat',
-                reply: "Ooh, I love talking shop! 🎧 Lately I've had **Daft Punk** (*Discovery*), **Fleetwood Mac** (*Rumours*), **M83** for late-night synthwave, and **A Tribe Called Quest** on heavy rotation.\n\nWhat about you—what genres or artists do you find yourself coming back to the most?",
-                suggestions: [
-                    "I love classic rock & indie",
-                    "Mostly hip-hop and R&B",
-                    "Electronic & synthwave",
-                    "A little bit of everything!"
-                ],
-                tracks: []
-            };
-        }
-
+        // K. Music Jokes
         if (/\b(joke|funny|make me laugh|humor)\b/i.test(lower)) {
             const joke = MUSIC_JOKES[assistantMemory.turnCount % MUSIC_JOKES.length];
             return {
                 success: true,
                 mode: 'chat',
                 reply: `${joke}\n\nBe honest—solid dad-level music joke or terrible? 😄`,
-                suggestions: [
-                    "Haha that was actually pretty good!",
-                    "Tell me another music joke",
-                    "Tell me a cool music fact instead",
-                    "What kind of music are you into?"
-                ],
                 tracks: []
             };
         }
 
-        if (/\b(fact|trivia|did you know|something interesting|random fact|story|distract me)\b/i.test(lower)) {
-            const fact = MUSIC_TRIVIA_FACTS[assistantMemory.turnCount % MUSIC_TRIVIA_FACTS.length];
-            return {
-                success: true,
-                mode: 'chat',
-                reply: `${fact}\n\nCrazy how many iconic songs almost didn't happen, right? Want another piece of music trivia, or what era of music is your favorite?`,
-                suggestions: [
-                    "Tell me another music fact!",
-                    "I love 80s and 90s music",
-                    "70s classic rock era",
-                    "2000s & modern music"
-                ],
-                tracks: []
-            };
-        }
-
-        // 7. Follow-up on subgenres / eras when discussing music (e.g., "70s & 80s", "90s grunge", "dreamy vocal", "golden-era", "a bit of everything")
-        if (/\b(70s|80s|90s|2000s|grunge|indie|golden-era|boom-bap|melodic|vocal|instrumental|classic|modern|throwback|a bit of everything|little bit of everything|both|all of them)\b/i.test(lower)) {
-            assistantMemory.lastConvCategory = 'era_chat';
-            if (/\b(a bit of everything|little bit of everything|both|all of them|eclectic)\b/i.test(lower)) {
-                return {
-                    success: true,
-                    mode: 'chat',
-                    reply: "Having eclectic taste is the best way to listen to music! 🎶 One hour you're in the mood for 70s classic rock or jazz, and the next it's 90s hip-hop or late-night electronics.\n\nWho's an artist or band you could listen to any day of the week and never get tired of?",
-                    suggestions: [
-                        "Fleetwood Mac",
-                        "Daft Punk",
-                        "The Weeknd",
-                        "A Tribe Called Quest"
-                    ],
-                    tracks: []
-                };
-            }
-            return {
-                success: true,
-                mode: 'chat',
-                reply: `You have seriously great taste! 🔥 That specific sound and era produced so many timeless records that still hold up today.\n\nWho are one or two of your go-to artists in that lane—or would you like me to put together a playlist for it whenever you're ready?`,
-                suggestions: [
-                    "Tell me a fun fact about that era",
-                    "Who would you recommend in that style?",
-                    `Make me a playlist in that style`,
-                    "Let's keep chatting"
-                ],
-                tracks: []
-            };
-        }
-
-        // 8. Check if user is chatting about a genre/vibe without asking for a playlist
-        const matchedVibeKey = detectVibeKeyFromText(lower);
-        if (matchedVibeKey) {
-            assistantMemory.pendingVibeKey = matchedVibeKey;
-            assistantMemory.lastGenreDiscussed = matchedVibeKey;
-            assistantMemory.lastConvCategory = 'genre_chat';
-            const genreInfo = GENRE_CHAT_RESPONSES[matchedVibeKey] || GENRE_CHAT_RESPONSES.chill;
-            return {
-                success: true,
-                mode: 'chat',
-                reply: genreInfo.reply,
-                suggestions: genreInfo.chips,
-                tracks: []
-            };
-        }
-
-        // 9. If user asks a vague music question ("I want some music", "what should I listen to?", "recommend something") without specifying a playlist yet—ask a clarifying conversational question first!
-        if (/\b(listen to some music|putting on some music|want some music|need some music|what should i listen to|recommend|who would you recommend)\b/i.test(lower)) {
+        // L. Assistant's Own Taste & Opinions
+        if (/\b(your favorite|what do you like|what kind of music do you|what music are you|what music have you|who is your favorite|what's your favorite|best song|best artist|favorite album)\b/i.test(lower)) {
             assistantMemory.lastConvCategory = 'genre_chat';
             return {
                 success: true,
                 mode: 'chat',
-                reply: "I'd love to help you narrow it down! 🎧 Before I pull anything up, what kind of mood are we feeling right now—something upbeat with energy, something laid-back and mellow, or a specific decade/genre?",
-                suggestions: [
-                    "Something laid-back and mellow",
-                    "Upbeat with good energy",
-                    "80s or 90s throwbacks",
-                    "Late-night synthwave or lo-fi"
-                ],
+                reply: `Ooh, I love talking shop! 🎧 Lately I've had **Daft Punk** (*Discovery*), **Fleetwood Mac** (*Rumours*), **M83** for late-night synthwave, and **A Tribe Called Quest** on heavy rotation.\n\nWhat about you—what genres or artists do you find yourself coming back to the most?`,
                 tracks: []
             };
         }
 
-        // 10. If the user explicitly names a band/artist during a music conversation (or asks "have you heard of X" / "I love X")
+        // M. Check if user mentioned an artist/band name during conversation
         const explicitArtistMention =
             /^(i really like|i love|i like|i'm a fan of|im a fan of|have you heard of|do you like|what do you think of|my favorite artist is|my favorite band is)\s+([a-z0-9\s'&.-]{2,30})[?!.]*$/i.exec(rawText) ||
             ((assistantMemory.lastConvCategory === 'genre_chat' || assistantMemory.lastConvCategory === 'era_chat') &&
@@ -1791,8 +1822,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 assistantMemory.lastConvCategory = 'artist_chat';
 
                 let chatText = wikiBio
-                    ? `Ooh, great choice! 🎶 **${topArtist}** — ${wikiBio}`
-                    : `Ooh, great taste! 🎶 **${topArtist}** has such an iconic sound and catalog.`;
+                    ? `Ooh, great taste! 🎶 **${topArtist}** — ${wikiBio}`
+                    : `Ooh, great choice! 🎶 **${topArtist}** has such an iconic sound and catalog.`;
                 if (topAlbums.length > 0) {
                     chatText += `\n\nReleases like *${topAlbums.join('* and *')}* are standout records. What's your personal favorite song or album by **${topArtist}**?`;
                 } else {
@@ -1803,63 +1834,29 @@ document.addEventListener('DOMContentLoaded', () => {
                     success: true,
                     mode: 'chat',
                     reply: chatText,
-                    suggestions: [
-                        `I love their classic hits`,
-                        `Their deeper album cuts are great`,
-                        `Make me a ${topArtist} playlist`,
-                        `What other artists sound like ${topArtist}?`
-                    ],
                     tracks: []
                 };
             }
         }
 
-        // 11. Multi-turn general back-and-forth fallback (rotates naturally so it never repeats the same canned response)
+        // N. General Back-and-Forth Fallback (Rotates naturally so it never repeats the same canned response)
         const generalReplies = [
-            {
-                reply: "I hear you! 😊 Honestly, it's nice just catching up and chatting. How has the rest of your week been treating you so far—pretty smooth or super busy?",
-                chips: [
-                    "Pretty smooth week so far!",
-                    "It's been a super busy week",
-                    "Looking forward to the weekend",
-                    "Tell me a cool music fact"
-                ]
-            },
-            {
-                reply: "Totally get that! 🙌 When you get some free time to yourself, what do you usually like to get into—music, movies, gaming, or getting outside?",
-                chips: [
-                    "Definitely listening to music",
-                    "Movies & good shows",
-                    "Gaming or hanging out at home",
-                    "Getting outside when the weather's nice"
-                ]
-            },
-            {
-                reply: "That's awesome! 😄 By the way, if you were going on a long road trip today and could only bring three albums or artists for the drive, who's making the cut?",
-                chips: [
-                    "70s & 80s rock legends",
-                    "90s hip-hop & R&B classics",
-                    "Synthwave & electronic",
-                    "Who would you bring?"
-                ]
-            }
+            `I hear you${userDisplayName}! 😊 Honestly, it's nice just catching up and chatting. How has the rest of your week been treating you so far—pretty smooth or super busy?`,
+            `Totally get that${userDisplayName}! 🙌 When you get some free time to yourself, what do you usually like to get into—music, movies, gaming, or getting outside?`,
+            `That's awesome${userDisplayName}! 😄 By the way, if you were going on a long road trip today and could only bring three albums or artists for the drive, who's making the cut?`,
+            `I'm right there with you${userDisplayName}. 🎧 Having good conversation makes any day better. What kind of music usually sets the tone for your evenings?`
         ];
         const chosenGeneral = generalReplies[assistantMemory.turnCount % generalReplies.length];
         return {
             success: true,
             mode: 'chat',
-            reply: chosenGeneral.reply,
-            suggestions: chosenGeneral.chips,
+            reply: chosenGeneral,
             tracks: []
         };
     }
 
     function isConversationalOnlyMessage(lower) {
-        // Detect pure human conversation so we reply like a person instead of searching iTunes for "how are you"
-        if (/^(hi|hey|hello|yo|sup|what's up|whats up|howdy|hiya|good morning|good afternoon|good evening|morning|evening)[!.?\s]*$/i.test(lower)) return 'greeting';
-        if (/^(hey|hi|hello|yo)?\s*(how are you|how's it going|hows it going|how are things|how do you do|what are you up to|wyd|you good|how's your day|hows your day)[!.?\s]*$/i.test(lower)) return 'how_are_you';
-        if (/\b(who are you|what are you|are you a bot|are you ai|are you human|are you real|what can you do|how does this work|help me)\b/i.test(lower)) return 'identity';
-        if (/^(thanks|thank you|thx|ty|appreciate it|love it|love this|this is fire|fire|awesome|amazing|great picks|so good|dope|nice|cool|perfect|you're the best|you rock|haha|lol|lmao|that's funny|thats funny)[!.?\s]*$/i.test(lower)) return 'gratitude';
+        // Detect playlist steering and explanation commands
         if (/\b(why did you pick|tell me about these|about this playlist|explain these songs|what makes this good)\b/i.test(lower)) return 'explain_picks';
         if (/\b(make it more upbeat|more upbeat|faster|more energy|higher energy|pump it up|too slow|wake me up)\b/i.test(lower)) return 'steer_upbeat';
         if (/\b(make it chiller|more chill|slower|softer|mellower|dial it back|too loud|too fast|calmer)\b/i.test(lower)) return 'steer_chill';
@@ -1873,76 +1870,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const isRingtone = /ringtone|m4r|alarm tone|text tone/.test(lower);
         const isAskingForNewOrAnother = /\b(new|another|different|fresh|random|more|next|surprise|other|else|switch|change|again)\b/i.test(lower);
 
-        // 0. Check human conversational & multi-turn intents first!
+        // 0. Check playlist-steering intents (upbeat, chill, continue vibe, explain picks)
         const convIntent = isConversationalOnlyMessage(lower);
-        if (convIntent === 'greeting') {
-            assistantMemory.lastConvCategory = 'day_status';
-            return {
-                success: true,
-                mode: 'chat',
-                reply: `Hey there! 👋 Good to hear from you—just hanging out here in the studio with a cup of coffee. How's your day going so far?`,
-                suggestions: [
-                    `Going pretty well! How about you?`,
-                    `It's been a long busy day`,
-                    `Just relaxing at home`,
-                    `What kind of music are you listening to?`
-                ],
-                tracks: []
-            };
-        }
-        if (convIntent === 'how_are_you') {
-            assistantMemory.lastConvCategory = 'day_status';
-            const lastMention = assistantMemory.lastPlaylistTitle
-                ? ` Still riding the wave from that **${assistantMemory.lastPlaylistTitle}** earlier!`
-                : ` Just hanging out in the studio and listening to some records.`;
-            return {
-                success: true,
-                mode: 'chat',
-                reply: `I'm doing great, thanks for asking! 🎧${lastMention} How are *you* doing today—having a smooth day so far, or has it been a hectic one?`,
-                suggestions: [
-                    `Having a pretty smooth day!`,
-                    `It's been a hectic day today`,
-                    `Just relaxing right now`,
-                    `How's the weather where you are?`
-                ],
-                tracks: []
-            };
-        }
-        if (convIntent === 'identity') {
-            return {
-                success: true,
-                mode: 'chat',
-                reply: `I'm your music-obsessed friend and personal DJ! 🎶 We can just hang out and have a normal back-and-forth conversation about your day, favorite bands, or music trivia—and whenever you specifically ask for a playlist or track, I'll pull it up right here in our chat.\n\nHow's your day going today?`,
-                suggestions: [
-                    `Going pretty well!`,
-                    `Who are your favorite artists?`,
-                    `Tell me a cool music fact`,
-                    `Tell me a music joke`
-                ],
-                tracks: []
-            };
-        }
-        if (convIntent === 'gratitude') {
-            const prevTitle = assistantMemory.lastPlaylistTitle;
-            const prevArtist = assistantMemory.lastArtist || 'those artists';
-            return {
-                success: true,
-                mode: 'chat',
-                reply: prevTitle
-                    ? `Anytime! 🙌 Glad you're enjoying **${prevTitle}**! Which track on that list stood out to you the most, or what else are you up to today?`
-                    : `Haha anytime! 🙌 Always fun hanging out and chatting with you. What else is going on with your day?`,
-                suggestions: prevTitle ? [
-                    `Tell me about ${prevArtist}`,
-                    `What year did these songs come out?`,
-                    `Just relaxing and listening`
-                ] : [
-                    `Just relaxing at home`,
-                    `Tell me a cool music fact`,
-                    `What's your favorite album?`
-                ],
-                tracks: []
-            };
-        }
         if (convIntent === 'explain_picks') {
             if (assistantMemory.lastTracks && assistantMemory.lastTracks.length > 0) {
                 const sample = assistantMemory.lastTracks.slice(0, 3).map(t => `**${t.title}** by *${t.artist}* (${t.year || 'Classic'})`).join(', ');
