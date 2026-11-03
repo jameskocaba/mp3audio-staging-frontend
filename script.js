@@ -776,6 +776,430 @@ document.addEventListener('DOMContentLoaded', () => {
         };
     }
 
+    // --- Follow-Up Question Resolution & Live Music Knowledge Engine ---
+    function resolveReferencedTrack(lower) {
+        const tracks = assistantMemory.lastTracks || [];
+        if (tracks.length === 0) return null;
+
+        const ordinalMap = [
+            { idx: 0, re: /\b(track\s*#?1|song\s*#?1|number\s*1|#1|first\s+(track|song|one)|1st\s+(track|song|one)|the\s+first|opener)\b/i },
+            { idx: 1, re: /\b(track\s*#?2|song\s*#?2|number\s*2|#2|second\s+(track|song|one)|2nd\s+(track|song|one)|the\s+second)\b/i },
+            { idx: 2, re: /\b(track\s*#?3|song\s*#?3|number\s*3|#3|third\s+(track|song|one)|3rd\s+(track|song|one)|the\s+third)\b/i },
+            { idx: 3, re: /\b(track\s*#?4|song\s*#?4|number\s*4|#4|fourth\s+(track|song|one)|4th\s+(track|song|one)|the\s+fourth)\b/i },
+            { idx: 4, re: /\b(track\s*#?5|song\s*#?5|number\s*5|#5|fifth\s+(track|song|one)|5th\s+(track|song|one)|the\s+fifth)\b/i },
+            { idx: 5, re: /\b(track\s*#?6|song\s*#?6|number\s*6|#6|sixth\s+(track|song|one)|6th\s+(track|song|one)|the\s+sixth)\b/i }
+        ];
+        for (const item of ordinalMap) {
+            if (item.re.test(lower) && tracks[item.idx]) {
+                return { track: tracks[item.idx], idx: item.idx };
+            }
+        }
+        if (/\b(last\s+(track|song|one))\b/i.test(lower)) {
+            return { track: tracks[tracks.length - 1], idx: tracks.length - 1 };
+        }
+        for (let i = 0; i < tracks.length; i++) {
+            const t = tracks[i];
+            const tTitle = (t.title || '').toLowerCase();
+            const tArtist = (t.artist || '').toLowerCase();
+            if ((tTitle && tTitle.length > 2 && lower.includes(tTitle)) || (tArtist && tArtist.length > 2 && lower.includes(tArtist))) {
+                return { track: t, idx: i };
+            }
+        }
+        if (currentQueue && currentQueue[currentQueueIndex] && /\b(this\s+(song|track|one)|playing|current)\b/i.test(lower)) {
+            return { track: currentQueue[currentQueueIndex], idx: currentQueueIndex };
+        }
+        if (tracks.length === 1 || /\b(this\s+(song|track|artist)|that\s+(song|track|artist)|it|they|them|he|she)\b/i.test(lower)) {
+            return { track: tracks[0], idx: 0 };
+        }
+        return null;
+    }
+
+    async function fetchWikipediaSummary(subjectQuery) {
+        const cleanSubj = (subjectQuery || '').trim();
+        if (!cleanSubj) return '';
+        try {
+            const searchUrl = `https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(cleanSubj + ' music')}&utf8=1&format=json&origin=*`;
+            const sRes = await fetchWithTimeout(searchUrl, {}, 1800);
+            if (!sRes || !sRes.ok) return '';
+            const sData = await sRes.json();
+            const hits = (sData.query && sData.query.search) || [];
+            const bestTitle = hits[0] ? hits[0].title : cleanSubj;
+
+            const extUrl = `https://en.wikipedia.org/w/api.php?action=query&prop=extracts&exintro=1&explaintext=1&exsentences=3&redirects=1&titles=${encodeURIComponent(bestTitle)}&format=json&origin=*`;
+            const eRes = await fetchWithTimeout(extUrl, {}, 1800);
+            if (!eRes || !eRes.ok) return '';
+            const eData = await eRes.json();
+            const pages = (eData.query && eData.query.pages) || {};
+            const firstPage = Object.values(pages)[0];
+            if (firstPage && firstPage.extract) {
+                return firstPage.extract.trim();
+            }
+        } catch (_) {}
+        return '';
+    }
+
+    async function answerFollowUpQuestion(rawText, lower) {
+        const tracks = assistantMemory.lastTracks || [];
+        const ref = resolveReferencedTrack(lower);
+
+        // 1. Voice / Chat Playback Commands ("play track 2", "play the first song", "pause", "next song")
+        if (/^(play|start playing|put on|listen to)\s+(track\s*#?\d|song\s*#?\d|number\s*\d|#\d|the\s+(first|second|third|fourth|fifth|sixth|last)\s*(track|song|one)?|(1st|2nd|3rd|4th|5th|6th)\s*(track|song|one)?)$/i.test(lower) && ref) {
+            setTimeout(() => playTrackFromQueue(tracks, ref.idx), 80);
+            return {
+                success: true,
+                mode: 'chat',
+                reply: `▶️ Playing **Track #${ref.idx + 1}: ${ref.track.title}** by **${ref.track.artist}** right now in the player below! 🎧\n\nLet me know if you want to know the story behind this track, or if you want me to build a full playlist around **${ref.track.artist}**.`,
+                suggestions: [
+                    `💬 Tell me about ${ref.track.artist}`,
+                    `📅 What year did ${ref.track.title} come out?`,
+                    `🔥 Build a playlist around ${ref.track.artist}`,
+                    `⏭️ Play the next track`
+                ],
+                tracks: []
+            };
+        }
+
+        if (/^(pause|stop|stop playing|pause music)$/i.test(lower)) {
+            if (!globalAudio.paused) globalAudio.pause();
+            return {
+                success: true,
+                mode: 'chat',
+                reply: `⏸️ Paused playback! Whenever you're ready to jump back in, just say *"resume"* or tell me what vibe you want to explore next.`,
+                suggestions: [
+                    `▶️ Resume playback`,
+                    `🔄 Curate a fresh playlist`,
+                    `💬 Tell me about these songs`
+                ],
+                tracks: []
+            };
+        }
+
+        if (/^(resume|continue playing|unpause)$/i.test(lower) && tracks.length > 0) {
+            setTimeout(() => playTrackFromQueue(tracks, currentQueueIndex || 0), 80);
+            return {
+                success: true,
+                mode: 'chat',
+                reply: `▶️ Resuming playback! Enjoy the groove 🎧`,
+                suggestions: [
+                    `⏭️ Play the next track`,
+                    `⚡ Make it more upbeat`,
+                    `🌙 Make it chiller`
+                ],
+                tracks: []
+            };
+        }
+
+        if (/^(next|next track|next song|skip|skip track)$/i.test(lower) && tracks.length > 0) {
+            const nextIdx = ((currentQueueIndex || 0) + 1) % tracks.length;
+            setTimeout(() => playTrackFromQueue(tracks, nextIdx), 80);
+            const nt = tracks[nextIdx];
+            return {
+                success: true,
+                mode: 'chat',
+                reply: `⏭️ Skipping ahead to **Track #${nextIdx + 1}: ${nt.title}** by **${nt.artist}**!`,
+                suggestions: [
+                    `💬 Tell me about ${nt.artist}`,
+                    `📅 When did ${nt.title} come out?`,
+                    `🔥 More songs like ${nt.title}`
+                ],
+                tracks: []
+            };
+        }
+
+        // 2. Track Swap / Replace Follow-Up ("swap track 3", "replace the second song", "remove track 1")
+        if (/\b(swap|replace|remove|change|switch out)\b/i.test(lower) && ref && tracks.length > 1) {
+            const preset = CLIENT_VIBE_SEEDS[assistantMemory.lastVibeKey || 'chill'] || CLIENT_VIBE_SEEDS.chill;
+            const replacementSeed = preset.seeds.find(s => !shownTrackKeys.has(`${(s.title || '').toLowerCase()}|${(s.artist || '').toLowerCase()}`)) || preset.seeds[preset.seeds.length - 1];
+            const enrichedArr = await enrichPresetSeedsNonBlocking([replacementSeed]);
+            const newTrack = { ...enrichedArr[0], index: ref.idx + 1 };
+            shownTrackKeys.add(`${(newTrack.title || '').toLowerCase()}|${(newTrack.artist || '').toLowerCase()}`);
+            const updatedTracks = tracks.map((t, i) => (i === ref.idx ? newTrack : { ...t, index: i + 1 }));
+            assistantMemory.lastTracks = updatedTracks;
+            return {
+                success: true,
+                mode: 'playlist',
+                playlist_title: assistantMemory.lastPlaylistTitle || 'Updated Curated Mix',
+                playlist_vibe: 'Updated Tracklist • 320kbps & ID3 Tagged',
+                reply: `Done! 🔄 I swapped out Track #${ref.idx + 1} (*${ref.track.title}*) and replaced it with **${newTrack.title}** by **${newTrack.artist}**:`,
+                follow_up_note: `How does **${newTrack.title}** fit the mix? Tell me if you want to swap any other track or ask me anything about these artists!`,
+                suggestions: [
+                    `▶️ Play track ${ref.idx + 1}`,
+                    `💬 Tell me about ${newTrack.artist}`,
+                    `⚡ Make it more upbeat`,
+                    `🌙 Make it chiller`
+                ],
+                tracks: updatedTracks
+            };
+        }
+
+        // 3. Questions about Release Year / Age / Oldest / Newest Song
+        if (/\b(what year|when did|when was|release date|released|how old|oldest|newest)\b/i.test(lower)) {
+            if (/\b(oldest|newest|earliest|latest)\b/i.test(lower) && tracks.length > 1) {
+                const withYears = tracks.filter(t => t.year && /^\d{4}$/.test(String(t.year)));
+                if (withYears.length > 0) {
+                    const sorted = [...withYears].sort((a, b) => parseInt(a.year, 10) - parseInt(b.year, 10));
+                    const oldest = sorted[0];
+                    const newest = sorted[sorted.length - 1];
+                    return {
+                        success: true,
+                        mode: 'chat',
+                        reply: `Looking at your current playlist (**${assistantMemory.lastPlaylistTitle || 'Curated Mix'}**):\n\n• **Oldest track:** **${oldest.title}** by *${oldest.artist}*, released in **${oldest.year}** (on *${oldest.album || 'Single'}*)\n• **Newest track:** **${newest.title}** by *${newest.artist}*, released in **${newest.year}** (on *${newest.album || 'Single'}*)\n\nWant me to build a playlist focused specifically on the **${oldest.year}s** era or more modern releases?`,
+                        suggestions: [
+                            `📼 Build a ${oldest.year.slice(0, 3)}0s era playlist`,
+                            `▶️ Play ${oldest.title}`,
+                            `💬 Tell me about ${oldest.artist}`,
+                            `🔄 Curate a fresh playlist`
+                        ],
+                        tracks: []
+                    };
+                }
+            }
+            if (ref && ref.track) {
+                const t = ref.track;
+                let yearStr = t.year;
+                let albumStr = t.album;
+                if (!yearStr) {
+                    const items = await searchItunesFast(`${t.artist} ${t.title}`, 1, 1500);
+                    if (items && items[0]) {
+                        const ym = (items[0].releaseDate || '').match(/\b(19\d\d|20\d\d)\b/);
+                        if (ym) yearStr = ym[1];
+                        if (items[0].collectionName) albumStr = items[0].collectionName;
+                    }
+                }
+                const currentYear = new Date().getFullYear();
+                const ageNote = yearStr ? ` (${Math.max(1, currentYear - parseInt(yearStr, 10))} years ago)` : '';
+                return {
+                    success: true,
+                    mode: 'chat',
+                    reply: `📅 **${t.title}** by **${t.artist}** was released in **${yearStr || 'its original studio run'}**${ageNote} on the album **${albumStr || 'Single'}**!\n\nIt's a standout record from that era. Want to hear more songs from **${yearStr || 'that era'}** or more tracks by **${t.artist}**?`,
+                    suggestions: [
+                        `▶️ Play track ${ref.idx + 1}`,
+                        `🎤 More songs by ${t.artist}`,
+                        `💬 Tell me more about ${t.artist}`,
+                        `💿 What other albums did ${t.artist} make?`
+                    ],
+                    tracks: []
+                };
+            }
+            if (tracks.length > 1) {
+                const yearList = tracks.map((t, i) => `${i + 1}. **${t.title}** (*${t.artist}*) — **${t.year || 'Classic'}** • *${t.album || 'Single'}*`).join('\n');
+                return {
+                    success: true,
+                    mode: 'chat',
+                    reply: `📅 Here is the release year and album breakdown for every track in **${assistantMemory.lastPlaylistTitle || 'your mix'}**:\n\n${yearList}\n\nWhich track or era is your favorite here?`,
+                    suggestions: [
+                        `▶️ Play track 1`,
+                        `💬 Tell me about ${tracks[0].artist}`,
+                        `🔥 Keep this vibe going (Vol. 2)`
+                    ],
+                    tracks: []
+                };
+            }
+        }
+
+        // 4. Questions about Albums ("what album is track 2 on?", "which album is this from?")
+        if (/\b(what album|which album|album is|albums are|from what album|record is)\b/i.test(lower)) {
+            if (ref && ref.track) {
+                const t = ref.track;
+                return {
+                    success: true,
+                    mode: 'chat',
+                    reply: `💿 **${t.title}** by **${t.artist}** is from the album **${t.album || 'Single'}**${t.year ? ' (' + t.year + ')' : ''}!\n\nWant me to pull more tracks from **${t.album || t.artist}** or tell you the story behind **${t.artist}**?`,
+                    suggestions: [
+                        `🎵 More tracks from ${t.album || t.artist}`,
+                        `💬 Tell me about ${t.artist}`,
+                        `▶️ Play track ${ref.idx + 1}`
+                    ],
+                    tracks: []
+                };
+            }
+            if (tracks.length > 0) {
+                const albumLines = tracks.map((t, i) => `${i + 1}. **${t.title}** — from *${t.album || 'Single'}* (${t.artist}${t.year ? ', ' + t.year : ''})`).join('\n');
+                return {
+                    success: true,
+                    mode: 'chat',
+                    reply: `💿 Here are the albums for all ${tracks.length} tracks in your current mix:\n\n${albumLines}`,
+                    suggestions: [
+                        `▶️ Play track 1`,
+                        `💬 Tell me about ${tracks[0].artist}`,
+                        `🔥 More like this vibe`
+                    ],
+                    tracks: []
+                };
+            }
+        }
+
+        // 5. Questions about Playlist Duration / Length / Longest / Shortest Track
+        if (/\b(how long is|total time|total duration|longest|shortest|how many songs|how many tracks)\b/i.test(lower) && tracks.length > 0) {
+            const totalSec = tracks.reduce((acc, t) => acc + (t.duration_sec || 210), 0);
+            const totalMin = Math.round(totalSec / 60);
+            const sortedByLen = [...tracks].sort((a, b) => (b.duration_sec || 210) - (a.duration_sec || 210));
+            const longest = sortedByLen[0];
+            const shortest = sortedByLen[sortedByLen.length - 1];
+            return {
+                success: true,
+                mode: 'chat',
+                reply: `⏱️ Your current mix (**${assistantMemory.lastPlaylistTitle || 'Curated Playlist'}**) has **${tracks.length} tracks** with a total runtime of about **${totalMin} minutes**:\n\n• **Longest track:** **${longest.title}** by *${longest.artist}* (${longest.duration || '4:30'})\n• **Shortest track:** **${shortest.title}** by *${shortest.artist}* (${shortest.duration || '2:45'})\n\nWant me to add 6 more tracks for a longer session, or swap any song out?`,
+                suggestions: [
+                    `🔥 Add 6 more tracks (Vol. 2)`,
+                    `▶️ Play ${longest.title}`,
+                    `🔄 Swap track 1`
+                ],
+                tracks: []
+            };
+        }
+
+        // 6. How-To / Feature / Pricing / Download / Ringtone / Platform Follow-Up Questions
+        if (/\b(how do i download|how to download|download all|download zip|where do i download|save mp3|get the zip)\b/i.test(lower)) {
+            return {
+                success: true,
+                mode: 'chat',
+                reply: `Downloading is super easy! 📦\n\n• **For a single song:** Just click the **⬇ MP3** button on the right side of any track bubble to extract the full 320kbps MP3 with embedded Apple Music HD cover art.\n• **For the whole playlist:** Click the orange **📦 Download Playlist (.ZIP)** button at the top of the playlist card to bundle all tracks into one 1-click ZIP archive!`,
+                suggestions: [
+                    `📱 How do I make a phone ringtone?`,
+                    `💰 Is this free or how do credits work?`,
+                    `🌙 Curate a synthwave playlist`
+                ],
+                tracks: []
+            };
+        }
+
+        if (/\b(how do i (make|set|use|put) a? ?ringtone|ringtone on iphone|ringtone on android|m4r|garageband)\b/i.test(lower)) {
+            return {
+                success: true,
+                mode: 'chat',
+                reply: `Here's how to set any track as your custom phone ringtone 📱:\n\n1. **Toggle on "📱 Ringtone"** in the top bar (or just tell me *"Make a ringtone of [Song]"*) and click **⬇ Ringtone**.\n2. **On Android:** Open **Settings → Sound & vibration → Phone ringtone → + Add Ringtone** and pick your downloaded `.mp3`!\n3. **On iPhone:** Open your downloaded `.m4r` / `.mp3` in Apple's free **GarageBand** app → long-press the project → **Share → Ringtone → Export**!\n\nWhat song should we turn into a ringtone first?`,
+                suggestions: [
+                    `📱 Make a ringtone of Blinding Lights`,
+                    `📱 Make a ringtone of Track 1`,
+                    `🔥 Curate an upbeat playlist`
+                ],
+                tracks: []
+            };
+        }
+
+        if (/\b(is this free|how much does it cost|price|pricing|how do credits work|what are credits|subscription)\b/i.test(lower)) {
+            return {
+                success: true,
+                mode: 'chat',
+                reply: `Here's the breakdown—it's super friendly! ⚡\n\n• **100% Free Forever:** Chatting with me, curating playlists, listening to audio previews in chat, and downloading **1 to 5 tracks per request** (including embedded 1000px Apple Music cover art & ID3 tags) are completely **FREE** with zero signup!\n• **Pay-As-You-Go Credits ($3.99 for 350 Credits):** If you want large playlist ZIPs (6+ tracks at once), AI 320kbps studio mastering (1 credit/track), or AI lyrics transcription (10 credits/track), you can grab 350 non-expiring credits for $3.99 (~$0.01 per track) by clicking **Sign In / Credits** at the top right.`,
+                suggestions: [
+                    `🎧 Curate a freeplaylist right now`,
+                    `🔊 What audio quality are the MP3s?`,
+                    `📱 Can I use this on Telegram?`
+                ],
+                tracks: []
+            };
+        }
+
+        if (/\b(what (quality|bitrate|format)|is it 320|id3|album art|metadata|flac|lossless)\b/i.test(lower)) {
+            return {
+                success: true,
+                mode: 'chat',
+                reply: `Every track you download is mastered in **high-bitrate MP3 (up to 320kbps CBR)** and automatically tagged with:\n\n• 🎨 **1000×1000px HD Album Artwork** sourced from Apple Music\n• 🏷️ **Complete ID3v2 Metadata** (Track Title, Artist, Album, Release Year & Genre)\n• 📝 **Optional AI Lyrics Transcription** embedded directly into the MP3's ` + '`USLT`' + ` lyrics tag!\n\nYou can toggle **🎨 HD Cover Art**, **⚡ 320kbps**, **📱 Ringtone**, and **📝 Lyrics** right in the top bar.`,
+                suggestions: [
+                    `🌙 Send me a synthwave playlist`,
+                    `🎸 Send me classic rock legends`,
+                    `💰 How do credits work?`
+                ],
+                tracks: []
+            };
+        }
+
+        // 7. Artist / Song / Genre Biography & Trivia Follow-Up Questions ("who sings track 2?", "who is M83?", "tell me about...", "what other albums...")
+        const isQuestionPattern = /\?$/.test(rawText) || /^(who|what|when|where|why|how|which|tell me|can you tell|do you know|explain|describe)\b/i.test(lower);
+        const wantsMusicAction = /\b(send me|play|make me|build me|curate|give me|drop|create|download|ringtone of)\b/i.test(lower) && !/^(who|what|when|where|why|how|tell me about|explain)\b/i.test(lower);
+
+        if (isQuestionPattern && !wantsMusicAction) {
+            // Check if asking "who sings / who is the artist on track X"
+            if (ref && ref.track && /\b(who sings|who made|who is the artist|who performed|by who|who wrote|tell me about|more about|who is|what is)\b/i.test(lower)) {
+                const t = ref.track;
+                const wikiBio = await fetchWikipediaSummary(`${t.artist} musician band`);
+                const topSongs = await searchItunesFast(t.artist, 5, 1600);
+                const otherHits = (topSongs || [])
+                    .map(item => item.trackName)
+                    .filter(Boolean)
+                    .filter((v, i, a) => a.indexOf(v) === i && v.toLowerCase() !== t.title.toLowerCase())
+                    .slice(0, 3);
+
+                const bioParagraph = wikiBio
+                    ? `\n\n📖 **About ${t.artist}:** ${wikiBio}`
+                    : `\n\n**${t.artist}** is known for crafting standout records in this lane, and **${t.title}** (${t.album || 'Single'}${t.year ? ', ' + t.year : ''}) is one of their signature tracks.`;
+                const hitsLine = otherHits.length > 0
+                    ? `\n\n🔥 **Other essential tracks by ${t.artist}:** *${otherHits.join('*, *')}*.`
+                    : '';
+
+                return {
+                    success: true,
+                    mode: 'chat',
+                    reply: `🎤 **Track #${ref.idx + 1} (${t.title})** is by **${t.artist}** (from *${t.album || 'Single'}*${t.year ? ', ' + t.year : ''})!${bioParagraph}${hitsLine}\n\nWant me to put together a full 6-track **${t.artist}** spotlight playlist for you?`,
+                    suggestions: [
+                        `🎵 Build a 6-track ${t.artist} playlist`,
+                        `▶️ Play ${t.title}`,
+                        `📅 When did ${t.title} come out?`,
+                        `🔄 Surprise me with a new playlist`
+                    ],
+                    tracks: []
+                };
+            }
+
+            // General music/artist/genre question (e.g., "Who is Daft Punk?", "Tell me about Fleetwood Mac", "What is synthwave?")
+            const topicMatch = rawText
+                .replace(/^(hey|hi|ok|so|well)?\s*(can you\s+|could you\s+)?(tell me more about|tell me about|who is|who are|what is|what are|explain|what other albums did|what songs did|where is|when did)\s+/i, '')
+                .replace(/\b(make|sing|release|come from|mean|famous for)\b\??$/i, '')
+                .replace(/[?!.]+$/, '')
+                .trim();
+
+            const targetSubject = (topicMatch && !/^(this|that|it|they|them|he|she|these|those)$/i.test(topicMatch))
+                ? topicMatch
+                : (ref && ref.track ? ref.track.artist : (assistantMemory.lastArtist || ''));
+
+            if (targetSubject) {
+                const [wikiBio, itunesItems] = await Promise.all([
+                    fetchWikipediaSummary(targetSubject),
+                    searchItunesFast(targetSubject, 5, 1600)
+                ]);
+
+                const topTrackNames = (itunesItems || [])
+                    .map(item => item.trackName)
+                    .filter(Boolean)
+                    .filter((v, i, a) => a.indexOf(v) === i)
+                    .slice(0, 4);
+                const topAlbums = (itunesItems || [])
+                    .map(item => item.collectionName)
+                    .filter(Boolean)
+                    .filter((v, i, a) => a.indexOf(v) === i)
+                    .slice(0, 3);
+
+                let answerText = wikiBio
+                    ? `🎧 **${targetSubject}:** ${wikiBio}`
+                    : `🎧 **${targetSubject}** has an incredible catalog with timeless production and standout melodies.`;
+
+                if (topTrackNames.length > 0) {
+                    answerText += `\n\n🔥 **Standout Tracks:** *${topTrackNames.join('*, *')}*`;
+                }
+                if (topAlbums.length > 0) {
+                    answerText += `\n💿 **Notable Releases:** *${topAlbums.join('*, *')}*`;
+                }
+                answerText += `\n\nWant me to drop a playable **${targetSubject}** playlist right into our chat so you can listen?`;
+
+                return {
+                    success: true,
+                    mode: 'chat',
+                    reply: answerText,
+                    suggestions: [
+                        `🎵 Play a ${targetSubject} playlist`,
+                        topTrackNames[0] ? `🔥 Play ${topTrackNames[0]} by ${targetSubject}` : `🔥 Play top ${targetSubject} tracks`,
+                        `🎲 Surprise me with a similar artist`
+                    ],
+                    tracks: []
+                };
+            }
+        }
+
+        return null;
+    }
+
     function isConversationalOnlyMessage(lower) {
         // Detect pure human conversation so we reply like a person instead of searching iTunes for "how are you"
         if (/^(hi|hey|hello|yo|sup|what's up|whats up|howdy|hiya|good morning|good afternoon|good evening|morning|evening)[!.?\s]*$/i.test(lower)) return 'greeting';
@@ -832,7 +1256,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return {
                 success: true,
                 mode: 'chat',
-                reply: `Think of me as your music-obsessed friend and personal DJ on speed dial! 🎶 You can talk to me just like a real person:\n\n• **Tell me how you feel or what you're doing** (*"I'm stressed after work"*, *"Cooking dinner"*, *"Driving at night"*)\n• **Steer the vibe mid-conversation** (*"Make it more upbeat"*, *"Give me 6 more like that"*, *"Why did you pick these?"*)\n• **Ask for any song, artist, ringtone, or paste a link**—and I'll drop playable audio bubbles + 320kbps MP3/ZIP downloads right into our chat!`,
+                reply: `Think of me as your music-obsessed friend and personal DJ on speed dial! 🎶 You can talk to me just like a real person:\n\n• **Tell me how you feel or what you're doing** (*"I'm stressed after work"*, *"Cooking dinner"*, *"Driving at night"*)\n• **Ask follow-up questions anytime** (*"When did track 2 come out?"*, *"Who sings the 3rd song?"*, *"Tell me about M83"*, *"Swap track 1"*)\n• **Ask for any song, artist, ringtone, or paste a link**—and I'll drop playable audio bubbles + 320kbps MP3/ZIP downloads right into our chat!`,
                 suggestions: [
                     `🌙 Curate a late-night synthwave mix`,
                     `🔥 Play Top Daft Punk tracks`,
@@ -848,10 +1272,10 @@ document.addEventListener('DOMContentLoaded', () => {
             return {
                 success: true,
                 mode: 'chat',
-                reply: `Anytime! 🙌 Nothing makes me happier than when a tracklist hits just right. Since you're feeling **${prevTitle}**, want me to keep that exact energy rolling with a Volume 2, spin off into more tracks like **${prevArtist}**, or switch up the tempo?`,
+                reply: `Anytime! 🙌 Nothing makes me happier than when a tracklist hits just right. Since you're feeling **${prevTitle}**, want me to keep that exact energy rolling with a Volume 2, spin off into more tracks like **${prevArtist}**, or ask me anything about these songs?`,
                 suggestions: [
                     `🔥 Keep this vibe going (Vol. 2)`,
-                    `🎤 More tracks like ${prevArtist}`,
+                    `💬 Tell me about ${prevArtist}`,
                     `⚡ Take the energy up a notch`,
                     `🌙 Smooth it out & go mellower`
                 ],
@@ -860,15 +1284,16 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         if (convIntent === 'explain_picks') {
             if (assistantMemory.lastTracks && assistantMemory.lastTracks.length > 0) {
-                const sample = assistantMemory.lastTracks.slice(0, 3).map(t => `**${t.title}** by *${t.artist}*`).join(', ');
+                const sample = assistantMemory.lastTracks.slice(0, 3).map(t => `**${t.title}** by *${t.artist}* (${t.year || 'Classic'})`).join(', ');
                 return {
                     success: true,
                     mode: 'chat',
-                    reply: `Great question! 🎧 When I built **${assistantMemory.lastPlaylistTitle || 'your mix'}**, I wanted a natural arc where each song flows into the next without jarring tempo jumps. Tracks like ${sample} share warm harmonic textures and a cohesive groove so you can hit **Play All** and stay in the zone from start to finish. Want me to dig deeper into this style?`,
+                    reply: `Great question! 🎧 When I built **${assistantMemory.lastPlaylistTitle || 'your mix'}**, I wanted a natural arc where each song flows into the next without jarring tempo jumps. Tracks like ${sample} share warm harmonic textures and a cohesive groove so you can hit **Play All** and stay in the zone from start to finish.\n\nYou can also ask me about any specific track (like *"When did track 2 come out?"* or *"Swap track 3"*)!`,
                     suggestions: [
-                        `🔥 Yes, give me 6 more in this style`,
-                        `🎤 Focus on ${assistantMemory.lastArtist || 'the lead artist'}`,
-                        `🎲 Show me a completely different genre`
+                        `📅 What year did these songs come out?`,
+                        `💬 Tell me about ${assistantMemory.lastArtist || 'the lead artist'}`,
+                        `🔥 Give me 6 more in this style`,
+                        `🎲 Show me a different genre`
                     ],
                     tracks: []
                 };
@@ -881,7 +1306,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 nextKey,
                 true,
                 `Got you—let's pick up the tempo and bring the energy way up! ⚡ I swapped out the slower grooves for **6 punchy, high-BPM tracks** that hit right away:`,
-                `How's that tempo feeling now? Say the word if you want to go even harder (full gym/festival energy) or lock right into this groove!`
+                `How's that tempo feeling now? Say the word if you want to go even harder (full gym/festival energy) or ask me anything about these tracks!`
             );
         }
         if (convIntent === 'steer_chill') {
@@ -901,6 +1326,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 `Keeping that exact wave going! 🌊 Here is **Volume 2** with **6 fresh tracks** in the same lane so the vibe never drops:`,
                 `Still locked in! Tap ▶ Play All in Chat to queue these up right behind the first batch.`
             );
+        }
+
+        // 0.25 Check Follow-Up Questions (about tracks, release years, albums, artists, playback, swapping tracks, or how-to)
+        const followUpAnswer = await answerFollowUpQuestion(rawText, lower);
+        if (followUpAnswer) {
+            return followUpAnswer;
         }
 
         // 0.5 Check empathetic real-life moments & emotions (stressed, sad, celebrating, driving, cooking, etc.)
@@ -1440,10 +1871,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const suggestions = Array.isArray(payload.suggestions) && payload.suggestions.length > 0
             ? payload.suggestions
             : (hasTracks ? [
-                `🔥 More like ${tracks[0] ? tracks[0].artist : 'this'}`,
+                `🎤 Tell me about ${tracks[0] ? tracks[0].artist : 'this artist'}`,
+                `💿 What year did Track #1 come out?`,
+                `🔄 Swap Track #2`,
                 `⚡ Make it more upbeat`,
-                `🌙 Make it chiller`,
-                `🎲 Surprise me with a new mix`
+                `🌙 Make it chiller`
             ] : []);
 
         const suggestionsHtml = suggestions.length > 0 ? `
@@ -1560,9 +1992,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const lowerText = text.toLowerCase();
         const isAskingForNew = /\b(new|another|different|fresh|random|more|next|surprise|other|else|switch|change|again)\b/i.test(text);
         const isPureConvOrLifeMoment = Boolean(isConversationalOnlyMessage(lowerText) || detectHumanLifeMoment(lowerText));
+        const looksLikeQuestion = /\?$/.test(text) || /^(who|what|when|where|why|how|which|tell me|can you tell|do you know|explain|swap|replace|pause|resume|next|skip)\b/i.test(lowerText);
 
         if (assistantStatusText) {
-            assistantStatusText.textContent = isPureConvOrLifeMoment
+            assistantStatusText.textContent = (isPureConvOrLifeMoment || looksLikeQuestion)
                 ? 'typing a reply...'
                 : 'digging through crates & curating tracks...';
         }
@@ -1570,12 +2003,20 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             let result = null;
 
-            // If it's a pure conversational message, follow-up steering, or life-moment mood check-in, use our human DJ persona directly!
+            // 1. Check if this is a follow-up question, playback command, track swap, or conversational message
             if (isPureConvOrLifeMoment) {
-                await new Promise(r => setTimeout(r, 420));
+                await new Promise(r => setTimeout(r, 380));
                 result = await clientSideCurateFallback(text);
             } else {
-                // Otherwise try backend up to 2.1s, then fall back to instant human client curation
+                const followUpAns = await answerFollowUpQuestion(text, lowerText);
+                if (followUpAns) {
+                    await new Promise(r => setTimeout(r, 320));
+                    result = followUpAns;
+                }
+            }
+
+            // 2. If not a pure follow-up question, try backend up to 2.1s, then fall back to instant human client curation
+            if (!result) {
                 try {
                     const backendCall = (async () => {
                         const resp = await fetchWithTimeout(`${BACKEND_URL}/api/assistant/chat`, {
@@ -1584,6 +2025,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             body: JSON.stringify({
                                 message: text,
                                 history: chatHistory.slice(-6),
+                                current_tracks: (assistantMemory.lastTracks || []).slice(0, 6),
                                 options: {
                                     auto_add_album_art: autoAddAlbumArtInput ? autoAddAlbumArtInput.checked : true,
                                     increase_quality: increaseQualityInput ? increaseQualityInput.checked : false,
@@ -1604,8 +2046,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     console.info('Using instant client curation:', networkErr);
                 }
 
-                let shouldUseClientCuration = !result || !result.success || !Array.isArray(result.tracks) || result.tracks.length === 0;
-                if (!shouldUseClientCuration && isAskingForNew) {
+                let shouldUseClientCuration = !result || !result.success || (result.mode !== 'chat' && (!Array.isArray(result.tracks) || result.tracks.length === 0));
+                if (!shouldUseClientCuration && isAskingForNew && Array.isArray(result.tracks) && result.tracks.length > 0) {
                     const allAlreadyShown = result.tracks.every(t =>
                         shownTrackKeys.has(`${(t.title || '').toLowerCase()}|${(t.artist || '').toLowerCase()}`)
                     );
@@ -1617,7 +2059,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 if (shouldUseClientCuration) {
                     result = await clientSideCurateFallback(text);
-                } else if (Array.isArray(result.tracks)) {
+                } else if (Array.isArray(result.tracks) && result.tracks.length > 0) {
                     result.tracks.forEach(t => {
                         shownTrackKeys.add(`${(t.title || '').toLowerCase()}|${(t.artist || '').toLowerCase()}`);
                     });
