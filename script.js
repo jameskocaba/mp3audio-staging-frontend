@@ -599,31 +599,31 @@ document.addEventListener('DOMContentLoaded', () => {
         lastPlaylistTitle: '',
         lastTracks: [],
         lastArtist: '',
+        lastConvCategory: '',
+        lastGenreDiscussed: '',
+        lastArtistDiscussed: '',
         pendingVibeKey: '',
         pendingTopic: '',
         turnCount: 0
     };
 
     function isExplicitPlaylistRequest(lower) {
-        // True ONLY when the user specifically asks for a playlist, mix, or set of songs
-        if (/\b(playlist|playlists|mix|mixtape|tracklist|setlist|curate|volume\s*2|vol\.?\s*2)\b/i.test(lower)) return true;
-        if (/\b(play|send|give|make|build|create|drop|put on|line up|queue|show|find|get)\b.*\b(songs|tracks|beats|music|anthems|hits|classics|jams)\b/i.test(lower)) return true;
-        if (/^(top|best)\s+\d*\s*\w+/i.test(lower)) return true;
-        if (/\b(songs|tracks)\s+(by|like|from|for)\s+/i.test(lower)) return true;
-        if (/\b(more like|similar to)\s+/i.test(lower) && !/\?$/.test(lower)) return true;
-        if (/^(send|make|build|create|curate|give)\s+me\s+(a|an|some)\s+/i.test(lower)) return true;
-        if (/\b(make it more upbeat|more upbeat|make it chiller|more chill|dial it back|keep this vibe going|surprise me with a|surprise me|new playlist|another playlist|fresh playlist|different genre)\b/i.test(lower)) return true;
+        // True ONLY when the user specifically asks to create, send, or play a playlist/mix/list of songs
+        if (/\b(how|what|why|when|where|who|which)\b/i.test(lower) && /\?$/.test(lower)) return false;
+        if (/\b(playlist|playlists|mixtape|tracklist|setlist)\b/i.test(lower)) return true;
+        if (/\b(make|build|create|curate|send|give|play|drop|put on|generate)\b.*\b(mix|songs|tracks)\b/i.test(lower)) return true;
+        if (/^(a\s+|an\s+|some\s+)?[a-z0-9\s'&/-]+\s+mix$/i.test(lower)) return true;
+        if (/^(play|send|give|show)\s+(me\s+)?(top|best)\s+\d*\s*\w+/i.test(lower)) return true;
+        if (/\b(make it more upbeat|make it chiller|keep this vibe going|surprise me with a playlist|new playlist|another playlist|fresh playlist)\b/i.test(lower)) return true;
         return false;
     }
 
     function isExplicitSingleTrackRequest(rawText, lower) {
-        // True ONLY when the user specifically asks to play/send/download a song, ringtone, or link
+        // True ONLY when the user specifically asks to play, send, or download a specific song, ringtone, or link
         if (/https?:\/\//i.test(rawText)) return true;
-        if (/\b(ringtone|m4r|alarm tone|text tone)\b/i.test(lower) && !/\b(how do i|how to|can i|what is)\b/i.test(lower)) return true;
-        if (/^(play|send|send me|download|get me|find me|put on|listen to|stream)\s+(?!a\s+game|with\b)/i.test(lower)) return true;
-        if (/\b(mp3|m4r)\b/i.test(lower) && !/\b(how|what|why|is|are|can)\b/i.test(lower)) return true;
-        if (/^[a-z0-9\s'&.,-]+\s+[-—]\s+[a-z0-9\s'&.,-]+$/i.test(rawText)) return true;
-        if (/^[a-z0-9\s'&.,-]+\s+by\s+[a-z0-9\s'&.,-]+$/i.test(rawText) && rawText.split(/\s+/).length <= 9) return true;
+        if (/\b(make|create|send|get|download)\b.*\b(ringtone|m4r|alarm tone|text tone)\b/i.test(lower)) return true;
+        if (/^(play|send me|download|stream|put on)\s+(?!some\b|a\s+game\b|with\b|around\b|music\b)[a-z0-9]/i.test(lower) && !/\b(playlist|mix)\b/i.test(lower)) return true;
+        if (/\b(download|send me|get me)\b.*\b(mp3|m4r)\b/i.test(lower)) return true;
         return false;
     }
 
@@ -698,12 +698,13 @@ document.addEventListener('DOMContentLoaded', () => {
         if (/\b(stressed|stress|anxious|anxiety|overwhelmed|long day|exhausted|tired|burnout|burned out|rough day|hard day|can't sleep|insomnia|decompress|unwind)\b/.test(lower)) {
             return {
                 vibeKey: 'lofi',
-                chatReply: "Ugh, I feel that—days like that really take it out of you. 🌿 Are you finally off the clock and able to kick back for the rest of the evening?\n\nI'm right here if you just want to chat and decompress—and whenever you feel like having me put together a calm unwinding playlist, just ask!",
+                convCategory: 'work_school',
+                chatReply: "Ugh, I feel that—days like that really take it out of you. 🌿 Are you finally off the clock and able to kick back for the rest of the evening, or still pushing through it?",
                 chatSuggestions: [
-                    "💬 Just venting—work was crazy today",
-                    "🍵 Just relaxing on the couch now",
-                    "🎵 Make me a calm unwinding playlist",
-                    "☕ Send me a lo-fi chill playlist"
+                    "Finally off the clock and relaxing",
+                    "Still pushing through work right now",
+                    "Yeah, today was non-stop",
+                    "Just trying to unwind on the couch"
                 ],
                 customIntro: "Sounds like it's been a heavy day—take a deep breath and let your shoulders drop. 🌿 Since you asked for a mix to unwind, I put together **6 warm, unhurried tracks** with soft melodies to help quiet the noise:",
                 followUp: "How are you holding up? If you want something even softer like acoustic guitar or late-night jazz, just say the word."
@@ -712,12 +713,13 @@ document.addEventListener('DOMContentLoaded', () => {
         if (/\b(sad|heartbroken|breakup|broke up|lonely|crying|depressed|down|in my feelings|miss her|miss him|missing someone|hurt)\b/.test(lower)) {
             return {
                 vibeKey: 'r&b',
-                chatReply: "I'm really sorry you're going through that ❤️ Some days just feel heavy, and you don't have to rush yourself out of it. Do you want to talk about what's on your mind, or distraction-chat about something totally random?\n\n*(And if you decide you want a soulful playlist to keep you company later, just say the word.)*",
+                convCategory: 'day_status',
+                chatReply: "I'm really sorry you're going through that ❤️ Some days just feel heavy, and you don't have to rush yourself out of it. Do you want to talk about what's on your mind, or distraction-chat about something totally random?",
                 chatSuggestions: [
-                    "💬 Yeah, let's just talk for a bit",
-                    "🎲 Tell me something interesting to distract me",
-                    "🎵 Make me a soulful comfort playlist",
-                    "🎸 Make me a gentle acoustic playlist"
+                    "Yeah, let's just talk for a bit",
+                    "Distract me with something fun",
+                    "Just taking it one hour at a time",
+                    "Tell me a random story or fact"
                 ],
                 customIntro: "I'm really sorry you're going through that ❤️ Here are **6 soulful, heartfelt tracks** I pulled to sit right there with you:",
                 followUp: "I'm right here if you want to talk, or if you want more late-night soul or stripped-back acoustic ballads."
@@ -726,12 +728,13 @@ document.addEventListener('DOMContentLoaded', () => {
         if (/\b(happy|excited|good news|promoted|celebrating|celebrate|friday|weekend|great day|best day|hyped|pumped)\b/.test(lower)) {
             return {
                 vibeKey: 'pop',
-                chatReply: "Now THAT is what I love to hear!! 🎉 Huge congrats—you love to see a win like that! What happened?! Tell me what we're celebrating today!",
+                convCategory: 'day_status',
+                chatReply: "Now THAT is what I love to hear!! 🎉 You love to see a win like that! What happened—what are we celebrating today?",
                 chatSuggestions: [
-                    "🎉 Just having an awesome day!",
-                    "💬 What's your favorite feel-good song?",
-                    "🎵 Make me a celebratory party playlist",
-                    "📼 Make me an 80s & 90s throwback playlist"
+                    "Got some great news at work!",
+                    "Finally made it to the weekend!",
+                    "Just in a really great mood today",
+                    "Hanging out with friends tonight"
                 ],
                 customIntro: "Now THAT is what I love to hear!! 🎉 Since we're celebrating, I lined up **6 infectious, feel-good anthems** to keep that high energy rolling:",
                 followUp: "What are we celebrating?! Tell me if you want to take this into full club/dance territory or throw on some 80s & 90s party classics next!"
@@ -741,14 +744,15 @@ document.addEventListener('DOMContentLoaded', () => {
             const isNight = /night|midnight|late/.test(lower);
             return {
                 vibeKey: isNight ? 'synthwave' : 'rock',
+                convCategory: 'hobbies',
                 chatReply: isNight
-                    ? "Nothing beats a late-night drive with empty roads and city lights passing by. 🌃 Heading somewhere fun, or just out clearing your head? Drive safe—and if you want me to put together a night-drive playlist, just ask!"
-                    : "Nice! 🛣️ Heading out on a road trip or just fighting through the daily commute? Drive safe—and let me know if you want to chat or if you'd like me to build a driving playlist for the road!",
+                    ? "Nothing beats a late-night drive with empty roads and city lights passing by. 🌃 Heading somewhere fun, or just out clearing your head?"
+                    : "Nice! 🛣️ Heading out on a road trip somewhere fun, or just making the daily commute?",
                 chatSuggestions: [
-                    "🚗 Just cruising & clearing my head",
-                    "💬 What's your ultimate road-trip song?",
-                    "🎵 Make me a late-night driving playlist",
-                    "🎸 Make me a classic rock road-trip playlist"
+                    "Just cruising and clearing my head",
+                    "On my way home right now",
+                    "Heading out on a road trip!",
+                    "Stuck in traffic unfortunately"
                 ],
                 customIntro: isNight
                     ? "Windows cracked, city lights passing by—nothing beats a late-night drive. 🌃 Here are **6 hypnotic synth & night-drive tracks** built for the open road:"
@@ -759,12 +763,13 @@ document.addEventListener('DOMContentLoaded', () => {
         if (/\b(cooking|dinner|kitchen|wine|date night|romantic|candles)\b/.test(lower)) {
             return {
                 vibeKey: 'jazz',
-                chatReply: "Ooh, love that! 🍷 What's on the menu tonight—cooking up a favorite recipe or trying something new? We can hang out and chat while you cook, and if you want a warm lounge or jazz playlist in the background, just ask!",
+                convCategory: 'food_drink',
+                chatReply: "Ooh, love that! 🍷 What's on the menu tonight—cooking up a go-to favorite recipe or experimenting with something new?",
                 chatSuggestions: [
-                    "🍝 Making a homemade dinner tonight!",
-                    "💬 What music do you like while cooking?",
-                    "🎵 Make me a warm jazz & lounge playlist",
-                    "✨ Make me a smooth R&B dinner playlist"
+                    "Making pasta from scratch!",
+                    "Just whipping up something quick",
+                    "Ordering takeout tonight instead",
+                    "Trying out a brand new recipe"
                 ],
                 customIntro: "Ooh, setting the mood! 🍷 Here are **6 timeless lounge & soul classics** to keep you company in the kitchen:",
                 followUp: "What's on the menu tonight? Let me know if you want to blend in some smooth R&B or sunset indie next!"
@@ -775,12 +780,13 @@ document.addEventListener('DOMContentLoaded', () => {
             const timeVibe = (hour >= 20 || hour < 5) ? 'synthwave' : (hour < 12 ? 'acoustic' : 'chill');
             return {
                 vibeKey: timeVibe,
-                chatReply: "Haha, I've been there! 😄 Sometimes doing nothing is underrated. We can chat about your favorite artists, trade random music trivia, or if you ever want me to put together a playlist, just ask! What kind of music or hobbies have you been into lately?",
+                convCategory: 'relaxing',
+                chatReply: "Haha, sometimes doing nothing at all is underrated! 😄 Are you just taking a breather at home, or looking for a fun topic to get into?",
                 chatSuggestions: [
-                    "🎲 Tell me a cool music fact",
-                    "🎤 Who are your favorite artists?",
-                    "😂 Tell me a music joke",
-                    "🎵 Surprise me with a playlist"
+                    "Just taking a breather at home",
+                    "Tell me a cool music fact",
+                    "What kind of music are you into?",
+                    "Tell me a music joke"
                 ],
                 customIntro: `Since you asked for some tracks, I hand-picked **6 of my personal favorite songs** that hit the sweet spot between groove and melody:`,
                 followUp: "Tell me which track in this batch catches your ear first, and I'll tailor the next round around it!"
@@ -1271,18 +1277,114 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     const GENRE_CHAT_RESPONSES = {
-        synthwave: "Synthwave has such an incredible atmosphere! 🌆 That blend of warm 80s analog Roland synths, gated reverb drums, and cinematic midnight-drive melodies never gets old—artists like **M83**, **Kavinsky**, and **The Midnight** really perfected it.\n\nWhat got you into synthwave? Whenever you want me to put together a synthwave playlist, just say the word!",
-        workout: "High-energy workout music is all about that relentless BPM and bassline that pushes you through the last set! 💪 Do you usually prefer heavy hip-hop, electronic drops, or hard rock when you're working out?\n\n*(Let me know if you want me to build a workout playlist whenever you're ready!)*",
-        "hip hop": "Hip-hop's evolution from 90s boom-bap sample chopping—like **A Tribe Called Quest**, **Nas**, and **Mobb Deep**—to modern production is unmatched. 🎤 Are you more into golden-era 90s lyricism or newer trap and melodic flows?\n\nWhenever you want a hip-hop playlist, just ask!",
-        lofi: "Lo-fi beats are honestly magic for getting into a flow state or winding down. ☕ Those dusty vinyl crackles, jazz Rhodes chords, and swung J Dilla-style drums make everything feel calmer.\n\nAre you working on something right now or just relaxing? Tell me if you ever want me to drop a lo-fi playlist!",
-        acoustic: "There's something timeless about stripped-back acoustic guitar and raw, honest songwriting—nowhere to hide behind heavy production. 🎸 Who are some of your favorite acoustic or folk artists?",
-        rock: "Classic and indie rock never lose their punch! ⚡ From **Fleetwood Mac** and **Led Zeppelin** to **The Killers** and **Arctic Monkeys**, a great guitar riff is forever.\n\nWhat's your favorite era of rock? Say the word anytime you want me to build a rock playlist!",
-        jazz: "Jazz is pure soul and conversation without words. 🎷 Those classic Blue Note recordings with **Miles Davis**, **John Coltrane**, and **Bill Evans** can transform the mood of a whole room in seconds.\n\nDo you prefer smooth late-night quartet jazz or upbeat swing and bossa nova?",
-        "r&b": "R&B and neo-soul have the richest vocal harmonies and pocket grooves in music. ✨ From 90s classics to **SZA**, **Frank Ocean**, and **H.E.R.**, it always hits right in the feelings.\n\nWho's your go-to R&B artist? Let me know if you'd like me to curate an R&B playlist!",
-        edm: "Electronic and house music have such contagious energy—especially when a progressive build finally drops! 🎧 Are you more into melodic house like **RÜFÜS DU SOL**, classic **Daft Punk**, or big festival anthems?",
-        throwback: "80s and 90s throwbacks are undefeated! 📼 The songwriting and hooks from those two decades are so iconic that everyone knows the chorus within three seconds.\n\nAre you more of an 80s synth-pop fan or a 90s R&B and rock kid?",
-        pop: "Great pop music is harder to write than people think—a hook that sticks in your head all week is pure craft! ✨ Who's been in your heavy rotation lately?",
-        chill: "Chill, laid-back grooves are the best way to let the day slow down. 🌅 We can just hang out and chat, or whenever you want me to put together a chill playlist, just ask!"
+        synthwave: {
+            reply: "Synthwave has such an unmistakable atmosphere! 🌆 That blend of warm 80s analog Roland synths, gated reverb drums, and cinematic midnight-drive melodies never gets old—artists like **M83**, **Kavinsky**, and **The Midnight** really perfected it.\n\nDo you lean more toward the dreamy, vocal-driven synthwave or the darker cyberpunk instrumentals?",
+            chips: [
+                "Dreamy vocal synthwave",
+                "Darker cyberpunk instrumentals",
+                "I love M83 and Kavinsky",
+                "Make me a synthwave playlist"
+            ]
+        },
+        workout: {
+            reply: "Good workout energy is all about a relentless rhythm that keeps you moving! 💪 When you're exercising, what actually gets you in the zone—heavy hip-hop drums, high-tempo electronic drops, or hard rock?",
+            chips: [
+                "Heavy hip-hop beats",
+                "High-tempo electronic drops",
+                "Hard rock & guitar riffs",
+                "Make me a workout playlist"
+            ]
+        },
+        "hip hop": {
+            reply: "Hip-hop's evolution from 90s boom-bap sample chopping—like **A Tribe Called Quest**, **Nas**, and **Mobb Deep**—to modern production is unmatched. 🎤 Are you more of a golden-era 90s head, or do you prefer 2000s/modern flows?",
+            chips: [
+                "90s golden-era boom-bap",
+                "2000s & modern hip-hop",
+                "Melodic & laid-back rap",
+                "Make me a hip-hop playlist"
+            ]
+        },
+        lofi: {
+            reply: "Lo-fi beats are honestly magic for getting into a flow state or winding down. ☕ Those dusty vinyl crackles, jazz Rhodes chords, and swung J Dilla-style drums make everything feel calmer.\n\nDo you usually put lo-fi on while you're working/studying, or late at night to relax?",
+            chips: [
+                "While working or studying",
+                "Late at night to relax",
+                "I love jazzy piano beats",
+                "Make me a lo-fi playlist"
+            ]
+        },
+        acoustic: {
+            reply: "There's something timeless about stripped-back acoustic guitar and raw, honest songwriting—nowhere to hide behind heavy studio production. 🎸 Do you gravitate more toward classic folk/singer-songwriters or modern indie acoustic?",
+            chips: [
+                "Classic folk & singer-songwriters",
+                "Modern indie acoustic",
+                "Warm instrumental guitar",
+                "Make me an acoustic playlist"
+            ]
+        },
+        rock: {
+            reply: "Rock covers so much iconic ground! ⚡ From 70s legends like **Fleetwood Mac** and **Led Zeppelin** to 90s grunge/alternative and 2000s indie rock like **The Killers** and **Arctic Monkeys**.\n\nWhich era of rock is your sweet spot?",
+            chips: [
+                "70s & 80s classic rock",
+                "90s grunge & alternative",
+                "2000s & modern indie rock",
+                "Make me a rock playlist"
+            ]
+        },
+        jazz: {
+            reply: "Jazz is pure soul and conversation without words. 🎷 Those classic Blue Note recordings with **Miles Davis**, **John Coltrane**, and **Bill Evans** can change the whole feel of a room in seconds.\n\nDo you prefer smooth late-night trumpet/sax ballads or upbeat swing and bossa nova?",
+            chips: [
+                "Smooth late-night jazz",
+                "Upbeat swing & bossa nova",
+                "Jazz piano trios",
+                "Make me a jazz playlist"
+            ]
+        },
+        "r&b": {
+            reply: "R&B and neo-soul have the richest vocal harmonies and pocket grooves in music. ✨ From 90s classics to **SZA**, **Frank Ocean**, and **H.E.R.**, it always hits right in the feelings.\n\nAre you more into 90s/2000s throwback R&B or modern alternative R&B?",
+            chips: [
+                "90s & 2000s throwback R&B",
+                "Modern alternative R&B & neo-soul",
+                "Late-night slow jams",
+                "Make me an R&B playlist"
+            ]
+        },
+        edm: {
+            reply: "Electronic and house music have such contagious energy—especially when a melodic build finally drops! 🎧 Are you more into sunset melodic house like **RÜFÜS DU SOL**, French touch like **Daft Punk**, or big festival anthems?",
+            chips: [
+                "Melodic house like RÜFÜS DU SOL",
+                "Classic French house & Daft Punk",
+                "High-energy festival anthems",
+                "Make me an electronic playlist"
+            ]
+        },
+        throwback: {
+            reply: "80s and 90s throwbacks are undefeated! 📼 The songwriting and hooks from those two decades are so iconic that everyone knows the chorus within three seconds.\n\nIf you had to pick one decade for a road trip—are you going 1980s or 1990s?",
+            chips: [
+                "Definitely the 1980s!",
+                "1990s all the way!",
+                "Impossible to choose—both!",
+                "Make me an 80s & 90s playlist"
+            ]
+        },
+        pop: {
+            reply: "Great pop music is harder to write than people think—a hook that sticks in your head all week is pure craft! ✨ Do you like upbeat dance-pop, retro synth-pop like **The Weeknd** and **Dua Lipa**, or indie pop?",
+            chips: [
+                "Retro synth-pop",
+                "Upbeat feel-good dance pop",
+                "Chill indie pop",
+                "Make me a pop playlist"
+            ]
+        },
+        chill: {
+            reply: "Laid-back, unhurried grooves are the best way to let the day slow down. 🌅 When you want to chill out, do you prefer mellow vocals or pure instrumental beats?",
+            chips: [
+                "Mellow vocals & warm grooves",
+                "Pure instrumental beats",
+                "A mix of both",
+                "Make me a chill playlist"
+            ]
+        }
     };
 
     const MUSIC_TRIVIA_FACTS = [
@@ -1299,11 +1401,89 @@ document.addEventListener('DOMContentLoaded', () => {
     ];
 
     async function generateConversationalReply(rawText, lower) {
-        // 1. Check real-life moments & emotions (respond with pure empathy & conversation—NO automatic playlist!)
+        assistantMemory.turnCount++;
+
+        // 1. Weather conversation & follow-ups
+        if (/\b(weather|rain|raining|rainy|sunny|sun|snow|snowing|forecast|temperature|degrees|windy|cloudy|storm|chilly|cold outside|hot outside|warm outside|humid|breezy)\b/i.test(lower)) {
+            assistantMemory.lastConvCategory = 'weather';
+            if (/\b(how is|how's|what is|what's|hows|whats)\b.*\b(weather|outside|temp)\b/i.test(lower) || /^weather\??$/i.test(lower)) {
+                return {
+                    success: true,
+                    mode: 'chat',
+                    reply: "It's a comfortable 72° here inside the studio booth! ☀️🎧 How's the weather looking outside your window right now—sunny and warm, rainy, or chilly?",
+                    suggestions: [
+                        "It's sunny and nice out",
+                        "Rainy and gray today",
+                        "Pretty chilly outside",
+                        "Hot and sunny here"
+                    ],
+                    tracks: []
+                };
+            }
+            if (/\b(rain|raining|rainy|storm|cloudy|gray|gloomy|overcast)\b/i.test(lower)) {
+                return {
+                    success: true,
+                    mode: 'chat',
+                    reply: "Honestly, rainy days have a whole cozy vibe of their own 🌧️ It's the best excuse to stay inside, grab something warm to drink, and take it slow. Do you get to stay in and relax today, or do you have to head out in it?",
+                    suggestions: [
+                        "Staying inside and relaxing today",
+                        "Working from home today",
+                        "Have to head out later unfortunately",
+                        "Drinking coffee and watching the rain"
+                    ],
+                    tracks: []
+                };
+            }
+            if (/\b(cold|chilly|freezing|snow|snowing|windy)\b/i.test(lower)) {
+                return {
+                    success: true,
+                    mode: 'chat',
+                    reply: "Brr, definitely a stay-warm-indoors kind of day! ❄️ Hopefully you don't have to be out in the cold too long. What are you up to today—working or taking it easy?",
+                    suggestions: [
+                        "Staying warm inside!",
+                        "Working today",
+                        "Just taking it easy at home",
+                        "Grabbing some hot coffee or tea"
+                    ],
+                    tracks: []
+                };
+            }
+            return {
+                success: true,
+                mode: 'chat',
+                reply: "Ooh, you can't beat nice weather like that! ☀️ Are you getting a chance to get outside and enjoy it today, or stuck indoors?",
+                suggestions: [
+                    "Getting outside for a bit!",
+                    "Stuck working indoors today",
+                    "Going for a walk or drive later",
+                    "Just relaxing at home"
+                ],
+                tracks: []
+            };
+        }
+
+        // 2. Replies to "How's your day going?" / Positive status updates ("pretty good", "doing well", "not bad", "great")
+        if (/^(going\s+)?(pretty\s+good|really\s+good|so\s+good|good|great|doing\s+well|doing\s+good|not\s+bad|can't\s+complain|cant\s+complain|all\s+good|solid|fine|alright|okay|ok|decent)(\s+thanks|\s+thank\s+you)?(\s+how\s+about\s+you|\s+and\s+you|\s+you)?[!.?\s]*$/i.test(lower)) {
+            assistantMemory.lastConvCategory = 'day_status';
+            return {
+                success: true,
+                mode: 'chat',
+                reply: "Glad to hear it! 🙌 Always nice when the day is rolling along smoothly. What are you up to right now—working on something, taking a break, or just hanging out?",
+                suggestions: [
+                    "Just taking a quick break",
+                    "Working right now",
+                    "Relaxing at home",
+                    "Listening to some music"
+                ],
+                tracks: []
+            };
+        }
+
+        // 3. Real-life moments & emotions (empathize & continue the back-and-forth without pushing playlists)
         const lifeMoment = detectHumanLifeMoment(lower);
         if (lifeMoment) {
             assistantMemory.pendingVibeKey = lifeMoment.vibeKey;
-            assistantMemory.turnCount++;
+            assistantMemory.lastConvCategory = lifeMoment.convCategory || 'day_status';
             return {
                 success: true,
                 mode: 'chat',
@@ -1313,18 +1493,94 @@ document.addEventListener('DOMContentLoaded', () => {
             };
         }
 
-        // 2. Check questions about the assistant's own favorites, taste, jokes, or music trivia
-        if (/\b(your favorite|what do you like|what kind of music do you|who is your favorite|what's your favorite|best song|best artist)\b/i.test(lower)) {
-            assistantMemory.turnCount++;
+        // 4. Work, school, commuting, or daily routine conversation
+        if (/\b(work|working|job|boss|office|meeting|meetings|shift|clocked out|off the clock|done for the day|grinding|school|class|homework|studying|exam|project|errands| indoors)\b/i.test(lower)) {
+            assistantMemory.lastConvCategory = 'work_school';
+            if (/\b(off the clock|done for the day|clocked out|finished|finally done|home from work)\b/i.test(lower)) {
+                return {
+                    success: true,
+                    mode: 'chat',
+                    reply: "Best feeling of the whole day right there! 🎉 Once you're finally done with work, what's your go-to move to unwind—kicking back with a show, cooking something good, or putting on some music?",
+                    suggestions: [
+                        "Kicking back with a good show",
+                        "Cooking or grabbing dinner",
+                        "Putting on some music",
+                        "Doing absolutely nothing for an hour"
+                    ],
+                    tracks: []
+                };
+            }
             return {
                 success: true,
                 mode: 'chat',
-                reply: "Ooh, tough question because I live in the record crates 24/7! 🎧 If I had to pick desert-island favorites, I never get tired of **Daft Punk** (*Discovery*), **Fleetwood Mac** (*Rumours*), **M83** for late-night drives, and **A Tribe Called Quest** for golden-era hip-hop.\n\nWhat about you—if you could only listen to one artist or album for the rest of the year, who are you picking?",
+                reply: "I hear you—staying locked in on work takes real energy! 💯 What kind of work or projects are you tackling today, or are you counting down until you can wrap up?",
                 suggestions: [
-                    "💬 Tell me a cool music fact",
-                    "🎵 Play a Daft Punk playlist",
-                    "🎵 Play a Fleetwood Mac playlist",
-                    "🎲 Surprise me with a playlist"
+                    "Counting down until I can wrap up!",
+                    "Working from home today",
+                    "Just taking a quick 5-minute breather",
+                    "What kind of music helps you focus?"
+                ],
+                tracks: []
+            };
+        }
+
+        // 5. Relaxing, home, food, drinks, shows, games, or hobbies
+        if (/\b(couch|sofa|tea|coffee|bed|relaxing|resting|breather|staying in|staying warm|patio|walk|tv|show|movie|movies|netflix|game|gaming|playing|pasta|pizza|food|eating|lunch|breakfast|takeout|recipe)\b/i.test(lower)) {
+            assistantMemory.lastConvCategory = 'relaxing';
+            if (/\b(pasta|pizza|food|eating|lunch|breakfast|takeout|recipe|making|cooking)\b/i.test(lower)) {
+                return {
+                    success: true,
+                    mode: 'chat',
+                    reply: "Now you're making me hungry! 😋 Good food honestly makes any day ten times better. Are you having a quiet night in after eating, or got plans for later?",
+                    suggestions: [
+                        "Quiet night in tonight!",
+                        "Watching a movie or show after",
+                        "Hanging out with friends",
+                        "What kind of music do you like?"
+                    ],
+                    tracks: []
+                };
+            }
+            if (/\b(tv|show|movie|movies|netflix|watching|game|gaming)\b/i.test(lower)) {
+                return {
+                    success: true,
+                    mode: 'chat',
+                    reply: "Ooh nice! 🍿 Watching anything good lately or playing a favorite game? I'm always on the lookout for great movie soundtracks too.",
+                    suggestions: [
+                        "Rewatching an old favorite",
+                        "Checking out something new",
+                        "What are your favorite movie soundtracks?",
+                        "Tell me a cool music fact"
+                    ],
+                    tracks: []
+                };
+            }
+            return {
+                success: true,
+                mode: 'chat',
+                reply: "Honestly, taking a real breather and slowing the pace down is undefeated. ☕✨ Do you have a chill week ahead, or has it been a busy one?",
+                suggestions: [
+                    "Pretty chill week so far",
+                    "It's been a super busy week",
+                    "Looking forward to the weekend",
+                    "What music have you been into lately?"
+                ],
+                tracks: []
+            };
+        }
+
+        // 6. Questions about the assistant's own favorites, taste, jokes, or music trivia
+        if (/\b(your favorite|what do you like|what kind of music do you|what music are you|what music have you|who is your favorite|what's your favorite|best song|best artist|favorite album|movie soundtrack)\b/i.test(lower)) {
+            assistantMemory.lastConvCategory = 'genre_chat';
+            return {
+                success: true,
+                mode: 'chat',
+                reply: "Ooh, I love talking shop! 🎧 Lately I've had **Daft Punk** (*Discovery*), **Fleetwood Mac** (*Rumours*), **M83** for late-night synthwave, and **A Tribe Called Quest** on heavy rotation.\n\nWhat about you—what genres or artists do you find yourself coming back to the most?",
+                suggestions: [
+                    "I love classic rock & indie",
+                    "Mostly hip-hop and R&B",
+                    "Electronic & synthwave",
+                    "A little bit of everything!"
                 ],
                 tracks: []
             };
@@ -1332,132 +1588,135 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (/\b(joke|funny|make me laugh|humor)\b/i.test(lower)) {
             const joke = MUSIC_JOKES[assistantMemory.turnCount % MUSIC_JOKES.length];
-            assistantMemory.turnCount++;
             return {
                 success: true,
                 mode: 'chat',
-                reply: `${joke}\n\nGot a favorite artist or genre on your mind today, or just hanging out?`,
+                reply: `${joke}\n\nBe honest—solid dad-level music joke or terrible? 😄`,
                 suggestions: [
-                    "😂 Tell me another music joke",
-                    "🎲 Tell me a cool music fact",
-                    "🎤 What's your favorite album?",
-                    "🎵 Make me a feel-good playlist"
+                    "Haha that was actually pretty good!",
+                    "Tell me another music joke",
+                    "Tell me a cool music fact instead",
+                    "What kind of music are you into?"
                 ],
                 tracks: []
             };
         }
 
-        if (/\b(fact|trivia|did you know|something interesting|random fact)\b/i.test(lower)) {
+        if (/\b(fact|trivia|did you know|something interesting|random fact|story|distract me)\b/i.test(lower)) {
             const fact = MUSIC_TRIVIA_FACTS[assistantMemory.turnCount % MUSIC_TRIVIA_FACTS.length];
-            assistantMemory.turnCount++;
             return {
                 success: true,
                 mode: 'chat',
-                reply: `${fact}\n\nWant another piece of music trivia, or is there an artist you'd like to talk about?`,
+                reply: `${fact}\n\nCrazy how many iconic songs almost didn't happen, right? Want another piece of music trivia, or what era of music is your favorite?`,
                 suggestions: [
-                    "🎲 Tell me another music fact",
-                    "😂 Tell me a music joke",
-                    "🎤 Who are your favorite artists?",
-                    "🎵 Curate a playlist for me"
+                    "Tell me another music fact!",
+                    "I love 80s and 90s music",
+                    "70s classic rock era",
+                    "2000s & modern music"
                 ],
                 tracks: []
             };
         }
 
-        // 3. Check if user is chatting about a genre/vibe without asking for a playlist
-        const matchedVibeKey = detectVibeKeyFromText(lower);
-        if (matchedVibeKey) {
-            assistantMemory.pendingVibeKey = matchedVibeKey;
-            assistantMemory.turnCount++;
-            const genreReply = GENRE_CHAT_RESPONSES[matchedVibeKey] || GENRE_CHAT_RESPONSES.chill;
-            return {
-                success: true,
-                mode: 'chat',
-                reply: genreReply,
-                suggestions: [
-                    `🎵 Yes, make me a ${matchedVibeKey} playlist`,
-                    `💬 Who are the best ${matchedVibeKey} artists?`,
-                    `🎲 Tell me a cool music fact`
-                ],
-                tracks: []
-            };
-        }
-
-        // 4. Check if user is asking about the weather or casually talking about their day (couch, tea, coffee, work, food, etc.)
-        if (/\b(weather|rain|raining|sunny|snow|snowing|forecast|temperature|degrees|windy|cloudy|storm)\b/i.test(lower)) {
-            assistantMemory.turnCount++;
-            return {
-                success: true,
-                mode: 'chat',
-                reply: "It's always a cozy 72° here in the studio booth! ☀️🎧 How's the weather looking outside your window right now—sunny and clear, or more of a rainy stay-indoors kind of day?",
-                suggestions: [
-                    "☀️ It's sunny and nice out!",
-                    "🌧️ Rainy & cozy indoor day",
-                    "🎲 Tell me a cool music fact",
-                    "🎵 Make me a rainy day lo-fi playlist"
-                ],
-                tracks: []
-            };
-        }
-
-        if (/\b(couch|sofa|tea|coffee|bed|relaxing|resting|tv|movie|game|gaming|pasta|pizza|food|eating|lunch|breakfast|work|boss|office|school|class|exam)\b/i.test(lower)) {
-            assistantMemory.turnCount++;
-            let replyMsg = "Honestly, that sounds like a great way to spend the time! 🙌 It's nice to slow things down and just enjoy the moment. How's the rest of your week looking so far?\n\n*(I'm right here to keep chatting—and whenever you feel like a playlist or a specific song, just ask!)*";
-            if (/\b(work|boss|office|school|class|exam)\b/i.test(lower)) {
-                replyMsg = "Man, I hear you—when work or school piles up like that, it takes real mental energy just to get through it. 💯 Hopefully the toughest part of the week is behind you now! What do you usually like to do to unplug once you're done for the day?";
-            } else if (/\b(tea|coffee|couch|sofa|bed|relaxing|resting)\b/i.test(lower)) {
-                replyMsg = "Honestly, kicking back and taking a real breather is undefeated. ☕✨ Nothing better than finally getting to slow down. Got any fun plans for the rest of the week, or just taking it easy tonight?";
-            } else if (/\b(pasta|pizza|food|eating|lunch|breakfast)\b/i.test(lower)) {
-                replyMsg = "Now you're making me hungry! 😋 Good food makes any day ten times better. What else are you up to tonight?";
+        // 7. Follow-up on subgenres / eras when discussing music (e.g., "70s & 80s", "90s grunge", "dreamy vocal", "golden-era", "a bit of everything")
+        if (/\b(70s|80s|90s|2000s|grunge|indie|golden-era|boom-bap|melodic|vocal|instrumental|classic|modern|throwback|a bit of everything|little bit of everything|both|all of them)\b/i.test(lower)) {
+            assistantMemory.lastConvCategory = 'era_chat';
+            if (/\b(a bit of everything|little bit of everything|both|all of them|eclectic)\b/i.test(lower)) {
+                return {
+                    success: true,
+                    mode: 'chat',
+                    reply: "Having eclectic taste is the best way to listen to music! 🎶 One hour you're in the mood for 70s classic rock or jazz, and the next it's 90s hip-hop or late-night electronics.\n\nWho's an artist or band you could listen to any day of the week and never get tired of?",
+                    suggestions: [
+                        "Fleetwood Mac",
+                        "Daft Punk",
+                        "The Weeknd",
+                        "A Tribe Called Quest"
+                    ],
+                    tracks: []
+                };
             }
             return {
                 success: true,
                 mode: 'chat',
-                reply: replyMsg,
+                reply: `You have seriously great taste! 🔥 That specific sound and era produced so many timeless records that still hold up today.\n\nWho are one or two of your go-to artists in that lane—or would you like me to put together a playlist for it whenever you're ready?`,
                 suggestions: [
-                    "💬 Just taking it easy tonight",
-                    "🎲 Tell me a cool music fact",
-                    "🎤 What's your favorite music genre?",
-                    "🎵 Make me a chill playlist now"
+                    "Tell me a fun fact about that era",
+                    "Who would you recommend in that style?",
+                    `Make me a playlist in that style`,
+                    "Let's keep chatting"
                 ],
                 tracks: []
             };
         }
 
-        // 5. Check if the user mentioned a specific artist, band, or song in conversation (e.g. "I really like Daft Punk", "Have you heard of M83?")
-        const cleanedTopic = rawText
-            .replace(/^(hey|hi|hello|yo|i really like|i love|i like|i'm a fan of|im a fan of|i've been listening to|ive been listening to|have you heard of|do you know|do you like|what do you think of|what do you think about|let's talk about|lets talk about)\s+/i, '')
-            .replace(/[?!.]+$/, '')
-            .trim();
+        // 8. Check if user is chatting about a genre/vibe without asking for a playlist
+        const matchedVibeKey = detectVibeKeyFromText(lower);
+        if (matchedVibeKey) {
+            assistantMemory.pendingVibeKey = matchedVibeKey;
+            assistantMemory.lastGenreDiscussed = matchedVibeKey;
+            assistantMemory.lastConvCategory = 'genre_chat';
+            const genreInfo = GENRE_CHAT_RESPONSES[matchedVibeKey] || GENRE_CHAT_RESPONSES.chill;
+            return {
+                success: true,
+                mode: 'chat',
+                reply: genreInfo.reply,
+                suggestions: genreInfo.chips,
+                tracks: []
+            };
+        }
 
-        const isConversationalSentence =
-            cleanedTopic.split(/\s+/).length > 4 ||
-            /\b(i am|i'm|im|you are|you're|we are|just|because|really|today|tonight|right now|think|feel|going to|want to|how is|how's|what is|what's|where is|when is|why is)\b/i.test(rawText);
+        // 9. If user asks a vague music question ("I want some music", "what should I listen to?", "recommend something") without specifying a playlist yet—ask a clarifying conversational question first!
+        if (/\b(listen to some music|putting on some music|want some music|need some music|what should i listen to|recommend|who would you recommend)\b/i.test(lower)) {
+            assistantMemory.lastConvCategory = 'genre_chat';
+            return {
+                success: true,
+                mode: 'chat',
+                reply: "I'd love to help you narrow it down! 🎧 Before I pull anything up, what kind of mood are we feeling right now—something upbeat with energy, something laid-back and mellow, or a specific decade/genre?",
+                suggestions: [
+                    "Something laid-back and mellow",
+                    "Upbeat with good energy",
+                    "80s or 90s throwbacks",
+                    "Late-night synthwave or lo-fi"
+                ],
+                tracks: []
+            };
+        }
 
-        if (cleanedTopic && !isConversationalSentence && cleanedTopic.length >= 2) {
+        // 10. If the user explicitly names a band/artist during a music conversation (or asks "have you heard of X" / "I love X")
+        const explicitArtistMention =
+            /^(i really like|i love|i like|i'm a fan of|im a fan of|have you heard of|do you like|what do you think of|my favorite artist is|my favorite band is)\s+([a-z0-9\s'&.-]{2,30})[?!.]*$/i.exec(rawText) ||
+            ((assistantMemory.lastConvCategory === 'genre_chat' || assistantMemory.lastConvCategory === 'era_chat') &&
+                rawText.split(/\s+/).length <= 3 &&
+                !/\b(yes|no|yeah|nah|ok|okay|sure|good|fine|why|how|what|when|where|who|chat|talking|week|day|work|home)\b/i.test(lower)
+                ? [null, '', rawText.replace(/[?!.]+$/, '').trim()]
+                : null);
+
+        if (explicitArtistMention && explicitArtistMention[2]) {
+            const candidateArtist = explicitArtistMention[2].trim();
             const [wikiBio, itunesItems] = await Promise.all([
-                fetchWikipediaSummary(cleanedTopic),
-                searchItunesFast(cleanedTopic, 4, 1500)
+                fetchWikipediaSummary(`${candidateArtist} musician`),
+                searchItunesFast(candidateArtist, 4, 1500)
             ]);
             if (wikiBio || (itunesItems && itunesItems.length > 0)) {
-                const topArtist = (itunesItems && itunesItems[0] && itunesItems[0].artistName) ? itunesItems[0].artistName : cleanedTopic;
-                const sampleTracks = (itunesItems || [])
-                    .map(it => it.trackName)
+                const topArtist = (itunesItems && itunesItems[0] && itunesItems[0].artistName) ? itunesItems[0].artistName : candidateArtist;
+                const topAlbums = (itunesItems || [])
+                    .map(it => it.collectionName)
                     .filter(Boolean)
                     .filter((v, i, a) => a.indexOf(v) === i)
-                    .slice(0, 3);
+                    .slice(0, 2);
 
                 assistantMemory.pendingTopic = topArtist;
                 assistantMemory.lastArtist = topArtist;
-                assistantMemory.turnCount++;
+                assistantMemory.lastArtistDiscussed = topArtist;
+                assistantMemory.lastConvCategory = 'artist_chat';
 
                 let chatText = wikiBio
-                    ? `Ooh, great mention! 🎶 **${topArtist}** — ${wikiBio}`
-                    : `Ooh, great taste! 🎶 **${topArtist}** has such a recognizable sound and catalog.`;
-                if (sampleTracks.length > 0) {
-                    chatText += `\n\nTracks like *${sampleTracks.join('*, *')}* are classics. What's your personal favorite song by **${topArtist}**? *(And if you want me to put together a playlist for them, just ask!)*`;
+                    ? `Ooh, great choice! 🎶 **${topArtist}** — ${wikiBio}`
+                    : `Ooh, great taste! 🎶 **${topArtist}** has such an iconic sound and catalog.`;
+                if (topAlbums.length > 0) {
+                    chatText += `\n\nReleases like *${topAlbums.join('* and *')}* are standout records. What's your personal favorite song or album by **${topArtist}**?`;
                 } else {
-                    chatText += `\n\nWhat's your favorite track or album by them? *(Whenever you want me to build a playlist around **${topArtist}**, just say the word!)*`;
+                    chatText += `\n\nWhat's your personal favorite song or album by **${topArtist}**?`;
                 }
 
                 return {
@@ -1465,27 +1724,52 @@ document.addEventListener('DOMContentLoaded', () => {
                     mode: 'chat',
                     reply: chatText,
                     suggestions: [
-                        `🎵 Make me a ${topArtist} playlist`,
-                        sampleTracks[0] ? `▶️ Play ${sampleTracks[0]} by ${topArtist}` : `💬 Tell me more about ${topArtist}`,
-                        `🎲 Tell me a cool music fact`
+                        `I love their classic hits`,
+                        `Their deeper album cuts are great`,
+                        `Make me a ${topArtist} playlist`,
+                        `What other artists sound like ${topArtist}?`
                     ],
                     tracks: []
                 };
             }
         }
 
-        // 6. General friendly human conversation fallback (NEVER forces an unrequested playlist!)
-        assistantMemory.turnCount++;
+        // 11. Multi-turn general back-and-forth fallback (rotates naturally so it never repeats the same canned response)
+        const generalReplies = [
+            {
+                reply: "I hear you! 😊 Honestly, it's nice just catching up and chatting. How has the rest of your week been treating you so far—pretty smooth or super busy?",
+                chips: [
+                    "Pretty smooth week so far!",
+                    "It's been a super busy week",
+                    "Looking forward to the weekend",
+                    "Tell me a cool music fact"
+                ]
+            },
+            {
+                reply: "Totally get that! 🙌 When you get some free time to yourself, what do you usually like to get into—music, movies, gaming, or getting outside?",
+                chips: [
+                    "Definitely listening to music",
+                    "Movies & good shows",
+                    "Gaming or hanging out at home",
+                    "Getting outside when the weather's nice"
+                ]
+            },
+            {
+                reply: "That's awesome! 😄 By the way, if you were going on a long road trip today and could only bring three albums or artists for the drive, who's making the cut?",
+                chips: [
+                    "70s & 80s rock legends",
+                    "90s hip-hop & R&B classics",
+                    "Synthwave & electronic",
+                    "Who would you bring?"
+                ]
+            }
+        ];
+        const chosenGeneral = generalReplies[assistantMemory.turnCount % generalReplies.length];
         return {
             success: true,
             mode: 'chat',
-            reply: `I love chatting with you! 😊 Tell me more—what's on your mind today, or what kind of music, artists, or hobbies have you been into lately?\n\n*(We can just hang out and talk, and whenever you specifically want a song or a playlist, just ask!)*`,
-            suggestions: [
-                "🎤 What are your favorite artists?",
-                "🎲 Tell me a cool music fact",
-                "😂 Tell me a music joke",
-                "🎵 Make me a playlist"
-            ],
+            reply: chosenGeneral.reply,
+            suggestions: chosenGeneral.chips,
             tracks: []
         };
     }
@@ -1493,14 +1777,13 @@ document.addEventListener('DOMContentLoaded', () => {
     function isConversationalOnlyMessage(lower) {
         // Detect pure human conversation so we reply like a person instead of searching iTunes for "how are you"
         if (/^(hi|hey|hello|yo|sup|what's up|whats up|howdy|hiya|good morning|good afternoon|good evening|morning|evening)[!.?\s]*$/i.test(lower)) return 'greeting';
-        if (/^(hey|hi|hello|yo)?\s*(how are you|how's it going|hows it going|how are things|how do you do|what are you up to|wyd|you good)[!.?\s]*$/i.test(lower)) return 'how_are_you';
+        if (/^(hey|hi|hello|yo)?\s*(how are you|how's it going|hows it going|how are things|how do you do|what are you up to|wyd|you good|how's your day|hows your day)[!.?\s]*$/i.test(lower)) return 'how_are_you';
         if (/\b(who are you|what are you|are you a bot|are you ai|are you human|are you real|what can you do|how does this work|help me)\b/i.test(lower)) return 'identity';
-        if (/^(thanks|thank you|thx|ty|appreciate it|love it|love this|this is fire|fire|awesome|amazing|great picks|so good|dope|nice|cool|perfect|you're the best|you rock)[!.?\s]*$/i.test(lower)) return 'gratitude';
+        if (/^(thanks|thank you|thx|ty|appreciate it|love it|love this|this is fire|fire|awesome|amazing|great picks|so good|dope|nice|cool|perfect|you're the best|you rock|haha|lol|lmao|that's funny|thats funny)[!.?\s]*$/i.test(lower)) return 'gratitude';
         if (/\b(why did you pick|tell me about these|about this playlist|explain these songs|what makes this good)\b/i.test(lower)) return 'explain_picks';
         if (/\b(make it more upbeat|more upbeat|faster|more energy|higher energy|pump it up|too slow|wake me up)\b/i.test(lower)) return 'steer_upbeat';
         if (/\b(make it chiller|more chill|slower|softer|mellower|dial it back|too loud|too fast|calmer)\b/i.test(lower)) return 'steer_chill';
         if (/^(keep going|more like this|volume 2|vol 2|part 2|same vibe|more of this)[!.?\s]*$/i.test(lower)) return 'continue_vibe';
-        if (/^(yes|yeah|yep|yup|sure|ok|okay|please|yes please|do it|go ahead|let's hear it|lets hear it|sounds good|drop it)[!.?\s]*$/i.test(lower)) return 'affirmative';
         return null;
     }
 
@@ -1513,32 +1796,34 @@ document.addEventListener('DOMContentLoaded', () => {
         // 0. Check human conversational & multi-turn intents first!
         const convIntent = isConversationalOnlyMessage(lower);
         if (convIntent === 'greeting') {
+            assistantMemory.lastConvCategory = 'day_status';
             return {
                 success: true,
                 mode: 'chat',
-                reply: `Hey there! 👋 Good to hear from you! How's your day going so far? We can just hang out and chat about your day, talk about your favorite artists, or whenever you want me to put together a playlist, just ask!`,
+                reply: `Hey there! 👋 Good to hear from you—just hanging out here in the studio with a cup of coffee. How's your day going so far?`,
                 suggestions: [
-                    `💬 How's your day going?`,
-                    `🎲 Tell me a cool music fact`,
-                    `🎤 Who are your favorite artists?`,
-                    `🎵 Make me a chill playlist`
+                    `Going pretty well! How about you?`,
+                    `It's been a long busy day`,
+                    `Just relaxing at home`,
+                    `What kind of music are you listening to?`
                 ],
                 tracks: []
             };
         }
         if (convIntent === 'how_are_you') {
+            assistantMemory.lastConvCategory = 'day_status';
             const lastMention = assistantMemory.lastPlaylistTitle
                 ? ` Still riding the wave from that **${assistantMemory.lastPlaylistTitle}** earlier!`
                 : ` Just hanging out in the studio and listening to some records.`;
             return {
                 success: true,
                 mode: 'chat',
-                reply: `I'm doing great, thanks for asking! 🎧${lastMention} How are *you* doing today? Tell me how your day's been going—we can just chat, or if you ever want a song or playlist, just say the word!`,
+                reply: `I'm doing great, thanks for asking! 🎧${lastMention} How are *you* doing today—having a smooth day so far, or has it been a hectic one?`,
                 suggestions: [
-                    `🌿 Had a long day today`,
-                    `🎉 Having a really good day!`,
-                    `🎲 Tell me a cool music fact`,
-                    `🎵 Make me a playlist`
+                    `Having a pretty smooth day!`,
+                    `It's been a hectic day today`,
+                    `Just relaxing right now`,
+                    `How's the weather where you are?`
                 ],
                 tracks: []
             };
@@ -1547,12 +1832,12 @@ document.addEventListener('DOMContentLoaded', () => {
             return {
                 success: true,
                 mode: 'chat',
-                reply: `Think of me as your music-obsessed friend and personal DJ! 🎶 You don't have to ask for a playlist every time—we can just hang out and have a normal conversation:\n\n• **Just chat anytime:** Talk about your day, your favorite bands, music trivia, or whatever's on your mind\n• **Ask follow-up questions:** Ask *"Who sings track 2?"*, *"What year did that come out?"*, or *"Tell me about Daft Punk"*\n• **Ask for music only when you want it:** Whenever you specifically ask for a playlist, song, ringtone, or link, I'll drop playable audio bubbles + 320kbps MP3/ZIP downloads right here!`,
+                reply: `I'm your music-obsessed friend and personal DJ! 🎶 We can just hang out and have a normal back-and-forth conversation about your day, favorite bands, or music trivia—and whenever you specifically ask for a playlist or track, I'll pull it up right here in our chat.\n\nHow's your day going today?`,
                 suggestions: [
-                    `🎤 Who are your favorite artists?`,
-                    `🎲 Tell me a cool music fact`,
-                    `😂 Tell me a music joke`,
-                    `🎵 Make me a late-night synthwave playlist`
+                    `Going pretty well!`,
+                    `Who are your favorite artists?`,
+                    `Tell me a cool music fact`,
+                    `Tell me a music joke`
                 ],
                 tracks: []
             };
@@ -1564,40 +1849,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 success: true,
                 mode: 'chat',
                 reply: prevTitle
-                    ? `Anytime! 🙌 Glad you're enjoying **${prevTitle}**! Let me know if you want to know anything about the artists on the list, or if we're just chilling and chatting.`
-                    : `Anytime! 🙌 Always happy to hang out and chat with you. What else is on your mind today?`,
+                    ? `Anytime! 🙌 Glad you're enjoying **${prevTitle}**! Which track on that list stood out to you the most, or what else are you up to today?`
+                    : `Haha anytime! 🙌 Always fun hanging out and chatting with you. What else is going on with your day?`,
                 suggestions: prevTitle ? [
-                    `💬 Tell me about ${prevArtist}`,
-                    `📅 What year did these songs come out?`,
-                    `🔥 Keep this vibe going (Vol. 2)`
+                    `Tell me about ${prevArtist}`,
+                    `What year did these songs come out?`,
+                    `Just relaxing and listening`
                 ] : [
-                    `🎲 Tell me a cool music fact`,
-                    `🎤 What's your favorite album?`,
-                    `🎵 Make me a playlist`
-                ],
-                tracks: []
-            };
-        }
-        if (convIntent === 'affirmative') {
-            // If the assistant previously discussed a vibe or artist and offered a playlist, "yes / sure / please" curates it!
-            if (assistantMemory.pendingVibeKey) {
-                const vKey = assistantMemory.pendingVibeKey;
-                assistantMemory.pendingVibeKey = '';
-                return await curatePresetVibePlaylist(vKey, false);
-            }
-            if (assistantMemory.pendingTopic) {
-                const topic = assistantMemory.pendingTopic;
-                assistantMemory.pendingTopic = '';
-                return await clientSideCurateFallback(`Make me a ${topic} playlist`);
-            }
-            return {
-                success: true,
-                mode: 'chat',
-                reply: `Awesome! 🙌 What's on your mind—want to chat about a favorite artist or genre, hear a random music fact, or would you like me to put together a playlist for you?`,
-                suggestions: [
-                    `🎲 Tell me a cool music fact`,
-                    `🎤 Who are your favorite artists?`,
-                    `🎵 Make me a chill playlist`
+                    `Just relaxing at home`,
+                    `Tell me a cool music fact`,
+                    `What's your favorite album?`
                 ],
                 tracks: []
             };
