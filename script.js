@@ -1509,20 +1509,67 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- WhatsApp & Telegram Bot Info & Webhook Binding ---
+    let isTelegramBotConnected = Boolean(localStorage.getItem('mp3audio_tg_bot_url'));
+
+    function applyTelegramBotUi(tgUrl, tgHandle, isConnected) {
+        isTelegramBotConnected = Boolean(isConnected);
+        const sTg = document.getElementById('sidebarTelegramLink');
+        const mTg = document.getElementById('modalTelegramBtn');
+        const hTg = document.getElementById('tgBotHandleDisplay');
+        const qTg = document.getElementById('tgQrImage');
+        const sSub = sTg ? sTg.querySelector('.channel-pill-text span') : null;
+
+        if (tgUrl) {
+            const deepUrl = tgUrl.includes('?') ? tgUrl : `${tgUrl}?start=welcome`;
+            if (sTg) sTg.href = deepUrl;
+            if (mTg) mTg.href = deepUrl;
+            if (qTg) qTg.src = `https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=${encodeURIComponent(deepUrl)}`;
+        }
+        if (tgHandle) {
+            if (hTg) hTg.textContent = tgHandle;
+            if (sSub) sSub.textContent = isConnected ? tgHandle : 'Tap to Connect Bot';
+        }
+    }
+
+    // Intercept clicks on Telegram buttons if no BotFather token has been linked yet
+    ['sidebarTelegramLink', 'modalTelegramBtn'].forEach(btnId => {
+        const el = document.getElementById(btnId);
+        if (el) {
+            el.addEventListener('click', (e) => {
+                if (!isTelegramBotConnected) {
+                    e.preventDefault();
+                    if (typeof openModal === 'function') openModal('botConnectModal');
+                    const detailsEl = document.querySelector('.bot-webhook-details');
+                    if (detailsEl) detailsEl.open = true;
+                    const tokenInput = document.getElementById('tgBotTokenInput');
+                    if (tokenInput) setTimeout(() => tokenInput.focus(), 120);
+                    const statusMsg = document.getElementById('botSetupStatusMsg');
+                    if (statusMsg) {
+                        statusMsg.innerHTML = `<span style="color:#fbbf24;">⚡ Step 1: Open <a href="https://t.me/BotFather" target="_blank" rel="noopener" style="color:#38bdf8;text-decoration:underline;">@BotFather in Telegram</a> and send <code>/newbot</code>.<br>Step 2: Paste your Bot Token above and click <strong>Activate Telegram Webhook</strong> so the <strong>Start</strong> button in Telegram connects to your assistant!</span>`;
+                    }
+                    showToast('Paste your free @BotFather token to activate your Telegram bot!', 'info');
+                }
+            });
+        }
+    });
+
     async function loadBotConfig() {
+        const savedUrl = localStorage.getItem('mp3audio_tg_bot_url');
+        const savedHandle = localStorage.getItem('mp3audio_tg_bot_handle');
+        if (savedUrl && savedHandle) {
+            applyTelegramBotUi(savedUrl, savedHandle, true);
+        } else {
+            applyTelegramBotUi('https://t.me/BotFather', 'Tap to Connect Bot', false);
+        }
+
         try {
-            const res = await fetch(`${BACKEND_URL}/api/assistant/bot-info`);
+            const res = await fetchWithTimeout(`${BACKEND_URL}/api/assistant/bot-info`, {}, 2500);
             if (!res.ok) return;
             const info = await res.json();
-            if (info.telegram_url) {
-                const sTg = document.getElementById('sidebarTelegramLink');
-                const mTg = document.getElementById('modalTelegramBtn');
-                const hTg = document.getElementById('tgBotHandleDisplay');
-                const qTg = document.getElementById('tgQrImage');
-                if (sTg) sTg.href = info.telegram_url;
-                if (mTg) mTg.href = info.telegram_url;
-                if (hTg && info.telegram_bot_username) hTg.textContent = info.telegram_bot_username;
-                if (qTg) qTg.src = `https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=${encodeURIComponent(info.telegram_url)}`;
+            if (info.telegram_configured && info.telegram_url) {
+                localStorage.setItem('mp3audio_tg_bot_url', info.telegram_url);
+                localStorage.setItem('mp3audio_tg_bot_handle', info.telegram_bot_username || '@MP3audioBot');
+                applyTelegramBotUi(info.telegram_url, info.telegram_bot_username, true);
             }
             if (info.whatsapp_url) {
                 const sWa = document.getElementById('sidebarWhatsappLink');
@@ -1542,21 +1589,67 @@ document.addEventListener('DOMContentLoaded', () => {
             const tokenInput = document.getElementById('tgBotTokenInput');
             const statusMsg = document.getElementById('botSetupStatusMsg');
             const botToken = tokenInput ? tokenInput.value.trim() : '';
-            if (statusMsg) statusMsg.textContent = 'Registering Telegram webhook...';
+            if (!botToken || !botToken.includes(':')) {
+                if (statusMsg) {
+                    statusMsg.innerHTML = `<span style="color:#f87171;">⚠️ Please paste a valid Telegram Bot Token from <a href="https://t.me/BotFather" target="_blank" rel="noopener" style="color:#38bdf8;">@BotFather</a> (format: <code>123456789:ABCdef...</code>).</span>`;
+                }
+                return;
+            }
+            if (statusMsg) statusMsg.textContent = 'Verifying bot token & activating Telegram webhook...';
+
             try {
-                const res = await fetch(`${BACKEND_URL}/api/bot/setup-telegram`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ bot_token: botToken })
-                });
-                const data = await res.json();
-                if (res.ok && data.ok) {
-                    if (statusMsg) statusMsg.innerHTML = `<span style="color:#4ade80;">✅ Telegram Webhook bound! Message your bot now.</span>`;
+                // 1. Verify token & fetch real @username directly from Telegram Bot API
+                const meRes = await fetch(`https://api.telegram.org/bot${botToken}/getMe`);
+                const meData = await meRes.json();
+                if (!meRes.ok || !meData.ok || !meData.result) {
+                    if (statusMsg) statusMsg.innerHTML = `<span style="color:#f87171;">⚠️ Invalid Bot Token: ${escapeHtml(meData.description || 'Could not verify with Telegram.')}</span>`;
+                    return;
+                }
+
+                const botUsername = meData.result.username;
+                const botUrl = `https://t.me/${botUsername}`;
+
+                // 2. Ask backend to register the webhook & store token in runtime memory
+                let webhookBound = false;
+                try {
+                    const beRes = await fetchWithTimeout(`${BACKEND_URL}/api/bot/setup-telegram`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ bot_token: botToken })
+                    }, 6000);
+                    if (beRes && beRes.ok) {
+                        const beData = await beRes.json();
+                        if (beData && beData.ok) webhookBound = true;
+                    }
+                } catch (_) { }
+
+                // 3. Direct browser fallback to Telegram setWebhook API if backend was cold-starting
+                if (!webhookBound) {
+                    const whRes = await fetch(`https://api.telegram.org/bot${botToken}/setWebhook`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            url: `${BACKEND_URL}/webhook/telegram`,
+                            allowed_updates: ['message', 'edited_message', 'business_message', 'edited_business_message', 'callback_query']
+                        })
+                    });
+                    const whData = await whRes.json();
+                    webhookBound = Boolean(whRes.ok && whData.ok);
+                }
+
+                if (webhookBound) {
+                    localStorage.setItem('mp3audio_tg_bot_url', botUrl);
+                    localStorage.setItem('mp3audio_tg_bot_handle', `@${botUsername}`);
+                    applyTelegramBotUi(botUrl, `@${botUsername}`, true);
+                    if (statusMsg) {
+                        statusMsg.innerHTML = `<span style="color:#4ade80;">✅ Connected to <strong>@${escapeHtml(botUsername)}</strong>! <a href="${escapeHtml(botUrl)}?start=welcome" target="_blank" rel="noopener" style="color:#38bdf8;font-weight:700;text-decoration:underline;">Click here to open @${escapeHtml(botUsername)} in Telegram and tap Start &rarr;</a></span>`;
+                    }
+                    showToast(`Telegram Bot @${botUsername} is now live!`, 'success');
                 } else {
-                    if (statusMsg) statusMsg.innerHTML = `<span style="color:#f87171;">⚠️ ${escapeHtml(data.description || data.error || 'Failed to bind webhook')}</span>`;
+                    if (statusMsg) statusMsg.innerHTML = `<span style="color:#f87171;">⚠️ Could not bind webhook. Please try again in a moment.</span>`;
                 }
             } catch (e) {
-                if (statusMsg) statusMsg.innerHTML = `<span style="color:#f87171;">⚠️ Could not reach backend webhook endpoint.</span>`;
+                if (statusMsg) statusMsg.innerHTML = `<span style="color:#f87171;">⚠️ Network error verifying Telegram token.</span>`;
             }
         });
     }
