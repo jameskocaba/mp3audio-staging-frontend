@@ -1,95 +1,101 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // --- GLOBAL DRAG PREVENT DEFAULT ---
-    // This prevents the browser from accidentally opening dropped files if dropped outside the target zone
+    // Prevent default browser file drop behavior outside handler
     window.addEventListener('dragover', (e) => e.preventDefault(), false);
     window.addEventListener('drop', (e) => e.preventDefault(), false);
 
-    // 1. User Dashboard & Auth UI Elements
+    const BACKEND_URL = 'https://audio-converter-backend.onrender.com';
+
+    // Inject Authorization Bearer token for cross-origin session persistence
+    const originalFetch = window.fetch;
+    window.fetch = function (input, init = {}) {
+        let url = typeof input === 'string' ? input : (input instanceof Request ? input.url : '');
+        if (url && url.startsWith(BACKEND_URL) && typeof input === 'string') {
+            init = init || {};
+            init.headers = init.headers || {};
+            const token = localStorage.getItem('session_token');
+            if (token) {
+                if (init.headers instanceof Headers) {
+                    if (!init.headers.has('Authorization')) init.headers.set('Authorization', `Bearer ${token}`);
+                } else {
+                    if (!init.headers['Authorization']) init.headers['Authorization'] = `Bearer ${token}`;
+                }
+            }
+            init.credentials = 'include';
+        }
+        return originalFetch(input, init);
+    };
+
+    // --- DOM Elements ---
+    const chatMessages = document.getElementById('chatMessages');
+    const chatInput = document.getElementById('chatInput');
+    const chatComposerForm = document.getElementById('chatComposerForm');
+    const attachFileBtn = document.getElementById('attachFileBtn');
+    const fileInput = document.getElementById('fileInput');
+    const attachedFilesPreview = document.getElementById('attachedFilesPreview');
+    const attachedFilesLabel = document.getElementById('attachedFilesLabel');
+    const clearAttachedFilesBtn = document.getElementById('clearAttachedFilesBtn');
+    const voiceInputBtn = document.getElementById('voiceInputBtn');
+    const dragDropOverlay = document.getElementById('dragDropOverlay');
+
+    // Sidebar & Navigation
+    const assistantSidebar = document.getElementById('assistantSidebar');
+    const sidebarBackdrop = document.getElementById('sidebarBackdrop');
+    const openSidebarBtn = document.getElementById('openSidebarBtn');
+    const closeSidebarBtn = document.getElementById('closeSidebarBtn');
+    const newChatBtn = document.getElementById('newChatBtn');
+    const recentHistoryList = document.getElementById('recentHistoryList');
+    const clearHistoryBtn = document.getElementById('clearHistoryBtn');
+
+    // Option Toggles
+    const autoAddAlbumArtInput = document.getElementById('autoAddAlbumArt');
+    const increaseQualityInput = document.getElementById('increaseQuality');
+    const videoToMp3Input = document.getElementById('videoToMp3');
+    const attachLyricsInput = document.getElementById('attachLyrics');
+
+    // Account & Billing Elements
     const userDashboard = document.getElementById('userDashboard');
     const guestPricingGrid = document.getElementById('guestPricingGrid');
-    const loginFormContainer = document.getElementById('loginFormContainer');
-    const conversionToolContainer = document.getElementById('conversionToolContainer');
     const loginEmail = document.getElementById('loginEmail');
     const sendLinkBtn = document.getElementById('sendLinkBtn');
     const authMessage = document.getElementById('authMessage');
     const userEmailDisplay = document.getElementById('userEmailDisplay');
     const paidCreditsDisplay = document.getElementById('paidCreditsDisplay');
     const headerPaidCreditsDisplay = document.getElementById('headerPaidCreditsDisplay');
-    const headerUserNav = document.getElementById('headerUserNav');
-    const headerLoginLink = document.getElementById('headerLoginLink');
-    const headerLogoutBtn = document.getElementById('headerLogoutBtn');
+    const sidebarAccountLabel = document.getElementById('sidebarAccountLabel');
+    const sidebarAccountSub = document.getElementById('sidebarAccountSub');
+    const headerAccountBtnText = document.getElementById('headerAccountBtnText');
     const logoutBtn = document.getElementById('logoutBtn');
     const buyCreditsBtn = document.getElementById('buyCreditsBtn');
-    const subscribeBtn = document.getElementById('subscribeBtn');
-    const billingMessage = document.getElementById('billingMessage');
-    const urlMessage = document.getElementById('urlMessage');
-    const workspacePricingContainer = document.getElementById('workspacePricingContainer');
-    const subscriptionBadge = document.getElementById('subscriptionBadge');
 
-    // 2. Conversion Tool UI Elements
-    const urlInput = document.getElementById('urlInput');
-    const startTimeInput = document.getElementById('startTime');
-    const endTimeInput = document.getElementById('endTime');
-    const transcribeInput = document.getElementById('transcribeAudio');
-    const fileInput = document.getElementById('fileInput');
-    const increaseQualityInput = document.getElementById('increaseQuality');
-    const videoToMp3Input = document.getElementById('videoToMp3');
-    const videoToMp3Badge = document.getElementById('videoToMp3Badge');
-    const attachLyricsInput = document.getElementById('attachLyrics');
-    const autoAddAlbumArtInput = document.getElementById('autoAddAlbumArt');
-    const fileInputText = document.getElementById('fileInputText');
-    const thumbnailContainer = document.getElementById('thumbnailContainer');
-    const currentThumbnail = document.getElementById('currentThumbnail');
-    const convertBtn = document.getElementById('convertBtn');
-    const cancelBtn = document.getElementById('cancelBtn');
-    const resetBtn = document.getElementById('resetBtn');
-    const actionGroup = document.getElementById('actionGroup');
-    const statusDiv = document.getElementById('status');
-    const progressBar = document.getElementById('progressBar');
-    const progressFill = document.getElementById('progressFill');
-    const downloadArea = document.getElementById('downloadArea');
-    const downloadList = document.getElementById('downloadList');
-    const conversionSummary = document.getElementById('conversionSummary');
-    const fileCounter = document.getElementById('fileCounter');
-    const fileCountVal = document.getElementById('fileCountVal');
-    const selectedTracksBadge = document.getElementById('selectedTracksBadge');
+    // Mini Player Elements
+    const miniPlayerBar = document.getElementById('miniPlayerBar');
+    const miniPlayerArt = document.getElementById('miniPlayerArt');
+    const miniPlayerTitle = document.getElementById('miniPlayerTitle');
+    const miniPlayerArtist = document.getElementById('miniPlayerArtist');
+    const miniPrevBtn = document.getElementById('miniPrevBtn');
+    const miniPlayPauseBtn = document.getElementById('miniPlayPauseBtn');
+    const miniPlayIcon = document.getElementById('miniPlayIcon');
+    const miniNextBtn = document.getElementById('miniNextBtn');
+    const miniCurrentTime = document.getElementById('miniCurrentTime');
+    const miniTotalTime = document.getElementById('miniTotalTime');
+    const miniSeekSlider = document.getElementById('miniSeekSlider');
+    const miniDownloadMp3Btn = document.getElementById('miniDownloadMp3Btn');
+    const miniCloseBtn = document.getElementById('miniCloseBtn');
 
-    // Point this to your PRODUCTION backend URL
-    // Ensure this EXACTLY matches your Render PROD web service URL
-    const BACKEND_URL = 'https://audio-converter-backend.onrender.com';
+    // State
+    let chatHistory = [];
+    let pendingFiles = [];
+    let recentPrompts = JSON.parse(localStorage.getItem('mp3audio_recent_prompts') || '[]');
 
-    // Intercept fetch calls to inject the Authorization header for cookie-blocked environments (e.g. mobile Safari)
-    const originalFetch = window.fetch;
-    window.fetch = function (input, init = {}) {
-        let url = typeof input === 'string' ? input : (input instanceof Request ? input.url : '');
-        if (url && url.startsWith(BACKEND_URL)) {
-            if (typeof input === 'string') {
-                init = init || {};
-                init.headers = init.headers || {};
-                const token = localStorage.getItem('session_token');
-                if (token) {
-                    if (init.headers instanceof Headers) {
-                        if (!init.headers.has('Authorization')) {
-                            init.headers.set('Authorization', `Bearer ${token}`);
-                        }
-                    } else {
-                        if (!init.headers['Authorization']) {
-                            init.headers['Authorization'] = `Bearer ${token}`;
-                        }
-                    }
-                }
-                init.credentials = 'include';
-            }
-        }
-        return originalFetch(input, init);
-    };
+    // Audio Player Queue State
+    const globalAudio = new Audio();
+    globalAudio.crossOrigin = 'anonymous';
+    let currentQueue = [];
+    let currentQueueIndex = -1;
+    let activeBubbleId = null;
 
-    let currentSessionId = null;
-    let pollTimeout = null;
-    let isGuestUser = true;
-
-    // --- TOAST NOTIFICATION SYSTEM ---
-    const showToast = (message, type = 'info') => {
+    // --- Toast Notification Helper ---
+    function showToast(message, type = 'info') {
         let container = document.getElementById('toast-container');
         if (!container) {
             container = document.createElement('div');
@@ -98,1004 +104,1156 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         const toast = document.createElement('div');
         toast.className = `toast toast-${type}`;
-        let icon = '';
-        if (type === 'success') icon = `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
-        else if (type === 'error') icon = `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>`;
-        else icon = `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>`;
-
-        toast.innerHTML = `${icon} <span>${message}</span>`;
+        const icon = type === 'success' ? '✅' : (type === 'error' ? '⚠️' : '🎧');
+        toast.innerHTML = `<span>${icon}</span><span>${message}</span>`;
         container.appendChild(toast);
         setTimeout(() => {
-            toast.classList.add('fade-out');
-            setTimeout(() => toast.remove(), 300);
-        }, 3000);
-    };
-
-    // --- RESTORE URL FROM SESSION STORAGE ---
-    if (urlInput) {
-        const savedUrl = sessionStorage.getItem('savedUrl');
-        if (savedUrl) urlInput.value = savedUrl;
-
-        urlInput.addEventListener('input', (e) => {
-            sessionStorage.setItem('savedUrl', e.target.value);
-        });
+            toast.remove();
+        }, 3500);
     }
 
-    const urlParams = new URLSearchParams(window.location.search);
+    // --- Format Time Helper ---
+    function formatTime(sec) {
+        if (!sec || isNaN(sec) || sec < 0) return '0:00';
+        const s = Math.floor(sec);
+        const m = Math.floor(s / 60);
+        const rem = s % 60;
+        return `${m}:${rem < 10 ? '0' : ''}${rem}`;
+    }
 
-    // --- POPULATE URL FROM QUERY PARAMETER ---
-    const queryUrl = urlParams.get('url');
-    if (queryUrl) {
-        if (urlInput) {
-            urlInput.value = queryUrl;
-            sessionStorage.setItem('savedUrl', queryUrl);
+    function escapeHtml(str) {
+        return String(str || '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;');
+    }
+
+    function formatMarkdownBold(text) {
+        return escapeHtml(text).replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    }
+
+    // --- Mobile Sidebar Toggle ---
+    function toggleSidebar(open) {
+        if (!assistantSidebar || !sidebarBackdrop) return;
+        if (open) {
+            assistantSidebar.classList.add('open');
+            sidebarBackdrop.classList.remove('hidden');
+        } else {
+            assistantSidebar.classList.remove('open');
+            sidebarBackdrop.classList.add('hidden');
         }
-        if (autoAddAlbumArtInput) {
-            autoAddAlbumArtInput.checked = true;
+    }
+
+    if (openSidebarBtn) openSidebarBtn.addEventListener('click', () => toggleSidebar(true));
+    if (closeSidebarBtn) closeSidebarBtn.addEventListener('click', () => toggleSidebar(false));
+    if (sidebarBackdrop) sidebarBackdrop.addEventListener('click', () => toggleSidebar(false));
+
+    // --- Recent Prompts Sidebar List ---
+    function saveRecentPrompt(promptText) {
+        const clean = promptText.trim();
+        if (!clean) return;
+        recentPrompts = [clean, ...recentPrompts.filter(p => p.toLowerCase() !== clean.toLowerCase())].slice(0, 12);
+        localStorage.setItem('mp3audio_recent_prompts', JSON.stringify(recentPrompts));
+        renderRecentPrompts();
+    }
+
+    function renderRecentPrompts() {
+        if (!recentHistoryList) return;
+        if (recentPrompts.length === 0) {
+            recentHistoryList.innerHTML = `<div style="font-size:0.74rem; color:#667781; padding: 4px 6px;">Your recent music requests will appear here.</div>`;
+            return;
         }
-    }
-
-    // --- STRIPE CHECKOUT REDIRECT HANDLER ---
-    const successParam = urlParams.get('success');
-    const canceledParam = urlParams.get('canceled');
-    if (successParam) {
-        showToast('Payment successful! Your account has been updated.', 'success');
-        window.history.replaceState({}, document.title, window.location.pathname);
-    } else if (canceledParam) {
-        showToast('Payment was canceled.', 'info');
-        window.history.replaceState({}, document.title, window.location.pathname);
-    }
-
-    // --- CUSTOM FILE INPUT UI ---
-    if (fileInput && fileInputText) {
-        fileInput.addEventListener('change', () => {
-            if (fileInput.files.length > 0) {
-                // Enforce maximum file size limit instantly on selection
-                const MAX_PER_FILE_SIZE = 50 * 1024 * 1024; // 50MB in bytes
-                const oversizedFiles = Array.from(fileInput.files).filter(file => file.size > MAX_PER_FILE_SIZE);
-
-                if (oversizedFiles.length > 0) {
-                    showToast('One or more files exceed the 50MB limit per track. Please select smaller files.', 'error');
-                    fileInput.value = ''; // Instantly clear the invalid selection
-                    fileInputText.textContent = 'Click to select files, or drag & drop here...';
-                    fileInputText.style.fontWeight = 'normal';
-                    fileInputText.style.color = '#64748b';
-                    if (selectedTracksBadge) selectedTracksBadge.classList.add('hidden');
-                    return;
-                }
-
-                const fileCount = fileInput.files.length;
-
-                // Calculate total size
-                let totalBytes = 0;
-                for (let i = 0; i < fileCount; i++) {
-                    totalBytes += fileInput.files[i].size;
-                }
-
-                const formatSize = (bytes) => {
-                    if (bytes === 0) return '0 Bytes';
-                    const k = 1024;
-                    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-                    const i = Math.floor(Math.log(bytes) / Math.log(k));
-                    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-                };
-
-                const sizeText = formatSize(totalBytes);
-
-                // Check if a directory was selected by inspecting the path of the first file
-                const isDirectory = fileInput.files[0].webkitRelativePath !== "";
-                if (isDirectory && fileCount > 1) {
-                    fileInputText.textContent = `Folder with ${fileCount} files selected (${sizeText})`;
-                } else if (fileCount === 1) {
-                    fileInputText.textContent = `${fileInput.files[0].name} (${sizeText})`;
-                } else {
-                    fileInputText.textContent = `${fileCount} files selected (${sizeText})`;
-                }
-                fileInputText.style.fontWeight = '600';
-                fileInputText.style.color = '#1e293b';
-
-                if (selectedTracksBadge && fileCountVal) {
-                    fileCountVal.textContent = `${fileCount} Track${fileCount > 1 ? 's' : ''} Loaded`;
-                    selectedTracksBadge.classList.remove('hidden');
-                }
-
-                // Auto-detect if video files were uploaded and automatically check the Video to MP3 toggle
-                const videoExts = ['mp4', 'mov', 'm4v', 'webm', 'mkv', 'avi', 'flv', 'wmv', '3gp', 'ts'];
-                let hasVideo = false;
-                for (let i = 0; i < fileInput.files.length; i++) {
-                    const ext = fileInput.files[i].name.split('.').pop().toLowerCase();
-                    if (videoExts.includes(ext)) { hasVideo = true; break; }
-                }
-                if (hasVideo && videoToMp3Input) {
-                    videoToMp3Input.checked = true;
-                }
-            } else {
-                // This case handles when the user opens the file dialog and cancels it.
-                fileInputText.textContent = 'Click to select files, or drag & drop here...';
-                fileInputText.style.fontWeight = 'normal';
-                fileInputText.style.color = '#64748b';
-
-                if (selectedTracksBadge) selectedTracksBadge.classList.add('hidden');
-            }
-        });
-    }
-
-    // --- DRAG AND DROP ZONE LOGIC ---
-    const dropZone = document.getElementById('dropZone');
-    if (dropZone && fileInput && fileInputText) {
-        // Add dragover and dragenter highlights
-        ['dragenter', 'dragover'].forEach(eventName => {
-            dropZone.addEventListener(eventName, (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                dropZone.style.borderColor = '#2980b9';
-                dropZone.style.backgroundColor = 'rgba(41, 128, 185, 0.05)';
-            }, false);
-        });
-
-        // Remove highlight on leave
-        ['dragleave', 'drop'].forEach(eventName => {
-            dropZone.addEventListener(eventName, (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                dropZone.style.borderColor = '';
-                dropZone.style.backgroundColor = '';
-            }, false);
-        });
-
-        // Process dropped items
-        dropZone.addEventListener('drop', async (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            const items = e.dataTransfer.items;
-            const dtFiles = e.dataTransfer.files;
-            if (!items && !dtFiles) return;
-
-            fileInputText.textContent = "Scanning dropped files...";
-            const files = [];
-            const queue = [];
-
-            // Valid audio and video extensions/mime types to accept
-            const isValidMedia = (file) => {
-                if (!file || !file.name) return false;
-                if (file.name.startsWith('._')) return false; // Ignore macOS metadata files
-                if (file.type && typeof file.type === 'string' && (file.type.startsWith('audio/') || file.type.startsWith('video/'))) return true;
-                // Fallback for files without a recognized mime type
-                const ext = file.name.split('.').pop().toLowerCase();
-                const validExts = ['mp3', 'wav', 'flac', 'aac', 'ogg', 'm4a', 'm4b', 'm4r', 'm4v', 'wma', 'mp4', 'mov', 'avi', 'mkv', 'webm', 'ts', 'aiff', 'alac'];
-                return validExts.includes(ext);
-            };
-
-            // Helper to recursively read files and folders
-            const readEntry = (entry) => {
-                return new Promise((resolve, reject) => {
-                    if (entry.isFile) {
-                        entry.file(f => {
-                            if (isValidMedia(f)) files.push(f);
-                            resolve();
-                        }, err => reject(err));
-                    } else if (entry.isDirectory) {
-                        const reader = entry.createReader();
-                        reader.readEntries(async (entries) => {
-                            const promises = entries.map(e => readEntry(e).catch(() => { }));
-                            await Promise.all(promises);
-                            resolve();
-                        }, err => reject(err));
-                    } else {
-                        resolve();
-                    }
-                });
-            };
-
-            if (items && items.length > 0) {
-                // Scan all dropped items
-                for (let i = 0; i < items.length; i++) {
-                    const item = items[i];
-
-                    if (item.kind === 'file') {
-                        if (typeof item.webkitGetAsEntry === 'function') {
-                            const entry = item.webkitGetAsEntry();
-                            if (entry) {
-                                queue.push(readEntry(entry).catch(() => {
-                                    const f = item.getAsFile();
-                                    if (f && isValidMedia(f)) files.push(f);
-                                }));
-                                continue;
-                            }
-                        }
-                        const f = item.getAsFile();
-                        if (f && isValidMedia(f)) files.push(f);
-                    }
-                }
-                await Promise.all(queue);
-            } else if (dtFiles && dtFiles.length > 0) {
-                for (let i = 0; i < dtFiles.length; i++) {
-                    if (isValidMedia(dtFiles[i])) files.push(dtFiles[i]);
-                }
-            }
-
-            if (files.length > 0) {
-                // Create a new DataTransfer to populate our file input programmatically
-                const dt = new DataTransfer();
-                files.forEach(f => dt.items.add(f));
-                fileInput.files = dt.files;
-
-                // Trigger change event to update UI
-                fileInput.dispatchEvent(new Event('change'));
-            } else {
-                fileInputText.textContent = 'Click to select files, or drag & drop here...';
-                showToast('No valid audio or video files found in the dropped items.', 'error');
-            }
-        });
-    }
-
-    // --- AUTHENTICATION LOGIC ---
-    const checkAuth = async () => {
-        if (conversionToolContainer) conversionToolContainer.classList.remove('hidden');
-        try {
-            const response = await fetch(`${BACKEND_URL}/auth/me`, { credentials: 'include' });
-            const data = await response.json();
-
-            if (data.token) {
-                localStorage.setItem('session_token', data.token);
-            }
-
-            const credits = (data.paid_track_credits !== undefined && data.paid_track_credits !== null) ? data.paid_track_credits : 0;
-            if (paidCreditsDisplay) paidCreditsDisplay.textContent = credits;
-            if (headerPaidCreditsDisplay) headerPaidCreditsDisplay.textContent = credits;
-
-            const freeVideoUsed = Boolean(data.free_video_used || (localStorage.getItem('free_video_converted') === 'true'));
-            if (videoToMp3Badge) {
-                if (freeVideoUsed) {
-                    videoToMp3Badge.className = 'premium-badge';
-                    videoToMp3Badge.textContent = '5 Credits';
-                } else {
-                    videoToMp3Badge.className = 'premium-badge free-badge';
-                    videoToMp3Badge.textContent = 'First Free';
-                }
-            }
-
-            if (data.authenticated) {
-                isGuestUser = false;
-                // User is logged in/paid
-                if (userDashboard) userDashboard.classList.remove('hidden');
-                if (guestPricingGrid) guestPricingGrid.classList.add('hidden');
-                if (headerUserNav) headerUserNav.classList.remove('hidden');
-                if (headerLoginLink) headerLoginLink.classList.add('hidden');
-                if (userEmailDisplay) userEmailDisplay.textContent = data.email || 'Active User';
-                if (logoutBtn) logoutBtn.classList.remove('hidden');
-
-                if (subscriptionBadge) subscriptionBadge.classList.add('hidden');
-                if (workspacePricingContainer) workspacePricingContainer.classList.remove('hidden');
-                if (buyCreditsBtn) buyCreditsBtn.classList.remove('hidden');
-                if (loginFormContainer) loginFormContainer.classList.add('hidden');
-            } else {
-                isGuestUser = true;
-                // User is a guest
-                if (userDashboard) userDashboard.classList.add('hidden');
-                if (guestPricingGrid) guestPricingGrid.classList.remove('hidden');
-                if (headerUserNav) headerUserNav.classList.add('hidden');
-                if (headerLoginLink) headerLoginLink.classList.remove('hidden');
-                if (workspacePricingContainer) workspacePricingContainer.classList.add('hidden');
-                if (loginFormContainer) loginFormContainer.classList.remove('hidden');
-            }
-        } catch (error) {
-            console.error('Auth Check Failed', error);
-            const freeVideoUsed = localStorage.getItem('free_video_converted') === 'true';
-            if (videoToMp3Badge) {
-                if (freeVideoUsed) {
-                    videoToMp3Badge.className = 'premium-badge';
-                    videoToMp3Badge.textContent = '5 Credits';
-                } else {
-                    videoToMp3Badge.className = 'premium-badge free-badge';
-                    videoToMp3Badge.textContent = 'First Free';
-                }
-            }
-            // Fallback for offline mode/guests
-            if (userDashboard) userDashboard.classList.add('hidden');
-            if (guestPricingGrid) guestPricingGrid.classList.remove('hidden');
-            if (headerUserNav) headerUserNav.classList.add('hidden');
-            if (headerLoginLink) headerLoginLink.classList.remove('hidden');
-            if (workspacePricingContainer) workspacePricingContainer.classList.add('hidden');
-            if (loginFormContainer) loginFormContainer.classList.remove('hidden');
-        }
-    };
-
-    // --- MAGIC LINK VERIFICATION & PREVIEW ---
-    const token = urlParams.get('token');
-    const preview = urlParams.get('preview');
-
-    if (preview === 'login' || preview === 'logged_in') {
-        if (conversionToolContainer) conversionToolContainer.classList.remove('hidden');
-        if (userDashboard) userDashboard.classList.remove('hidden');
-        if (guestPricingGrid) guestPricingGrid.classList.add('hidden');
-        if (headerUserNav) headerUserNav.classList.remove('hidden');
-        if (headerLoginLink) headerLoginLink.classList.add('hidden');
-        if (userEmailDisplay) userEmailDisplay.textContent = 'alex@example.com';
-        if (paidCreditsDisplay) paidCreditsDisplay.textContent = '350';
-        if (headerPaidCreditsDisplay) headerPaidCreditsDisplay.textContent = '350';
-        if (workspacePricingContainer) workspacePricingContainer.classList.remove('hidden');
-        if (buyCreditsBtn) buyCreditsBtn.classList.remove('hidden');
-        if (loginFormContainer) loginFormContainer.classList.add('hidden');
-    } else if (token) {
-        if (urlMessage) {
-            urlMessage.innerHTML = `<div class="alert-message" style="background:#eff6ff; color:#1e40af; border:1px solid #bfdbfe;">Verifying secure link...</div>`;
-            urlMessage.classList.remove('hidden');
-        }
-        window.history.replaceState({}, document.title, window.location.pathname);
-
-        fetch(`${BACKEND_URL}/auth/verify`, {
-            method: 'POST',
-            credentials: 'include',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ token: token })
-        })
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) {
-                    if (urlMessage) {
-                        urlMessage.classList.add('hidden');
-                    }
-                    if (data.token) {
-                        localStorage.setItem('session_token', data.token);
-                    }
-                    showToast('Login successful! Welcome back.', 'success');
-                    checkAuth();
-                } else {
-                    showToast(data.error || 'Invalid link.', 'error');
-                    checkAuth();
-                }
-            })
-            .catch(err => {
-                showToast('Network error. Please try logging in again.', 'error');
-                checkAuth();
+        recentHistoryList.innerHTML = '';
+        recentPrompts.forEach(p => {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'history-item-btn';
+            btn.innerHTML = `<span>🎵</span><span>${escapeHtml(p)}</span>`;
+            btn.addEventListener('click', () => {
+                toggleSidebar(false);
+                sendUserMessage(p);
             });
-    } else {
-        checkAuth();
+            recentHistoryList.appendChild(btn);
+        });
     }
+    renderRecentPrompts();
 
-    if (sendLinkBtn) {
-        sendLinkBtn.addEventListener('click', async (e) => {
-            if (e && e.preventDefault) e.preventDefault();
-            const email = loginEmail.value.trim();
-            if (!email) return;
-
-            sendLinkBtn.disabled = true;
-            sendLinkBtn.textContent = 'Sending...';
-            if (authMessage) {
-                authMessage.style.color = '#475569';
-                authMessage.textContent = 'Connecting to secure server...';
-            }
-
-            try {
-                // Check if server is active with a quick ping
-                let isServerActive = false;
-                try {
-                    const controller = new AbortController();
-                    const timeoutId = setTimeout(() => controller.abort(), 2000); // 2s quick check
-                    const res = await fetch(`${BACKEND_URL}/health`, { signal: controller.signal });
-                    clearTimeout(timeoutId);
-                    if (res.ok) {
-                        isServerActive = true;
-                    }
-                } catch (e) {
-                    console.log("Server is inactive, initiating wake-up...");
-                }
-
-                if (!isServerActive) {
-                    // Trigger Render wake-up by sending a single non-blocking ping
-                    fetch(`${BACKEND_URL}/health`).catch(() => {});
-                    
-                    // Wait exactly 60 seconds for the server to spin up and database to initialize
-                    const delaySeconds = 60;
-                    for (let elapsed = 0; elapsed <= delaySeconds; elapsed++) {
-                        if (authMessage) {
-                            authMessage.textContent = `Spinning up server, please wait (may take up to 60s) (${elapsed}s)...`;
-                        }
-                        await new Promise(resolve => setTimeout(resolve, 1000));
-                    }
-                }
-
-                if (authMessage) {
-                    authMessage.textContent = 'Requesting secure link...';
-                }
-
-                console.log("Attempting to send magic link to:", `${BACKEND_URL}/auth/login`);
-                const response = await fetch(`${BACKEND_URL}/auth/login`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email })
-                });
-
-                console.log("Backend Response Status:", response.status);
-
-                if (response.ok) {
-                    if (authMessage) {
-                        authMessage.textContent = '';
-                    }
-                    showToast('Link sent! Check your email inbox.', 'success');
-                    sendLinkBtn.disabled = false;
-                    sendLinkBtn.textContent = 'Send Link';
-                } else {
-                    if (authMessage) {
-                        authMessage.textContent = '';
-                    }
-                    const errorData = await response.json().catch(() => ({}));
-                    console.error("Backend Error Data:", errorData);
-                    showToast(errorData.error || 'Failed to send link.', 'error');
-                    sendLinkBtn.disabled = false;
-                    sendLinkBtn.textContent = 'Send Link';
-                }
-            } catch (error) {
-                console.error("Fetch/Network Error:", error);
-                if (authMessage) {
-                    authMessage.textContent = '';
-                }
-                showToast('Network error or server unavailable. Try again.', 'error');
-                sendLinkBtn.disabled = false;
-                sendLinkBtn.textContent = 'Send Link';
-            }
+    if (clearHistoryBtn) {
+        clearHistoryBtn.addEventListener('click', () => {
+            recentPrompts = [];
+            localStorage.removeItem('mp3audio_recent_prompts');
+            renderRecentPrompts();
+            showToast('Recent history cleared');
         });
     }
 
-    if (loginEmail && sendLinkBtn) {
-        loginEmail.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                sendLinkBtn.click();
+    if (newChatBtn) {
+        newChatBtn.addEventListener('click', () => {
+            toggleSidebar(false);
+            if (chatInput) {
+                chatInput.value = '';
+                chatInput.focus();
             }
+            showToast('Ready for your next music or playlist request!');
         });
     }
 
-    const handleLogout = async (e) => {
-        if (e && e.preventDefault) e.preventDefault();
-        localStorage.removeItem('session_token');
-        await fetch(`${BACKEND_URL}/auth/logout`, { method: 'POST', credentials: 'include' });
-        window.location.reload();
+    // --- Built-in Client-Side Curation Fallback (Uses iTunes Search API if backend is still deploying) ---
+    const CLIENT_VIBE_SEEDS = {
+        synthwave: {
+            title: "Midnight Neon: Chill Synthwave Mix",
+            vibe: "Warm analog synths, retro arpeggios & late-night drive energy",
+            seeds: ["M83 Midnight City", "Kavinsky Nightcall", "The Midnight Sunset", "GUNSHIP Tech Noir", "Mr.Kitty After Dark", "FM-84 Running in the Night"]
+        },
+        workout: {
+            title: "High-Octane Gym & Workout Anthems",
+            vibe: "Heavy bass, relentless tempo & peak adrenaline",
+            seeds: ["Kanye West Stronger", "Eminem Till I Collapse", "Kendrick Lamar HUMBLE", "Kanye West POWER", "Survivor Eye of the Tiger", "David Guetta Titanium"]
+        },
+        "hip hop": {
+            title: "Golden Era & Modern Hip-Hop Essentials",
+            vibe: "Boom-bap classics, sharp lyricism & iconic 808s",
+            seeds: ["Nas N.Y. State of Mind", "Mobb Deep Shook Ones Pt II", "Wu-Tang Clan C.R.E.A.M.", "Notorious B.I.G. Juicy", "Dr. Dre Still D.R.E.", "Kendrick Lamar Money Trees"]
+        },
+        lofi: {
+            title: "Lo-Fi Study & Rainy Window Beats",
+            vibe: "Dusty vinyl crackle, warm Rhodes chords & mellow boom-bap",
+            seeds: ["WYS Snowman", "Nujabes Feather", "beabadoobee Coffee", "Jinsang Affection", "The Deli 5:32pm", "Nujabes Luv sic"]
+        },
+        acoustic: {
+            title: "Warm Coffeehouse Acoustic Sessions",
+            vibe: "Intimate fingerpicking, rich vocals & stripped-back storytelling",
+            seeds: ["Tracy Chapman Fast Car", "Jack Johnson Banana Pancakes", "Bon Iver Skinny Love", "The Beatles Blackbird", "The Lumineers Ho Hey", "Ed Sheeran Photograph"]
+        },
+        rock: {
+            title: "Stadium & Classic Rock Legends",
+            vibe: "Timeless guitar riffs, soaring vocals & driving drums",
+            seeds: ["Queen Bohemian Rhapsody", "Fleetwood Mac Dreams", "Eagles Hotel California", "Nirvana Smells Like Teen Spirit", "The Killers Mr. Brightside", "Foo Fighters Everlong"]
+        },
+        jazz: {
+            title: "Midnight Blue Note Jazz Lounge",
+            vibe: "Smoky saxophone, walking upright bass & velvet trumpet",
+            seeds: ["Dave Brubeck Take Five", "Miles Davis So What", "John Coltrane My Favorite Things", "Frank Sinatra Fly Me to the Moon", "Miles Davis Blue in Green", "Chet Baker Almost Blue"]
+        },
+        "r&b": {
+            title: "Silk & Soul: R&B Slow Jams",
+            vibe: "Lush harmonies, late-night basslines & timeless soul",
+            seeds: ["SZA Snooze", "Frank Ocean Pink + White", "Childish Gambino Redbone", "Daniel Caesar Best Part", "Miguel Adorn", "The Weeknd Earned It"]
+        }
     };
 
-    if (logoutBtn) {
-        logoutBtn.addEventListener('click', handleLogout);
+    function mapItunesResult(item, idx) {
+        const title = item.trackName || `Track ${idx}`;
+        const artist = item.artistName || 'Artist';
+        const album = item.collectionName || 'Single';
+        const artwork = (item.artworkUrl100 || '').replace('100x100bb.jpg', '600x600bb.jpg');
+        const durSec = item.trackTimeMillis ? Math.max(1, Math.round(item.trackTimeMillis / 1000)) : 210;
+        const yearMatch = (item.releaseDate || '').match(/\b(19\d\d|20\d\d)\b/);
+        return {
+            index: idx,
+            title,
+            artist,
+            album,
+            year: yearMatch ? yearMatch[1] : '',
+            duration: formatTime(durSec),
+            duration_sec: durSec,
+            artwork_url: artwork,
+            preview_url: item.previewUrl || '',
+            search_query: `ytsearch1:${artist} - ${title} official audio`
+        };
     }
 
-    if (headerLogoutBtn) {
-        headerLogoutBtn.addEventListener('click', handleLogout);
-    }
+    async function clientSideCurateFallback(messageText) {
+        const lower = messageText.toLowerCase();
+        const isRingtone = /ringtone|m4r|alarm tone/.test(lower);
 
-    if (buyCreditsBtn) {
-        buyCreditsBtn.addEventListener('click', async (e) => {
-            if (e && e.preventDefault) e.preventDefault();
-            buyCreditsBtn.disabled = true;
-            buyCreditsBtn.textContent = 'Processing...';
-            try {
-                const response = await fetch(`${BACKEND_URL}/create-checkout-session`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ type: 'credits' }),
-                    credentials: 'include'
-                });
-                const data = await response.json();
-                if (response.ok && data.url) window.location.href = data.url;
-                else {
-                    showToast(data.error || 'Checkout error. Please try again later.', 'error');
-                    buyCreditsBtn.disabled = false;
-                    buyCreditsBtn.textContent = 'Buy Credits';
-                }
-            } catch (error) {
-                showToast('Network error. Please try again.', 'error');
-                buyCreditsBtn.disabled = false;
-                buyCreditsBtn.textContent = 'Buy Credits';
+        for (const [key, preset] of Object.entries(CLIENT_VIBE_SEEDS)) {
+            if (lower.includes(key) || (key === 'lofi' && lower.includes('lo-fi'))) {
+                const tracks = await Promise.all(preset.seeds.map(async (seed, idx) => {
+                    try {
+                        const r = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(seed)}&media=music&entity=song&limit=1`);
+                        const d = await r.json();
+                        if (d.results && d.results[0]) return mapItunesResult(d.results[0], idx + 1);
+                    } catch (e) { }
+                    return {
+                        index: idx + 1,
+                        title: seed,
+                        artist: 'Featured Artist',
+                        album: 'Curated Mix',
+                        year: '2025',
+                        duration: '3:30',
+                        duration_sec: 210,
+                        artwork_url: 'favicon.png',
+                        preview_url: '',
+                        search_query: `ytsearch1:${seed} official audio`
+                    };
+                }));
+                return {
+                    success: true,
+                    reply: `Here is your **${preset.title}**! Tap play on any audio bubble to listen right in the chat, download individual 320kbps MP3s, or grab the full playlist ZIP.`,
+                    mode: 'playlist',
+                    playlist_title: preset.title,
+                    playlist_vibe: preset.vibe,
+                    tracks
+                };
             }
-        });
-    }
-
-    if (subscribeBtn) {
-        subscribeBtn.addEventListener('click', async (e) => {
-            if (e && e.preventDefault) e.preventDefault();
-            subscribeBtn.disabled = true;
-            subscribeBtn.textContent = 'Processing...';
-            try {
-                const response = await fetch(`${BACKEND_URL}/create-checkout-session`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ type: 'subscription' }),
-                    credentials: 'include'
-                });
-                const data = await response.json();
-                if (response.ok && data.url) window.location.href = data.url;
-                else {
-                    showToast(data.error || 'Checkout error. Please try again later.', 'error');
-                    subscribeBtn.disabled = false;
-                    subscribeBtn.textContent = 'Subscribe Now';
-                }
-            } catch (error) {
-                showToast('Network error. Please try again.', 'error');
-                subscribeBtn.disabled = false;
-                subscribeBtn.textContent = 'Subscribe Now';
-            }
-        });
-    }
-
-    // --- CONVERSION TOOL LOGIC ---
-    const resetUI = () => {
-        if (convertBtn) {
-            convertBtn.disabled = false;
-            convertBtn.textContent = "Process";
         }
-        if (cancelBtn) {
-            cancelBtn.disabled = false;
-            cancelBtn.textContent = "Cancel";
-        }
-        if (actionGroup) actionGroup.style.display = 'none';
-        if (resetBtn) resetBtn.disabled = false;
-        if (pollTimeout) {
-            clearTimeout(pollTimeout);
-            pollTimeout = null;
-        }
-    };
 
-    const fullReset = (e) => {
-        if (e && e.preventDefault) e.preventDefault();
-        if (urlInput) {
-            urlInput.value = '';
-            sessionStorage.removeItem('savedUrl');
-        }
-        if (startTimeInput) startTimeInput.value = '';
-        if (endTimeInput) endTimeInput.value = '';
-        if (transcribeInput) transcribeInput.checked = false;
-        if (fileInput) fileInput.value = '';
-        if (increaseQualityInput) increaseQualityInput.checked = false;
-        if (videoToMp3Input) videoToMp3Input.checked = false;
-        if (attachLyricsInput) attachLyricsInput.checked = false;
-        if (autoAddAlbumArtInput) autoAddAlbumArtInput.checked = true;
-        if (fileInputText) {
-            fileInputText.textContent = 'Click to select files, or drag & drop here...';
-            fileInputText.style.fontWeight = 'normal';
-            fileInputText.style.color = '#64748b';
-        }
-        if (statusDiv) statusDiv.innerHTML = "Ready";
-        if (conversionSummary) conversionSummary.innerHTML = '';
-        if (downloadList) downloadList.innerHTML = '';
-        if (downloadArea) downloadArea.classList.add('hidden');
-        if (thumbnailContainer) thumbnailContainer.classList.add('hidden');
-        if (currentThumbnail) currentThumbnail.src = '';
-        if (progressBar) progressBar.classList.add('hidden');
-        if (selectedTracksBadge) selectedTracksBadge.classList.add('hidden');
-        if (fileCountVal) fileCountVal.textContent = '0 Tracks Loaded';
-        resetUI();
-    };
+        // Clean conversational filler
+        let cleanQ = messageText
+            .replace(/^(hey|hi|hello|yo|please|can you|could you|send me|play|find|get me|make me|create|give me|i want|i need|text me)\s+/i, '')
+            .replace(/\b(a playlist of|a playlist for|playlist|songs by|tracks by|music by|ringtone of|ringtone for|ringtone|mp3|audio|song|track)\b/gi, ' ')
+            .replace(/\s+/g, ' ')
+            .trim() || messageText;
 
-    const updateProgress = (current, total, subProgress = 0) => {
-        if (!progressFill) return;
-        const overallProgress = current + (subProgress / 100);
-        const percent = total > 0 ? Math.min(Math.round((overallProgress / total) * 100), 100) : 0;
-        progressFill.style.width = percent + '%';
-        progressFill.textContent = `${percent}%`;
-    };
-
-    const generateSummaryTable = (failedDetails, titleColor = "#1e293b") => {
-        if (!failedDetails || failedDetails.length === 0) return '';
-        let tableRows = failedDetails.map(f => `
-            <tr>
-                <td>${f.track}</td>
-                <td>${f.reason}</td>
-            </tr>
-        `).join('');
-
-        return `
-            <div class="summary-container">
-                <h3 class="summary-title" style="color: ${titleColor};">Failure Breakdown</h3>
-                <table class="summary-table">
-                    <thead>
-                        <tr>
-                            <th>Skipped Track</th>
-                            <th>Reason</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${tableRows}
-                    </tbody>
-                </table>
-            </div>
-        `;
-    };
-
-    const pollStatus = async () => {
-        if (!currentSessionId) return;
+        const wantsPlaylist = /playlist|mix|songs|tracks|vibe|mood|workout|chill|study|party|top |best /i.test(lower);
+        const limit = isRingtone ? 1 : (wantsPlaylist ? 6 : 4);
 
         try {
-            const response = await fetch(`${BACKEND_URL}/status/${currentSessionId}`, { credentials: 'include' });
-            if (!response.ok) throw new Error('Status check failed');
-            const data = await response.json();
-
-            if (!statusDiv) return;
-
-            if (data.status === 'queued') {
-                if (progressBar) progressBar.classList.add('hidden');
-
-                // If they are first in line, the worker is just waking up. Show a loading state instead of the queue block.
-                if (data.queue_position <= 1) {
-                    statusDiv.innerHTML = `
-                        <div class="spinner"></div>
-                        <p style="margin:0; font-weight:bold; font-size:1.05rem;">Starting process...</p>
-                        <p style="margin:5px 0 0 0; font-size:0.85rem; color:#64748b;">Waking up the processor</p>
-                    `;
-                } else {
-                    const waitText = data.estimated_wait <= 1 ? "< 1 min" : `~${data.estimated_wait} mins`;
-                    statusDiv.innerHTML = `
-                        <div class="queue-box">
-                            <div class="spinner queue-spinner"></div>
-                            <p style="margin:0 0 5px 0; font-weight:bold;">Waiting in Queue</p>
-                            <p style="margin:0; font-size:0.85rem;">Position: ${data.queue_position} | Est. Wait: ${waitText}</p>
-                        </div>
-                    `;
+            const resp = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(cleanQ)}&media=music&entity=song&limit=${limit * 2}`);
+            const data = await resp.json();
+            const seen = new Set();
+            const tracks = [];
+            for (const item of (data.results || [])) {
+                const k = `${(item.trackName || '').toLowerCase()}|${(item.artistName || '').toLowerCase()}`;
+                if (!seen.has(k) && item.trackName) {
+                    seen.add(k);
+                    tracks.push(mapItunesResult(item, tracks.length + 1));
+                    if (tracks.length >= limit) break;
                 }
             }
-            else if (data.status === 'processing') {
-                if (progressBar) progressBar.classList.remove('hidden');
-
-                if (data.current_thumbnail && currentThumbnail && thumbnailContainer) {
-                    currentThumbnail.src = data.current_thumbnail;
-                    thumbnailContainer.classList.remove('hidden');
-                } else if (thumbnailContainer) {
-                    thumbnailContainer.classList.add('hidden');
+            if (tracks.length > 0) {
+                if (tracks.length === 1 || isRingtone) {
+                    const t = tracks[0];
+                    return {
+                        success: true,
+                        reply: `Here is **${t.title}** by **${t.artist}**! Tap play in the bubble below to listen immediately, or click **Download MP3** for the full tagged file.`,
+                        mode: isRingtone ? 'ringtone' : 'single',
+                        playlist_title: `${t.title} — ${t.artist}`,
+                        playlist_vibe: `${t.album} ${t.year ? '(' + t.year + ')' : ''}`,
+                        tracks: [t]
+                    };
                 }
-
-                updateProgress(data.completed, data.total, data.sub_progress);
-
-                const currentTrackDisplay = Math.min(data.completed + 1, data.total);
-
-                statusDiv.innerHTML = `
-                    <div class="spinner"></div>
-                    <p style="margin:0; font-weight:bold; font-size:1.05rem;">Processing Track ${currentTrackDisplay} of ${data.total}</p>
-                    <p style="margin:5px 0 0 0; font-size:0.85rem; color:#64748b;">${data.current_status || 'Working on your files'}</p>
-                `;
+                return {
+                    success: true,
+                    reply: `I curated **${tracks.length} tracks** for **${cleanQ}**! Tap play on any audio bubble to listen in the chat, download individual MP3s, or grab the full Playlist ZIP.`,
+                    mode: 'playlist',
+                    playlist_title: `${cleanQ} — Curated Mix`,
+                    playlist_vibe: `AI Curated Selection • 320kbps & ID3 Tagged`,
+                    tracks
+                };
             }
-            else if (data.status === 'completed') {
-                resetUI();
-                if (progressBar) progressBar.classList.remove('hidden');
-                updateProgress(data.total, data.total, 100);
-
-                if (data.completed > 0) {
-                    statusDiv.innerHTML = `<p style="color: #2ecc71; font-weight: bold; font-size: 1.1rem;">✅ Success! Processed ${data.completed} of ${data.total} tracks.</p>`;
-                    showToast(`Success! Processed ${data.completed} of ${data.total} tracks.`, 'success');
-                    if (videoToMp3Input && videoToMp3Input.checked) {
-                        localStorage.setItem('free_video_converted', 'true');
-                    }
-                    if (window.fetchGlobalStats) window.fetchGlobalStats();
-                } else {
-                    statusDiv.innerHTML = `<p style="color: #ef4444; font-weight: bold; font-size: 1.1rem;">⚠️ Process Finished: 0 tracks processed.</p>`;
-                    showToast(`No tracks could be processed.`, 'error');
-                }
-
-                if (downloadArea && downloadList) {
-                    downloadArea.classList.remove('hidden');
-
-                    if (conversionSummary) {
-                        conversionSummary.innerHTML = generateSummaryTable(data.failed_details, data.completed > 0 ? "#1e293b" : "#ef4444");
-                    }
-
-                    if (data.completed > 0) {
-                        const downloadUrl = `${BACKEND_URL}${data.zip_path}`;
-                        const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(downloadUrl)}`;
-
-                        downloadList.innerHTML = `
-                            <li>
-                                <a href="${downloadUrl}" class="zip-btn" target="_blank">
-                                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                                    Download Complete ZIP Archive
-                                </a>
-                            </li>
-                            <li style="margin-top: 12px; list-style: none;">
-                                <div class="ringtone-download-card">
-                                    <div class="ringtone-download-header">
-                                        <div class="rt-dl-info">
-                                            <span class="rt-dl-icon">📱</span>
-                                            <div class="rt-dl-text">
-                                                <strong>Cellular Phone Ringtone Ready</strong>
-                                                <p>Includes standard MP3 (Android) and M4R (iPhone) formats.</p>
-                                            </div>
-                                        </div>
-                                        <div class="rt-dl-actions">
-                                            <button type="button" class="ringtone-guide-btn" onclick="openModal('ringtoneModal')">
-                                                <span>📖 Setup Directions</span>
-                                            </button>
-                                            <button type="button" class="ringtone-qr-toggle-btn" onclick="window.toggleRingtoneQr()">
-                                                <span>📱 Scan to Mobile</span>
-                                            </button>
-                                        </div>
-                                    </div>
-                                    <div id="ringtoneQrBox" class="ringtone-qr-box" style="display: none;">
-                                        <img src="${qrCodeUrl}" alt="Scan QR Code to download on mobile" width="130" height="130" loading="lazy">
-                                        <div class="ringtone-qr-desc">
-                                            <h4>Scan with Phone Camera</h4>
-                                            <p>Point your iPhone or Android camera at this code to download the ringtone files directly to your phone without cords or emails.</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </li>
-                        `;
-                    } else {
-                        downloadList.innerHTML = '';
-                    }
-                }
-                currentSessionId = null;
-                checkAuth();
-            }
-            else if (data.status === 'error' || data.status === 'cancelled') {
-                resetUI();
-                const msg = data.status === 'error' ? (data.error || 'An error occurred during processing.') : 'Process Cancelled.';
-                statusDiv.innerHTML = `<p style="color: #ef4444; font-weight: bold; font-size: 1.1rem;">❌ Action Failed</p>`;
-                if (data.status === 'error') showToast(msg, 'error');
-
-                if (data.status === 'error' && data.failed_details && data.failed_details.length > 0) {
-                    if (downloadArea) downloadArea.classList.remove('hidden');
-                    if (downloadList) downloadList.innerHTML = '';
-                    if (conversionSummary) {
-                        conversionSummary.innerHTML = generateSummaryTable(data.failed_details, "#ef4444");
-                    }
-                }
-
-                currentSessionId = null;
-                checkAuth();
-            }
-        } catch (error) {
-            console.error('Polling error:', error);
+        } catch (err) {
+            console.warn('iTunes fallback search error:', err);
         }
 
-        // Schedule the next poll only AFTER the previous one has completed
-        if (currentSessionId) {
-            pollTimeout = setTimeout(pollStatus, 2000);
-        }
-    };
+        return {
+            success: true,
+            reply: `I found **${cleanQ}** for you! Click **Download MP3** below to extract and tag the full 320kbps audio track.`,
+            mode: 'single',
+            playlist_title: cleanQ,
+            playlist_vibe: 'Direct Audio Extraction',
+            tracks: [{
+                index: 1,
+                title: cleanQ,
+                artist: 'MP3aud.io Search',
+                album: 'Single',
+                year: '2026',
+                duration: '3:30',
+                duration_sec: 210,
+                artwork_url: 'favicon.png',
+                preview_url: '',
+                search_query: cleanQ.startsWith('http') ? cleanQ : `ytsearch1:${cleanQ} official audio`
+            }]
+        };
+    }
 
-    const startConversion = async (e) => {
-        if (e && e.preventDefault) e.preventDefault();
+    // --- Audio Playback Engine for Chat Bubbles & Mini Player ---
+    function updateAllBubblePlayStates() {
+        document.querySelectorAll('.track-audio-bubble').forEach(el => {
+            const bid = el.getAttribute('data-bubble-id');
+            const btn = el.querySelector('.track-play-btn');
+            const isThisActive = (bid === activeBubbleId);
+            el.classList.toggle('is-playing', isThisActive && !globalAudio.paused);
+            if (btn) {
+                btn.innerHTML = (isThisActive && !globalAudio.paused) ? '⏸' : '▶';
+            }
+            if (!isThisActive) {
+                const fill = el.querySelector('.track-scrub-fill');
+                if (fill) fill.style.width = '0%';
+            }
+        });
+        if (miniPlayIcon) {
+            miniPlayIcon.textContent = globalAudio.paused ? '▶' : '⏸';
+        }
+    }
+
+    function playTrackFromQueue(queue, index) {
+        if (!queue || index < 0 || index >= queue.length) return;
+        currentQueue = queue;
+        currentQueueIndex = index;
+        const track = currentQueue[currentQueueIndex];
+
+        if (!track.preview_url) {
+            showToast('No instant preview stream for this track — click "⬇ MP3" to extract the full audio!', 'info');
+            return;
+        }
+
+        if (activeBubbleId === track.bubbleId && globalAudio.src === track.preview_url) {
+            if (globalAudio.paused) {
+                globalAudio.play().catch(() => { });
+            } else {
+                globalAudio.pause();
+            }
+            updateAllBubblePlayStates();
+            return;
+        }
+
+        activeBubbleId = track.bubbleId;
+        globalAudio.src = track.preview_url;
+        globalAudio.currentTime = 0;
+        globalAudio.play().catch(err => {
+            console.warn('Audio playback blocked or failed:', err);
+            showToast('Could not play stream preview. Try clicking Download MP3.', 'error');
+        });
+
+        if (miniPlayerBar) {
+            miniPlayerBar.classList.remove('hidden');
+            if (miniPlayerArt) miniPlayerArt.src = track.artwork_url || 'favicon.png';
+            if (miniPlayerTitle) miniPlayerTitle.textContent = track.title || 'Track';
+            if (miniPlayerArtist) miniPlayerArtist.textContent = track.artist || 'Artist';
+            if (miniDownloadMp3Btn) {
+                miniDownloadMp3Btn.onclick = () => {
+                    const bubbleEl = document.querySelector(`.track-audio-bubble[data-bubble-id="${track.bubbleId}"]`);
+                    const statusContainer = bubbleEl ? bubbleEl.closest('.assistant-bubble').querySelector('.bubble-conversion-container') : null;
+                    triggerTrackOrPlaylistDownload([track], `${track.artist} - ${track.title}`, statusContainer);
+                };
+            }
+        }
+        updateAllBubblePlayStates();
+    }
+
+    globalAudio.addEventListener('play', updateAllBubblePlayStates);
+    globalAudio.addEventListener('pause', updateAllBubblePlayStates);
+    globalAudio.addEventListener('timeupdate', () => {
+        const dur = globalAudio.duration || 30;
+        const cur = globalAudio.currentTime || 0;
+        const pct = Math.min(100, (cur / dur) * 100);
+
+        if (miniCurrentTime) miniCurrentTime.textContent = formatTime(cur);
+        if (miniTotalTime) miniTotalTime.textContent = formatTime(dur);
+        if (miniSeekSlider) miniSeekSlider.value = pct;
+
+        if (activeBubbleId) {
+            const activeEl = document.querySelector(`.track-audio-bubble[data-bubble-id="${activeBubbleId}"]`);
+            if (activeEl) {
+                const fill = activeEl.querySelector('.track-scrub-fill');
+                const durBadge = activeEl.querySelector('.track-duration-badge');
+                if (fill) fill.style.width = `${pct}%`;
+                if (durBadge) durBadge.textContent = `${formatTime(cur)} / ${formatTime(dur)}`;
+            }
+        }
+    });
+
+    globalAudio.addEventListener('ended', () => {
+        if (currentQueue && currentQueueIndex + 1 < currentQueue.length) {
+            playTrackFromQueue(currentQueue, currentQueueIndex + 1);
+        } else {
+            updateAllBubblePlayStates();
+        }
+    });
+
+    if (miniPlayPauseBtn) {
+        miniPlayPauseBtn.addEventListener('click', () => {
+            if (!globalAudio.src) return;
+            if (globalAudio.paused) globalAudio.play();
+            else globalAudio.pause();
+        });
+    }
+    if (miniPrevBtn) {
+        miniPrevBtn.addEventListener('click', () => {
+            if (currentQueueIndex > 0) playTrackFromQueue(currentQueue, currentQueueIndex - 1);
+            else globalAudio.currentTime = 0;
+        });
+    }
+    if (miniNextBtn) {
+        miniNextBtn.addEventListener('click', () => {
+            if (currentQueue && currentQueueIndex + 1 < currentQueue.length) {
+                playTrackFromQueue(currentQueue, currentQueueIndex + 1);
+            }
+        });
+    }
+    if (miniSeekSlider) {
+        miniSeekSlider.addEventListener('input', () => {
+            if (globalAudio.duration) {
+                globalAudio.currentTime = (parseFloat(miniSeekSlider.value) / 100) * globalAudio.duration;
+            }
+        });
+    }
+    if (miniCloseBtn) {
+        miniCloseBtn.addEventListener('click', () => {
+            globalAudio.pause();
+            if (miniPlayerBar) miniPlayerBar.classList.add('hidden');
+        });
+    }
+
+    // --- 1-Click MP3 & Playlist ZIP Download Engine inside Chat Thread ---
+    async function triggerTrackOrPlaylistDownload(tracksList, playlistTitle, statusContainer) {
+        if (!tracksList || tracksList.length === 0) return;
+
+        const isSingle = tracksList.length === 1;
+        const increaseQuality = increaseQualityInput ? increaseQualityInput.checked : false;
+        const autoAddAlbumArt = autoAddAlbumArtInput ? autoAddAlbumArtInput.checked : true;
+        const transcribeAudio = attachLyricsInput ? attachLyricsInput.checked : false;
+        const isRingtone = videoToMp3Input ? videoToMp3Input.checked : false;
+
+        let box = null;
+        if (statusContainer) {
+            statusContainer.innerHTML = `
+                <div class="bubble-conversion-box">
+                    <div class="bubble-conversion-header">
+                        <span class="conv-status-label">⚡ Initializing ${isSingle ? 'MP3 track' : `playlist (${tracksList.length} tracks)`}...</span>
+                        <span class="conv-pct-label">0%</span>
+                    </div>
+                    <div class="bubble-progress-track">
+                        <div class="bubble-progress-fill" style="width: 10%;"></div>
+                    </div>
+                    <div class="conv-action-slot"></div>
+                </div>
+            `;
+            box = statusContainer.querySelector('.bubble-conversion-box');
+        } else {
+            showToast(`Preparing ${isSingle ? tracksList[0].title : playlistTitle}...`, 'info');
+        }
+
+        const updateBox = (label, pct, readyUrl = null, readyLabel = null) => {
+            if (!box) return;
+            const lbl = box.querySelector('.conv-status-label');
+            const pctEl = box.querySelector('.conv-pct-label');
+            const fill = box.querySelector('.bubble-progress-fill');
+            const slot = box.querySelector('.conv-action-slot');
+            if (lbl) lbl.textContent = label;
+            if (pctEl) pctEl.textContent = `${Math.round(pct)}%`;
+            if (fill) fill.style.width = `${Math.max(5, Math.min(100, pct))}%`;
+            if (readyUrl && slot) {
+                slot.innerHTML = `<a href="${readyUrl}" class="bubble-ready-download-link" target="_blank" download>✅ ${readyLabel || 'Click to Save File'}</a>`;
+            }
+        };
+
         try {
-            if (!statusDiv) return;
+            const sessionId = (crypto && crypto.randomUUID) ? crypto.randomUUID() : ('sess_' + Date.now());
+            let resp = await fetch(`${BACKEND_URL}/api/assistant/prepare_download`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    session_id: sessionId,
+                    tracks: tracksList,
+                    playlist_title: playlistTitle,
+                    increase_quality: increaseQuality,
+                    auto_add_album_art: autoAddAlbumArt,
+                    transcribe_audio: transcribeAudio,
+                    is_ringtone: isRingtone
+                })
+            });
 
-            const hasFiles = fileInput && fileInput.files.length > 0;
-            const url = urlInput ? urlInput.value.trim() : '';
-
-            if (!hasFiles && !url) {
-                showToast('Please select files to upload or enter a URL.', 'error');
-                return;
-            }
-
-            if (convertBtn) {
-                convertBtn.disabled = true;
-                convertBtn.textContent = "Processing...";
-            }
-            if (resetBtn) resetBtn.disabled = true;
-            if (actionGroup) actionGroup.style.display = 'flex';
-            if (cancelBtn) cancelBtn.classList.remove('hidden');
-
-            statusDiv.innerHTML = `<div class="spinner"></div><p style="font-weight:bold; color:#2980b9;">Spinning up server...</p><p style="font-size:0.85rem; color:#64748b;">(This may take up to 50 seconds if the server is asleep)</p>`;
-            showToast('Spinning up server. This may take up to 50 seconds...', 'info');
-
-            // Ping the backend to wake it up before sending a potentially large payload
-            try {
-                await fetch(`${BACKEND_URL}/health`);
-            } catch (err) {
-                console.warn("Pre-flight wake up ping failed or timed out, continuing anyway...", err);
-            }
-
-            if (hasFiles) {
-                statusDiv.innerHTML = `<div class="spinner"></div><p style="font-weight:bold; color:#2980b9;">Uploading files to server...</p><p style="font-size:0.85rem; color:#64748b;">(Please keep this tab open during upload)</p>`;
-            } else {
-                statusDiv.innerHTML = `<div class="spinner"></div><p style="font-weight:bold; color:#2980b9;">Analyzing link...</p><p style="font-size:0.85rem; color:#64748b;">(Playlists can take 10-15 seconds to fetch from SoundCloud)</p>`;
-            }
-
-            if (downloadArea) downloadArea.classList.add('hidden');
-            if (conversionSummary) conversionSummary.innerHTML = '';
-            if (thumbnailContainer) thumbnailContainer.classList.add('hidden');
-            if (progressBar) progressBar.classList.remove('hidden');
-            if (progressFill) {
-                progressFill.style.width = '0%';
-                progressFill.textContent = 'Initializing...';
-            }
-
-            let response;
-
-            if (hasFiles) {
-                // Enforce a maximum file size limit of 50MB per file
-                const MAX_PER_FILE_SIZE = 50 * 1024 * 1024; // 50MB in bytes
-                const oversizedFiles = Array.from(fileInput.files).filter(file => file.size > MAX_PER_FILE_SIZE);
-
-                if (oversizedFiles.length > 0) {
-                    showToast('One or more files exceed the 50MB limit per track. Please remove them and try again.', 'error');
-                    resetUI();
-                    statusDiv.innerHTML = `Ready`;
-                    return;
-                }
-
-                const formData = new FormData();
-                for (let i = 0; i < fileInput.files.length; i++) {
-                    formData.append('files', fileInput.files[i]);
-                }
-                if (increaseQualityInput && increaseQualityInput.checked) formData.append('increase_quality', 'true');
-                if (videoToMp3Input && videoToMp3Input.checked) {
-                    formData.append('video_to_mp3', 'true');
-                    formData.append('is_ringtone', 'true');
-                }
-                if (attachLyricsInput && attachLyricsInput.checked) formData.append('attach_lyrics', 'true');
-                if (autoAddAlbumArtInput && autoAddAlbumArtInput.checked) formData.append('auto_add_album_art', 'true');
-                if (startTimeInput && startTimeInput.value.trim()) formData.append('start_time', startTimeInput.value.trim());
-                if (endTimeInput && endTimeInput.value.trim()) formData.append('end_time', endTimeInput.value.trim());
-
-                response = await fetch(`${BACKEND_URL}/process_local_files`, {
+            // Fallback to /start_conversion if /api/assistant/prepare_download is not yet live on remote server
+            if (resp.status === 404) {
+                const firstQuery = tracksList[0].search_query || `ytsearch1:${tracksList[0].artist} - ${tracksList[0].title} official audio`;
+                resp = await fetch(`${BACKEND_URL}/start_conversion`, {
                     method: 'POST',
-                    credentials: 'include',
-                    body: formData
-                });
-            } else {
-                const startTime = startTimeInput ? startTimeInput.value.trim() : '';
-                const endTime = endTimeInput ? endTimeInput.value.trim() : '';
-                const transcribeAudio = transcribeInput ? transcribeInput.checked : false;
-                const isVideo = videoToMp3Input ? videoToMp3Input.checked : false;
-
-                response = await fetch(`${BACKEND_URL}/start_conversion`, {
-                    method: 'POST',
-                    credentials: 'include',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        url,
-                        start_time: startTime,
-                        end_time: endTime,
+                        session_id: sessionId,
+                        url: firstQuery,
+                        increase_quality: increaseQuality,
+                        auto_add_album_art: autoAddAlbumArt,
                         transcribe_audio: transcribeAudio,
-                        video_to_mp3: isVideo,
-                        is_ringtone: isVideo,
-                        auto_add_album_art: autoAddAlbumArtInput ? autoAddAlbumArtInput.checked : false
+                        video_to_mp3: isRingtone,
+                        is_ringtone: isRingtone
                     })
                 });
             }
 
-            const data = await response.json();
+            const data = await resp.json();
+            if (!resp.ok) {
+                if (data.requires_payment) {
+                    updateBox(`⚠️ ${data.error}`, 0);
+                    openModal('accountModal');
+                    return;
+                }
+                throw new Error(data.error || 'Failed to queue download');
+            }
 
-            if (response.status === 403) {
-                // UI Limit Warning Handler
-                statusDiv.innerHTML = `
-                    <div style="background: #ffffff; border: 1px solid #e2e8f0; border-top: 4px solid #f59e0b; padding: 15px; border-radius: 8px; text-align: left; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
-                        <p style="color: #1e293b; font-weight: bold; margin-top: 0; margin-bottom: 8px;">⚠️ Limit Reached</p>
-                        <p style="font-size: 0.9rem; color: #475569; margin: 0; line-height: 1.4;">${data.error || 'Processing Blocked: You have reached the limit for this request.'}</p>
+            pollConversionJobInChat(sessionId, isSingle, isRingtone, tracksList[0], updateBox);
+            checkAuthStatus();
+        } catch (err) {
+            console.warn('Backend conversion queue error:', err);
+            // Direct preview stream download fallback if backend is unreachable
+            if (isSingle && tracksList[0].preview_url) {
+                updateBox(
+                    `✅ Instant Audio Stream Ready: ${tracksList[0].artist} - ${tracksList[0].title}`,
+                    100,
+                    tracksList[0].preview_url,
+                    `Download Audio (${tracksList[0].title})`
+                );
+            } else {
+                updateBox(`⚠️ Could not reach audio conversion server: ${err.message}`, 0);
+            }
+        }
+    }
+
+    function pollConversionJobInChat(sessionId, isSingle, isRingtone, firstTrack, updateBox) {
+        const poll = async () => {
+            try {
+                const res = await fetch(`${BACKEND_URL}/status/${sessionId}`);
+                if (!res.ok) throw new Error('Status check failed');
+                const statusData = await res.json();
+
+                if (statusData.status === 'queued') {
+                    updateBox(`⏳ Queued (Position #${statusData.queue_position || 1})...`, 12);
+                    setTimeout(poll, 1800);
+                } else if (statusData.status === 'processing') {
+                    const total = Math.max(1, statusData.total || 1);
+                    const done = statusData.completed || 0;
+                    const sub = statusData.sub_progress || 0;
+                    const pct = Math.min(95, ((done + sub / 100) / total) * 100);
+                    const stepText = statusData.current_status || `Processing track ${statusData.current_track || 1} of ${total}...`;
+                    updateBox(`🎧 ${stepText}`, pct);
+                    setTimeout(poll, 1500);
+                } else if (statusData.status === 'completed') {
+                    const ext = isRingtone ? 'm4r' : 'mp3';
+                    const dlUrl = isSingle
+                        ? `${BACKEND_URL}/download_mp3/${sessionId}?ext=${ext}`
+                        : `${BACKEND_URL}${statusData.zip_path || `/download/${sessionId}/playlist_backup.zip`}`;
+                    const label = isSingle
+                        ? `Download ${ext.toUpperCase()} (${firstTrack ? firstTrack.title : 'Track'})`
+                        : `Download Full Playlist (.ZIP)`;
+
+                    updateBox(`🎉 Ready! High-res ID3 tags & cover art embedded.`, 100, dlUrl, label);
+                    showToast('Your download is ready!', 'success');
+
+                    // Trigger automatic download
+                    const a = document.createElement('a');
+                    a.href = dlUrl;
+                    a.download = '';
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                } else {
+                    updateBox(`⚠️ Error: ${statusData.error || 'Conversion interrupted'}`, 0);
+                }
+            } catch (e) {
+                updateBox(`⚠️ Connection lost while checking status.`, 0);
+            }
+        };
+        poll();
+    }
+
+    // --- Render User & Assistant Message Bubbles ---
+    function scrollToBottom() {
+        if (!chatMessages) return;
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    function appendUserBubble(text) {
+        const row = document.createElement('div');
+        row.className = 'msg-row user-row';
+        const nowStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        row.innerHTML = `
+            <div class="msg-bubble user-bubble">
+                <div class="msg-text"><p>${escapeHtml(text)}</p></div>
+                <span class="msg-time">${nowStr} ✓✓</span>
+            </div>
+        `;
+        chatMessages.appendChild(row);
+        scrollToBottom();
+    }
+
+    function appendTypingBubble() {
+        const row = document.createElement('div');
+        row.className = 'msg-row assistant-row typing-row';
+        row.innerHTML = `
+            <div class="msg-avatar">🎧</div>
+            <div class="msg-bubble assistant-bubble" style="max-width: 110px;">
+                <div class="typing-dots"><span></span><span></span><span></span></div>
+            </div>
+        `;
+        chatMessages.appendChild(row);
+        scrollToBottom();
+        return row;
+    }
+
+    function appendAssistantMusicBubble(payload) {
+        const tracks = (payload.tracks || []).map((t, i) => ({
+            ...t,
+            bubbleId: `b_${Date.now()}_${i}_${Math.random().toString(36).slice(2, 6)}`
+        }));
+        const isPlaylist = tracks.length > 1;
+        const playlistTitle = payload.playlist_title || 'Curated Selection';
+        const playlistVibe = payload.playlist_vibe || '320kbps Studio Audio • Auto ID3 Tagged';
+        const nowStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+        const row = document.createElement('div');
+        row.className = 'msg-row assistant-row';
+
+        let playlistHeaderHtml = '';
+        if (isPlaylist) {
+            playlistHeaderHtml = `
+                <div class="playlist-header-card">
+                    <div class="playlist-header-meta">
+                        <span class="playlist-badge-eyebrow">✨ AI CURATED PLAYLIST &bull; ${tracks.length} TRACKS</span>
+                        <h3>${escapeHtml(playlistTitle)}</h3>
+                        <span>${escapeHtml(playlistVibe)}</span>
                     </div>
-                `;
-
-                if (loginFormContainer) loginFormContainer.classList.remove('hidden');
-                if (loginEmail) loginEmail.focus();
-
-                resetUI();
-                checkAuth();
-                showToast('Limit Reached. Please sign in.', 'error');
-                return;
-            }
-
-            if (!response.ok) {
-                throw new Error(data.error || 'Failed to start processing');
-            }
-
-            currentSessionId = data.session_id;
-            pollStatus(); // Triggers the first check, which then schedules the rest
-
-        } catch (error) {
-            console.error(error);
-            resetUI();
-            statusDiv.innerHTML = `Ready`;
-
-            let errorMsg = error.message;
-            if (errorMsg.toLowerCase().includes('failed to fetch')) {
-                errorMsg = "Network Error: Cannot reach the backend. Check your BACKEND_URL or CORS settings.";
-            }
-            showToast(errorMsg, 'error');
+                    <div class="playlist-header-actions">
+                        <button type="button" class="btn-play-all-chat">▶ Play All in Chat</button>
+                        <button type="button" class="btn-download-playlist-zip">📦 Download Playlist (.ZIP)</button>
+                    </div>
+                </div>
+            `;
         }
-    };
 
-    const cancelConversion = async (e) => {
-        if (e && e.preventDefault) e.preventDefault();
-        if (!currentSessionId) return;
-        if (cancelBtn) {
-            cancelBtn.disabled = true;
-            cancelBtn.textContent = "Cancelling...";
+        const tracksHtml = tracks.map((t, idx) => {
+            const art = t.artwork_url || 'favicon.png';
+            const subMeta = [t.artist, t.album, t.year].filter(Boolean).join(' • ');
+            const isRingtoneMode = (payload.mode === 'ringtone') || (videoToMp3Input && videoToMp3Input.checked);
+            return `
+                <div class="track-audio-bubble" data-bubble-id="${t.bubbleId}" data-track-idx="${idx}">
+                    <div class="track-cover-wrap">
+                        <img src="${escapeHtml(art)}" alt="${escapeHtml(t.title)}" class="track-cover-img" loading="lazy" onerror="this.src='favicon.png'">
+                    </div>
+                    <button type="button" class="track-play-btn" title="Play track in chat" aria-label="Play ${escapeHtml(t.title)}">▶</button>
+                    <div class="track-bubble-center">
+                        <div class="track-title-line">
+                            <span class="track-title-text">${escapeHtml(t.title)}</span>
+                            <span class="track-duration-badge">${escapeHtml(t.duration || '3:30')}</span>
+                        </div>
+                        <div class="track-sub-line">
+                            <span class="track-quality-pill">320k ID3</span>
+                            <span>${escapeHtml(subMeta)}</span>
+                        </div>
+                        <div class="track-waveform-row">
+                            <div class="track-scrub-bar" title="Click to seek">
+                                <div class="track-scrub-fill"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="track-dl-actions">
+                        <button type="button" class="btn-track-mp3" data-idx="${idx}">
+                            ${isRingtoneMode ? '⬇ Ringtone' : '⬇ MP3'}
+                        </button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        row.innerHTML = `
+            <div class="msg-avatar">🎧</div>
+            <div class="msg-bubble assistant-bubble">
+                <div class="msg-sender-name">
+                    <span>MP3aud.io Assistant</span>
+                    <span class="msg-time">${nowStr}</span>
+                </div>
+                <div class="msg-text">
+                    <p>${formatMarkdownBold(payload.reply || 'Here are your tracks!')}</p>
+                </div>
+                ${playlistHeaderHtml}
+                <div class="tracks-bubble-stack">
+                    ${tracksHtml}
+                </div>
+                <div class="bubble-conversion-container"></div>
+            </div>
+        `;
+
+        chatMessages.appendChild(row);
+        scrollToBottom();
+
+        const bubbleEl = row.querySelector('.assistant-bubble');
+        const statusContainer = bubbleEl.querySelector('.bubble-conversion-container');
+
+        // Wire up Play buttons & Scrubbing on each track bubble
+        bubbleEl.querySelectorAll('.track-audio-bubble').forEach(trackEl => {
+            const idx = parseInt(trackEl.getAttribute('data-track-idx'), 10);
+            const playBtn = trackEl.querySelector('.track-play-btn');
+            const scrubBar = trackEl.querySelector('.track-scrub-bar');
+            const dlBtn = trackEl.querySelector('.btn-track-mp3');
+
+            if (playBtn) {
+                playBtn.addEventListener('click', () => {
+                    playTrackFromQueue(tracks, idx);
+                });
+            }
+            if (scrubBar) {
+                scrubBar.addEventListener('click', (e) => {
+                    const rect = scrubBar.getBoundingClientRect();
+                    const ratio = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+                    if (activeBubbleId !== tracks[idx].bubbleId) {
+                        playTrackFromQueue(tracks, idx);
+                    } else if (globalAudio.duration) {
+                        globalAudio.currentTime = ratio * globalAudio.duration;
+                    }
+                });
+            }
+            if (dlBtn) {
+                dlBtn.addEventListener('click', () => {
+                    triggerTrackOrPlaylistDownload([tracks[idx]], `${tracks[idx].artist} - ${tracks[idx].title}`, statusContainer);
+                });
+            }
+        });
+
+        // Wire up Playlist-level Play All & Download ZIP buttons
+        const playAllBtn = bubbleEl.querySelector('.btn-play-all-chat');
+        if (playAllBtn) {
+            playAllBtn.addEventListener('click', () => {
+                playTrackFromQueue(tracks, 0);
+            });
         }
+
+        const zipBtn = bubbleEl.querySelector('.btn-download-playlist-zip');
+        if (zipBtn) {
+            zipBtn.addEventListener('click', () => {
+                triggerTrackOrPlaylistDownload(tracks, playlistTitle, statusContainer);
+            });
+        }
+    }
+
+    // --- Send Message Handler (Text Request or Attached Local Files) ---
+    async function sendUserMessage(customText = null) {
+        if (pendingFiles.length > 0 && !customText) {
+            await handleSendLocalFilesInChat();
+            return;
+        }
+
+        const text = (customText !== null ? customText : (chatInput ? chatInput.value : '')).trim();
+        if (!text) return;
+
+        if (customText === null && chatInput) {
+            chatInput.value = '';
+            chatInput.style.height = 'auto';
+        }
+
+        appendUserBubble(text);
+        saveRecentPrompt(text);
+        chatHistory.push({ role: 'user', content: text });
+
+        const typingRow = appendTypingBubble();
 
         try {
-            await fetch(`${BACKEND_URL}/cancel`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ session_id: currentSessionId })
-            });
-            showToast('Processing cancelled.', 'info');
-        } catch (error) {
-            console.error('Failed to cancel:', error);
-            resetUI();
+            let result = null;
+            try {
+                const resp = await fetch(`${BACKEND_URL}/api/assistant/chat`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        message: text,
+                        history: chatHistory.slice(-6),
+                        options: {
+                            auto_add_album_art: autoAddAlbumArtInput ? autoAddAlbumArtInput.checked : true,
+                            increase_quality: increaseQualityInput ? increaseQualityInput.checked : false,
+                            is_ringtone: videoToMp3Input ? videoToMp3Input.checked : false,
+                            transcribe_audio: attachLyricsInput ? attachLyricsInput.checked : false
+                        }
+                    })
+                });
+                if (resp.ok) {
+                    result = await resp.json();
+                }
+            } catch (networkErr) {
+                console.info('Using direct client curation fallback:', networkErr);
+            }
+
+            if (!result || !result.success) {
+                result = await clientSideCurateFallback(text);
+            }
+
+            typingRow.remove();
+            appendAssistantMusicBubble(result);
+            chatHistory.push({ role: 'assistant', content: result.reply || '' });
+        } catch (err) {
+            typingRow.remove();
+            showToast('Something went wrong processing your message.', 'error');
         }
-    };
+    }
 
-    if (convertBtn) convertBtn.addEventListener('click', startConversion);
-    if (cancelBtn) cancelBtn.addEventListener('click', cancelConversion);
-    if (resetBtn) resetBtn.addEventListener('click', fullReset);
+    // --- Local File Upload in Chat ---
+    function setPendingFiles(fileList) {
+        const files = Array.from(fileList || []);
+        if (files.length === 0) return;
+        const MAX_SIZE = 50 * 1024 * 1024;
+        if (files.some(f => f.size > MAX_SIZE)) {
+            showToast('One or more files exceed the 50MB per-track limit.', 'error');
+            return;
+        }
+        pendingFiles = files;
+        if (attachedFilesPreview && attachedFilesLabel) {
+            attachedFilesLabel.textContent = files.length === 1
+                ? `📎 ${files[0].name}`
+                : `📎 ${files.length} media files attached`;
+            attachedFilesPreview.classList.remove('hidden');
+        }
+    }
 
-    // --- PREVENT ACCIDENTAL TAB CLOSURE FOR GUESTS ---
-    window.addEventListener('beforeunload', (e) => {
-        if (currentSessionId && isGuestUser) {
-            e.preventDefault();
-            e.returnValue = ''; // Required by modern browsers to trigger the warning popup
+    async function handleSendLocalFilesInChat() {
+        const files = [...pendingFiles];
+        pendingFiles = [];
+        if (fileInput) fileInput.value = '';
+        if (attachedFilesPreview) attachedFilesPreview.classList.add('hidden');
+
+        const userText = (chatInput && chatInput.value.trim())
+            ? chatInput.value.trim()
+            : `Enhance & tag ${files.length === 1 ? files[0].name : `${files.length} media files`}`;
+        if (chatInput) chatInput.value = '';
+
+        appendUserBubble(`📎 ${userText}`);
+
+        const nowStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        const row = document.createElement('div');
+        row.className = 'msg-row assistant-row';
+        row.innerHTML = `
+            <div class="msg-avatar">🎧</div>
+            <div class="msg-bubble assistant-bubble">
+                <div class="msg-sender-name">
+                    <span>MP3aud.io Assistant</span>
+                    <span class="msg-time">${nowStr}</span>
+                </div>
+                <div class="msg-text">
+                    <p>I received your <strong>${files.length} media ${files.length === 1 ? 'file' : 'files'}</strong>! Processing with your selected audio &amp; metadata enhancements now:</p>
+                </div>
+                <div class="bubble-conversion-container">
+                    <div class="bubble-conversion-box">
+                        <div class="bubble-conversion-header">
+                            <span class="conv-status-label">📤 Uploading media files...</span>
+                            <span class="conv-pct-label">10%</span>
+                        </div>
+                        <div class="bubble-progress-track">
+                            <div class="bubble-progress-fill" style="width: 10%;"></div>
+                        </div>
+                        <div class="conv-action-slot"></div>
+                    </div>
+                </div>
+            </div>
+        `;
+        chatMessages.appendChild(row);
+        scrollToBottom();
+
+        const box = row.querySelector('.bubble-conversion-box');
+        const updateBox = (label, pct, readyUrl = null, readyLabel = null) => {
+            const lbl = box.querySelector('.conv-status-label');
+            const pctEl = box.querySelector('.conv-pct-label');
+            const fill = box.querySelector('.bubble-progress-fill');
+            const slot = box.querySelector('.conv-action-slot');
+            if (lbl) lbl.textContent = label;
+            if (pctEl) pctEl.textContent = `${Math.round(pct)}%`;
+            if (fill) fill.style.width = `${Math.max(5, Math.min(100, pct))}%`;
+            if (readyUrl && slot) {
+                slot.innerHTML = `<a href="${readyUrl}" class="bubble-ready-download-link" target="_blank" download>✅ ${readyLabel || 'Download Processed Files'}</a>`;
+            }
+        };
+
+        try {
+            const sessionId = (crypto && crypto.randomUUID) ? crypto.randomUUID() : ('sess_' + Date.now());
+            const formData = new FormData();
+            formData.append('session_id', sessionId);
+            files.forEach(f => formData.append('files', f));
+            formData.append('auto_add_album_art', autoAddAlbumArtInput ? String(autoAddAlbumArtInput.checked) : 'true');
+            formData.append('increase_quality', increaseQualityInput ? String(increaseQualityInput.checked) : 'false');
+            formData.append('video_to_mp3', videoToMp3Input ? String(videoToMp3Input.checked) : 'false');
+            formData.append('attach_lyrics', attachLyricsInput ? String(attachLyricsInput.checked) : 'false');
+
+            const resp = await fetch(`${BACKEND_URL}/process_local_files`, {
+                method: 'POST',
+                body: formData
+            });
+            const data = await resp.json();
+            if (!resp.ok) {
+                if (data.requires_payment) {
+                    updateBox(`⚠️ ${data.error}`, 0);
+                    openModal('accountModal');
+                    return;
+                }
+                throw new Error(data.error || 'Upload failed');
+            }
+            pollConversionJobInChat(sessionId, files.length === 1, videoToMp3Input && videoToMp3Input.checked, { title: files[0].name }, updateBox);
+            checkAuthStatus();
+        } catch (err) {
+            updateBox(`⚠️ Upload error: ${err.message}`, 0);
+        }
+    }
+
+    if (attachFileBtn && fileInput) {
+        attachFileBtn.addEventListener('click', () => fileInput.click());
+        fileInput.addEventListener('change', () => setPendingFiles(fileInput.files));
+    }
+    if (clearAttachedFilesBtn) {
+        clearAttachedFilesBtn.addEventListener('click', () => {
+            pendingFiles = [];
+            if (fileInput) fileInput.value = '';
+            if (attachedFilesPreview) attachedFilesPreview.classList.add('hidden');
+        });
+    }
+
+    // Drag and drop files anywhere into window
+    let dragCounter = 0;
+    window.addEventListener('dragenter', (e) => {
+        if (e.dataTransfer && Array.from(e.dataTransfer.types || []).includes('Files')) {
+            dragCounter++;
+            if (dragDropOverlay) dragDropOverlay.classList.remove('hidden');
+        }
+    });
+    window.addEventListener('dragleave', () => {
+        dragCounter = Math.max(0, dragCounter - 1);
+        if (dragCounter === 0 && dragDropOverlay) dragDropOverlay.classList.add('hidden');
+    });
+    window.addEventListener('drop', (e) => {
+        dragCounter = 0;
+        if (dragDropOverlay) dragDropOverlay.classList.add('hidden');
+        if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+            setPendingFiles(e.dataTransfer.files);
+            handleSendLocalFilesInChat();
         }
     });
 
-    // --- MOBILE HEADER NAV DRAWER TOGGLE ---
-    const menuToggle = document.querySelector('.menu-toggle');
-    const headerNav = document.querySelector('.header-nav');
-    if (menuToggle && headerNav) {
-        menuToggle.addEventListener('click', (e) => {
-            e.stopPropagation();
-            headerNav.classList.toggle('open');
+    // --- Composer Input & Quick Prompt Wiring ---
+    if (chatComposerForm) {
+        chatComposerForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            sendUserMessage();
         });
+    }
+    if (chatInput) {
+        chatInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendUserMessage();
+            }
+        });
+        chatInput.addEventListener('input', () => {
+            chatInput.style.height = 'auto';
+            chatInput.style.height = Math.min(110, chatInput.scrollHeight) + 'px';
+        });
+    }
 
-        // Close nav if user clicks outside of it on mobile
-        document.addEventListener('click', (e) => {
-            if (headerNav.classList.contains('open') && !headerNav.contains(e.target) && e.target !== menuToggle) {
-                headerNav.classList.remove('open');
+    document.querySelectorAll('[data-prompt]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const promptText = btn.getAttribute('data-prompt');
+            toggleSidebar(false);
+            sendUserMessage(promptText);
+        });
+    });
+
+    // --- Voice Input (Web Speech API) ---
+    if (voiceInputBtn) {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (SpeechRecognition) {
+            const recognition = new SpeechRecognition();
+            recognition.lang = 'en-US';
+            recognition.interimResults = false;
+
+            recognition.onstart = () => {
+                voiceInputBtn.classList.add('recording');
+                showToast('Listening... speak a song, artist, or playlist vibe!');
+            };
+            recognition.onend = () => {
+                voiceInputBtn.classList.remove('recording');
+            };
+            recognition.onresult = (event) => {
+                const transcript = event.results[0][0].transcript;
+                if (transcript) {
+                    if (chatInput) chatInput.value = transcript;
+                    sendUserMessage(transcript);
+                }
+            };
+            voiceInputBtn.addEventListener('click', () => {
+                try { recognition.start(); } catch (e) { recognition.stop(); }
+            });
+        } else {
+            voiceInputBtn.addEventListener('click', () => {
+                showToast('Voice dictation is not supported in this browser.', 'info');
+            });
+        }
+    }
+
+    // --- WhatsApp & Telegram Bot Info & Webhook Binding ---
+    async function loadBotConfig() {
+        try {
+            const res = await fetch(`${BACKEND_URL}/api/assistant/bot-info`);
+            if (!res.ok) return;
+            const info = await res.json();
+            if (info.telegram_url) {
+                const sTg = document.getElementById('sidebarTelegramLink');
+                const mTg = document.getElementById('modalTelegramBtn');
+                const hTg = document.getElementById('tgBotHandleDisplay');
+                const qTg = document.getElementById('tgQrImage');
+                if (sTg) sTg.href = info.telegram_url;
+                if (mTg) mTg.href = info.telegram_url;
+                if (hTg && info.telegram_bot_username) hTg.textContent = info.telegram_bot_username;
+                if (qTg) qTg.src = `https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=${encodeURIComponent(info.telegram_url)}`;
+            }
+            if (info.whatsapp_url) {
+                const sWa = document.getElementById('sidebarWhatsappLink');
+                const mWa = document.getElementById('modalWhatsappBtn');
+                const qWa = document.getElementById('waQrImage');
+                if (sWa) sWa.href = info.whatsapp_url;
+                if (mWa) mWa.href = info.whatsapp_url;
+                if (qWa) qWa.src = `https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=${encodeURIComponent(info.whatsapp_url)}`;
+            }
+        } catch (e) { }
+    }
+    loadBotConfig();
+
+    const bindTelegramWebhookBtn = document.getElementById('bindTelegramWebhookBtn');
+    if (bindTelegramWebhookBtn) {
+        bindTelegramWebhookBtn.addEventListener('click', async () => {
+            const tokenInput = document.getElementById('tgBotTokenInput');
+            const statusMsg = document.getElementById('botSetupStatusMsg');
+            const botToken = tokenInput ? tokenInput.value.trim() : '';
+            if (statusMsg) statusMsg.textContent = 'Registering Telegram webhook...';
+            try {
+                const res = await fetch(`${BACKEND_URL}/api/bot/setup-telegram`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ bot_token: botToken })
+                });
+                const data = await res.json();
+                if (res.ok && data.ok) {
+                    if (statusMsg) statusMsg.innerHTML = `<span style="color:#4ade80;">✅ Telegram Webhook bound! Message your bot now.</span>`;
+                } else {
+                    if (statusMsg) statusMsg.innerHTML = `<span style="color:#f87171;">⚠️ ${escapeHtml(data.description || data.error || 'Failed to bind webhook')}</span>`;
+                }
+            } catch (e) {
+                if (statusMsg) statusMsg.innerHTML = `<span style="color:#f87171;">⚠️ Could not reach backend webhook endpoint.</span>`;
             }
         });
     }
 
-    // --- FAQ ACCORDION TOGGLE LOGIC ---
-    const faqTriggers = document.querySelectorAll('.faq-trigger');
-    faqTriggers.forEach(trigger => {
-        trigger.addEventListener('click', () => {
-            const faqItem = trigger.parentElement;
-            const panel = faqItem.querySelector('.faq-panel');
-            const isActive = faqItem.classList.contains('active');
+    // --- Authentication, Magic Link & Stripe Checkout Integration ---
+    async function checkAuthStatus() {
+        try {
+            const res = await fetch(`${BACKEND_URL}/auth/me`);
+            if (!res.ok) return;
+            const data = await res.json();
+            if (data.token) localStorage.setItem('session_token', data.token);
 
-            // Close all other panels for accordion effect
-            document.querySelectorAll('.faq-item').forEach(item => {
-                if (item !== faqItem) {
-                    item.classList.remove('active');
-                    const otherPanel = item.querySelector('.faq-panel');
-                    if (otherPanel) otherPanel.style.maxHeight = null;
-                    const otherTrigger = item.querySelector('.faq-trigger');
-                    if (otherTrigger) otherTrigger.setAttribute('aria-expanded', 'false');
-                }
-            });
+            const credits = data.paid_track_credits || 0;
+            if (paidCreditsDisplay) paidCreditsDisplay.textContent = credits;
+            if (headerPaidCreditsDisplay) headerPaidCreditsDisplay.textContent = credits;
 
-            // Toggle active state
-            faqItem.classList.toggle('active');
-
-            if (isActive) {
-                panel.style.maxHeight = null;
-                trigger.setAttribute('aria-expanded', 'false');
+            if (data.authenticated && data.email) {
+                if (userDashboard) userDashboard.classList.remove('hidden');
+                if (guestPricingGrid) guestPricingGrid.classList.add('hidden');
+                if (userEmailDisplay) userEmailDisplay.textContent = data.email;
+                if (sidebarAccountLabel) sidebarAccountLabel.textContent = data.email;
+                if (sidebarAccountSub) sidebarAccountSub.textContent = `Logged In • Priority Queue Active`;
+                if (headerAccountBtnText) headerAccountBtnText.textContent = `${credits} Credits`;
             } else {
-                panel.style.maxHeight = panel.scrollHeight + 'px';
-                trigger.setAttribute('aria-expanded', 'true');
+                if (userDashboard) userDashboard.classList.add('hidden');
+                if (guestPricingGrid) guestPricingGrid.classList.remove('hidden');
+                if (sidebarAccountLabel) sidebarAccountLabel.textContent = 'Free Guest Pass';
+                if (sidebarAccountSub) sidebarAccountSub.textContent = '5 Free Tracks/Req • Tap for Credits';
+                if (headerAccountBtnText) headerAccountBtnText.textContent = 'Sign In / Credits';
+            }
+        } catch (e) { }
+    }
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const magicToken = urlParams.get('token');
+    if (magicToken) {
+        fetch(`${BACKEND_URL}/auth/verify`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ token: magicToken })
+        })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success && data.token) {
+                    localStorage.setItem('session_token', data.token);
+                    showToast('Logged in! Your credits are ready.', 'success');
+                    checkAuthStatus();
+                } else {
+                    showToast(data.error || 'Login link expired.', 'error');
+                }
+                window.history.replaceState({}, document.title, window.location.pathname);
+            })
+            .catch(() => { });
+    } else {
+        checkAuthStatus();
+    }
+
+    if (urlParams.get('success')) {
+        showToast('Payment successful! +350 Track Credits added.', 'success');
+        window.history.replaceState({}, document.title, window.location.pathname);
+        checkAuthStatus();
+    } else if (urlParams.get('canceled')) {
+        showToast('Checkout canceled.', 'info');
+        window.history.replaceState({}, document.title, window.location.pathname);
+    }
+
+    // Handle deep-linked query (?q= or ?url=) from WhatsApp / Telegram / Share links
+    const initialQuery = urlParams.get('q') || urlParams.get('url');
+    if (initialQuery) {
+        window.history.replaceState({}, document.title, window.location.pathname);
+        setTimeout(() => sendUserMessage(initialQuery), 300);
+    }
+
+    if (sendLinkBtn && loginEmail) {
+        sendLinkBtn.addEventListener('click', async () => {
+            const email = loginEmail.value.trim();
+            if (!email) {
+                if (authMessage) authMessage.innerHTML = `<span style="color:#f87171; font-size:0.78rem;">Please enter your email address.</span>`;
+                return;
+            }
+            sendLinkBtn.disabled = true;
+            sendLinkBtn.textContent = 'Sending...';
+            try {
+                const res = await fetch(`${BACKEND_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email })
+                });
+                const data = await res.json();
+                if (res.ok && data.success) {
+                    if (authMessage) authMessage.innerHTML = `<span style="color:#4ade80; font-size:0.78rem;">✅ Magic login link sent! Check your email inbox.</span>`;
+                } else {
+                    if (authMessage) authMessage.innerHTML = `<span style="color:#f87171; font-size:0.78rem;">⚠️ ${escapeHtml(data.error || 'Failed to send link')}</span>`;
+                }
+            } catch (e) {
+                if (authMessage) authMessage.innerHTML = `<span style="color:#f87171; font-size:0.78rem;">⚠️ Network error sending login link.</span>`;
+            } finally {
+                sendLinkBtn.disabled = false;
+                sendLinkBtn.textContent = 'Send Login Link';
             }
         });
-    });
+    }
 
-    // --- FETCH GLOBAL STATS ON LOAD ---
-    const fetchGlobalStats = async () => {
-        try {
-            const res = await fetch(`${BACKEND_URL}/api/stats`);
-            const data = await res.json();
-            if (data.success && data.total_tracks) {
-                const globalCountVal = document.getElementById('globalCountVal');
-                if (globalCountVal) {
-                    globalCountVal.textContent = data.total_tracks.toLocaleString();
+    if (buyCreditsBtn) {
+        buyCreditsBtn.addEventListener('click', async () => {
+            buyCreditsBtn.disabled = true;
+            buyCreditsBtn.textContent = 'Redirecting to Stripe...';
+            try {
+                const res = await fetch(`${BACKEND_URL}/create-checkout-session`, { method: 'POST' });
+                const data = await res.json();
+                if (data.url) {
+                    window.location.href = data.url;
+                } else {
+                    showToast(data.error || 'Please sign in first.', 'error');
+                    buyCreditsBtn.disabled = false;
+                    buyCreditsBtn.textContent = 'Buy 350 Credits ($3.99)';
                 }
+            } catch (e) {
+                showToast('Could not start checkout.', 'error');
+                buyCreditsBtn.disabled = false;
+                buyCreditsBtn.textContent = 'Buy 350 Credits ($3.99)';
             }
-        } catch (err) {
-            console.error("Failed to fetch global stats:", err);
-        }
-    };
+        });
+    }
 
-    fetchGlobalStats();
-    window.fetchGlobalStats = fetchGlobalStats;
-
-    // --- MOBILE QR CODE BRIDGE TOGGLE ---
-    window.toggleRingtoneQr = function() {
-        const box = document.getElementById('ringtoneQrBox');
-        if (box) {
-            box.style.display = box.style.display === 'none' ? 'flex' : 'none';
-        }
-    };
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', async () => {
+            localStorage.removeItem('session_token');
+            try { await fetch(`${BACKEND_URL}/auth/logout`, { method: 'POST' }); } catch (e) { }
+            checkAuthStatus();
+            showToast('Signed out.');
+        });
+    }
 });

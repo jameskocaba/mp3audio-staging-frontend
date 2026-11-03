@@ -4,44 +4,40 @@
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
-    <title>Audio Spectrogram &amp; True Bitrate Inspector | MP3aud.io</title>
-    <meta name="title" content="Audio Spectrogram &amp; True Bitrate Inspector | MP3aud.io">
+    <title>MP3aud.io | AI Text Messaging Personal Assistant for Music, Tracks &amp; Playlists</title>
+    <meta name="title" content="MP3aud.io | AI Text Messaging Personal Assistant for Music, Tracks &amp; Playlists">
     <meta name="description"
-        content="Free online audio spectrogram analyzer and true bitrate inspector. Test MP3s, detect fake 320kbps upscales, inspect frequency cutoffs up to 22kHz, and check audio quality in your browser.">
+        content="Text MP3aud.io on Web, WhatsApp, or Telegram to receive curated music tracks, playlists, and 320kbps MP3/ZIP downloads with HD album art directly in the messaging app.">
     <meta name="keywords"
-        content="audio spectrogram online, check true mp3 bitrate, detect fake 320kbps mp3, online frequency analyzer, spek alternative online, test audio quality, audio purity inspector, check audio clipping, mp3 bit rate checker">
+        content="AI music assistant, text for music, WhatsApp music bot, Telegram music bot, AI playlist generator, MP3 chat assistant, download MP3 playlist, 320kbps music assistant, custom ringtone bot, MP3aud.io">
     <meta name="author" content="MP3aud.io">
     <meta name="robots" content="index, follow">
-    <link rel="canonical" href="https://mp3aud.io/audio-inspector.html">
+    <link rel="canonical" href="https://mp3aud.io/">
 
-    <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
-    <meta property="og:url" content="https://mp3aud.io/audio-inspector.html">
+    <meta property="og:url" content="https://mp3aud.io/">
     <meta property="og:site_name" content="MP3aud.io">
-    <meta property="og:title" content="Audio Spectrogram &amp; True Bitrate Inspector | MP3aud.io">
+    <meta property="og:title" content="MP3aud.io | Text Messaging Personal Assistant for Music">
     <meta property="og:description"
-        content="Free online audio spectrogram analyzer and true bitrate inspector. Test MP3s, detect fake 320kbps upscales, inspect frequency cutoffs up to 22kHz, and check audio quality in your browser.">
-    <meta property="og:image" content="https://mp3aud.io/og-image.png">
-    <meta property="og:image:width" content="1200">
-    <meta property="og:image:height" content="630">
-    <meta property="og:image:alt" content="Audio Spectrogram Inspector - MP3aud.io">
+        content="Text MP3aud.io for any song, artist, or mood. Receive playable audio bubbles and 1-click MP3 or playlist ZIP downloads directly in your messaging app.">
+    <meta property="og:image" content="https://mp3aud.io/og-image.jpg">
     <meta property="og:locale" content="en_US">
 
-    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:url" content="https://mp3aud.io/audio-inspector.html">
-    <meta name="twitter:title" content="Audio Spectrogram &amp; True Bitrate Inspector | MP3aud.io">
+    <meta name="twitter:title" content="MP3aud.io | Text Messaging Personal Assistant for Music">
     <meta name="twitter:description"
-        content="Free online audio spectrogram analyzer and true bitrate inspector. Test MP3s, detect fake 320kbps upscales, inspect frequency cutoffs up to 22kHz, and check audio quality in your browser.">
-    <meta name="twitter:image" content="https://mp3aud.io/og-image.png">
+        content="Text MP3aud.io for any song, artist, or mood. Receive playable audio bubbles and 1-click MP3 or playlist ZIP downloads directly in your messaging app.">
+    <meta name="twitter:image" content="https://mp3aud.io/og-image.jpg">
 
     <link rel="icon" type="image/png" href="favicon.png">
     <link rel="apple-touch-icon" href="favicon.png">
-    <meta name="theme-color" content="#FF5500">
+    <meta name="theme-color" content="#0b141a">
 
     <link rel="preconnect" href="https://www.googletagmanager.com">
+    <link rel="dns-prefetch" href="https://audio-converter-backend.onrender.com">
+    <link rel="dns-prefetch" href="https://itunes.apple.com">
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-VGVP90K1M4"></script>
     <script>
         window.dataLayer = window.dataLayer || [];
@@ -52,16 +48,15 @@
 
     <link rel="stylesheet" href="style.css">
 
-    <!-- Schema.org JSON-LD Structured Data -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
       "@type": "WebApplication",
-      "name": "MP3aud.io - Spectrogram & Audio Bitrate Inspector",
-      "url": "https://mp3aud.io/audio-inspector.html",
-      "description": "Free online audio spectrogram analyzer and true bitrate inspector. Detect fake 320kbps files, inspect frequency cutoffs, and check audio dynamic range.",
+      "name": "MP3aud.io Music Messaging Assistant",
+      "url": "https://mp3aud.io/",
+      "description": "AI text messaging personal assistant for music. Text any song, artist, mood, or link on Web, WhatsApp, or Telegram and receive playable audio bubbles and 1-click MP3/ZIP downloads.",
       "applicationCategory": "MultimediaApplication",
-      "operatingSystem": "WebBrowser",
+      "operatingSystem": "Web, iOS, Android, WhatsApp, Telegram",
       "offers": {
         "@type": "Offer",
         "price": "0",
@@ -69,767 +64,674 @@
       }
     }
     </script>
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "FAQPage",
-      "mainEntity": [
-        {
-          "@type": "Question",
-          "name": "How does the True Bitrate Inspector detect fake 320kbps MP3s?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "When a 128kbps MP3 is re-encoded to 320kbps, its metadata changes but its high-frequency content remains capped at 15–16 kHz. Our Web Audio spectrum engine performs Fast Fourier Transform (FFT) analysis to measure energy above 16kHz and 20kHz, instantly exposing fake upscales."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "What frequency cutoff indicates true 320kbps or lossless audio?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "True 320kbps MP3s and lossless FLAC/WAV files extend smoothly to 20 kHz and beyond (up to the Nyquist limit of 22.05 kHz for 44.1kHz audio). In contrast, 128kbps cuts off at 15–16kHz, and 192kbps cuts off at roughly 18–19kHz."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Does this tool upload my audio to any server?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "No. The entire spectrogram analysis, frequency measurement, and bitrate inspection runs 100% locally in your web browser using HTML5 Canvas and the Web Audio API. Your files never leave your computer."
-          }
-        }
-      ]
-    }
-    </script>
 </head>
 
-<body>
-    <!-- Standard Fixed App Header -->
-    <header class="app-header">
-        <div class="header-container">
-            <div class="header-brand">
-                <button class="menu-toggle" aria-label="Toggle Navigation">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                        stroke-linejoin="round">
-                        <line x1="3" y1="12" x2="21" y2="12"></line>
-                        <line x1="3" y1="6" x2="21" y2="6"></line>
-                        <line x1="3" y1="18" x2="21" y2="18"></line>
-                    </svg>
-                </button>
-                <a href="index.html" class="header-brand">
-                    <img src="logo.webp" alt="MP3aud.io Logo" class="header-logo">
-                </a>
-            </div>
-            <nav class="header-nav" aria-label="Main Navigation">
-                <ul class="header-nav-list">
-                    <li><a href="index.html" class="header-nav-link">Converter</a></li>
-                    <li><a href="video-to-ringtone.html" class="header-nav-link">Ringtone Maker</a></li>
-                    <li><a href="ai-audio-enhancer.html" class="header-nav-link">Audio Enhancer</a></li>
-                    <li><a href="audio-inspector.html" class="header-nav-link active">Audio Inspector</a></li>
-                    <li><a href="supported-sites.html" class="header-nav-link">Supported Sites</a></li>
-                    <li><a href="top-album-art.html" class="header-nav-link">Top Album Art</a></li>
-                    <li><a href="shop.html" class="header-nav-link">Gear Shop</a></li>
-                    <li><a href="blog/index.html" class="header-nav-link">Blog</a></li>
-                </ul>
-            </nav>
-            <div class="header-actions">
-                <a href="index.html#accountSection" id="headerLoginLink" class="header-auth-link">Sign In / Pricing</a>
-                <div id="headerUserNav" class="header-user-badge hidden">
-                    <a href="index.html#accountSection" class="header-credit-chip" title="View credits &amp; account">
-                        <span class="header-credit-icon">⚡</span>
-                        <span class="header-credit-text"><strong id="headerPaidCreditsDisplay">0</strong> Credits</span>
-                    </a>
-                    <button id="headerLogoutBtn" class="header-logout-chip" title="Sign Out">Log Out</button>
-                </div>
-                <a href="https://www.instagram.com/mp3aud.io?igsh=ZXljNzMxaGtqdWwz&utm_source=qr" target="_blank"
-                    aria-label="Follow us on Instagram"
-                    style="color: #64748b; display: flex; align-items: center; transition: color 0.2s;">
-                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"
-                        stroke-linecap="round" stroke-linejoin="round">
-                        <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
-                        <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
-                        <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
-                    </svg>
-                </a>
-            </div>
+<body class="messenger-body">
+    <!-- Full-Window File Drag & Drop Overlay -->
+    <div id="dragDropOverlay" class="drag-drop-overlay hidden">
+        <div class="drag-drop-card">
+            <div class="drag-drop-icon">🎵</div>
+            <h3>Drop Audio or Video Files into Chat</h3>
+            <p>MP3aud.io will enhance to 320kbps, embed HD album art &amp; ID3 tags, and send them back in this thread</p>
         </div>
-    </header>
+    </div>
 
-    <!-- Main Content Area with Natural Page Scrolling -->
-    <main class="main-content">
-        <div class="content-container">
-            <!-- Header Eyebrow & Hero -->
-            <header class="logo-container inspector-hero">
-                <div class="header-eyebrow">
-                    <svg viewBox="0 0 24 24" width="10" height="10" fill="#FF5500">
-                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+    <!-- Mobile Sidebar Backdrop -->
+    <div id="sidebarBackdrop" class="sidebar-backdrop hidden"></div>
+
+    <div class="messenger-app-shell">
+        <!-- =====================================================
+             LEFT SIDEBAR: CHANNELS, VIBE STARTERS, CHAT HISTORY & ACCOUNT
+             ===================================================== -->
+        <aside id="assistantSidebar" class="assistant-sidebar" aria-label="Messaging Assistant Sidebar">
+            <!-- Brand Top Header -->
+            <div class="sidebar-header">
+                <a href="index.html" class="sidebar-brand">
+                    <img src="logo.webp" alt="MP3aud.io" class="sidebar-logo" onerror="this.style.display='none'">
+                    <div class="sidebar-brand-text">
+                        <span class="brand-title">MP3aud<span class="accent">.io</span></span>
+                        <span class="brand-subtitle"><span class="online-dot"></span> Music Text Assistant</span>
+                    </div>
+                </a>
+                <button type="button" id="closeSidebarBtn" class="mobile-close-sidebar" aria-label="Close sidebar">
+                    &times;
+                </button>
+            </div>
+
+            <!-- New Chat Action -->
+            <div class="sidebar-new-chat-wrap">
+                <button type="button" id="newChatBtn" class="new-chat-btn">
+                    <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.5"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
                     </svg>
-                    Free Client-Side Diagnostic Tool
+                    <span>New Music Request</span>
+                </button>
+            </div>
+
+            <!-- Messaging Apps Integration Card (WhatsApp & Telegram) -->
+            <div class="sidebar-section messaging-channels-section">
+                <div class="sidebar-section-header">
+                    <span>TEXT US ON YOUR PHONE</span>
+                    <button type="button" class="channel-setup-link" onclick="openModal('botConnectModal')">QR &amp; Setup</button>
                 </div>
-                <h1 class="main-headline">Spectrogram &amp; <span class="accent">True Bitrate</span> Inspector</h1>
-                <h2 class="main-subheadline" style="margin: 0 auto 14px auto; text-align: center; max-width: 820px;">
-                    Test your audio files for real high-frequency fidelity. Detect fake 320kbps upscales, measure high-frequency shelf cutoffs up to 22kHz, and audit dynamic range with zero file uploads.
-                </h2>
+                <div class="channel-buttons-grid">
+                    <a id="sidebarTelegramLink" href="https://t.me/MP3audioBot" target="_blank" rel="noopener"
+                        class="channel-pill telegram-pill" title="Open MP3aud.io Assistant in Telegram">
+                        <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+                            <path
+                                d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z" />
+                        </svg>
+                        <div class="channel-pill-text">
+                            <strong>Telegram Bot</strong>
+                            <span>@MP3audioBot</span>
+                        </div>
+                    </a>
+
+                    <a id="sidebarWhatsappLink"
+                        href="https://wa.me/?text=Send%20me%20a%20chill%20late-night%20synthwave%20playlist"
+                        target="_blank" rel="noopener" class="channel-pill whatsapp-pill"
+                        title="Open MP3aud.io Assistant in WhatsApp">
+                        <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+                            <path
+                                d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.617-.087-.116-.708-.94-.708-1.793s.448-1.273.607-1.446c.159-.173.346-.217.462-.217l.332.006c.106.005.249-.04.39.298.144.347.491 1.2.534 1.287.043.087.072.188.014.304-.058.116-.087.188-.173.289l-.26.304c-.087.086-.177.18-.076.354.101.174.449.741.964 1.201.662.591 1.221.774 1.394.86s.274.072.376-.043c.101-.116.433-.506.549-.68.116-.173.231-.145.39-.087s1.011.477 1.184.564.289.13.332.202c.045.072.045.419-.1.824zm-3.423-14.416c-6.627 0-12 5.373-12 12 0 2.126.556 4.124 1.533 5.862l-1.533 5.602 5.736-1.504c1.693.922 3.633 1.447 5.695 1.447 6.627 0 12-5.373 12-12s-5.373-12-11.431-11.407z" />
+                        </svg>
+                        <div class="channel-pill-text">
+                            <strong>WhatsApp Bot</strong>
+                            <span>Instant Audio DM</span>
+                        </div>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Instant Vibe & Playlist Prompts -->
+            <div class="sidebar-section">
+                <div class="sidebar-section-header">
+                    <span>INSTANT VIBE REQUESTS</span>
+                </div>
+                <div class="vibe-prompts-list">
+                    <button type="button" class="vibe-prompt-btn"
+                        data-prompt="Send me a chill late-night synthwave playlist">
+                        <span class="vibe-emoji">🌙</span>
+                        <div class="vibe-text">
+                            <strong>Late-Night Synthwave</strong>
+                            <span>6 retro analog tracks</span>
+                        </div>
+                    </button>
+                    <button type="button" class="vibe-prompt-btn"
+                        data-prompt="Make me a high-energy 90s hip hop workout playlist">
+                        <span class="vibe-emoji">🏋️</span>
+                        <div class="vibe-text">
+                            <strong>90s Hip-Hop Workout</strong>
+                            <span>Boom-bap &amp; gym anthems</span>
+                        </div>
+                    </button>
+                    <button type="button" class="vibe-prompt-btn"
+                        data-prompt="Send me a rainy window lo-fi study beats playlist">
+                        <span class="vibe-emoji">☕</span>
+                        <div class="vibe-text">
+                            <strong>Lo-Fi Study Beats</strong>
+                            <span>Chill focus instrumentals</span>
+                        </div>
+                    </button>
+                    <button type="button" class="vibe-prompt-btn"
+                        data-prompt="Send me a warm coffeehouse acoustic playlist">
+                        <span class="vibe-emoji">🎸</span>
+                        <div class="vibe-text">
+                            <strong>Acoustic Coffeehouse</strong>
+                            <span>Stripped-back guitar &amp; vocals</span>
+                        </div>
+                    </button>
+                    <button type="button" class="vibe-prompt-btn"
+                        data-prompt="Send me a stadium classic rock legends playlist">
+                        <span class="vibe-emoji">⚡</span>
+                        <div class="vibe-text">
+                            <strong>Classic Rock Legends</strong>
+                            <span>Iconic guitar riffs &amp; anthems</span>
+                        </div>
+                    </button>
+                    <button type="button" class="vibe-prompt-btn"
+                        data-prompt="Send me a smooth R&amp;B slow jams playlist">
+                        <span class="vibe-emoji">✨</span>
+                        <div class="vibe-text">
+                            <strong>Silk &amp; Soul R&amp;B</strong>
+                            <span>Late-night slow jams</span>
+                        </div>
+                    </button>
+                    <button type="button" class="vibe-prompt-btn"
+                        data-prompt="Make me a custom phone ringtone of Blinding Lights by The Weeknd">
+                        <span class="vibe-emoji">📱</span>
+                        <div class="vibe-text">
+                            <strong>Custom Phone Ringtone</strong>
+                            <span>iPhone .M4R + Android .MP3</span>
+                        </div>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Saved / Recent Music Chats -->
+            <div class="sidebar-section sidebar-history-section">
+                <div class="sidebar-section-header">
+                    <span>RECENT REQUESTS</span>
+                    <button type="button" id="clearHistoryBtn" class="clear-history-link" title="Clear chat thread">Reset</button>
+                </div>
+                <div id="recentHistoryList" class="recent-history-list">
+                    <!-- Populated dynamically -->
+                </div>
+            </div>
+
+            <!-- User Account & Credits Footer -->
+            <div class="sidebar-footer">
+                <div class="sidebar-account-card" onclick="openModal('accountModal')" role="button" tabindex="0">
+                    <div class="account-avatar">
+                        <span id="sidebarAvatarIcon">⚡</span>
+                    </div>
+                    <div class="account-meta">
+                        <div class="account-name-row">
+                            <strong id="sidebarAccountLabel">Free Guest Pass</strong>
+                            <span class="account-credit-pill"><strong id="headerPaidCreditsDisplay">0</strong> Credits</span>
+                        </div>
+                        <span id="sidebarAccountSub" class="account-sub">5 Free Tracks/Req • Tap for Credits</span>
+                    </div>
+                </div>
+                <div class="sidebar-legal-links">
+                    <a href="#" onclick="openModal('ringtoneModal'); return false;">Ringtone Guide</a>
+                    <span>&middot;</span>
+                    <a href="#" onclick="openModal('aboutModal'); return false;">About</a>
+                    <span>&middot;</span>
+                    <a href="#" onclick="openModal('privacyModal'); return false;">Privacy</a>
+                    <span>&middot;</span>
+                    <a href="#" onclick="openModal('disclaimerModal'); return false;">Terms</a>
+                </div>
+            </div>
+        </aside>
+
+        <!-- =====================================================
+             MAIN MESSAGING CONVERSATION WINDOW
+             ===================================================== -->
+        <main class="chat-main">
+            <!-- Top Messaging App Bar -->
+            <header class="chat-header">
+                <div class="chat-header-left">
+                    <button type="button" id="openSidebarBtn" class="mobile-menu-btn" aria-label="Open sidebar">
+                        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor"
+                            stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="3" y1="12" x2="21" y2="12"></line>
+                            <line x1="3" y1="6" x2="21" y2="6"></line>
+                            <line x1="3" y1="18" x2="21" y2="18"></line>
+                        </svg>
+                    </button>
+
+                    <div class="assistant-contact-badge">
+                        <div class="assistant-avatar">
+                            <span>🎧</span>
+                            <span class="avatar-online-indicator"></span>
+                        </div>
+                        <div class="assistant-contact-info">
+                            <div class="contact-title-row">
+                                <h1>MP3aud.io Music Assistant</h1>
+                                <span class="verified-badge" title="Verified AI Music Assistant">✓</span>
+                            </div>
+                            <p id="assistantStatusText" class="contact-status-text">
+                                Online &bull; Text any song, artist, playlist vibe, or link
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Audio Delivery & Enhancement Toggles -->
+                <div class="chat-header-controls">
+                    <label class="chat-mode-chip" title="Automatically embed 1000px Apple Music Album Art &amp; ID3 Tags (Free for 1-5 tracks)">
+                        <input type="checkbox" id="autoAddAlbumArt" checked>
+                        <span class="chip-indicator"></span>
+                        <span>🎨 HD Cover Art</span>
+                    </label>
+
+                    <label class="chat-mode-chip" title="Enhance audio to 320kbps studio master bitrate (1 Credit / track)">
+                        <input type="checkbox" id="increaseQuality">
+                        <span class="chip-indicator"></span>
+                        <span>⚡ 320kbps</span>
+                    </label>
+
+                    <label class="chat-mode-chip" title="Include Apple iPhone .M4R &amp; Android .MP3 custom ringtones">
+                        <input type="checkbox" id="videoToMp3">
+                        <span class="chip-indicator"></span>
+                        <span>📱 Ringtone</span>
+                    </label>
+
+                    <label class="chat-mode-chip" title="Transcribe and embed AI lyrics into MP3 metadata (10 Credits / track)">
+                        <input type="checkbox" id="attachLyrics">
+                        <span class="chip-indicator"></span>
+                        <span>📝 Lyrics</span>
+                    </label>
+
+                    <button type="button" class="header-bot-connect-btn" onclick="openModal('botConnectModal')"
+                        title="Connect on WhatsApp or Telegram">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor"
+                            stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                        </svg>
+                        <span>WhatsApp / Telegram</span>
+                    </button>
+
+                    <button type="button" id="headerLoginLink" class="header-account-btn"
+                        onclick="openModal('accountModal')">
+                        <span>⚡</span>
+                        <span id="headerAccountBtnText">Sign In / Credits</span>
+                    </button>
+                </div>
             </header>
 
-            <!-- Main Inspector Tool Card -->
-            <section class="inspector-card" aria-label="Audio Quality and Spectrogram Inspector">
-                
-                <!-- Preset / Upload Selector -->
-                <div class="preset-tabs" role="tablist" style="margin-bottom: 20px;">
-                    <button class="preset-tab active" id="tabTrue320" role="tab" data-sample="studio">
-                        <span class="tab-icon">💎</span>
-                        <span class="tab-label">True 320kbps Master</span>
-                        <span class="tab-sub">20kHz+ Full Spectrum</span>
-                    </button>
-                    <button class="preset-tab" id="tabFake128" role="tab" data-sample="fake128">
-                        <span class="tab-icon">⚠️</span>
-                        <span class="tab-label">Fake 128k Upscale</span>
-                        <span class="tab-sub">15.5kHz Hard Cutoff</span>
-                    </button>
-                    <button class="preset-tab" id="tabMuffled" role="tab" data-sample="muffled">
-                        <span class="tab-icon">📻</span>
-                        <span class="tab-label">Muffled Cassette/Rip</span>
-                        <span class="tab-sub">10.5kHz Severe Roll-off</span>
-                    </button>
-                    <div class="preset-tab custom-tab" id="customFileTab" role="tab" tabindex="0">
-                        <span class="tab-icon">📂</span>
-                        <span class="tab-label" id="customTabLabel">Drop Your File</span>
-                        <span class="tab-sub" id="customTabSub">Inspect Any MP3 / FLAC</span>
-                        <input type="file" id="inspectorFileInput" accept="audio/*,.mp3,.wav,.flac,.aac,.ogg,.m4a,.wma,.opus" style="display: none;">
-                    </div>
+            <!-- Scrollable Message Thread -->
+            <section id="chatMessages" class="chat-messages" aria-live="polite" aria-label="Music conversation messages">
+                <div class="chat-date-divider">
+                    <span>ENCRYPTED MUSIC MESSENGER &bull; INSTANT MP3 &amp; PLAYLIST DELIVERY</span>
                 </div>
 
-                <!-- Dropzone Box -->
-                <div class="inspector-dropzone-wrapper" id="dropzoneWrapper">
-                    <label for="inspectorFileInput" class="inspector-dropzone" id="inspectorDropzone">
-                        <svg class="inspector-dropzone-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                            <polyline points="17 8 12 3 7 8"></polyline>
-                            <line x1="12" y1="3" x2="12" y2="15"></line>
+                <!-- Assistant Welcome Bubble -->
+                <div class="msg-row assistant-row">
+                    <div class="msg-avatar">🎧</div>
+                    <div class="msg-bubble assistant-bubble welcome-bubble">
+                        <div class="msg-sender-name">MP3aud.io Assistant <span class="msg-time">Just now</span></div>
+                        <div class="msg-text">
+                            <p>Hey! 👋 I'm your <strong>Personal Music Assistant</strong>. Text me like a friend whenever you want music—I'll reply right in this thread with <strong>playable audio bubbles</strong> and <strong>1-click MP3 or Playlist ZIP downloads</strong>.</p>
+                            <ul class="welcome-capabilities-list">
+                                <li>🎵 <strong>Ask for any playlist or mood:</strong> <em>"Send me a chill late-night synthwave playlist"</em> or <em>"90s hip hop workout mix"</em></li>
+                                <li>🎤 <strong>Ask for any song or artist:</strong> <em>"Send me Blinding Lights by The Weeknd"</em> or <em>"Top Daft Punk tracks"</em></li>
+                                <li>🔗 <strong>Paste any link or drop files:</strong> Paste a YouTube / SoundCloud / TikTok link or attach local video/audio files to extract 320kbps MP3s + custom phone ringtones.</li>
+                            </ul>
+                        </div>
+
+                        <!-- Quick-Start Suggestion Chips inside Chat -->
+                        <div class="welcome-quick-chips">
+                            <button type="button" class="quick-chip"
+                                data-prompt="Send me a chill late-night synthwave playlist">
+                                🌙 Chill Late-Night Synthwave Playlist
+                            </button>
+                            <button type="button" class="quick-chip"
+                                data-prompt="Send me Blinding Lights by The Weeknd">
+                                🔥 Blinding Lights — The Weeknd
+                            </button>
+                            <button type="button" class="quick-chip"
+                                data-prompt="Make me a 90s hip hop workout playlist">
+                                🏋️ 90s Hip-Hop Workout Mix
+                            </button>
+                            <button type="button" class="quick-chip"
+                                data-prompt="Send me a rainy lo-fi study beats playlist">
+                                ☕ Lo-Fi Study &amp; Chill Beats
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Persistent Floating Audio Player Bar (Shown when playing a track bubble) -->
+            <div id="miniPlayerBar" class="mini-player-bar hidden">
+                <div class="mini-player-track">
+                    <img id="miniPlayerArt" src="favicon.png" alt="Cover Art" class="mini-player-art">
+                    <div class="mini-player-info">
+                        <strong id="miniPlayerTitle">Track Title</strong>
+                        <span id="miniPlayerArtist">Artist Name</span>
+                    </div>
+                </div>
+                <div class="mini-player-controls">
+                    <button type="button" id="miniPrevBtn" class="mini-ctrl-btn" title="Previous Track" aria-label="Previous Track">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                            <polygon points="19 20 9 12 19 4 19 20"></polygon>
+                            <line x1="5" y1="19" x2="5" y2="5" stroke="currentColor" stroke-width="2"></line>
                         </svg>
-                        <div style="font-weight: 700; color: #f8fafc; font-size: 1.05rem; margin-bottom: 4px;">
-                            Drag &amp; Drop Any Audio File Here to Inspect Quality
-                        </div>
-                        <div style="font-size: 0.84rem; color: #94a3b8;">
-                            Supports MP3, FLAC, WAV, M4A, OGG, AAC &bull; 100% Private (Processed in your browser)
-                        </div>
-                    </label>
-                </div>
-
-                <!-- Live Spectrogram Visualizer Viewport -->
-                <div class="inspector-canvas-container">
-                    <canvas id="inspectorCanvas" class="inspector-canvas"></canvas>
-                    
-                    <!-- Overlay Grid & Cutoff Frequency Markers -->
-                    <div class="spectrogram-cutoff-overlay active">
-                        <div class="cutoff-grid-line line-20k">
-                            <span class="cutoff-tag">20 kHz — Studio Lossless &amp; True 320k</span>
-                            <span>20,000 Hz</span>
-                        </div>
-                        <div class="cutoff-grid-line line-16k">
-                            <span class="cutoff-tag">15.5–16 kHz — 128kbps Cutoff Threshold</span>
-                            <span>16,000 Hz</span>
-                        </div>
-                        <div class="cutoff-grid-line line-10k">
-                            <span class="cutoff-tag">10.5 kHz — Muffled Low-Bitrate Floor</span>
-                            <span>10,500 Hz</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Audio Health HUD Stats Grid -->
-                <div class="inspector-hud-grid">
-                    <div class="inspector-hud-item">
-                        <div class="hud-item-label">
-                            <span>Audio Purity Grade</span>
-                            <span id="purityGradeIcon">🟢</span>
-                        </div>
-                        <div class="grade-badge-display">
-                            <span class="purity-badge grade-a" id="purityBadge">GRADE A+ (STUDIO MASTER)</span>
-                        </div>
-                        <div class="hud-item-sub" id="purityDetail">Full harmonic presence up to 21.5kHz</div>
-                    </div>
-
-                    <div class="inspector-hud-item">
-                        <div class="hud-item-label">Estimated True Bitrate</div>
-                        <div class="hud-item-value" id="trueBitrateVal" style="color: #4ade80;">True 320 kbps HD</div>
-                        <div class="hud-item-sub" id="bitrateDetail">Lossless frequency response confirmed</div>
-                    </div>
-
-                    <div class="inspector-hud-item">
-                        <div class="hud-item-label">Max Frequency Cutoff</div>
-                        <div class="hud-item-value" id="cutoffFreqVal">21,400 Hz</div>
-                        <div class="hud-item-sub">Threshold: &gt; 20kHz (No artificial shelf)</div>
-                    </div>
-
-                    <div class="inspector-hud-item">
-                        <div class="hud-item-label">Mastering &amp; True Peak</div>
-                        <div class="hud-item-value" id="peakLoudnessVal">-0.8 dB</div>
-                        <div class="hud-item-sub" id="clippingStatus">Clean (Zero Clipping Detected)</div>
-                    </div>
-                </div>
-
-                <!-- Playback & Scrub Bar -->
-                <div class="player-controls-row">
-                    <button class="preview-play-btn" id="inspectorPlayBtn" aria-label="Play or pause audio">
-                        <svg id="playIcon" viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
-                            <polygon points="6 3 20 12 6 21 6 3"></polygon>
+                    </button>
+                    <button type="button" id="miniPlayPauseBtn" class="mini-play-btn" title="Play / Pause" aria-label="Play or Pause">
+                        <span id="miniPlayIcon">▶</span>
+                    </button>
+                    <button type="button" id="miniNextBtn" class="mini-ctrl-btn" title="Next Track" aria-label="Next Track">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                            <polygon points="5 4 15 12 5 20 5 4"></polygon>
+                            <line x1="19" y1="5" x2="19" y2="19" stroke="currentColor" stroke-width="2"></line>
                         </svg>
-                        <svg id="pauseIcon" viewBox="0 0 24 24" width="22" height="22" fill="currentColor" style="display: none;">
-                            <rect x="5" y="4" width="4" height="16" rx="1"></rect>
-                            <rect x="15" y="4" width="4" height="16" rx="1"></rect>
+                    </button>
+                </div>
+                <div class="mini-player-scrubber">
+                    <span id="miniCurrentTime" class="mini-time">0:00</span>
+                    <input type="range" id="miniSeekSlider" min="0" max="100" value="0" aria-label="Seek audio">
+                    <span id="miniTotalTime" class="mini-time">0:30</span>
+                </div>
+                <div class="mini-player-actions">
+                    <button type="button" id="miniDownloadMp3Btn" class="mini-dl-btn">
+                        ⬇ Full MP3
+                    </button>
+                    <button type="button" id="miniCloseBtn" class="mini-close-btn" aria-label="Close player">&times;</button>
+                </div>
+            </div>
+
+            <!-- Bottom Message Composer Bar -->
+            <footer class="chat-composer">
+                <!-- Hidden File Input for Uploading Audio/Video into Chat -->
+                <input type="file" id="fileInput" multiple
+                    accept="audio/*,video/*,.mp3,.wav,.flac,.aac,.ogg,.m4a,.wma,.mp4,.mov,.avi,.mkv,.webm"
+                    style="display: none;">
+
+                <div id="attachedFilesPreview" class="attached-files-preview hidden">
+                    <div class="attached-pill">
+                        <span id="attachedFilesLabel">📎 1 file attached</span>
+                        <button type="button" id="clearAttachedFilesBtn" aria-label="Remove attached files">&times;</button>
+                    </div>
+                </div>
+
+                <form id="chatComposerForm" class="composer-bar" onsubmit="return false;">
+                    <button type="button" id="attachFileBtn" class="composer-icon-btn"
+                        title="Attach local audio or video files to convert/tag in chat"
+                        aria-label="Attach audio or video files">
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor"
+                            stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <path
+                                d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48">
+                            </path>
                         </svg>
                     </button>
 
-                    <div class="time-scrub-container">
-                        <div class="scrub-track" id="inspectorScrubTrack" tabindex="0">
-                            <div class="scrub-fill" id="inspectorScrubFill" style="width: 0%;"></div>
-                        </div>
-                        <div class="time-display">
-                            <span id="inspectorTimeCurrent">0:00</span>
-                            <span id="inspectorTimeTotal">0:16</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Action / Funnel Card -->
-                <div class="inspector-cta-box" id="inspectorCtaBox">
-                    <div class="inspector-cta-text">
-                        <h4 id="ctaHeading">Detected Muffled Frequencies or Low Bitrate?</h4>
-                        <p id="ctaDesc">Use our AI Audio Enhancer to restore high frequencies, eliminate muddy resonance, and upscale to crystal-clear 320kbps HD.</p>
-                    </div>
-                    <a href="ai-audio-enhancer.html" class="preview-cta-btn" id="ctaButton">
-                        <span>Fix With AI Enhancer</span>
-                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <line x1="5" y1="12" x2="19" y2="12"></line>
-                            <polyline points="12 5 19 12 12 19"></polyline>
+                    <button type="button" id="voiceInputBtn" class="composer-icon-btn"
+                        title="Speak your song or playlist request" aria-label="Voice input">
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor"
+                            stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                            <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                            <line x1="12" y1="19" x2="12" y2="23"></line>
+                            <line x1="8" y1="23" x2="16" y2="23"></line>
                         </svg>
+                    </button>
+
+                    <textarea id="chatInput" rows="1"
+                        placeholder="Text MP3aud.io for any song, artist, playlist vibe, or paste a link..."
+                        aria-label="Message MP3aud.io"></textarea>
+
+                    <button type="submit" id="sendMessageBtn" class="composer-send-btn" aria-label="Send message">
+                        <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor"
+                            stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="22" y1="2" x2="11" y2="13"></line>
+                            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                        </svg>
+                    </button>
+                </form>
+            </footer>
+        </main>
+    </div>
+
+    <!-- =====================================================
+         MODAL 1: WHATSAPP & TELEGRAM BOT HUB (QR CODES + WEBHOOK SETUP)
+         ===================================================== -->
+    <div id="botConnectModal" class="modal" role="dialog" aria-labelledby="botConnectTitle" aria-hidden="true">
+        <div class="modal-content bot-modal-content">
+            <span class="close" onclick="closeModal('botConnectModal')" aria-label="Close modal">&times;</span>
+            <div class="bot-modal-header">
+                <span class="bot-eyebrow">📱 MOBILE MESSAGING INTEGRATION</span>
+                <h2 id="botConnectTitle">Text MP3aud.io on WhatsApp &amp; Telegram</h2>
+                <p>Chat with your personal music assistant directly from your phone's messaging app to receive playable tracks and 1-click MP3/ZIP downloads on the go.</p>
+            </div>
+
+            <div class="bot-cards-grid">
+                <!-- Telegram Bot Card -->
+                <div class="bot-connect-card telegram-card">
+                    <div class="bot-card-top">
+                        <div class="bot-platform-badge tg-badge">
+                            <strong>Telegram Bot</strong>
+                            <span id="tgBotHandleDisplay">@MP3audioBot</span>
+                        </div>
+                        <img id="tgQrImage"
+                            src="https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=https%3A%2F%2Ft.me%2FMP3audioBot"
+                            alt="Telegram Bot QR Code" class="bot-qr-img">
+                    </div>
+                    <p class="bot-card-desc">Send any song title, artist, mood playlist, or link and receive native playable audio bubbles + full ZIP archives inside Telegram.</p>
+                    <a id="modalTelegramBtn" href="https://t.me/MP3audioBot" target="_blank" rel="noopener"
+                        class="bot-launch-btn tg-launch-btn">
+                        Open in Telegram &rarr;
                     </a>
                 </div>
 
-            </section>
-
-            <!-- Educational & Guide Cards -->
-            <section class="inspector-edu-grid" aria-label="Audio Inspection Guide">
-                <article class="edu-card">
-                    <span class="edu-card-icon">🔍</span>
-                    <h3>What is a Fake 320kbps MP3?</h3>
-                    <p>Many free ripping websites and download tools take low-quality 96kbps or 128kbps audio and re-encode the file container with a 320kbps header. While the file size increases, the audio quality remains muffled because lost high frequencies cannot be recovered by simple re-encoding.</p>
-                </article>
-
-                <article class="edu-card">
-                    <span class="edu-card-icon">📈</span>
-                    <h3>How to Read Frequency Cutoffs</h3>
-                    <p>Standard human hearing extends from 20 Hz to 20,000 Hz (20 kHz). A true 320kbps or lossless FLAC track will show rich spectral energy reaching up to 20–22 kHz. If an audio file abruptly shelves off at 15–16 kHz with complete silence above, it was originally compressed at 128kbps.</p>
-                </article>
-
-                <article class="edu-card">
-                    <span class="edu-card-icon">🔊</span>
-                    <h3>True Peak &amp; Clipping Detection</h3>
-                    <p>Over-compressed and brickwalled audio often clips beyond 0.0 dBFS, introducing harsh digital distortion on smartphone speakers and car stereos. Our inspector checks instantaneous peak levels to ensure clean, distortion-free playback.</p>
-                </article>
-            </section>
-
-            <!-- FAQ Section -->
-            <section class="inspector-faq-section" aria-label="Frequently Asked Questions">
-                <div class="section-title-wrap" style="text-align: center; margin-bottom: 24px;">
-                    <h2 class="main-headline" style="font-size: 1.6rem;">Frequently Asked Questions</h2>
+                <!-- WhatsApp Bot Card -->
+                <div class="bot-connect-card whatsapp-card">
+                    <div class="bot-card-top">
+                        <div class="bot-platform-badge wa-badge">
+                            <strong>WhatsApp Assistant</strong>
+                            <span id="waBotNumberDisplay">Instant Audio DM</span>
+                        </div>
+                        <img id="waQrImage"
+                            src="https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=https%3A%2F%2Fwa.me%2F%3Ftext%3DSend%2520me%2520a%2520chill%2520late-night%2520synthwave%2520playlist"
+                            alt="WhatsApp Bot QR Code" class="bot-qr-img">
+                    </div>
+                    <p class="bot-card-desc">Text our WhatsApp bot for instant playlist curation, audio previews, custom ringtones, and 1-click MP3 download links.</p>
+                    <a id="modalWhatsappBtn"
+                        href="https://wa.me/?text=Send%20me%20a%20chill%20late-night%20synthwave%20playlist"
+                        target="_blank" rel="noopener" class="bot-launch-btn wa-launch-btn">
+                        Open in WhatsApp &rarr;
+                    </a>
                 </div>
+            </div>
 
-                <div class="faq-item-card">
-                    <h3>How accurate is this in-browser spectrogram inspector?</h3>
-                    <p>Extremely accurate. The inspector uses the browser's native Web Audio API with a 1024-point Fast Fourier Transform (FFT) running at the audio file's native sampling rate (usually 44,100 Hz or 48,000 Hz). This matches the exact frequency analysis performed by desktop tools like Spek or Audacity.</p>
+            <!-- Webhook & Bot Admin Setup Accordion -->
+            <details class="bot-webhook-details">
+                <summary>⚙️ Bot Owner / Webhook Configuration (Telegram &amp; WhatsApp API)</summary>
+                <div class="bot-webhook-body">
+                    <p>Your backend is equipped with live webhook endpoints for both <strong>Telegram Bot API</strong> and <strong>WhatsApp (Twilio &amp; Meta Cloud API)</strong>:</p>
+                    <div class="webhook-url-row">
+                        <label>Telegram Webhook URL:</label>
+                        <code id="webhookTgUrlDisplay">https://audio-converter-backend.onrender.com/webhook/telegram</code>
+                    </div>
+                    <div class="webhook-url-row">
+                        <label>WhatsApp Webhook URL:</label>
+                        <code id="webhookWaUrlDisplay">https://audio-converter-backend.onrender.com/webhook/whatsapp</code>
+                    </div>
+                    <div class="tg-token-setup-row">
+                        <input type="password" id="tgBotTokenInput"
+                            placeholder="Paste Telegram BotFather Token (optional one-click bind)">
+                        <button type="button" id="bindTelegramWebhookBtn">Activate Telegram Webhook</button>
+                    </div>
+                    <div id="botSetupStatusMsg" class="bot-setup-status"></div>
                 </div>
-
-                <div class="faq-item-card">
-                    <h3>Is my music uploaded to any server when I test it?</h3>
-                    <p>No. All decoding and frequency analysis happen 100% locally in your web browser. Your audio files are never transmitted across the internet, ensuring complete privacy and zero bandwidth consumption.</p>
-                </div>
-
-                <div class="faq-item-card">
-                    <h3>Can I fix an MP3 that fails the quality test?</h3>
-                    <p>Yes. If your audio file has a low cutoff (e.g. 128kbps rip from vinyl, cassette, or web stream), you can use our <a href="ai-audio-enhancer.html" style="color: #ff5500; font-weight: 600;">AI Audio Enhancer</a> to synthesize lost high-frequency harmonics, remove low-end muddiness, and upscale it to true 320kbps.</p>
-                </div>
-            </section>
+            </details>
         </div>
-    </main>
+    </div>
 
-    <!-- Global App Scripts for mobile sidebar and auth -->
-    <script src="script.js"></script>
+    <!-- =====================================================
+         MODAL 2: ACCOUNT, MAGIC LINK LOGIN & STRIPE CREDITS
+         ===================================================== -->
+    <div id="accountModal" class="modal" role="dialog" aria-labelledby="accountModalTitle" aria-hidden="true">
+        <div class="modal-content account-modal-content">
+            <span class="close" onclick="closeModal('accountModal')" aria-label="Close modal">&times;</span>
+            <h2 id="accountModalTitle" style="margin-top:0; margin-bottom: 14px;">Account &amp; AI Music Credits</h2>
 
-    <!-- Interactive Spectrogram Engine Script -->
+            <!-- Logged In View -->
+            <div id="userDashboard" class="pricing-cards-grid hidden">
+                <div class="pricing-plan-card user-dashboard-card auth-box">
+                    <div>
+                        <div class="plan-card-header">
+                            <div class="plan-title-row">
+                                <h3 class="plan-card-title user-account-title">My Account</h3>
+                            </div>
+                            <span class="plan-pill user-active-pill">● LOGGED IN</span>
+                        </div>
+                        <div class="user-info-row">
+                            <span class="user-info-label">Active Account</span>
+                            <div id="userEmailDisplay" class="user-email-badge">...</div>
+                        </div>
+                        <div class="user-credit-balance-box">
+                            <span class="credit-balance-subtitle">Available AI Track Credits</span>
+                            <div class="credit-balance-count">
+                                <span id="paidCreditsDisplay">0</span>
+                                <span class="credit-balance-unit">Credits</span>
+                            </div>
+                        </div>
+                        <ul class="plan-features-list user-account-list">
+                            <li><strong>AI Chat &amp; Audio Previews:</strong> Always Free</li>
+                            <li><strong>1–5 Track Downloads + HD Cover Art:</strong> Free</li>
+                            <li><strong>AI 320k Bitrate Master:</strong> 1 credit / track</li>
+                            <li><strong>AI Synced Lyrics:</strong> 10 credits / track</li>
+                            <li><strong>Priority Download Queue:</strong> Active</li>
+                        </ul>
+                    </div>
+                    <div class="account-card-footer">
+                        <button id="logoutBtn" class="btn-logout-action">Sign Out</button>
+                    </div>
+                </div>
+
+                <div id="workspacePricingContainer" class="pricing-plan-card payg-tier-card auth-box">
+                    <div>
+                        <div class="plan-card-header">
+                            <div class="plan-title-row">
+                                <h3 class="plan-card-title payg-title">Add Track Credits</h3>
+                            </div>
+                            <span class="plan-pill payg-pill">NO EXPIRATION</span>
+                        </div>
+                        <div class="plan-price-row">
+                            <span class="plan-price payg-price">$3.99</span>
+                            <span class="plan-price-period payg-period">/ 350 Track Credits</span>
+                        </div>
+                        <p class="plan-card-desc payg-desc">
+                            <strong>Instant credit top-up.</strong> Credits never expire and unlock large playlist ZIPs &amp; 320kbps mastering:
+                        </p>
+                        <ul class="plan-features-list payg-list">
+                            <li><strong>+350 Track Credits</strong> (~$0.011 per track)</li>
+                            <li><strong>Full Playlist ZIP Downloads</strong> (up to 350 tracks)</li>
+                            <li><strong>AI 320k Bitrate Enhancer</strong> (1 credit / track)</li>
+                            <li><strong>AI Lyrics Transcription</strong> (10 credits / track)</li>
+                            <li><strong>One-time purchase</strong> &middot; No monthly fees</li>
+                        </ul>
+                    </div>
+                    <div class="buy-credits-action-wrap">
+                        <button id="buyCreditsBtn" class="premium-btn buy-credits-btn">Buy 350 Credits ($3.99)</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Guest / Logged Out View -->
+            <div id="guestPricingGrid" class="pricing-cards-grid">
+                <div class="pricing-plan-card free-tier-card auth-box">
+                    <div>
+                        <div class="plan-card-header">
+                            <div class="plan-title-row">
+                                <h3 class="plan-card-title free-title">Free Pass</h3>
+                            </div>
+                            <span class="plan-pill free-pill">ACTIVE NOW</span>
+                        </div>
+                        <div class="plan-price-row">
+                            <span class="plan-price free-price">$0</span>
+                            <span class="plan-price-period free-period">/ 5 Free Tracks per Request</span>
+                        </div>
+                        <p class="plan-card-desc free-desc">
+                            <strong>Chat and download tracks with zero signup.</strong>
+                        </p>
+                        <ul class="plan-features-list free-list">
+                            <li><strong>Unlimited AI Music Chat &amp; Previews</strong></li>
+                            <li><strong>Up to 5 MP3 downloads free</strong> per request</li>
+                            <li><strong>Auto Apple Music HD Cover Art &amp; ID3 Tags</strong></li>
+                            <li><strong>1-Click MP3 &amp; Playlist ZIP Downloads</strong></li>
+                        </ul>
+                    </div>
+                    <button type="button" class="btn-free-action" onclick="closeModal('accountModal')">Continue Chatting Free</button>
+                </div>
+
+                <div id="loginFormContainer" class="pricing-plan-card payg-tier-card auth-box">
+                    <div>
+                        <div class="plan-card-header">
+                            <div class="plan-title-row">
+                                <h3 class="plan-card-title payg-title">Pay As You Go</h3>
+                            </div>
+                            <span class="plan-pill payg-pill">NO EXPIRATION</span>
+                        </div>
+                        <div class="plan-price-row">
+                            <span class="plan-price payg-price">$3.99</span>
+                            <span class="plan-price-period payg-period">/ 350 Track Credits</span>
+                        </div>
+                        <p class="plan-card-desc payg-desc">
+                            Enter your email to receive a passwordless login link and unlock 350 credits:
+                        </p>
+                        <ul class="plan-features-list payg-list">
+                            <li><strong>350 Track Credits</strong> (~$0.011 per track)</li>
+                            <li><strong>AI 320k Bitrate Mastering</strong></li>
+                            <li><strong>Large Playlist ZIP Downloads</strong></li>
+                            <li><strong>Credits never expire</strong></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <div class="unified-search-bar payg-search-bar">
+                            <input type="email" id="loginEmail" placeholder="you@example.com" autocomplete="email">
+                            <button type="button" id="sendLinkBtn">Send Login Link</button>
+                        </div>
+                        <div id="authMessage"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- =====================================================
+         MODAL 3: RINGTONE SETUP GUIDE MODAL
+         ===================================================== -->
+    <div id="ringtoneModal" class="modal" role="dialog" aria-labelledby="ringtoneModalTitle" aria-hidden="true">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('ringtoneModal')" aria-label="Close modal">&times;</span>
+            <h2 id="ringtoneModalTitle">📱 How to Set Your Track as a Phone Ringtone</h2>
+            <p>Toggle <strong>📱 Ringtone</strong> in the top chat bar (or text <em>"Make me a ringtone of..."</em>) to get both Apple iPhone (<code>.m4r</code>) and Android (<code>.mp3</code>) ringtone files.</p>
+            <h3>🍏 Apple iPhone (No Computer Needed via GarageBand)</h3>
+            <ol class="modal-steps">
+                <li>Download your track from the chat bubble to your iPhone <strong>Files</strong> app.</li>
+                <li>Open Apple's free <strong>GarageBand</strong> app &rarr; tap <strong>Audio Recorder</strong> &rarr; tap the <strong>Tracks</strong> icon (top left).</li>
+                <li>Tap the <strong>Loop icon</strong> (top right) &rarr; <strong>Files</strong> &rarr; drag your downloaded file onto the timeline.</li>
+                <li>Tap the top-left arrow &rarr; <strong>My Songs</strong>, long-press your song &rarr; <strong>Share</strong> &rarr; <strong>Ringtone</strong> &rarr; <strong>Export</strong>!</li>
+            </ol>
+            <h3>🤖 Android Smartphones</h3>
+            <ol class="modal-steps">
+                <li>Tap <strong>Download MP3</strong> on any track bubble in the chat.</li>
+                <li>Open <strong>Settings</strong> &rarr; <strong>Sound &amp; vibration</strong> &rarr; <strong>Phone ringtone</strong>.</li>
+                <li>Tap <strong>+ Add Ringtone</strong> (or <strong>My Sounds</strong>) and choose your downloaded MP3!</li>
+            </ol>
+        </div>
+    </div>
+
+    <!-- =====================================================
+         MODAL 4: ABOUT, PRIVACY & DISCLAIMER MODALS
+         ===================================================== -->
+    <div id="aboutModal" class="modal" role="dialog" aria-labelledby="aboutTitle" aria-hidden="true">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('aboutModal')" aria-label="Close modal">&times;</span>
+            <h2 id="aboutTitle">About MP3aud.io Personal Music Assistant</h2>
+            <p>MP3aud.io is an AI-powered conversational music assistant available on the Web, Telegram, and WhatsApp. Text any song, artist, mood, or playlist idea—or drop a link or media file—and receive playable tracks, high-resolution album artwork, ID3 metadata tags, and 1-click MP3/ZIP downloads right inside your chat thread.</p>
+        </div>
+    </div>
+
+    <div id="privacyModal" class="modal" role="dialog" aria-labelledby="privacyTitle" aria-hidden="true">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('privacyModal')" aria-label="Close modal">&times;</span>
+            <h2 id="privacyTitle">Privacy Policy</h2>
+            <p>We prioritize your privacy. Generated MP3s and ZIP archives are temporarily cached for download and automatically purged 1 hour after session completion. Local chat history is stored privately in your browser's local storage and can be cleared at any time with one click.</p>
+        </div>
+    </div>
+
+    <div id="disclaimerModal" class="modal" role="dialog" aria-labelledby="disclaimerTitle" aria-hidden="true">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('disclaimerModal')" aria-label="Close modal">&times;</span>
+            <h2 id="disclaimerTitle">Legal Disclaimer</h2>
+            <p>MP3aud.io is intended for personal music discovery, previewing, and archival of authorized or user-provided media. Users are responsible for complying with applicable copyright laws and platform terms of service.</p>
+        </div>
+    </div>
+
     <script>
-    (function () {
-        'use strict';
-
-        // Web Audio Context & Analyzer
-        var AudioContextClass = window.AudioContext || window.webkitAudioContext;
-        var audioCtx = null;
-        var analyser = null;
-        var sourceNode = null;
-        var filterNode = null;
-        var gainNode = null;
-        var freqData = null;
-        var animFrame = null;
-
-        var currentBuffer = null;
-        var isPlaying = false;
-        var startedAt = 0;
-        var pausedAt = 0;
-        var currentDuration = 16;
-        var currentSampleType = 'studio'; // 'studio', 'fake128', 'muffled', 'custom'
-
-        var canvas = document.getElementById('inspectorCanvas');
-        var ctx = canvas ? canvas.getContext('2d') : null;
-
-        var playBtn = document.getElementById('inspectorPlayBtn');
-        var playIcon = document.getElementById('playIcon');
-        var pauseIcon = document.getElementById('pauseIcon');
-        var scrubTrack = document.getElementById('inspectorScrubTrack');
-        var scrubFill = document.getElementById('inspectorScrubFill');
-        var timeCurrent = document.getElementById('inspectorTimeCurrent');
-        var timeTotal = document.getElementById('inspectorTimeTotal');
-
-        var purityBadge = document.getElementById('purityBadge');
-        var purityDetail = document.getElementById('purityDetail');
-        var purityGradeIcon = document.getElementById('purityGradeIcon');
-        var trueBitrateVal = document.getElementById('trueBitrateVal');
-        var bitrateDetail = document.getElementById('bitrateDetail');
-        var cutoffFreqVal = document.getElementById('cutoffFreqVal');
-        var peakLoudnessVal = document.getElementById('peakLoudnessVal');
-        var clippingStatus = document.getElementById('clippingStatus');
-
-        var fileInput = document.getElementById('inspectorFileInput');
-        var dropzone = document.getElementById('inspectorDropzone');
-        var customTab = document.getElementById('customFileTab');
-        var customTabLabel = document.getElementById('customTabLabel');
-        var customTabSub = document.getElementById('customTabSub');
-
-        function initAudio() {
-            if (audioCtx) {
-                if (audioCtx.state === 'suspended') audioCtx.resume();
-                return;
-            }
-            audioCtx = new AudioContextClass();
-            analyser = audioCtx.createAnalyser();
-            analyser.fftSize = 1024;
-            analyser.smoothingTimeConstant = 0.85;
-            freqData = new Uint8Array(analyser.frequencyBinCount);
-
-            filterNode = audioCtx.createBiquadFilter();
-            gainNode = audioCtx.createGain();
-            gainNode.gain.value = 0.9;
-
-            filterNode.connect(gainNode);
-            gainNode.connect(analyser);
-            analyser.connect(audioCtx.destination);
+        function openModal(modalId) {
+            var modal = document.getElementById(modalId);
+            if (modal) modal.style.display = "flex";
         }
-
-        function resizeCanvas() {
-            if (!canvas) return;
-            var dpr = window.devicePixelRatio || 1;
-            var rect = canvas.getBoundingClientRect();
-            canvas.width = rect.width * dpr;
-            canvas.height = rect.height * dpr;
-            if (ctx) ctx.scale(dpr, dpr);
+        function closeModal(modalId) {
+            var modal = document.getElementById(modalId);
+            if (modal) modal.style.display = "none";
         }
-        window.addEventListener('resize', resizeCanvas);
-        setTimeout(resizeCanvas, 50);
-
-        // Synth Audio Buffer Generator for Live Preset Demonstration
-        function generateDemoBuffer(type) {
-            initAudio();
-            var sampleRate = audioCtx.sampleRate;
-            var dur = 16.0;
-            var totalSamples = Math.floor(dur * sampleRate);
-            var buffer = audioCtx.createBuffer(2, totalSamples, sampleRate);
-            var left = buffer.getChannelData(0);
-            var right = buffer.getChannelData(1);
-
-            var bpm = 124;
-            var beatSec = 60 / bpm;
-            var totalBeats = Math.floor(dur / beatSec);
-
-            for (var b = 0; b < totalBeats; b++) {
-                var bStart = Math.floor(b * beatSec * sampleRate);
-                var kLen = Math.floor(0.38 * sampleRate);
-                for (var s = 0; s < kLen && (bStart + s) < totalSamples; s++) {
-                    var t = s / sampleRate;
-                    var kFreq = 145 * Math.exp(-t * 24) + 42;
-                    var kVal = Math.sin(2 * Math.PI * kFreq * t) * Math.exp(-t * 8.5) * 0.75;
-                    left[bStart + s] += kVal;
-                    right[bStart + s] += kVal;
-                }
-
-                // Hi-Hats & Shimmers (High Frequencies)
-                var hOffset = Math.floor(0.5 * beatSec * sampleRate);
-                var hStart = bStart + hOffset;
-                var hLen = Math.floor(0.12 * sampleRate);
-                for (var s = 0; s < hLen && (hStart + s) < totalSamples; s++) {
-                    var t = s / sampleRate;
-                    // White noise with high sparkle
-                    var hVal = (Math.random() * 2 - 1) * Math.exp(-t * 42) * 0.35;
-                    // Add 19.5kHz ultra high sine tone to verify 320k top-end
-                    if (type === 'studio') {
-                        hVal += Math.sin(2 * Math.PI * 19800 * t) * Math.exp(-t * 20) * 0.12;
-                    }
-                    left[hStart + s] += hVal * 0.8;
-                    right[hStart + s] += hVal * 1.0;
-                }
-            }
-
-            // Synth chords & melody
-            var notes = [440, 554.37, 659.25, 880, 1108.73];
-            for (var b = 0; b < totalBeats; b++) {
-                var bStart = Math.floor(b * beatSec * sampleRate);
-                var nLen = Math.floor(beatSec * sampleRate);
-                var f = notes[b % notes.length];
-                for (var s = 0; s < nLen && (bStart + s) < totalSamples; s++) {
-                    var t = s / sampleRate;
-                    var v = (Math.sin(2 * Math.PI * f * t) + 0.5 * Math.sin(4 * Math.PI * f * t) + 0.3 * Math.sin(6 * Math.PI * f * t)) * Math.exp(-t * 2.2) * 0.25;
-                    left[bStart + s] += v;
-                    right[bStart + s] += v;
-                }
-            }
-            return buffer;
-        }
-
-        function updateInspectorMetrics(type, userCutoff) {
-            if (type === 'studio') {
-                purityBadge.className = 'purity-badge grade-a';
-                purityBadge.textContent = 'GRADE A+ (STUDIO MASTER)';
-                purityGradeIcon.textContent = '🟢';
-                purityDetail.textContent = 'Rich high-frequency energy up to 21.8 kHz';
-                trueBitrateVal.textContent = 'True 320 kbps HD';
-                trueBitrateVal.style.color = '#4ade80';
-                bitrateDetail.textContent = 'Lossless frequency response confirmed';
-                cutoffFreqVal.textContent = '21,800 Hz';
-                peakLoudnessVal.textContent = '-0.8 dB';
-                clippingStatus.textContent = 'Clean (Zero Clipping Detected)';
-                clippingStatus.style.color = '#64748b';
-            } else if (type === 'fake128') {
-                purityBadge.className = 'purity-badge grade-f';
-                purityBadge.textContent = 'GRADE F (FAKE 320k UPSCALE)';
-                purityGradeIcon.textContent = '🔴';
-                purityDetail.textContent = 'Hard shelf cutoff at 15.6 kHz (128k rip)';
-                trueBitrateVal.textContent = '128 kbps (Fake Upscale)';
-                trueBitrateVal.style.color = '#f87171';
-                bitrateDetail.textContent = 'High frequencies missing above 16kHz';
-                cutoffFreqVal.textContent = '15,600 Hz';
-                peakLoudnessVal.textContent = '-0.4 dB';
-                clippingStatus.textContent = 'Lossy compression artifacts detected';
-                clippingStatus.style.color = '#f87171';
-            } else if (type === 'muffled') {
-                purityBadge.className = 'purity-badge grade-c';
-                purityBadge.textContent = 'GRADE C (SEVERE MUFFLE)';
-                purityGradeIcon.textContent = '🟠';
-                purityDetail.textContent = 'Severe acoustic roll-off above 10.5 kHz';
-                trueBitrateVal.textContent = '96–112 kbps (Muffled)';
-                trueBitrateVal.style.color = '#fb923c';
-                bitrateDetail.textContent = 'Low-mid mud with rolled-off treble';
-                cutoffFreqVal.textContent = '10,500 Hz';
-                peakLoudnessVal.textContent = '-1.8 dB';
-                clippingStatus.textContent = 'Muffled dynamics';
-                clippingStatus.style.color = '#64748b';
-            } else if (type === 'custom') {
-                var cutoff = userCutoff || 20500;
-                cutoffFreqVal.textContent = Math.round(cutoff).toLocaleString() + ' Hz';
-                if (cutoff >= 19500) {
-                    purityBadge.className = 'purity-badge grade-a';
-                    purityBadge.textContent = 'GRADE A (EXCELLENT / 320k)';
-                    purityGradeIcon.textContent = '🟢';
-                    trueBitrateVal.textContent = 'True 320kbps / Lossless';
-                    trueBitrateVal.style.color = '#4ade80';
-                    bitrateDetail.textContent = 'Full high-frequency extension';
-                } else if (cutoff >= 16500) {
-                    purityBadge.className = 'purity-badge grade-b';
-                    purityBadge.textContent = 'GRADE B (192–256 kbps)';
-                    purityGradeIcon.textContent = '🟡';
-                    trueBitrateVal.textContent = '192–256 kbps';
-                    trueBitrateVal.style.color = '#facc15';
-                    bitrateDetail.textContent = 'Moderate high-frequency compression';
-                } else {
-                    purityBadge.className = 'purity-badge grade-f';
-                    purityBadge.textContent = 'GRADE D/F (FAKE UPSCALE)';
-                    purityGradeIcon.textContent = '🔴';
-                    trueBitrateVal.textContent = '128 kbps (Low Quality)';
-                    trueBitrateVal.style.color = '#f87171';
-                    bitrateDetail.textContent = 'Capped at 15–16kHz shelf cutoff';
-                }
-            }
-        }
-
-        function setPreset(type) {
-            currentSampleType = type;
-            initAudio();
-
-            if (type === 'studio') {
-                filterNode.type = 'allpass';
-                updateInspectorMetrics('studio');
-            } else if (type === 'fake128') {
-                filterNode.type = 'lowpass';
-                filterNode.frequency.value = 15600;
-                filterNode.Q.value = 3.5;
-                updateInspectorMetrics('fake128');
-            } else if (type === 'muffled') {
-                filterNode.type = 'lowpass';
-                filterNode.frequency.value = 10500;
-                filterNode.Q.value = 1.0;
-                updateInspectorMetrics('muffled');
-            }
-
-            currentBuffer = generateDemoBuffer(type);
-            currentDuration = currentBuffer.duration;
-            timeTotal.textContent = fmtTime(currentDuration);
-
-            if (isPlaying) {
-                playAudio();
-            } else {
-                drawIdleCanvas();
-            }
-        }
-
-        function buildAndPlaySource(offset) {
-            initAudio();
-            if (sourceNode) {
-                try { sourceNode.stop(); } catch (e) { }
-                sourceNode.disconnect();
-            }
-            if (!currentBuffer) {
-                setPreset(currentSampleType);
-            }
-
-            sourceNode = audioCtx.createBufferSource();
-            sourceNode.buffer = currentBuffer;
-            sourceNode.loop = true;
-            sourceNode.connect(filterNode);
-
-            sourceNode.start(0, offset);
-            startedAt = audioCtx.currentTime - offset;
-        }
-
-        function playAudio() {
-            initAudio();
-            buildAndPlaySource(pausedAt);
-            isPlaying = true;
-            playIcon.style.display = 'none';
-            pauseIcon.style.display = '';
-            runRenderLoop();
-        }
-
-        function pauseAudio() {
-            if (audioCtx) {
-                pausedAt = (audioCtx.currentTime - startedAt + pausedAt) % currentDuration;
-            }
-            if (sourceNode) {
-                try { sourceNode.stop(); } catch (e) { }
-                sourceNode = null;
-            }
-            isPlaying = false;
-            playIcon.style.display = '';
-            pauseIcon.style.display = 'none';
-            if (animFrame) cancelAnimationFrame(animFrame);
-            drawIdleCanvas();
-        }
-
-        function fmtTime(s) {
-            s = Math.max(0, Math.floor(s));
-            var m = Math.floor(s / 60);
-            var sec = s % 60;
-            return m + ':' + (sec < 10 ? '0' : '') + sec;
-        }
-
-        // Canvas Waterfall Spectrogram & Multi-Bar Heatmap Renderer
-        function drawSpectrogram(data) {
-            if (!canvas || !ctx) return;
-            var w = canvas.getBoundingClientRect().width;
-            var h = 240;
-
-            // Dark space backdrop with radial gradient
-            var grad = ctx.createLinearGradient(0, 0, 0, h);
-            grad.addColorStop(0, '#020617');
-            grad.addColorStop(1, '#0b1329');
-            ctx.fillStyle = grad;
-            ctx.fillRect(0, 0, w, h);
-
-            if (!data) return;
-
-            var numBars = 72;
-            var barWidth = (w - (numBars - 1) * 3) / numBars;
-            var binCount = analyser.frequencyBinCount;
-
-            for (var i = 0; i < numBars; i++) {
-                var binIndex = Math.floor(Math.pow(i / numBars, 1.35) * (binCount * 0.95));
-                var val = (data[binIndex] || 0) / 255;
-                var barHeight = Math.max(4, val * (h - 20));
-
-                var x = i * (barWidth + 3);
-                var y = h - barHeight;
-
-                // Color based on frequency band & height
-                var barGrad = ctx.createLinearGradient(x, h, x, y);
-                if (i < 20) {
-                    // Lows (Bass / Warm amber)
-                    barGrad.addColorStop(0, '#ea580c');
-                    barGrad.addColorStop(1, '#f59e0b');
-                } else if (i < 48) {
-                    // Mids (Cyan / Electric Blue)
-                    barGrad.addColorStop(0, '#0284c7');
-                    barGrad.addColorStop(1, '#38bdf8');
-                } else {
-                    // Highs (Neon Green / Violet)
-                    barGrad.addColorStop(0, '#10b981');
-                    barGrad.addColorStop(1, '#4ade80');
-                }
-
-                ctx.fillStyle = barGrad;
-                ctx.beginPath();
-                ctx.roundRect(x, y, barWidth, barHeight, [3, 3, 0, 0]);
-                ctx.fill();
-
-                // Top Peak Cap
-                ctx.fillStyle = '#ffffff';
-                ctx.fillRect(x, Math.max(0, y - 2), barWidth, 2);
-            }
-        }
-
-        function drawIdleCanvas() {
-            if (!canvas || !ctx) return;
-            var idleData = new Uint8Array(512);
-            for (var i = 0; i < 512; i++) {
-                idleData[i] = Math.max(8, Math.sin(i * 0.1) * 20 + 25);
-            }
-            drawSpectrogram(idleData);
-        }
-
-        function runRenderLoop() {
-            if (!isPlaying || !analyser) return;
-            analyser.getByteFrequencyData(freqData);
-            drawSpectrogram(freqData);
-
-            // Time & Scrub Progress Update
-            var pos = (audioCtx.currentTime - startedAt + pausedAt) % currentDuration;
-            scrubFill.style.width = ((pos / currentDuration) * 100) + '%';
-            timeCurrent.textContent = fmtTime(pos);
-
-            animFrame = requestAnimationFrame(runRenderLoop);
-        }
-
-        // Play/Pause button click
-        playBtn.addEventListener('click', function () {
-            if (isPlaying) {
-                pauseAudio();
-            } else {
-                playAudio();
+        window.addEventListener('click', function (event) {
+            if (event.target && event.target.classList && event.target.classList.contains('modal')) {
+                event.target.style.display = "none";
             }
         });
-
-        // Scrubbing on Progress Bar
-        scrubTrack.addEventListener('click', function (e) {
-            var rect = scrubTrack.getBoundingClientRect();
-            var ratio = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
-            pausedAt = ratio * currentDuration;
-            if (isPlaying) {
-                buildAndPlaySource(pausedAt);
-            } else {
-                scrubFill.style.width = (ratio * 100) + '%';
-                timeCurrent.textContent = fmtTime(pausedAt);
-            }
-        });
-
-        // Preset Tab Switching
-        var presetTabs = document.querySelectorAll('.preset-tab[data-sample]');
-        presetTabs.forEach(function (tab) {
-            tab.addEventListener('click', function () {
-                presetTabs.forEach(function (t) { t.classList.remove('active'); });
-                customTab.classList.remove('active');
-                tab.classList.add('active');
-                setPreset(tab.getAttribute('data-sample'));
-            });
-        });
-
-        // User Custom File Upload & Inspection
-        function handleUserFile(file) {
-            if (!file) return;
-            initAudio();
-
-            customTabLabel.textContent = file.name.length > 18 ? file.name.substring(0, 15) + '...' : file.name;
-            customTabSub.textContent = (file.size / (1024 * 1024)).toFixed(1) + ' MB Loaded';
-            presetTabs.forEach(function (t) { t.classList.remove('active'); });
-            customTab.classList.add('active');
-
-            var reader = new FileReader();
-            reader.onload = function (e) {
-                var arrayBuffer = e.target.result;
-                audioCtx.decodeAudioData(arrayBuffer, function (decoded) {
-                    currentBuffer = decoded;
-                    currentDuration = decoded.duration;
-                    timeTotal.textContent = fmtTime(currentDuration);
-                    filterNode.type = 'allpass';
-
-                    // Estimate Cutoff Frequency via file size/name
-                    var estimatedCutoff = 21500;
-                    if (file.name.toLowerCase().includes('128') || file.size < 1500000) {
-                        estimatedCutoff = 15800;
-                    }
-
-                    updateInspectorMetrics('custom', estimatedCutoff);
-                    pausedAt = 0;
-                    playAudio();
-                }, function () {
-                    alert('Could not decode audio file. Please try another MP3, WAV, or FLAC file.');
-                });
-            };
-            reader.readAsArrayBuffer(file);
-        }
-
-        fileInput.addEventListener('change', function (e) {
-            if (e.target.files && e.target.files[0]) {
-                handleUserFile(e.target.files[0]);
-            }
-        });
-
-        customTab.addEventListener('click', function () {
-            fileInput.click();
-        });
-
-        // Drag & Drop on Dropzone
-        dropzone.addEventListener('dragover', function (e) {
-            e.preventDefault();
-            dropzone.classList.add('dragover');
-        });
-
-        dropzone.addEventListener('dragleave', function () {
-            dropzone.classList.remove('dragover');
-        });
-
-        dropzone.addEventListener('drop', function (e) {
-            e.preventDefault();
-            dropzone.classList.remove('dragover');
-            if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-                handleUserFile(e.dataTransfer.files[0]);
-            }
-        });
-
-        // Initialize with True 320k demo preset
-        setPreset('studio');
-    })();
-
-    // Mobile nav toggle
-    const menuToggle = document.querySelector('.menu-toggle');
-    const headerNav = document.querySelector('.header-nav');
-    if (menuToggle && headerNav) {
-        menuToggle.addEventListener('click', (e) => {
-            e.stopPropagation();
-            headerNav.classList.toggle('open');
-        });
-        document.addEventListener('click', (e) => {
-            if (headerNav.classList.contains('open') && !headerNav.contains(e.target) && e.target !== menuToggle) {
-                headerNav.classList.remove('open');
-            }
-        });
-    }
     </script>
+    <script src="script.js"></script>
 </body>
+
 </html>
