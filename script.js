@@ -1175,10 +1175,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // 7. Artist / Song / Genre Biography & Trivia Follow-Up Questions ("who sings track 2?", "who is M83?", "tell me about...", "what other albums...")
-        const isQuestionPattern = /\?$/.test(rawText) || /^(who|what|when|where|why|how|which|tell me|can you tell|do you know|explain|describe)\b/i.test(lower);
-        const wantsMusicAction = /\b(send me|play|make me|build me|curate|give me|drop|create|download|ringtone of)\b/i.test(lower) && !/^(who|what|when|where|why|how|tell me about|explain)\b/i.test(lower);
+        const isExplicitBioOrTrackQuestion =
+            (ref && ref.track && /\b(who sings|who made|who is the artist|who performed|by who|who wrote|tell me about|more about)\b/i.test(lower)) ||
+            /^(hey|hi|ok|so)?\s*(can you\s+|could you\s+)?(tell me more about|tell me about|who is|who are|what other albums did|what songs did)\s+/i.test(lower);
+        const isGeneralSmallTalkOrWeather = /\b(weather|rain|raining|sunny|snow|cold|hot|temperature|forecast|your day|you doing|are you|time is it|old are you|where are you|how is it|how's it)\b/i.test(lower);
 
-        if (isQuestionPattern && !wantsMusicAction) {
+        if (isExplicitBioOrTrackQuestion && !isGeneralSmallTalkOrWeather) {
             // Check if asking "who sings / who is the artist on track X"
             if (ref && ref.track && /\b(who sings|who made|who is the artist|who performed|by who|who wrote|tell me about|more about|who is|what is)\b/i.test(lower)) {
                 const t = ref.track;
@@ -1211,18 +1213,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 };
             }
 
-            // General music/artist/genre question (e.g., "Who is Daft Punk?", "Tell me about Fleetwood Mac", "What is synthwave?")
+            // Explicit artist/band bio question (e.g., "Who is Daft Punk?", "Tell me about Fleetwood Mac")
             const topicMatch = rawText
-                .replace(/^(hey|hi|ok|so|well)?\s*(can you\s+|could you\s+)?(tell me more about|tell me about|who is|who are|what is|what are|explain|what other albums did|what songs did|where is|when did)\s+/i, '')
+                .replace(/^(hey|hi|ok|so|well)?\s*(can you\s+|could you\s+)?(tell me more about|tell me about|who is|who are|what other albums did|what songs did)\s+/i, '')
                 .replace(/\b(make|sing|release|come from|mean|famous for)\b\??$/i, '')
                 .replace(/[?!.]+$/, '')
                 .trim();
 
-            const targetSubject = (topicMatch && !/^(this|that|it|they|them|he|she|these|those)$/i.test(topicMatch))
+            const targetSubject = (topicMatch && !/^(this|that|it|they|them|he|she|these|those|you|the weather|weather|today|life)$/i.test(topicMatch))
                 ? topicMatch
                 : (ref && ref.track ? ref.track.artist : (assistantMemory.lastArtist || ''));
 
-            if (targetSubject) {
+            if (targetSubject && targetSubject.split(/\s+/).length <= 5) {
                 const [wikiBio, itunesItems] = await Promise.all([
                     fetchWikipediaSummary(targetSubject),
                     searchItunesFast(targetSubject, 5, 1600)
@@ -1249,7 +1251,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (topAlbums.length > 0) {
                     answerText += `\n💿 **Notable Releases:** *${topAlbums.join('*, *')}*`;
                 }
-                answerText += `\n\nWant me to drop a playable **${targetSubject}** playlist right into our chat so you can listen?`;
+                answerText += `\n\n*(If you ever want me to put together a **${targetSubject}** playlist, just ask!)*`;
 
                 return {
                     success: true,
@@ -1257,8 +1259,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     reply: answerText,
                     suggestions: [
                         `🎵 Play a ${targetSubject} playlist`,
-                        topTrackNames[0] ? `🔥 Play ${topTrackNames[0]} by ${targetSubject}` : `🔥 Play top ${targetSubject} tracks`,
-                        `🎲 Surprise me with a similar artist`
+                        `🎲 Tell me a cool music fact`,
+                        `💬 Who are your favorite artists?`
                     ],
                     tracks: []
                 };
@@ -1381,8 +1383,24 @@ document.addEventListener('DOMContentLoaded', () => {
             };
         }
 
-        // 4. Check if user is casually talking about a follow-up detail from their day (couch, tea, coffee, work, food, etc.)
-        if (/\b(couch|sofa|tea|coffee|bed|relaxing|resting|tv|movie|game|gaming|pasta|pizza|food|eating|lunch|breakfast|work|boss|office|school|class|exam|weather|rain|sunny)\b/i.test(lower)) {
+        // 4. Check if user is asking about the weather or casually talking about their day (couch, tea, coffee, work, food, etc.)
+        if (/\b(weather|rain|raining|sunny|snow|snowing|forecast|temperature|degrees|windy|cloudy|storm)\b/i.test(lower)) {
+            assistantMemory.turnCount++;
+            return {
+                success: true,
+                mode: 'chat',
+                reply: "It's always a cozy 72° here in the studio booth! ☀️🎧 How's the weather looking outside your window right now—sunny and clear, or more of a rainy stay-indoors kind of day?",
+                suggestions: [
+                    "☀️ It's sunny and nice out!",
+                    "🌧️ Rainy & cozy indoor day",
+                    "🎲 Tell me a cool music fact",
+                    "🎵 Make me a rainy day lo-fi playlist"
+                ],
+                tracks: []
+            };
+        }
+
+        if (/\b(couch|sofa|tea|coffee|bed|relaxing|resting|tv|movie|game|gaming|pasta|pizza|food|eating|lunch|breakfast|work|boss|office|school|class|exam)\b/i.test(lower)) {
             assistantMemory.turnCount++;
             let replyMsg = "Honestly, that sounds like a great way to spend the time! 🙌 It's nice to slow things down and just enjoy the moment. How's the rest of your week looking so far?\n\n*(I'm right here to keep chatting—and whenever you feel like a playlist or a specific song, just ask!)*";
             if (/\b(work|boss|office|school|class|exam)\b/i.test(lower)) {
@@ -1412,7 +1430,9 @@ document.addEventListener('DOMContentLoaded', () => {
             .replace(/[?!.]+$/, '')
             .trim();
 
-        const isConversationalSentence = cleanedTopic.split(/\s+/).length > 4 || /\b(i am|i'm|im|you are|you're|we are|just|because|really|today|tonight|right now|think|feel|going to|want to)\b/i.test(cleanedTopic);
+        const isConversationalSentence =
+            cleanedTopic.split(/\s+/).length > 4 ||
+            /\b(i am|i'm|im|you are|you're|we are|just|because|really|today|tonight|right now|think|feel|going to|want to|how is|how's|what is|what's|where is|when is|why is)\b/i.test(rawText);
 
         if (cleanedTopic && !isConversationalSentence && cleanedTopic.length >= 2) {
             const [wikiBio, itunesItems] = await Promise.all([
