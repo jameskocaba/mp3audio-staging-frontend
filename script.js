@@ -195,11 +195,30 @@ document.addEventListener('DOMContentLoaded', () => {
     if (newChatBtn) {
         newChatBtn.addEventListener('click', () => {
             toggleSidebar(false);
+            chatHistory = [];
+            assistantMemory.awaitingPlaylistVibe = false;
+            assistantMemory.pendingVibeKey = '';
+            assistantMemory.pendingTopic = '';
+            if (chatMessages) {
+                chatMessages.innerHTML = `
+                    <div class="chat-date-divider">
+                        <span>ENCRYPTED MUSIC MESSENGER &bull; INSTANT MP3 &amp; PLAYLIST DELIVERY</span>
+                    </div>
+                    <div class="msg-row assistant-row">
+                        <div class="msg-avatar">🎧</div>
+                        <div class="msg-bubble assistant-bubble welcome-bubble">
+                            <div class="msg-sender-name">MP3aud.io Assistant <span class="msg-time">Just now</span></div>
+                            <div class="msg-text">
+                                <p>Hey! 👋 How's your day going? We can chat about whatever's on your mind, talk about your favorite artists, or whenever you'd like me to put together a playlist or pull up a song, just let me know.</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
             if (chatInput) {
                 chatInput.value = '';
                 chatInput.focus();
             }
-            sendUserMessage('Send me a fresh surprise playlist');
         });
     }
 
@@ -1400,8 +1419,69 @@ document.addEventListener('DOMContentLoaded', () => {
         "😂 Why are jazz musicians so great at conversation?\n\nBecause even when they make a mistake, they just repeat it twice, smile, and call it *improvisation*! 🎷"
     ];
 
+    async function fetchLiveConversationalAiReply(userText) {
+        try {
+            const activeTracksContext = (assistantMemory.lastTracks && assistantMemory.lastTracks.length > 0)
+                ? `\nCurrent playlist on screen: ${assistantMemory.lastTracks.slice(0, 6).map((t, i) => `#${i + 1} "${t.title}" by ${t.artist} (${t.year || ''})`).join(', ')}.`
+                : '';
+            const sysMsg =
+                "You are a warm, down-to-earth human friend and personal music DJ chatting via text message on MP3aud.io." +
+                activeTracksContext +
+                "\nRules:\n" +
+                "- Reply like a real person texting a friend: natural, casual, and concise (1 to 2 short sentences max).\n" +
+                "- Never use bullet points, numbered lists, or robotic assistant disclaimers.\n" +
+                "- Respond directly to what the user just said (whether it's about their day, weather, work, life, food, hobbies, or music) and ask a natural follow-up question to keep the back-and-forth conversation going.\n" +
+                "- Do NOT push playlists unless the user brings up wanting to listen to music.";
+
+            const recentHistory = chatHistory.slice(-8).map(m => ({
+                role: m.role === 'assistant' ? 'assistant' : 'user',
+                content: String(m.content || '').slice(0, 350)
+            }));
+            if (recentHistory.length === 0 || recentHistory[recentHistory.length - 1].content !== userText) {
+                recentHistory.push({ role: 'user', content: userText });
+            }
+
+            const resp = await fetchWithTimeout('https://text.pollinations.ai/openai', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    model: 'openai',
+                    messages: [{ role: 'system', content: sysMsg }, ...recentHistory],
+                    temperature: 0.75
+                })
+            }, 2200);
+
+            if (resp && resp.ok) {
+                const data = await resp.json();
+                const content = data && data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content;
+                if (content && typeof content === 'string' && content.trim().length > 2) {
+                    return content.trim();
+                }
+            }
+        } catch (_) {}
+        return null;
+    }
+
     async function generateConversationalReply(rawText, lower) {
         assistantMemory.turnCount++;
+
+        // Track any genre or mood mentioned in the conversation so we remember it if they later ask for a playlist
+        const mentionedVibe = detectVibeKeyFromText(lower);
+        if (mentionedVibe) {
+            assistantMemory.pendingVibeKey = mentionedVibe;
+            assistantMemory.lastGenreDiscussed = mentionedVibe;
+        }
+
+        // Try live conversational AI first for natural, open-ended human back-and-forth
+        const liveAiReply = await fetchLiveConversationalAiReply(rawText);
+        if (liveAiReply) {
+            return {
+                success: true,
+                mode: 'chat',
+                reply: liveAiReply,
+                tracks: []
+            };
+        }
 
         // 1. Weather conversation & follow-ups
         if (/\b(weather|rain|raining|rainy|sunny|sun|snow|snowing|forecast|temperature|degrees|windy|cloudy|storm|chilly|cold outside|hot outside|warm outside|humid|breezy)\b/i.test(lower)) {
@@ -1916,8 +1996,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // 0.3 Determine whether the user SPECIFICALLY asked for a playlist or a single track/ringtone!
-        const wantsPlaylist = isExplicitPlaylistRequest(lower);
-        const wantsSingleTrack = isExplicitSingleTrackRequest(rawText, lower);
+        const wasAwaitingVibe = Boolean(assistantMemory.awaitingPlaylistVibe);
+        if (wasAwaitingVibe) {
+            assistantMemory.awaitingPlaylistVibe = false;
+        }
+        const wantsPlaylist = wasAwaitingVibe || isExplicitPlaylistRequest(lower);
+        const wantsSingleTrack = !wasAwaitingVibe && isExplicitSingleTrackRequest(rawText, lower);
 
         // If the user did NOT specifically ask for a playlist or a track, just have a natural human conversation!
         if (!wantsPlaylist && !wantsSingleTrack) {
@@ -1945,17 +2029,40 @@ document.addEventListener('DOMContentLoaded', () => {
             .replace(/\s+/g, ' ')
             .trim();
 
+        const isSurpriseOrAnother = /\b(surprise|random|another|different|fresh|more|next|anything|whatever you want|you pick|dealers choice|dealer's choice)\b/i.test(lower);
         const isGenericNewPlaylistRequest = !cleanQ || /^(new|another|different|fresh|random|more|next|surprise|surprise me|something new|something else|anything|music|songs|tracks|vibe|vibes|good music|your favorite)$/i.test(cleanQ);
 
-        // 3. If user asked for a generic "new playlist" / "another playlist" / "surprise me", rotate to a fresh curated vibe!
+        // 3. If user asked generically for a playlist ("make me a playlist") without specifying a vibe yet:
+        //    - If we already discussed a vibe/topic in the conversation, use that context!
+        //    - If they didn't ask for a surprise/another mix, ask them conversationally what mood/genre they're feeling first!
         if (wantsPlaylist && isGenericNewPlaylistRequest && !isRingtone) {
-            let nextKey = VIBE_KEYS_LIST[rotationCursor % VIBE_KEYS_LIST.length];
-            rotationCursor++;
-            if (nextKey === lastVibeKey) {
-                nextKey = VIBE_KEYS_LIST[rotationCursor % VIBE_KEYS_LIST.length];
+            if (!isSurpriseOrAnother && !wasAwaitingVibe) {
+                if (assistantMemory.pendingVibeKey) {
+                    const pendingKey = assistantMemory.pendingVibeKey;
+                    assistantMemory.pendingVibeKey = null;
+                    return await curatePresetVibePlaylist(pendingKey, true);
+                }
+                if (assistantMemory.pendingTopic) {
+                    cleanQ = assistantMemory.pendingTopic;
+                    assistantMemory.pendingTopic = null;
+                } else {
+                    assistantMemory.awaitingPlaylistVibe = true;
+                    return {
+                        success: true,
+                        mode: 'chat',
+                        reply: `I'd love to put a playlist together for you! What kind of mood, genre, or artist are you feeling right now? (Or just say "surprise me" if you want me to pick!)`,
+                        tracks: []
+                    };
+                }
+            } else {
+                let nextKey = VIBE_KEYS_LIST[rotationCursor % VIBE_KEYS_LIST.length];
                 rotationCursor++;
+                if (nextKey === lastVibeKey) {
+                    nextKey = VIBE_KEYS_LIST[rotationCursor % VIBE_KEYS_LIST.length];
+                    rotationCursor++;
+                }
+                return await curatePresetVibePlaylist(nextKey, true);
             }
-            return await curatePresetVibePlaylist(nextKey, true);
         }
 
         if (!cleanQ) cleanQ = rawText;
@@ -2457,22 +2564,6 @@ document.addEventListener('DOMContentLoaded', () => {
             ? `<div class="msg-text" style="margin-top: 10px; font-size: 0.86rem; color: #cbd5e1;"><p>${formatMarkdownBold(payload.follow_up_note)}</p></div>`
             : '';
 
-        const suggestions = Array.isArray(payload.suggestions) && payload.suggestions.length > 0
-            ? payload.suggestions
-            : (hasTracks ? [
-                `🎤 Tell me about ${tracks[0] ? tracks[0].artist : 'this artist'}`,
-                `💿 What year did Track #1 come out?`,
-                `🔄 Swap Track #2`,
-                `⚡ Make it more upbeat`,
-                `🌙 Make it chiller`
-            ] : []);
-
-        const suggestionsHtml = suggestions.length > 0 ? `
-            <div class="welcome-quick-chips" style="margin-top: 10px;">
-                ${suggestions.map(s => `<button type="button" class="quick-chip follow-up-chip" data-prompt="${escapeHtml(s.replace(/^[^\w\d]+/, '').trim())}">${escapeHtml(s)}</button>`).join('')}
-            </div>
-        ` : '';
-
         row.innerHTML = `
             <div class="msg-avatar">🎧</div>
             <div class="msg-bubble assistant-bubble">
@@ -2486,7 +2577,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 ${playlistHeaderHtml}
                 ${hasTracks ? `<div class="tracks-bubble-stack">${tracksHtml}</div>` : ''}
                 ${followUpHtml}
-                ${suggestionsHtml}
                 <div class="bubble-conversion-container"></div>
             </div>
         `;
@@ -2496,14 +2586,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const bubbleEl = row.querySelector('.assistant-bubble');
         const statusContainer = bubbleEl.querySelector('.bubble-conversion-container');
-
-        // Wire up follow-up quick-reply chips inside the bubble
-        bubbleEl.querySelectorAll('.follow-up-chip').forEach(chip => {
-            chip.addEventListener('click', () => {
-                const prompt = chip.getAttribute('data-prompt') || chip.textContent.trim();
-                if (prompt) sendUserMessage(prompt);
-            });
-        });
 
         // Wire up Play buttons & Scrubbing on each track bubble
         bubbleEl.querySelectorAll('.track-audio-bubble').forEach(trackEl => {
@@ -2580,8 +2662,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const typingRow = appendTypingBubble();
         const lowerText = text.toLowerCase();
         const isAskingForNew = /\b(new|another|different|fresh|random|more|next|surprise|other|else|switch|change|again)\b/i.test(text);
+        const isGenericMakePlaylist = /^(hey|hi|hello|yo|please|can you|could you|will you|would you|i want you to|i'd like you to)?\s*(make|build|create|curate|put together|give|send)\s+(me\s+)?(a\s+)?(good\s+|cool\s+|nice\s+)?(playlist|mix|mixtape)\s*[?.!]*$/i.test(lowerText);
         const isExplicitMusicReq = isExplicitPlaylistRequest(lowerText) || isExplicitSingleTrackRequest(text, lowerText);
-        const isPureConvOrLifeMoment = Boolean(!isExplicitMusicReq || isConversationalOnlyMessage(lowerText));
+        const isPureConvOrLifeMoment = Boolean(assistantMemory.awaitingPlaylistVibe || isGenericMakePlaylist || !isExplicitMusicReq || isConversationalOnlyMessage(lowerText));
         const looksLikeQuestion = /\?$/.test(text) || /^(who|what|when|where|why|how|which|tell me|can you tell|do you know|explain|swap|replace|pause|resume|next|skip)\b/i.test(lowerText);
 
         if (assistantStatusText) {
