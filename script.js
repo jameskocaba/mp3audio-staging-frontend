@@ -131,7 +131,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function formatMarkdownBold(text) {
-        return escapeHtml(text).replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+        return escapeHtml(text)
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+            .replace(/\*(.*?)\*/g, '<em>$1</em>')
+            .replace(/\n/g, '<br>');
     }
 
     // --- Mobile Sidebar Toggle ---
@@ -590,25 +593,138 @@ document.addEventListener('DOMContentLoaded', () => {
         return Promise.race([enrichPromise, timeoutPromise]);
     }
 
+    // --- Conversational Memory & Human DJ Persona State ---
+    const assistantMemory = {
+        lastVibeKey: '',
+        lastPlaylistTitle: '',
+        lastTracks: [],
+        lastArtist: '',
+        turnCount: 0
+    };
+
+    const HUMAN_VIBE_INTROS = {
+        synthwave: [
+            "Ooh, late-night synthwave is one of my absolute favorite moods. 🌆 Picture empty highways, neon reflections on wet pavement, and warm analog arpeggios—I pulled **6 essential tracks** for you:",
+            "Nothing beats that retro-futuristic analog glow. ⚡ I dug into the synthwave crates and lined up **6 tracks** built for a midnight drive:"
+        ],
+        workout: [
+            "Let's get after it!! 💪 When you need to push through a heavy set or lock into a run, you need relentless drums and zero filler. Here are **6 high-adrenaline anthems** to fuel your session:",
+            "Time to turn the intensity all the way up 🔥 I put together **6 heavy-hitting workout tracks** with massive basslines and nonstop momentum:"
+        ],
+        "hip hop": [
+            "Now we're talking. 🎤 From iconic boom-bap drums to razor-sharp lyricism and heavy 808s, I pulled **6 hip-hop essentials** that never miss:",
+            "Respect the classics! 🙌 I lined up **6 heavyweight hip-hop tracks** with timeless production and lyrical heat:"
+        ],
+        lofi: [
+            "Let's get you into a calm, effortless flow state. ☕ I picked **6 dusty lo-fi & chillhop beats** with warm Rhodes chords and vinyl texture—perfect for focusing or unwinding:",
+            "Cozy vibes incoming 🌧️ Here are **6 mellow, distraction-free lo-fi instrumentals** that feel like a warm cup of coffee by a rainy window:"
+        ],
+        acoustic: [
+            "Sometimes you just want stripped-back guitars, honest storytelling, and warm vocals that feel like they're right in the room with you. 🎸 Here are **6 intimate acoustic sessions**:",
+            "Taking it warm and unplugged 🌿 I curated **6 acoustic favorites** with rich fingerpicking and timeless melodies:"
+        ],
+        rock: [
+            "Turn the amplifier up! ⚡ There's nothing quite like soaring vocals, driving drums, and guitar riffs everyone knows by heart. Here are **6 rock legends**:",
+            "Pure electricity from start to finish 🎸 I pulled **6 iconic rock anthems** that sound incredible at full volume:"
+        ],
+        jazz: [
+            "Dim the lights and pour a drink 🎷 I put together **6 timeless Blue Note & late-night jazz recordings** with smoky saxophone, velvet trumpet, and walking upright bass:",
+            "Pure sophistication. ✨ Here are **6 classic jazz masterpieces** that instantly turn any room into a cozy midnight lounge:"
+        ],
+        "r&b": [
+            "Smooth, lush, and straight from the soul. ✨ Whether you're winding down late at night or just in your feelings, these **6 R&B and neo-soul tracks** set the mood effortlessly:",
+            "Pure velvet vocals and deep pocket grooves 🌙 Here are **6 soulful R&B gems** I picked out for you:"
+        ],
+        edm: [
+            "Hands in the air! 🙌 I lined up **6 euphoric electronic & house anthems** with massive builds and unforgettable drops:",
+            "Let's bring the club & festival energy right into the chat 🎧 Here are **6 electronic essentials** that hit hard:"
+        ],
+        throwback: [
+            "Hop in the time machine! 📼 These **6 iconic 80s & 90s throwbacks** have hooks so good everyone in the room will be singing along within ten seconds:",
+            "Pure nostalgia gold ✨ I pulled **6 timeless retro hits** from the 80s and 90s that still sound fresh today:"
+        ],
+        pop: [
+            "Instant mood-lifters incoming! ✨ I grabbed **6 glossy, feel-good pop anthems** packed with infectious hooks and bright energy:",
+            "If you want pure feel-good momentum, this set is undefeated 🎉 Here are **6 chart-topping pop favorites**:"
+        ],
+        chill: [
+            "Let's slow things down and let the room breathe 🌅 I curated **6 dreamy, laid-back tracks** with warm basslines and sunset grooves:",
+            "Easygoing, smooth, and zero stress 🌊 Here are **6 chill tracks** that melt the day away:"
+        ]
+    };
+
     function detectVibeKeyFromText(lower) {
         if (/synthwave|retrowave|outrun|cyberpunk|neon/.test(lower)) return 'synthwave';
-        if (/workout|gym|fitness|cardio|lift|running|run|hype/.test(lower)) return 'workout';
+        if (/workout|gym|fitness|cardio|lift|running|run|hype|pump up|energetic/.test(lower)) return 'workout';
         if (/hip hop|hip-hop|rap|boom bap|trap|90s rap/.test(lower)) return 'hip hop';
-        if (/lofi|lo-fi|study|homework|focus|coding|reading/.test(lower)) return 'lofi';
-        if (/acoustic|coffeehouse|folk|unplugged|guitar/.test(lower)) return 'acoustic';
-        if (/rock|metal|grunge|alternative|indie rock|guitar/.test(lower)) return 'rock';
-        if (/jazz|saxophone|swing|bossa|lounge|blues/.test(lower)) return 'jazz';
-        if (/r&b|rnb|soul|slow jam|neo soul/.test(lower)) return 'r&b';
+        if (/lofi|lo-fi|study|homework|focus|coding|reading|concentrate|deep work/.test(lower)) return 'lofi';
+        if (/acoustic|coffeehouse|folk|unplugged|campfire| mellow guitar/.test(lower)) return 'acoustic';
+        if (/rock|metal|grunge|alternative|indie rock|classic rock/.test(lower)) return 'rock';
+        if (/jazz|saxophone|swing|bossa|lounge|blues|dinner party|wine/.test(lower)) return 'jazz';
+        if (/r&b|rnb|soul|slow jam|neo soul|romantic|date night/.test(lower)) return 'r&b';
         if (/edm|electronic|house|techno|club|festival|dance|rave/.test(lower)) return 'edm';
         if (/80s|90s|throwback|retro|old school|classic hits|nostalgia/.test(lower)) return 'throwback';
-        if (/pop|chart|party|upbeat|feel good|happy|summer/.test(lower)) return 'pop';
-        if (/chill|late night|late-night|relax|vibe|sunset|ambient/.test(lower)) return 'chill';
+        if (/pop|chart|party|upbeat|feel good|happy|summer|celebrat|friday|weekend/.test(lower)) return 'pop';
+        if (/chill|late night|late-night|relax|vibe|sunset|ambient|unwind|decompress|calm/.test(lower)) return 'chill';
         return null;
     }
 
-    async function curatePresetVibePlaylist(vibeKey, isNewOrMoreRequest = false) {
+    function detectHumanLifeMoment(lower) {
+        if (/\b(stressed|stress|anxious|anxiety|overwhelmed|long day|exhausted|tired|burnout|burned out|rough day|hard day|can't sleep|insomnia|decompress|unwind)\b/.test(lower)) {
+            return {
+                vibeKey: 'lofi',
+                customIntro: "Sounds like it's been a heavy day—take a deep breath and let your shoulders drop. 🌿 I put together **6 warm, unhurried tracks** with soft melodies to help quiet the noise and let your mind rest:",
+                followUp: "How are you holding up? If you want something even softer like acoustic guitar or late-night jazz, just say the word."
+            };
+        }
+        if (/\b(sad|heartbroken|breakup|broke up|lonely|crying|depressed|down|in my feelings|miss her|miss him|missing someone|hurt)\b/.test(lower)) {
+            return {
+                vibeKey: 'r&b',
+                customIntro: "I'm really sorry you're going through that ❤️ Sometimes you don't need someone to tell you to cheer up—you just need music that sits right there with you and understands every word. I pulled **6 soulful, heartfelt tracks** for you:",
+                followUp: "I'm right here if you want more late-night soul, stripped-back acoustic ballads, or whenever you're ready, something gentle to lift your spirits."
+            };
+        }
+        if (/\b(happy|excited|good news|promoted|celebrating|celebrate|friday|weekend|great day|best day|hyped|pumped)\b/.test(lower)) {
+            return {
+                vibeKey: 'pop',
+                customIntro: "Now THAT is what I love to hear!! 🎉 Huge congrats—moments like this deserve a proper soundtrack. I lined up **6 infectious, feel-good anthems** to keep that high energy rolling:",
+                followUp: "What are we celebrating?! Tell me if you want to take this into full club/dance territory or throw on some 80s & 90s party classics next!"
+            };
+        }
+        if (/\b(driving|drive|road trip|highway|commute|traffic|car ride|night drive)\b/.test(lower)) {
+            const isNight = /night|midnight|late/.test(lower);
+            return {
+                vibeKey: isNight ? 'synthwave' : 'rock',
+                customIntro: isNight
+                    ? "Windows cracked, city lights passing by—nothing beats a late-night drive. 🌃 Here are **6 hypnotic synth & night-drive tracks** built for the open road:"
+                    : "Nothing beats a great driving soundtrack with the road ahead of you 🛣️ I pulled **6 timeless road-trip anthems** built for cruising:",
+                followUp: "Want to keep cruising on this wavelength, or switch the dial to indie chill or 90s hip-hop?"
+            };
+        }
+        if (/\b(cooking|dinner|kitchen|wine|date night|romantic|candles)\b/.test(lower)) {
+            return {
+                vibeKey: 'jazz',
+                customIntro: "Ooh, setting the mood! 🍷 Whether you're cooking or pouring a glass of wine, you want warm, rich grooves that make the room feel inviting without overpowering the conversation. Here are **6 timeless lounge & soul classics**:",
+                followUp: "What's on the menu tonight? Let me know if you want to blend in some smooth R&B or sunset indie next!"
+            };
+        }
+        if (/\b(bored|idk|don't know|not sure|whatever|anything|recommend|suggestion|what should i listen to)\b/.test(lower)) {
+            const hour = new Date().getHours();
+            const timeVibe = (hour >= 20 || hour < 5) ? 'synthwave' : (hour < 12 ? 'acoustic' : 'chill');
+            const timeLabel = (hour >= 20 || hour < 5) ? 'late-night' : (hour < 12 ? 'morning' : 'afternoon');
+            return {
+                vibeKey: timeVibe,
+                customIntro: `I've got you covered! Since it's ${timeLabel}, I hand-picked **6 of my personal favorite tracks** that hit the sweet spot between groove and melody:`,
+                followUp: "Tell me which track in this batch catches your ear first, and I'll tailor the next round around it!"
+            };
+        }
+        return null;
+    }
+
+    async function curatePresetVibePlaylist(vibeKey, isNewOrMoreRequest = false, customHumanIntro = null, customFollowUp = null) {
         const preset = CLIENT_VIBE_SEEDS[vibeKey] || CLIENT_VIBE_SEEDS.chill;
         lastVibeKey = vibeKey;
+        assistantMemory.lastVibeKey = vibeKey;
 
         // Filter out already-shown tracks so asking for a "new playlist" gives fresh tracks
         const unseenSeeds = preset.seeds.filter(s => {
@@ -629,9 +745,30 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         const playlistTitle = (usedSecondPage || isNewOrMoreRequest) && preset.altTitle ? preset.altTitle : preset.title;
+        assistantMemory.lastPlaylistTitle = playlistTitle;
+        assistantMemory.lastTracks = tracks;
+        if (tracks[0] && tracks[0].artist) assistantMemory.lastArtist = tracks[0].artist;
+
+        const intros = HUMAN_VIBE_INTROS[vibeKey] || HUMAN_VIBE_INTROS.chill;
+        const defaultIntro = isNewOrMoreRequest
+            ? `Fresh crate dug! 🎧 I switched things up and curated **${playlistTitle}** for you—6 brand-new tracks starting with **${tracks[0] ? tracks[0].title : 'a classic'}** by **${tracks[0] ? tracks[0].artist : ''}**:`
+            : intros[assistantMemory.turnCount % intros.length];
+
+        const followUpNote = customFollowUp || (
+            `How does this mix feel? You can tap ▶ on any track to listen right here, or tell me *"make it more upbeat"*, *"something chiller"*, or *"more like ${tracks[0] ? tracks[0].artist : 'this'}"*!`
+        );
+
+        assistantMemory.turnCount++;
         return {
             success: true,
-            reply: `Here is your **${playlistTitle}** (${tracks.length} tracks)! Tap play on any audio bubble to listen right in the chat, download individual 320kbps MP3s, or grab the full playlist ZIP.`,
+            reply: customHumanIntro || defaultIntro,
+            follow_up_note: followUpNote,
+            suggestions: [
+                `🔥 More like ${tracks[0] ? tracks[0].artist : 'this vibe'}`,
+                `⚡ Make it more upbeat`,
+                `🌙 Dial it back & make it chiller`,
+                `🎲 Surprise me with a different genre`
+            ],
             mode: 'playlist',
             playlist_title: playlistTitle,
             playlist_vibe: preset.vibe,
@@ -639,10 +776,138 @@ document.addEventListener('DOMContentLoaded', () => {
         };
     }
 
+    function isConversationalOnlyMessage(lower) {
+        // Detect pure human conversation so we reply like a person instead of searching iTunes for "how are you"
+        if (/^(hi|hey|hello|yo|sup|what's up|whats up|howdy|hiya|good morning|good afternoon|good evening|morning|evening)[!.?\s]*$/i.test(lower)) return 'greeting';
+        if (/^(hey|hi|hello|yo)?\s*(how are you|how's it going|hows it going|how are things|how do you do|what are you up to|wyd|you good)[!.?\s]*$/i.test(lower)) return 'how_are_you';
+        if (/\b(who are you|what are you|are you a bot|are you ai|are you human|are you real|what can you do|how does this work|help me)\b/i.test(lower)) return 'identity';
+        if (/^(thanks|thank you|thx|ty|appreciate it|love it|love this|this is fire|fire|awesome|amazing|great picks|so good|dope|nice|cool|perfect|you're the best|you rock)[!.?\s]*$/i.test(lower)) return 'gratitude';
+        if (/\b(why did you pick|tell me about these|about this playlist|explain these songs|what makes this good)\b/i.test(lower)) return 'explain_picks';
+        if (/\b(make it more upbeat|more upbeat|faster|more energy|higher energy|pump it up|too slow|wake me up)\b/i.test(lower)) return 'steer_upbeat';
+        if (/\b(make it chiller|more chill|slower|softer|mellower|dial it back|too loud|too fast|calmer)\b/i.test(lower)) return 'steer_chill';
+        if (/^(keep going|more like this|volume 2|vol 2|part 2|same vibe|more of this)[!.?\s]*$/i.test(lower)) return 'continue_vibe';
+        return null;
+    }
+
     async function clientSideCurateFallback(messageText) {
-        const lower = (messageText || '').toLowerCase().trim();
+        const rawText = (messageText || '').trim();
+        const lower = rawText.toLowerCase();
         const isRingtone = /ringtone|m4r|alarm tone|text tone/.test(lower);
         const isAskingForNewOrAnother = /\b(new|another|different|fresh|random|more|next|surprise|other|else|switch|change|again)\b/i.test(lower);
+
+        // 0. Check human conversational & multi-turn intents first!
+        const convIntent = isConversationalOnlyMessage(lower);
+        if (convIntent === 'greeting') {
+            return {
+                success: true,
+                mode: 'chat',
+                reply: `Hey there! 👋 Good to hear from you—I'm right here in the booth lining up tracks. How's your day going? Tell me what kind of mood you're in, what you're up to right now, or drop an artist/song you love and I'll curate something special for you!`,
+                suggestions: [
+                    `🌙 Chill late-night synthwave mix`,
+                    `🏋️ High-energy workout playlist`,
+                    `☕ Relaxing lo-fi beats while I work`,
+                    `🎲 Surprise me with your favorite songs`
+                ],
+                tracks: []
+            };
+        }
+        if (convIntent === 'how_are_you') {
+            const lastMention = assistantMemory.lastPlaylistTitle
+                ? ` Still riding the wave from that **${assistantMemory.lastPlaylistTitle}** earlier!`
+                : ` Just digging through some crates and finding gems.`;
+            return {
+                success: true,
+                mode: 'chat',
+                reply: `I'm doing great, thanks for asking! 🎧${lastMention} How are *you* feeling today? Tell me if it's been a high-energy day, a long stressful one, or somewhere in between—I'll match the soundtrack to your exact mood.`,
+                suggestions: [
+                    `🌿 Had a long day—help me unwind`,
+                    `🎉 Feeling great! Play something upbeat`,
+                    `🚗 Need a late-night driving soundtrack`,
+                    `🍷 Cooking dinner—play warm lounge vibes`
+                ],
+                tracks: []
+            };
+        }
+        if (convIntent === 'identity') {
+            return {
+                success: true,
+                mode: 'chat',
+                reply: `Think of me as your music-obsessed friend and personal DJ on speed dial! 🎶 You can talk to me just like a real person:\n\n• **Tell me how you feel or what you're doing** (*"I'm stressed after work"*, *"Cooking dinner"*, *"Driving at night"*)\n• **Steer the vibe mid-conversation** (*"Make it more upbeat"*, *"Give me 6 more like that"*, *"Why did you pick these?"*)\n• **Ask for any song, artist, ringtone, or paste a link**—and I'll drop playable audio bubbles + 320kbps MP3/ZIP downloads right into our chat!`,
+                suggestions: [
+                    `🌙 Curate a late-night synthwave mix`,
+                    `🔥 Play Top Daft Punk tracks`,
+                    `🌿 Help me relax after a long day`,
+                    `📱 Make a custom phone ringtone`
+                ],
+                tracks: []
+            };
+        }
+        if (convIntent === 'gratitude') {
+            const prevTitle = assistantMemory.lastPlaylistTitle || 'that mix';
+            const prevArtist = assistantMemory.lastArtist || 'those artists';
+            return {
+                success: true,
+                mode: 'chat',
+                reply: `Anytime! 🙌 Nothing makes me happier than when a tracklist hits just right. Since you're feeling **${prevTitle}**, want me to keep that exact energy rolling with a Volume 2, spin off into more tracks like **${prevArtist}**, or switch up the tempo?`,
+                suggestions: [
+                    `🔥 Keep this vibe going (Vol. 2)`,
+                    `🎤 More tracks like ${prevArtist}`,
+                    `⚡ Take the energy up a notch`,
+                    `🌙 Smooth it out & go mellower`
+                ],
+                tracks: []
+            };
+        }
+        if (convIntent === 'explain_picks') {
+            if (assistantMemory.lastTracks && assistantMemory.lastTracks.length > 0) {
+                const sample = assistantMemory.lastTracks.slice(0, 3).map(t => `**${t.title}** by *${t.artist}*`).join(', ');
+                return {
+                    success: true,
+                    mode: 'chat',
+                    reply: `Great question! 🎧 When I built **${assistantMemory.lastPlaylistTitle || 'your mix'}**, I wanted a natural arc where each song flows into the next without jarring tempo jumps. Tracks like ${sample} share warm harmonic textures and a cohesive groove so you can hit **Play All** and stay in the zone from start to finish. Want me to dig deeper into this style?`,
+                    suggestions: [
+                        `🔥 Yes, give me 6 more in this style`,
+                        `🎤 Focus on ${assistantMemory.lastArtist || 'the lead artist'}`,
+                        `🎲 Show me a completely different genre`
+                    ],
+                    tracks: []
+                };
+            }
+        }
+        if (convIntent === 'steer_upbeat') {
+            const upbeatKeys = ['pop', 'edm', 'workout', 'throwback'];
+            const nextKey = upbeatKeys[rotationCursor++ % upbeatKeys.length];
+            return await curatePresetVibePlaylist(
+                nextKey,
+                true,
+                `Got you—let's pick up the tempo and bring the energy way up! ⚡ I swapped out the slower grooves for **6 punchy, high-BPM tracks** that hit right away:`,
+                `How's that tempo feeling now? Say the word if you want to go even harder (full gym/festival energy) or lock right into this groove!`
+            );
+        }
+        if (convIntent === 'steer_chill') {
+            const chillKeys = ['chill', 'lofi', 'acoustic', 'r&b', 'jazz'];
+            const nextKey = chillKeys[rotationCursor++ % chillKeys.length];
+            return await curatePresetVibePlaylist(
+                nextKey,
+                true,
+                `Say less—dialing it back to something much smoother, warmer, and more laid-back 🌙 Here are **6 mellow tracks** to let the room breathe:`,
+                `Better? Let me know if you want pure instrumental beats (no vocals) or warm acoustic guitar next.`
+            );
+        }
+        if (convIntent === 'continue_vibe' && assistantMemory.lastVibeKey) {
+            return await curatePresetVibePlaylist(
+                assistantMemory.lastVibeKey,
+                true,
+                `Keeping that exact wave going! 🌊 Here is **Volume 2** with **6 fresh tracks** in the same lane so the vibe never drops:`,
+                `Still locked in! Tap ▶ Play All in Chat to queue these up right behind the first batch.`
+            );
+        }
+
+        // 0.5 Check empathetic real-life moments & emotions (stressed, sad, celebrating, driving, cooking, etc.)
+        const lifeMoment = detectHumanLifeMoment(lower);
+        if (lifeMoment && !isRingtone) {
+            return await curatePresetVibePlaylist(lifeMoment.vibeKey, isAskingForNewOrAnother, lifeMoment.customIntro, lifeMoment.followUp);
+        }
 
         // 1. Check if user matched a specific genre/vibe preset
         const matchedVibeKey = detectVibeKeyFromText(lower);
@@ -651,15 +916,15 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // 2. Clean conversational filler & "new/another/different playlist" modifiers
-        let cleanQ = messageText
-            .replace(/^(hey|hi|hello|yo|please|can you|could you|send me|play|find|get me|make me|create|give me|i want|i need|text me|build me|curate|generate|drop)\s+/i, '')
+        let cleanQ = rawText
+            .replace(/^(hey|hi|hello|yo|please|can you|could you|send me|play|find|get me|make me|create|give me|i want|i need|text me|build me|curate|generate|drop|how about|show me|put on)\s+/i, '')
             .replace(/\b(a new|another|a different|a fresh|a random|new|different|fresh|random|surprise|more|next|other)\s+(playlist|mix|songs|tracks|music|vibe|list)\b/gi, ' ')
-            .replace(/\b(a playlist of|a playlist for|playlist|songs by|tracks by|music by|ringtone of|ringtone for|ringtone|mp3|audio|song|track|mix)\b/gi, ' ')
-            .replace(/^(a|an|some|the|me|for me|please|now)\b\s*/gi, '')
+            .replace(/\b(a playlist of|a playlist for|playlist|songs by|tracks by|music by|songs like|tracks like|music like|more like|ringtone of|ringtone for|ringtone|mp3|audio|song|track|mix)\b/gi, ' ')
+            .replace(/^(a|an|some|the|me|for me|please|now|of|by)\b\s*/gi, '')
             .replace(/\s+/g, ' ')
             .trim();
 
-        const isGenericNewPlaylistRequest = !cleanQ || /^(new|another|different|fresh|random|more|next|surprise|surprise me|something new|something else|anything|music|songs|tracks|vibe|vibes|good music)$/i.test(cleanQ);
+        const isGenericNewPlaylistRequest = !cleanQ || /^(new|another|different|fresh|random|more|next|surprise|surprise me|something new|something else|anything|music|songs|tracks|vibe|vibes|good music|your favorite)$/i.test(cleanQ);
 
         // 3. If user asked for a generic "new playlist" / "another playlist" / "surprise me", rotate to a fresh curated vibe!
         if (isGenericNewPlaylistRequest && !isRingtone) {
@@ -672,16 +937,15 @@ document.addEventListener('DOMContentLoaded', () => {
             return await curatePresetVibePlaylist(nextKey, true);
         }
 
-        if (!cleanQ) cleanQ = messageText.trim();
+        if (!cleanQ) cleanQ = rawText;
 
-        const wantsPlaylist = /playlist|mix|songs|tracks|vibe|mood|workout|chill|study|party|top |best |new |another |more /i.test(lower);
+        const wantsPlaylist = /playlist|mix|songs|tracks|vibe|mood|workout|chill|study|party|top |best |new |another |more |like /i.test(lower);
         const limit = isRingtone ? 1 : (wantsPlaylist ? 6 : 4);
 
         try {
             const results = await searchItunesFast(cleanQ, limit * 3, 1800);
             const seen = new Set();
             const tracks = [];
-            // Prefer tracks not yet shown if user asked for "new" / "more"
             for (const pass of [1, 2]) {
                 for (const item of (results || [])) {
                     const k = `${(item.trackName || '').toLowerCase()}|${(item.artistName || '').toLowerCase()}`;
@@ -696,11 +960,25 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             if (tracks.length > 0) {
+                assistantMemory.lastTracks = tracks;
+                assistantMemory.lastArtist = tracks[0].artist || cleanQ;
+                assistantMemory.lastPlaylistTitle = tracks.length === 1 ? `${tracks[0].title} — ${tracks[0].artist}` : `${cleanQ} — Curated Mix`;
+                assistantMemory.turnCount++;
+
                 if (tracks.length === 1 || isRingtone) {
                     const t = tracks[0];
                     return {
                         success: true,
-                        reply: `Here is **${t.title}** by **${t.artist}**! Tap play in the bubble below to listen immediately, or click **Download MP3** for the full tagged file.`,
+                        reply: isRingtone
+                            ? `Great pick for a ringtone! 📱 I pulled **${t.title}** by **${t.artist}**. Tap play below to preview it, or click **⬇ Ringtone** to get your custom iPhone (.M4R) & Android (.MP3) files:`
+                            : `Love that track! 🔥 Here is **${t.title}** by **${t.artist}** (${t.album || 'Single'}${t.year ? ', ' + t.year : ''}). Tap ▶ in the bubble below to listen right now, or grab the full 320kbps MP3:`,
+                        follow_up_note: `Want me to build a full 6-track playlist around **${t.artist}**, or pull more songs with this exact energy?`,
+                        suggestions: [
+                            `🎵 Build a 6-track ${t.artist} playlist`,
+                            `🔥 More songs like ${t.title}`,
+                            `📱 Make a ringtone of ${t.title}`,
+                            `🎲 Surprise me with a new playlist`
+                        ],
                         mode: isRingtone ? 'ringtone' : 'single',
                         playlist_title: `${t.title} — ${t.artist}`,
                         playlist_vibe: `${t.album} ${t.year ? '(' + t.year + ')' : ''}`,
@@ -709,10 +987,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 return {
                     success: true,
-                    reply: `I curated **${tracks.length} tracks** for **${cleanQ}**! Tap play on any audio bubble to listen in the chat, download individual MP3s, or grab the full Playlist ZIP.`,
+                    reply: `Ooh, great taste! 🎧 I hand-picked **${tracks.length} standout tracks** for **${cleanQ}**—kicking off with **${tracks[0].title}** by **${tracks[0].artist}**. Tap ▶ on any bubble to listen right in our chat, or grab the full Playlist ZIP:`,
+                    follow_up_note: `What do you think of this lineup? Tell me if you want deeper cuts from **${tracks[0].artist}**, something faster, or a fresh vibe!`,
+                    suggestions: [
+                        `🔥 More tracks by ${tracks[0].artist}`,
+                        `⚡ Make it more upbeat`,
+                        `🌙 Make it chiller`,
+                        `🔄 Curate another playlist`
+                    ],
                     mode: 'playlist',
                     playlist_title: `${cleanQ} — Curated Mix`,
-                    playlist_vibe: `AI Curated Selection • 320kbps & ID3 Tagged`,
+                    playlist_vibe: `Personal DJ Selection • 320kbps & ID3 Tagged`,
                     tracks
                 };
             }
@@ -728,7 +1013,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
         return {
             success: true,
-            reply: `I found **${cleanQ}** for you! Click **Download MP3** below to extract and tag the full 320kbps audio track.`,
+            reply: `I lined up **${cleanQ}** for you! 🎵 Click **⬇ MP3** below to extract and tag the full 320kbps studio audio track:`,
+            follow_up_note: `Want me to put together a full playlist around **${cleanQ}** next?`,
+            suggestions: [
+                `🎵 Build a playlist around ${cleanQ}`,
+                `🔄 Surprise me with a new playlist`
+            ],
             mode: 'single',
             playlist_title: cleanQ,
             playlist_vibe: 'Direct Audio Extraction',
@@ -1082,6 +1372,7 @@ document.addEventListener('DOMContentLoaded', () => {
             ...t,
             bubbleId: `b_${Date.now()}_${i}_${Math.random().toString(36).slice(2, 6)}`
         }));
+        const hasTracks = tracks.length > 0;
         const isPlaylist = tracks.length > 1;
         const playlistTitle = payload.playlist_title || 'Curated Selection';
         const playlistVibe = payload.playlist_vibe || '320kbps Studio Audio • Auto ID3 Tagged';
@@ -1108,7 +1399,7 @@ document.addEventListener('DOMContentLoaded', () => {
             `;
         }
 
-        const tracksHtml = tracks.map((t, idx) => {
+        const tracksHtml = hasTracks ? tracks.map((t, idx) => {
             const art = t.artwork_url || 'favicon.png';
             const subMeta = [t.artist, t.album, t.year].filter(Boolean).join(' • ');
             const isRingtoneMode = (payload.mode === 'ringtone') || (videoToMp3Input && videoToMp3Input.checked);
@@ -1140,7 +1431,26 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                 </div>
             `;
-        }).join('');
+        }).join('') : '';
+
+        const followUpHtml = payload.follow_up_note
+            ? `<div class="msg-text" style="margin-top: 10px; font-size: 0.86rem; color: #cbd5e1;"><p>${formatMarkdownBold(payload.follow_up_note)}</p></div>`
+            : '';
+
+        const suggestions = Array.isArray(payload.suggestions) && payload.suggestions.length > 0
+            ? payload.suggestions
+            : (hasTracks ? [
+                `🔥 More like ${tracks[0] ? tracks[0].artist : 'this'}`,
+                `⚡ Make it more upbeat`,
+                `🌙 Make it chiller`,
+                `🎲 Surprise me with a new mix`
+            ] : []);
+
+        const suggestionsHtml = suggestions.length > 0 ? `
+            <div class="welcome-quick-chips" style="margin-top: 10px;">
+                ${suggestions.map(s => `<button type="button" class="quick-chip follow-up-chip" data-prompt="${escapeHtml(s.replace(/^[^\w\d]+/, '').trim())}">${escapeHtml(s)}</button>`).join('')}
+            </div>
+        ` : '';
 
         row.innerHTML = `
             <div class="msg-avatar">🎧</div>
@@ -1153,9 +1463,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     <p>${formatMarkdownBold(payload.reply || 'Here are your tracks!')}</p>
                 </div>
                 ${playlistHeaderHtml}
-                <div class="tracks-bubble-stack">
-                    ${tracksHtml}
-                </div>
+                ${hasTracks ? `<div class="tracks-bubble-stack">${tracksHtml}</div>` : ''}
+                ${followUpHtml}
+                ${suggestionsHtml}
                 <div class="bubble-conversion-container"></div>
             </div>
         `;
@@ -1165,6 +1475,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const bubbleEl = row.querySelector('.assistant-bubble');
         const statusContainer = bubbleEl.querySelector('.bubble-conversion-container');
+
+        // Wire up follow-up quick-reply chips inside the bubble
+        bubbleEl.querySelectorAll('.follow-up-chip').forEach(chip => {
+            chip.addEventListener('click', () => {
+                const prompt = chip.getAttribute('data-prompt') || chip.textContent.trim();
+                if (prompt) sendUserMessage(prompt);
+            });
+        });
 
         // Wire up Play buttons & Scrubbing on each track bubble
         bubbleEl.querySelectorAll('.track-audio-bubble').forEach(trackEl => {
@@ -1239,58 +1557,74 @@ document.addEventListener('DOMContentLoaded', () => {
         chatHistory.push({ role: 'user', content: text });
 
         const typingRow = appendTypingBubble();
+        const lowerText = text.toLowerCase();
         const isAskingForNew = /\b(new|another|different|fresh|random|more|next|surprise|other|else|switch|change|again)\b/i.test(text);
+        const isPureConvOrLifeMoment = Boolean(isConversationalOnlyMessage(lowerText) || detectHumanLifeMoment(lowerText));
+
+        if (assistantStatusText) {
+            assistantStatusText.textContent = isPureConvOrLifeMoment
+                ? 'typing a reply...'
+                : 'digging through crates & curating tracks...';
+        }
 
         try {
             let result = null;
 
-            // Only wait up to 2.1s for backend so chat never stalls on cold starts or rate limits
-            try {
-                const backendCall = (async () => {
-                    const resp = await fetchWithTimeout(`${BACKEND_URL}/api/assistant/chat`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            message: text,
-                            history: chatHistory.slice(-6),
-                            options: {
-                                auto_add_album_art: autoAddAlbumArtInput ? autoAddAlbumArtInput.checked : true,
-                                increase_quality: increaseQualityInput ? increaseQualityInput.checked : false,
-                                is_ringtone: videoToMp3Input ? videoToMp3Input.checked : false,
-                                transcribe_audio: attachLyricsInput ? attachLyricsInput.checked : false
-                            }
-                        })
-                    }, 2100);
-                    if (resp && resp.ok) {
-                        return await resp.json();
-                    }
-                    return null;
-                })();
-
-                const raceTimeout = new Promise(resolve => setTimeout(() => resolve(null), 2200));
-                result = await Promise.race([backendCall, raceTimeout]);
-            } catch (networkErr) {
-                console.info('Using instant client curation:', networkErr);
-            }
-
-            // Check if backend result is missing, empty, or returned duplicate tracks when user asked for a NEW playlist
-            let shouldUseClientCuration = !result || !result.success || !Array.isArray(result.tracks) || result.tracks.length === 0;
-            if (!shouldUseClientCuration && isAskingForNew) {
-                const allAlreadyShown = result.tracks.every(t =>
-                    shownTrackKeys.has(`${(t.title || '').toLowerCase()}|${(t.artist || '').toLowerCase()}`)
-                );
-                const looksLikeLiteralNewQuery = /\b(a new|new|another|different)\s+—\s+curated mix/i.test(result.playlist_title || '');
-                if (allAlreadyShown || looksLikeLiteralNewQuery) {
-                    shouldUseClientCuration = true;
-                }
-            }
-
-            if (shouldUseClientCuration) {
+            // If it's a pure conversational message, follow-up steering, or life-moment mood check-in, use our human DJ persona directly!
+            if (isPureConvOrLifeMoment) {
+                await new Promise(r => setTimeout(r, 420));
                 result = await clientSideCurateFallback(text);
-            } else if (Array.isArray(result.tracks)) {
-                result.tracks.forEach(t => {
-                    shownTrackKeys.add(`${(t.title || '').toLowerCase()}|${(t.artist || '').toLowerCase()}`);
-                });
+            } else {
+                // Otherwise try backend up to 2.1s, then fall back to instant human client curation
+                try {
+                    const backendCall = (async () => {
+                        const resp = await fetchWithTimeout(`${BACKEND_URL}/api/assistant/chat`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                message: text,
+                                history: chatHistory.slice(-6),
+                                options: {
+                                    auto_add_album_art: autoAddAlbumArtInput ? autoAddAlbumArtInput.checked : true,
+                                    increase_quality: increaseQualityInput ? increaseQualityInput.checked : false,
+                                    is_ringtone: videoToMp3Input ? videoToMp3Input.checked : false,
+                                    transcribe_audio: attachLyricsInput ? attachLyricsInput.checked : false
+                                }
+                            })
+                        }, 2100);
+                        if (resp && resp.ok) {
+                            return await resp.json();
+                        }
+                        return null;
+                    })();
+
+                    const raceTimeout = new Promise(resolve => setTimeout(() => resolve(null), 2200));
+                    result = await Promise.race([backendCall, raceTimeout]);
+                } catch (networkErr) {
+                    console.info('Using instant client curation:', networkErr);
+                }
+
+                let shouldUseClientCuration = !result || !result.success || !Array.isArray(result.tracks) || result.tracks.length === 0;
+                if (!shouldUseClientCuration && isAskingForNew) {
+                    const allAlreadyShown = result.tracks.every(t =>
+                        shownTrackKeys.has(`${(t.title || '').toLowerCase()}|${(t.artist || '').toLowerCase()}`)
+                    );
+                    const looksLikeLiteralNewQuery = /\b(a new|new|another|different)\s+—\s+curated mix/i.test(result.playlist_title || '');
+                    if (allAlreadyShown || looksLikeLiteralNewQuery) {
+                        shouldUseClientCuration = true;
+                    }
+                }
+
+                if (shouldUseClientCuration) {
+                    result = await clientSideCurateFallback(text);
+                } else if (Array.isArray(result.tracks)) {
+                    result.tracks.forEach(t => {
+                        shownTrackKeys.add(`${(t.title || '').toLowerCase()}|${(t.artist || '').toLowerCase()}`);
+                    });
+                    assistantMemory.lastTracks = result.tracks;
+                    assistantMemory.lastPlaylistTitle = result.playlist_title || text;
+                    if (result.tracks[0] && result.tracks[0].artist) assistantMemory.lastArtist = result.tracks[0].artist;
+                }
             }
 
             if (typingRow && typingRow.parentNode) typingRow.remove();
@@ -1307,6 +1641,9 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         } finally {
             if (typingRow && typingRow.parentNode) typingRow.remove();
+            if (assistantStatusText) {
+                assistantStatusText.innerHTML = 'Online &bull; Personal Music DJ &amp; Assistant';
+            }
         }
     }
 
@@ -1642,23 +1979,50 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const curated = await clientSideCurateFallback(textMsg);
         const tracks = curated.tracks || [];
-        const playlistTitle = curated.playlist_title || 'MP3aud.io Curated Mix';
-        const cleanReply = (curated.reply || 'Here are your curated tracks!').replace(/\*\*(.+?)\*\*/g, '$1');
+        const cleanReply = (curated.reply || 'Here are your curated tracks!').replace(/\*\*(.+?)\*\*/g, '$1').replace(/\*(.+?)\*/g, '$1');
 
+        if (tracks.length === 0) {
+            const chatKb = [
+                [
+                    { text: '🌙 Late-Night Synthwave', callback_data: 'curate:chill late-night synthwave playlist' },
+                    { text: '🌿 Help Me Unwind', callback_data: 'curate:i had a long day help me unwind' }
+                ],
+                [
+                    { text: '⚡ Make It Upbeat', callback_data: 'curate:make it more upbeat' },
+                    { text: '🎲 Surprise Playlist', callback_data: 'curate:send me a new playlist' }
+                ]
+            ];
+            await fetch(`${apiBase}/sendMessage`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    chat_id: chatId,
+                    text: escapeHtml(cleanReply),
+                    parse_mode: 'HTML',
+                    reply_markup: { inline_keyboard: chatKb },
+                    ...bizParams
+                })
+            });
+            return;
+        }
+
+        const playlistTitle = curated.playlist_title || 'MP3aud.io Curated Mix';
         const trackLines = tracks.slice(0, 6).map((t, i) =>
             `${i + 1}. <b>${escapeHtml(t.title)}</b> — ${escapeHtml(t.artist)} (${escapeHtml(t.duration || '3:30')})`
         ).join('\n');
+        const followUpLine = curated.follow_up_note
+            ? `\n\n💬 <i>${escapeHtml(curated.follow_up_note.replace(/\*\*(.+?)\*\*/g, '$1').replace(/\*(.+?)\*/g, '$1'))}</i>`
+            : '';
 
         const webUrl = `${window.location.origin}/?q=${encodeURIComponent(textMsg)}`;
         const inlineKb = [
             [
-                { text: '🔄 Curate New Playlist', callback_data: 'curate:send me a new playlist' },
-                { text: '🎧 Open & Download ZIP', url: webUrl }
+                { text: '⚡ More Upbeat', callback_data: 'curate:make it more upbeat' },
+                { text: '🌙 Make It Chiller', callback_data: 'curate:make it chiller' }
             ],
             [
-                { text: '🌙 Synthwave', callback_data: 'curate:synthwave playlist' },
-                { text: '🏋️ Workout', callback_data: 'curate:workout playlist' },
-                { text: '☕ Lo-Fi', callback_data: 'curate:lofi playlist' }
+                { text: '🔄 Curate New Playlist', callback_data: 'curate:send me a new playlist' },
+                { text: '🎧 Open & Download ZIP', url: webUrl }
             ]
         ];
 
@@ -1667,7 +2031,7 @@ document.addEventListener('DOMContentLoaded', () => {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 chat_id: chatId,
-                text: `🎵 <b>${escapeHtml(playlistTitle)}</b>\n${escapeHtml(cleanReply)}\n\n${trackLines}`,
+                text: `🎵 <b>${escapeHtml(playlistTitle)}</b>\n${escapeHtml(cleanReply)}\n\n${trackLines}${followUpLine}`,
                 parse_mode: 'HTML',
                 reply_markup: { inline_keyboard: inlineKb },
                 ...bizParams
