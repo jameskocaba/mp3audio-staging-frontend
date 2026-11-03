@@ -1,4 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
+    if (window.__MP3AUDIO_ASSISTANT_INIT__) return;
+    window.__MP3AUDIO_ASSISTANT_INIT__ = true;
     // Prevent default browser file drop behavior outside handler
     window.addEventListener('dragover', (e) => e.preventDefault(), false);
     window.addEventListener('drop', (e) => e.preventDefault(), false);
@@ -89,7 +91,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Audio Player Queue State
     const globalAudio = new Audio();
-    globalAudio.crossOrigin = 'anonymous';
     let currentQueue = [];
     let currentQueueIndex = -1;
     let activeBubbleId = null;

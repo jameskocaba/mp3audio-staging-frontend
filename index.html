@@ -46,7 +46,1811 @@
         gtag('config', 'G-VGVP90K1M4');
     </script>
 
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css?v=20261103_4">
+    <style>
+/* ==========================================================================
+   MP3AUD.IO — AI TEXT MESSAGING PERSONAL MUSIC ASSISTANT STYLESHEET
+   WhatsApp / Telegram / Studio Dark Messaging Theme
+   ========================================================================== */
+
+:root {
+    --bg-app: #0b141a;
+    --bg-sidebar: #111b21;
+    --bg-header: #182229;
+    --bg-chat-wallpaper: #0b141a;
+    --bg-assistant-bubble: #1f2c34;
+    --bg-user-bubble: #005c4b;
+    --bg-track-card: #131d24;
+    --bg-track-card-hover: #18252e;
+    --border-subtle: rgba(255, 255, 255, 0.08);
+    --border-accent: rgba(255, 85, 0, 0.35);
+    --text-primary: #e9edef;
+    --text-secondary: #8696a0;
+    --text-muted: #667781;
+    --brand-orange: #ff5500;
+    --brand-orange-hover: #ff6a1f;
+    --brand-emerald: #00a884;
+    --brand-emerald-hover: #06cf9c;
+    --telegram-blue: #24A1DE;
+    --whatsapp-green: #25D366;
+    --radius-lg: 14px;
+    --radius-md: 10px;
+    --radius-sm: 8px;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html,
+body.messenger-body {
+    width: 100%;
+    height: 100dvh;
+    overflow: hidden;
+    background-color: var(--bg-app);
+    color: var(--text-primary);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* ==========================================================================
+   MAIN SHELL LAYOUT (SIDEBAR + CHAT THREAD)
+   ========================================================================== */
+.messenger-app-shell {
+    display: flex;
+    width: 100%;
+    height: 100dvh;
+    overflow: hidden;
+    position: relative;
+}
+
+/* ==========================================================================
+   LEFT SIDEBAR
+   ========================================================================== */
+.assistant-sidebar {
+    width: 330px;
+    min-width: 330px;
+    height: 100%;
+    background-color: var(--bg-sidebar);
+    border-right: 1px solid var(--border-subtle);
+    display: flex;
+    flex-direction: column;
+    z-index: 40;
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sidebar-header {
+    padding: 16px 18px;
+    background-color: var(--bg-header);
+    border-bottom: 1px solid var(--border-subtle);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.sidebar-brand {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    text-decoration: none;
+    color: var(--text-primary);
+}
+
+.sidebar-logo {
+    width: 36px;
+    height: 36px;
+    border-radius: 9px;
+    object-fit: cover;
+}
+
+.sidebar-brand-text {
+    display: flex;
+    flex-direction: column;
+}
+
+.brand-title {
+    font-size: 1.15rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: #ffffff;
+}
+
+.brand-title .accent {
+    color: var(--brand-orange);
+}
+
+.brand-subtitle {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 2px;
+}
+
+.online-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background-color: var(--whatsapp-green);
+    box-shadow: 0 0 8px var(--whatsapp-green);
+    display: inline-block;
+}
+
+.mobile-close-sidebar {
+    display: none;
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 1.6rem;
+    cursor: pointer;
+    line-height: 1;
+}
+
+.sidebar-new-chat-wrap {
+    padding: 12px 14px 6px;
+}
+
+.new-chat-btn {
+    width: 100%;
+    padding: 10px 14px;
+    border-radius: var(--radius-md);
+    border: 1px solid rgba(255, 85, 0, 0.4);
+    background: linear-gradient(135deg, rgba(255, 85, 0, 0.16) 0%, rgba(0, 168, 132, 0.14) 100%);
+    color: #ffffff;
+    font-weight: 600;
+    font-size: 0.88rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.new-chat-btn:hover {
+    background: linear-gradient(135deg, rgba(255, 85, 0, 0.28) 0%, rgba(0, 168, 132, 0.24) 100%);
+    transform: translateY(-1px);
+}
+
+/* Sidebar Sections */
+.sidebar-section {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border-subtle);
+}
+
+.sidebar-section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+}
+
+.channel-setup-link,
+.clear-history-link {
+    background: none;
+    border: none;
+    color: var(--brand-orange);
+    font-size: 0.72rem;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+.channel-buttons-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+}
+
+.channel-pill {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    border-radius: var(--radius-sm);
+    text-decoration: none;
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    transition: all 0.18s ease;
+}
+
+.telegram-pill {
+    background: rgba(36, 161, 222, 0.13);
+}
+
+.telegram-pill:hover {
+    background: rgba(36, 161, 222, 0.24);
+    border-color: var(--telegram-blue);
+}
+
+.telegram-pill svg {
+    color: var(--telegram-blue);
+    flex-shrink: 0;
+}
+
+.whatsapp-pill {
+    background: rgba(37, 211, 102, 0.12);
+}
+
+.whatsapp-pill:hover {
+    background: rgba(37, 211, 102, 0.24);
+    border-color: var(--whatsapp-green);
+}
+
+.whatsapp-pill svg {
+    color: var(--whatsapp-green);
+    flex-shrink: 0;
+}
+
+.channel-pill-text {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.channel-pill-text strong {
+    font-size: 0.76rem;
+    white-space: nowrap;
+}
+
+.channel-pill-text span {
+    font-size: 0.66rem;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Vibe Prompt Buttons */
+.vibe-prompts-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    max-height: 250px;
+    overflow-y: auto;
+}
+
+.vibe-prompt-btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 7px 9px;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: var(--radius-sm);
+    color: var(--text-primary);
+    text-align: left;
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+
+.vibe-prompt-btn:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.06);
+}
+
+.vibe-emoji {
+    font-size: 1.15rem;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 7px;
+    flex-shrink: 0;
+}
+
+.vibe-text {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.vibe-text strong {
+    font-size: 0.81rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.vibe-text span {
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+}
+
+/* Recent History List */
+.sidebar-history-section {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    min-height: 80px;
+}
+
+.recent-history-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    overflow-y: auto;
+}
+
+.history-item-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 7px 9px;
+    border-radius: 7px;
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 0.78rem;
+    text-align: left;
+    cursor: pointer;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.history-item-btn:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-primary);
+}
+
+/* Sidebar Footer */
+.sidebar-footer {
+    padding: 12px 14px;
+    background-color: var(--bg-header);
+    border-top: 1px solid var(--border-subtle);
+}
+
+.sidebar-account-card {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 11px;
+    border-radius: var(--radius-md);
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--border-subtle);
+    cursor: pointer;
+    transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.sidebar-account-card:hover {
+    border-color: var(--brand-orange);
+    background: rgba(255, 85, 0, 0.08);
+}
+
+.account-avatar {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--brand-orange), #d97706);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+
+.account-meta {
+    flex: 1;
+    overflow: hidden;
+}
+
+.account-name-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+}
+
+.account-name-row strong {
+    font-size: 0.8rem;
+    color: #ffffff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.account-credit-pill {
+    font-size: 0.7rem;
+    padding: 2px 7px;
+    border-radius: 999px;
+    background: rgba(255, 85, 0, 0.2);
+    color: #ffb088;
+    font-weight: 600;
+    flex-shrink: 0;
+}
+
+.account-sub {
+    display: block;
+    font-size: 0.69rem;
+    color: var(--text-secondary);
+    margin-top: 2px;
+}
+
+.sidebar-legal-links {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    margin-top: 8px;
+    font-size: 0.7rem;
+    color: var(--text-muted);
+}
+
+.sidebar-legal-links a {
+    color: var(--text-secondary);
+    text-decoration: none;
+}
+
+.sidebar-legal-links a:hover {
+    color: var(--text-primary);
+    text-decoration: underline;
+}
+
+/* ==========================================================================
+   MAIN CHAT AREA
+   ========================================================================== */
+.chat-main {
+    flex: 1;
+    height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--bg-chat-wallpaper);
+    background-image: radial-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 0);
+    background-size: 24px 24px;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Top Chat Header */
+.chat-header {
+    padding: 10px 18px;
+    background-color: var(--bg-header);
+    border-bottom: 1px solid var(--border-subtle);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    z-index: 20;
+}
+
+.chat-header-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.mobile-menu-btn {
+    display: none;
+    background: none;
+    border: none;
+    color: var(--text-primary);
+    cursor: pointer;
+    padding: 4px;
+}
+
+.assistant-contact-badge {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+}
+
+.assistant-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #ff5500 0%, #00a884 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    position: relative;
+    flex-shrink: 0;
+}
+
+.avatar-online-indicator {
+    position: absolute;
+    bottom: 1px;
+    right: 1px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: var(--whatsapp-green);
+    border: 2px solid var(--bg-header);
+}
+
+.contact-title-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.contact-title-row h1 {
+    font-size: 0.98rem;
+    font-weight: 700;
+    color: #ffffff;
+}
+
+.verified-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background-color: var(--brand-emerald);
+    color: #ffffff;
+    font-size: 0.65rem;
+    font-weight: 800;
+}
+
+.contact-status-text {
+    font-size: 0.76rem;
+    color: var(--text-secondary);
+}
+
+/* Chat Header Mode Toggles & Buttons */
+.chat-header-controls {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    flex-wrap: wrap;
+}
+
+.chat-mode-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 10px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border-subtle);
+    color: var(--text-secondary);
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    user-select: none;
+    transition: all 0.15s ease;
+}
+
+.chat-mode-chip input {
+    display: none;
+}
+
+.chat-mode-chip .chip-indicator {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--text-muted);
+    transition: background 0.15s ease;
+}
+
+.chat-mode-chip:has(input:checked) {
+    background: rgba(0, 168, 132, 0.16);
+    border-color: rgba(0, 168, 132, 0.5);
+    color: #e9edef;
+}
+
+.chat-mode-chip:has(input:checked) .chip-indicator {
+    background: var(--whatsapp-green);
+    box-shadow: 0 0 6px var(--whatsapp-green);
+}
+
+.header-bot-connect-btn,
+.header-account-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-size: 0.76rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.18s ease;
+}
+
+.header-bot-connect-btn {
+    background: rgba(37, 211, 102, 0.14);
+    border: 1px solid rgba(37, 211, 102, 0.4);
+    color: #86efac;
+}
+
+.header-bot-connect-btn:hover {
+    background: rgba(37, 211, 102, 0.25);
+}
+
+.header-account-btn {
+    background: rgba(255, 85, 0, 0.16);
+    border: 1px solid rgba(255, 85, 0, 0.45);
+    color: #ffbfa0;
+}
+
+.header-account-btn:hover {
+    background: rgba(255, 85, 0, 0.28);
+}
+
+/* ==========================================================================
+   CONVERSATION THREAD & MESSAGE BUBBLES
+   ========================================================================== */
+.chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px 24px 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    scroll-behavior: smooth;
+}
+
+.chat-date-divider {
+    text-align: center;
+    margin: 4px 0 8px;
+}
+
+.chat-date-divider span {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 8px;
+    background: rgba(24, 34, 41, 0.9);
+    border: 1px solid var(--border-subtle);
+    color: var(--text-secondary);
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+}
+
+.msg-row {
+    display: flex;
+    align-items: flex-end;
+    gap: 10px;
+    max-width: 820px;
+    width: 100%;
+}
+
+.assistant-row {
+    align-self: flex-start;
+}
+
+.user-row {
+    align-self: flex-end;
+    flex-direction: row-reverse;
+}
+
+.msg-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--bg-header);
+    border: 1px solid var(--border-subtle);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.95rem;
+    flex-shrink: 0;
+}
+
+.msg-bubble {
+    padding: 12px 15px;
+    border-radius: 14px;
+    position: relative;
+    line-height: 1.48;
+    font-size: 0.92rem;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.22);
+}
+
+.assistant-bubble {
+    background-color: var(--bg-assistant-bubble);
+    border: 1px solid var(--border-subtle);
+    border-bottom-left-radius: 4px;
+    color: var(--text-primary);
+    flex: 1;
+}
+
+.user-bubble {
+    background: linear-gradient(135deg, #005c4b 0%, #054d40 100%);
+    border: 1px solid rgba(37, 211, 102, 0.22);
+    border-bottom-right-radius: 4px;
+    color: #ffffff;
+    max-width: 75%;
+}
+
+.msg-sender-name {
+    font-size: 0.74rem;
+    font-weight: 700;
+    color: var(--brand-emerald-hover);
+    margin-bottom: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.msg-time {
+    font-size: 0.68rem;
+    color: var(--text-secondary);
+    font-weight: 400;
+}
+
+.user-bubble .msg-time {
+    color: rgba(255, 255, 255, 0.72);
+    display: block;
+    text-align: right;
+    margin-top: 4px;
+}
+
+.msg-text p {
+    margin-bottom: 8px;
+}
+
+.msg-text p:last-child {
+    margin-bottom: 0;
+}
+
+.welcome-capabilities-list {
+    margin: 8px 0 12px 18px;
+    font-size: 0.85rem;
+    color: #cbd5e1;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.welcome-quick-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+    margin-top: 12px;
+}
+
+.quick-chip {
+    padding: 7px 12px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: var(--text-primary);
+    font-size: 0.79rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.16s ease;
+}
+
+.quick-chip:hover {
+    background: rgba(0, 168, 132, 0.22);
+    border-color: var(--brand-emerald);
+    transform: translateY(-1px);
+}
+
+/* ==========================================================================
+   DIRECT PLAYABLE AUDIO BUBBLES & PLAYLIST CARDS IN CHAT
+   ========================================================================== */
+.playlist-header-card {
+    margin-top: 12px;
+    padding: 12px 14px;
+    border-radius: var(--radius-md);
+    background: linear-gradient(135deg, rgba(255, 85, 0, 0.14) 0%, rgba(0, 168, 132, 0.14) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.playlist-header-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.playlist-badge-eyebrow {
+    font-size: 0.66rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: #ff9866;
+}
+
+.playlist-header-meta h3 {
+    font-size: 1rem;
+    font-weight: 800;
+    color: #ffffff;
+}
+
+.playlist-header-meta span {
+    font-size: 0.76rem;
+    color: var(--text-secondary);
+}
+
+.playlist-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.btn-play-all-chat,
+.btn-download-playlist-zip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 13px;
+    border-radius: var(--radius-sm);
+    font-size: 0.79rem;
+    font-weight: 700;
+    cursor: pointer;
+    border: none;
+    transition: all 0.18s ease;
+}
+
+.btn-play-all-chat {
+    background: var(--brand-emerald);
+    color: #ffffff;
+}
+
+.btn-play-all-chat:hover {
+    background: var(--brand-emerald-hover);
+}
+
+.btn-download-playlist-zip {
+    background: var(--brand-orange);
+    color: #ffffff;
+}
+
+.btn-download-playlist-zip:hover {
+    background: var(--brand-orange-hover);
+}
+
+/* Individual Playable Track Audio Bubble */
+.tracks-bubble-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.track-audio-bubble {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    padding: 9px 11px;
+    border-radius: var(--radius-md);
+    background-color: var(--bg-track-card);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    transition: background-color 0.16s ease, border-color 0.16s ease;
+}
+
+.track-audio-bubble:hover {
+    background-color: var(--bg-track-card-hover);
+    border-color: rgba(255, 255, 255, 0.14);
+}
+
+.track-audio-bubble.is-playing {
+    border-color: var(--brand-emerald);
+    background: linear-gradient(90deg, rgba(0, 168, 132, 0.14) 0%, var(--bg-track-card) 100%);
+}
+
+.track-cover-wrap {
+    position: relative;
+    width: 48px;
+    height: 48px;
+    border-radius: 8px;
+    overflow: hidden;
+    flex-shrink: 0;
+    background: #0b141a;
+}
+
+.track-cover-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.track-play-btn {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    border: none;
+    background: var(--brand-emerald);
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.92rem;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: transform 0.15s ease, background 0.15s ease;
+}
+
+.track-play-btn:hover {
+    transform: scale(1.06);
+    background: var(--brand-emerald-hover);
+}
+
+.track-bubble-center {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.track-title-line {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.track-title-text {
+    font-size: 0.87rem;
+    font-weight: 700;
+    color: #ffffff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.track-duration-badge {
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+    flex-shrink: 0;
+    font-variant-numeric: tabular-nums;
+}
+
+.track-sub-line {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.track-quality-pill {
+    font-size: 0.64rem;
+    padding: 1px 6px;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.07);
+    color: #94a3b8;
+    font-weight: 600;
+}
+
+/* Interactive Voice-Note Style Waveform Progress Bar inside Bubble */
+.track-waveform-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 2px;
+}
+
+.track-scrub-bar {
+    flex: 1;
+    height: 6px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.1);
+    overflow: hidden;
+    cursor: pointer;
+    position: relative;
+}
+
+.track-scrub-fill {
+    width: 0%;
+    height: 100%;
+    background: linear-gradient(90deg, var(--brand-emerald), var(--brand-orange));
+    border-radius: 999px;
+    transition: width 0.1s linear;
+}
+
+.track-dl-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
+.btn-track-mp3 {
+    padding: 7px 11px;
+    border-radius: 7px;
+    border: 1px solid rgba(255, 85, 0, 0.45);
+    background: rgba(255, 85, 0, 0.14);
+    color: #ffb48f;
+    font-size: 0.74rem;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.16s ease;
+}
+
+.btn-track-mp3:hover {
+    background: var(--brand-orange);
+    color: #ffffff;
+}
+
+/* Inline Conversion & Download Progress Bar inside Chat Bubble */
+.bubble-conversion-box {
+    margin-top: 10px;
+    padding: 10px 12px;
+    border-radius: var(--radius-sm);
+    background: rgba(11, 20, 26, 0.75);
+    border: 1px solid rgba(255, 85, 0, 0.35);
+    font-size: 0.79rem;
+}
+
+.bubble-conversion-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 6px;
+    color: #e2e8f0;
+    font-weight: 600;
+}
+
+.bubble-progress-track {
+    width: 100%;
+    height: 7px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 999px;
+    overflow: hidden;
+}
+
+.bubble-progress-fill {
+    width: 8%;
+    height: 100%;
+    background: linear-gradient(90deg, var(--brand-orange), var(--brand-emerald));
+    transition: width 0.3s ease;
+}
+
+.bubble-ready-download-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 8px;
+    padding: 7px 14px;
+    border-radius: 7px;
+    background: var(--whatsapp-green);
+    color: #06281e;
+    font-weight: 800;
+    font-size: 0.8rem;
+    text-decoration: none;
+}
+
+/* Typing Indicator Bubble */
+.typing-dots {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 2px;
+}
+
+.typing-dots span {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--text-secondary);
+    animation: bounceDot 1.2s infinite ease-in-out;
+}
+
+.typing-dots span:nth-child(2) {
+    animation-delay: 0.15s;
+}
+
+.typing-dots span:nth-child(3) {
+    animation-delay: 0.3s;
+}
+
+@keyframes bounceDot {
+    0%, 80%, 100% { transform: scale(0.7); opacity: 0.45; }
+    40% { transform: scale(1.1); opacity: 1; }
+}
+
+/* ==========================================================================
+   PERSISTENT FLOATING MINI-PLAYER BAR
+   ========================================================================== */
+.mini-player-bar {
+    padding: 8px 18px;
+    background: #142029;
+    border-top: 1px solid rgba(0, 168, 132, 0.35);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    z-index: 25;
+}
+
+.mini-player-track {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 160px;
+    max-width: 240px;
+}
+
+.mini-player-art {
+    width: 38px;
+    height: 38px;
+    border-radius: 6px;
+    object-fit: cover;
+}
+
+.mini-player-info {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.mini-player-info strong {
+    font-size: 0.8rem;
+    color: #ffffff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.mini-player-info span {
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.mini-player-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.mini-ctrl-btn {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 4px;
+}
+
+.mini-ctrl-btn:hover {
+    color: #ffffff;
+}
+
+.mini-play-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: none;
+    background: var(--brand-emerald);
+    color: #ffffff;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+}
+
+.mini-player-scrubber {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    max-width: 380px;
+}
+
+.mini-time {
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+    font-variant-numeric: tabular-nums;
+}
+
+#miniSeekSlider {
+    flex: 1;
+    accent-color: var(--brand-emerald);
+    cursor: pointer;
+}
+
+.mini-player-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.mini-dl-btn {
+    padding: 6px 11px;
+    border-radius: 6px;
+    background: var(--brand-orange);
+    color: #ffffff;
+    border: none;
+    font-size: 0.74rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.mini-close-btn {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 1.3rem;
+    cursor: pointer;
+    line-height: 1;
+}
+
+/* ==========================================================================
+   BOTTOM CHAT COMPOSER BAR
+   ========================================================================== */
+.chat-composer {
+    padding: 10px 18px 14px;
+    background-color: var(--bg-header);
+    border-top: 1px solid var(--border-subtle);
+    z-index: 20;
+}
+
+.attached-files-preview {
+    margin-bottom: 8px;
+}
+
+.attached-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 5px 12px;
+    border-radius: 999px;
+    background: rgba(255, 85, 0, 0.18);
+    border: 1px solid rgba(255, 85, 0, 0.45);
+    color: #ffbfa0;
+    font-size: 0.78rem;
+    font-weight: 600;
+}
+
+.attached-pill button {
+    background: none;
+    border: none;
+    color: #ffffff;
+    font-size: 1rem;
+    cursor: pointer;
+}
+
+.composer-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background-color: #2a3942;
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    border-radius: 24px;
+    padding: 6px 8px 6px 12px;
+    transition: border-color 0.2s ease;
+}
+
+.composer-bar:focus-within {
+    border-color: var(--brand-emerald);
+}
+
+.composer-icon-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: none;
+    background: transparent;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: color 0.15s ease, background 0.15s ease;
+}
+
+.composer-icon-btn:hover {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.composer-icon-btn.recording {
+    color: #ef4444;
+    background: rgba(239, 68, 68, 0.15);
+}
+
+#chatInput {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: #ffffff;
+    font-size: 0.93rem;
+    font-family: inherit;
+    resize: none;
+    max-height: 110px;
+    padding: 6px 4px;
+    line-height: 1.4;
+}
+
+#chatInput::placeholder {
+    color: var(--text-secondary);
+}
+
+.composer-send-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: none;
+    background: linear-gradient(135deg, var(--brand-emerald) 0%, #059669 100%);
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: transform 0.15s ease, filter 0.15s ease;
+}
+
+.composer-send-btn:hover {
+    transform: scale(1.05);
+    filter: brightness(1.1);
+}
+
+/* ==========================================================================
+   DRAG & DROP FULL WINDOW OVERLAY
+   ========================================================================== */
+.drag-drop-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(11, 20, 26, 0.88);
+    backdrop-filter: blur(6px);
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.drag-drop-card {
+    padding: 36px 44px;
+    border-radius: 20px;
+    border: 2px dashed var(--brand-emerald);
+    background: var(--bg-header);
+    text-align: center;
+    max-width: 460px;
+}
+
+.drag-drop-icon {
+    font-size: 3rem;
+    margin-bottom: 12px;
+}
+
+.drag-drop-card h3 {
+    font-size: 1.25rem;
+    margin-bottom: 8px;
+}
+
+.drag-drop-card p {
+    font-size: 0.88rem;
+    color: var(--text-secondary);
+}
+
+/* ==========================================================================
+   MODALS (BOT CONNECT, ACCOUNT & CREDITS, RINGTONE GUIDE)
+   ========================================================================== */
+.modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.72);
+    backdrop-filter: blur(4px);
+    z-index: 90;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+}
+
+.modal-content {
+    background: #182229;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 16px;
+    max-width: 680px;
+    width: 100%;
+    max-height: 90dvh;
+    overflow-y: auto;
+    padding: 24px 26px;
+    color: var(--text-primary);
+    position: relative;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+}
+
+.modal-content .close {
+    position: absolute;
+    top: 16px;
+    right: 20px;
+    font-size: 1.6rem;
+    color: var(--text-secondary);
+    cursor: pointer;
+    line-height: 1;
+}
+
+.modal-content h2 {
+    font-size: 1.25rem;
+    margin-bottom: 8px;
+}
+
+.modal-content h3 {
+    font-size: 1rem;
+    margin: 16px 0 8px;
+    color: #ffb088;
+}
+
+.modal-content p {
+    font-size: 0.88rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    margin-bottom: 10px;
+}
+
+.modal-steps {
+    margin-left: 20px;
+    font-size: 0.86rem;
+    color: var(--text-primary);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+/* Bot Connect Modal */
+.bot-eyebrow {
+    font-size: 0.7rem;
+    font-weight: 800;
+    color: var(--brand-emerald-hover);
+    letter-spacing: 0.06em;
+}
+
+.bot-cards-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin: 16px 0;
+}
+
+.bot-connect-card {
+    padding: 16px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border-subtle);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.bot-card-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.bot-platform-badge {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.bot-platform-badge strong {
+    font-size: 0.95rem;
+}
+
+.bot-platform-badge span {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+}
+
+.bot-qr-img {
+    width: 84px;
+    height: 84px;
+    border-radius: 8px;
+    background: #ffffff;
+    padding: 4px;
+}
+
+.bot-launch-btn {
+    display: block;
+    text-align: center;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 0.84rem;
+    text-decoration: none;
+    color: #ffffff;
+}
+
+.tg-launch-btn {
+    background: var(--telegram-blue);
+}
+
+.wa-launch-btn {
+    background: #1da851;
+}
+
+.bot-webhook-details {
+    margin-top: 12px;
+    padding: 12px;
+    border-radius: 10px;
+    background: rgba(0, 0, 0, 0.25);
+    border: 1px solid var(--border-subtle);
+    font-size: 0.8rem;
+}
+
+.bot-webhook-details summary {
+    cursor: pointer;
+    font-weight: 700;
+    color: var(--text-secondary);
+}
+
+.bot-webhook-body {
+    margin-top: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.webhook-url-row {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.webhook-url-row code {
+    padding: 6px 8px;
+    border-radius: 6px;
+    background: #0b141a;
+    color: #86efac;
+    font-size: 0.75rem;
+    word-break: break-all;
+}
+
+.tg-token-setup-row {
+    display: flex;
+    gap: 8px;
+    margin-top: 4px;
+}
+
+.tg-token-setup-row input {
+    flex: 1;
+    padding: 8px 10px;
+    border-radius: 6px;
+    border: 1px solid var(--border-subtle);
+    background: #0b141a;
+    color: #ffffff;
+    font-size: 0.78rem;
+}
+
+.tg-token-setup-row button {
+    padding: 8px 12px;
+    border-radius: 6px;
+    border: none;
+    background: var(--telegram-blue);
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 0.76rem;
+    cursor: pointer;
+}
+
+/* Account & Pricing Cards inside Modal */
+.pricing-cards-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+}
+
+.pricing-plan-card {
+    padding: 16px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--border-subtle);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 14px;
+}
+
+.plan-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+
+.plan-card-title {
+    margin: 0 !important;
+    font-size: 0.98rem !important;
+    color: #ffffff !important;
+}
+
+.plan-pill {
+    font-size: 0.65rem;
+    font-weight: 800;
+    padding: 3px 8px;
+    border-radius: 999px;
+    background: rgba(0, 168, 132, 0.2);
+    color: #6ee7b7;
+}
+
+.payg-pill {
+    background: rgba(255, 85, 0, 0.2);
+    color: #ffb088;
+}
+
+.plan-price-row {
+    margin-bottom: 8px;
+}
+
+.plan-price {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #ffffff;
+}
+
+.plan-price-period {
+    font-size: 0.76rem;
+    color: var(--text-secondary);
+}
+
+.plan-features-list {
+    margin-left: 16px;
+    font-size: 0.78rem;
+    color: #cbd5e1;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.user-credit-balance-box {
+    padding: 10px 12px;
+    border-radius: 8px;
+    background: rgba(255, 85, 0, 0.12);
+    border: 1px solid rgba(255, 85, 0, 0.3);
+    margin: 8px 0;
+}
+
+.credit-balance-subtitle {
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+}
+
+.credit-balance-count {
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: #ffb088;
+}
+
+.unified-search-bar {
+    display: flex;
+    gap: 6px;
+}
+
+.unified-search-bar input {
+    flex: 1;
+    padding: 9px 10px;
+    border-radius: 8px;
+    border: 1px solid var(--border-subtle);
+    background: #0b141a;
+    color: #ffffff;
+    font-size: 0.82rem;
+}
+
+.unified-search-bar button,
+.buy-credits-btn,
+.btn-free-action,
+.btn-logout-action {
+    padding: 9px 14px;
+    border-radius: 8px;
+    border: none;
+    font-weight: 700;
+    font-size: 0.82rem;
+    cursor: pointer;
+}
+
+.unified-search-bar button,
+.buy-credits-btn {
+    background: var(--brand-orange);
+    color: #ffffff;
+    width: 100%;
+}
+
+.unified-search-bar button {
+    width: auto;
+}
+
+.btn-free-action {
+    background: var(--brand-emerald);
+    color: #ffffff;
+    width: 100%;
+}
+
+.btn-logout-action {
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--text-primary);
+    width: 100%;
+}
+
+/* Toast Notifications */
+#toast-container {
+    position: fixed;
+    bottom: 84px;
+    right: 20px;
+    z-index: 120;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.toast {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+    border-radius: 10px;
+    background: #1f2c34;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    color: #ffffff;
+    font-size: 0.82rem;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+/* ==========================================================================
+   MOBILE & TABLET RESPONSIVENESS
+   ========================================================================== */
+@media (max-width: 900px) {
+    .assistant-sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        transform: translateX(-100%);
+    }
+
+    .assistant-sidebar.open {
+        transform: translateX(0);
+    }
+
+    .sidebar-backdrop {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.6);
+        z-index: 35;
+    }
+
+    .mobile-menu-btn,
+    .mobile-close-sidebar {
+        display: inline-flex;
+    }
+
+    .chat-messages {
+        padding: 14px 12px 20px;
+    }
+
+    .bot-cards-grid,
+    .pricing-cards-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .mini-player-scrubber {
+        display: none;
+    }
+}
+
+    </style>
 
     <script type="application/ld+json">
     {
@@ -731,7 +2535,1270 @@
             }
         });
     </script>
-    <script src="script.js"></script>
+    <script>
+document.addEventListener('DOMContentLoaded', () => {
+    if (window.__MP3AUDIO_ASSISTANT_INIT__) return;
+    window.__MP3AUDIO_ASSISTANT_INIT__ = true;
+    // Prevent default browser file drop behavior outside handler
+    window.addEventListener('dragover', (e) => e.preventDefault(), false);
+    window.addEventListener('drop', (e) => e.preventDefault(), false);
+
+    const BACKEND_URL = 'https://audio-converter-backend.onrender.com';
+
+    // Inject Authorization Bearer token for cross-origin session persistence
+    const originalFetch = window.fetch;
+    window.fetch = function (input, init = {}) {
+        let url = typeof input === 'string' ? input : (input instanceof Request ? input.url : '');
+        if (url && url.startsWith(BACKEND_URL) && typeof input === 'string') {
+            init = init || {};
+            init.headers = init.headers || {};
+            const token = localStorage.getItem('session_token');
+            if (token) {
+                if (init.headers instanceof Headers) {
+                    if (!init.headers.has('Authorization')) init.headers.set('Authorization', `Bearer ${token}`);
+                } else {
+                    if (!init.headers['Authorization']) init.headers['Authorization'] = `Bearer ${token}`;
+                }
+            }
+            init.credentials = 'include';
+        }
+        return originalFetch(input, init);
+    };
+
+    // --- DOM Elements ---
+    const chatMessages = document.getElementById('chatMessages');
+    const chatInput = document.getElementById('chatInput');
+    const chatComposerForm = document.getElementById('chatComposerForm');
+    const attachFileBtn = document.getElementById('attachFileBtn');
+    const fileInput = document.getElementById('fileInput');
+    const attachedFilesPreview = document.getElementById('attachedFilesPreview');
+    const attachedFilesLabel = document.getElementById('attachedFilesLabel');
+    const clearAttachedFilesBtn = document.getElementById('clearAttachedFilesBtn');
+    const voiceInputBtn = document.getElementById('voiceInputBtn');
+    const dragDropOverlay = document.getElementById('dragDropOverlay');
+
+    // Sidebar & Navigation
+    const assistantSidebar = document.getElementById('assistantSidebar');
+    const sidebarBackdrop = document.getElementById('sidebarBackdrop');
+    const openSidebarBtn = document.getElementById('openSidebarBtn');
+    const closeSidebarBtn = document.getElementById('closeSidebarBtn');
+    const newChatBtn = document.getElementById('newChatBtn');
+    const recentHistoryList = document.getElementById('recentHistoryList');
+    const clearHistoryBtn = document.getElementById('clearHistoryBtn');
+
+    // Option Toggles
+    const autoAddAlbumArtInput = document.getElementById('autoAddAlbumArt');
+    const increaseQualityInput = document.getElementById('increaseQuality');
+    const videoToMp3Input = document.getElementById('videoToMp3');
+    const attachLyricsInput = document.getElementById('attachLyrics');
+
+    // Account & Billing Elements
+    const userDashboard = document.getElementById('userDashboard');
+    const guestPricingGrid = document.getElementById('guestPricingGrid');
+    const loginEmail = document.getElementById('loginEmail');
+    const sendLinkBtn = document.getElementById('sendLinkBtn');
+    const authMessage = document.getElementById('authMessage');
+    const userEmailDisplay = document.getElementById('userEmailDisplay');
+    const paidCreditsDisplay = document.getElementById('paidCreditsDisplay');
+    const headerPaidCreditsDisplay = document.getElementById('headerPaidCreditsDisplay');
+    const sidebarAccountLabel = document.getElementById('sidebarAccountLabel');
+    const sidebarAccountSub = document.getElementById('sidebarAccountSub');
+    const headerAccountBtnText = document.getElementById('headerAccountBtnText');
+    const logoutBtn = document.getElementById('logoutBtn');
+    const buyCreditsBtn = document.getElementById('buyCreditsBtn');
+
+    // Mini Player Elements
+    const miniPlayerBar = document.getElementById('miniPlayerBar');
+    const miniPlayerArt = document.getElementById('miniPlayerArt');
+    const miniPlayerTitle = document.getElementById('miniPlayerTitle');
+    const miniPlayerArtist = document.getElementById('miniPlayerArtist');
+    const miniPrevBtn = document.getElementById('miniPrevBtn');
+    const miniPlayPauseBtn = document.getElementById('miniPlayPauseBtn');
+    const miniPlayIcon = document.getElementById('miniPlayIcon');
+    const miniNextBtn = document.getElementById('miniNextBtn');
+    const miniCurrentTime = document.getElementById('miniCurrentTime');
+    const miniTotalTime = document.getElementById('miniTotalTime');
+    const miniSeekSlider = document.getElementById('miniSeekSlider');
+    const miniDownloadMp3Btn = document.getElementById('miniDownloadMp3Btn');
+    const miniCloseBtn = document.getElementById('miniCloseBtn');
+
+    // State
+    let chatHistory = [];
+    let pendingFiles = [];
+    let recentPrompts = JSON.parse(localStorage.getItem('mp3audio_recent_prompts') || '[]');
+
+    // Audio Player Queue State
+    const globalAudio = new Audio();
+    let currentQueue = [];
+    let currentQueueIndex = -1;
+    let activeBubbleId = null;
+
+    // --- Toast Notification Helper ---
+    function showToast(message, type = 'info') {
+        let container = document.getElementById('toast-container');
+        if (!container) {
+            container = document.createElement('div');
+            container.id = 'toast-container';
+            document.body.appendChild(container);
+        }
+        const toast = document.createElement('div');
+        toast.className = `toast toast-${type}`;
+        const icon = type === 'success' ? '✅' : (type === 'error' ? '⚠️' : '🎧');
+        toast.innerHTML = `<span>${icon}</span><span>${message}</span>`;
+        container.appendChild(toast);
+        setTimeout(() => {
+            toast.remove();
+        }, 3500);
+    }
+
+    // --- Format Time Helper ---
+    function formatTime(sec) {
+        if (!sec || isNaN(sec) || sec < 0) return '0:00';
+        const s = Math.floor(sec);
+        const m = Math.floor(s / 60);
+        const rem = s % 60;
+        return `${m}:${rem < 10 ? '0' : ''}${rem}`;
+    }
+
+    function escapeHtml(str) {
+        return String(str || '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;');
+    }
+
+    function formatMarkdownBold(text) {
+        return escapeHtml(text).replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    }
+
+    // --- Mobile Sidebar Toggle ---
+    function toggleSidebar(open) {
+        if (!assistantSidebar || !sidebarBackdrop) return;
+        if (open) {
+            assistantSidebar.classList.add('open');
+            sidebarBackdrop.classList.remove('hidden');
+        } else {
+            assistantSidebar.classList.remove('open');
+            sidebarBackdrop.classList.add('hidden');
+        }
+    }
+
+    if (openSidebarBtn) openSidebarBtn.addEventListener('click', () => toggleSidebar(true));
+    if (closeSidebarBtn) closeSidebarBtn.addEventListener('click', () => toggleSidebar(false));
+    if (sidebarBackdrop) sidebarBackdrop.addEventListener('click', () => toggleSidebar(false));
+
+    // --- Recent Prompts Sidebar List ---
+    function saveRecentPrompt(promptText) {
+        const clean = promptText.trim();
+        if (!clean) return;
+        recentPrompts = [clean, ...recentPrompts.filter(p => p.toLowerCase() !== clean.toLowerCase())].slice(0, 12);
+        localStorage.setItem('mp3audio_recent_prompts', JSON.stringify(recentPrompts));
+        renderRecentPrompts();
+    }
+
+    function renderRecentPrompts() {
+        if (!recentHistoryList) return;
+        if (recentPrompts.length === 0) {
+            recentHistoryList.innerHTML = `<div style="font-size:0.74rem; color:#667781; padding: 4px 6px;">Your recent music requests will appear here.</div>`;
+            return;
+        }
+        recentHistoryList.innerHTML = '';
+        recentPrompts.forEach(p => {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'history-item-btn';
+            btn.innerHTML = `<span>🎵</span><span>${escapeHtml(p)}</span>`;
+            btn.addEventListener('click', () => {
+                toggleSidebar(false);
+                sendUserMessage(p);
+            });
+            recentHistoryList.appendChild(btn);
+        });
+    }
+    renderRecentPrompts();
+
+    if (clearHistoryBtn) {
+        clearHistoryBtn.addEventListener('click', () => {
+            recentPrompts = [];
+            localStorage.removeItem('mp3audio_recent_prompts');
+            renderRecentPrompts();
+            showToast('Recent history cleared');
+        });
+    }
+
+    if (newChatBtn) {
+        newChatBtn.addEventListener('click', () => {
+            toggleSidebar(false);
+            if (chatInput) {
+                chatInput.value = '';
+                chatInput.focus();
+            }
+            showToast('Ready for your next music or playlist request!');
+        });
+    }
+
+    // --- Built-in Client-Side Curation Fallback (Uses iTunes Search API if backend is still deploying) ---
+    const CLIENT_VIBE_SEEDS = {
+        synthwave: {
+            title: "Midnight Neon: Chill Synthwave Mix",
+            vibe: "Warm analog synths, retro arpeggios & late-night drive energy",
+            seeds: ["M83 Midnight City", "Kavinsky Nightcall", "The Midnight Sunset", "GUNSHIP Tech Noir", "Mr.Kitty After Dark", "FM-84 Running in the Night"]
+        },
+        workout: {
+            title: "High-Octane Gym & Workout Anthems",
+            vibe: "Heavy bass, relentless tempo & peak adrenaline",
+            seeds: ["Kanye West Stronger", "Eminem Till I Collapse", "Kendrick Lamar HUMBLE", "Kanye West POWER", "Survivor Eye of the Tiger", "David Guetta Titanium"]
+        },
+        "hip hop": {
+            title: "Golden Era & Modern Hip-Hop Essentials",
+            vibe: "Boom-bap classics, sharp lyricism & iconic 808s",
+            seeds: ["Nas N.Y. State of Mind", "Mobb Deep Shook Ones Pt II", "Wu-Tang Clan C.R.E.A.M.", "Notorious B.I.G. Juicy", "Dr. Dre Still D.R.E.", "Kendrick Lamar Money Trees"]
+        },
+        lofi: {
+            title: "Lo-Fi Study & Rainy Window Beats",
+            vibe: "Dusty vinyl crackle, warm Rhodes chords & mellow boom-bap",
+            seeds: ["WYS Snowman", "Nujabes Feather", "beabadoobee Coffee", "Jinsang Affection", "The Deli 5:32pm", "Nujabes Luv sic"]
+        },
+        acoustic: {
+            title: "Warm Coffeehouse Acoustic Sessions",
+            vibe: "Intimate fingerpicking, rich vocals & stripped-back storytelling",
+            seeds: ["Tracy Chapman Fast Car", "Jack Johnson Banana Pancakes", "Bon Iver Skinny Love", "The Beatles Blackbird", "The Lumineers Ho Hey", "Ed Sheeran Photograph"]
+        },
+        rock: {
+            title: "Stadium & Classic Rock Legends",
+            vibe: "Timeless guitar riffs, soaring vocals & driving drums",
+            seeds: ["Queen Bohemian Rhapsody", "Fleetwood Mac Dreams", "Eagles Hotel California", "Nirvana Smells Like Teen Spirit", "The Killers Mr. Brightside", "Foo Fighters Everlong"]
+        },
+        jazz: {
+            title: "Midnight Blue Note Jazz Lounge",
+            vibe: "Smoky saxophone, walking upright bass & velvet trumpet",
+            seeds: ["Dave Brubeck Take Five", "Miles Davis So What", "John Coltrane My Favorite Things", "Frank Sinatra Fly Me to the Moon", "Miles Davis Blue in Green", "Chet Baker Almost Blue"]
+        },
+        "r&b": {
+            title: "Silk & Soul: R&B Slow Jams",
+            vibe: "Lush harmonies, late-night basslines & timeless soul",
+            seeds: ["SZA Snooze", "Frank Ocean Pink + White", "Childish Gambino Redbone", "Daniel Caesar Best Part", "Miguel Adorn", "The Weeknd Earned It"]
+        }
+    };
+
+    function mapItunesResult(item, idx) {
+        const title = item.trackName || `Track ${idx}`;
+        const artist = item.artistName || 'Artist';
+        const album = item.collectionName || 'Single';
+        const artwork = (item.artworkUrl100 || '').replace('100x100bb.jpg', '600x600bb.jpg');
+        const durSec = item.trackTimeMillis ? Math.max(1, Math.round(item.trackTimeMillis / 1000)) : 210;
+        const yearMatch = (item.releaseDate || '').match(/\b(19\d\d|20\d\d)\b/);
+        return {
+            index: idx,
+            title,
+            artist,
+            album,
+            year: yearMatch ? yearMatch[1] : '',
+            duration: formatTime(durSec),
+            duration_sec: durSec,
+            artwork_url: artwork,
+            preview_url: item.previewUrl || '',
+            search_query: `ytsearch1:${artist} - ${title} official audio`
+        };
+    }
+
+    async function clientSideCurateFallback(messageText) {
+        const lower = messageText.toLowerCase();
+        const isRingtone = /ringtone|m4r|alarm tone/.test(lower);
+
+        for (const [key, preset] of Object.entries(CLIENT_VIBE_SEEDS)) {
+            if (lower.includes(key) || (key === 'lofi' && lower.includes('lo-fi'))) {
+                const tracks = await Promise.all(preset.seeds.map(async (seed, idx) => {
+                    try {
+                        const r = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(seed)}&media=music&entity=song&limit=1`);
+                        const d = await r.json();
+                        if (d.results && d.results[0]) return mapItunesResult(d.results[0], idx + 1);
+                    } catch (e) { }
+                    return {
+                        index: idx + 1,
+                        title: seed,
+                        artist: 'Featured Artist',
+                        album: 'Curated Mix',
+                        year: '2025',
+                        duration: '3:30',
+                        duration_sec: 210,
+                        artwork_url: 'favicon.png',
+                        preview_url: '',
+                        search_query: `ytsearch1:${seed} official audio`
+                    };
+                }));
+                return {
+                    success: true,
+                    reply: `Here is your **${preset.title}**! Tap play on any audio bubble to listen right in the chat, download individual 320kbps MP3s, or grab the full playlist ZIP.`,
+                    mode: 'playlist',
+                    playlist_title: preset.title,
+                    playlist_vibe: preset.vibe,
+                    tracks
+                };
+            }
+        }
+
+        // Clean conversational filler
+        let cleanQ = messageText
+            .replace(/^(hey|hi|hello|yo|please|can you|could you|send me|play|find|get me|make me|create|give me|i want|i need|text me)\s+/i, '')
+            .replace(/\b(a playlist of|a playlist for|playlist|songs by|tracks by|music by|ringtone of|ringtone for|ringtone|mp3|audio|song|track)\b/gi, ' ')
+            .replace(/\s+/g, ' ')
+            .trim() || messageText;
+
+        const wantsPlaylist = /playlist|mix|songs|tracks|vibe|mood|workout|chill|study|party|top |best /i.test(lower);
+        const limit = isRingtone ? 1 : (wantsPlaylist ? 6 : 4);
+
+        try {
+            const resp = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(cleanQ)}&media=music&entity=song&limit=${limit * 2}`);
+            const data = await resp.json();
+            const seen = new Set();
+            const tracks = [];
+            for (const item of (data.results || [])) {
+                const k = `${(item.trackName || '').toLowerCase()}|${(item.artistName || '').toLowerCase()}`;
+                if (!seen.has(k) && item.trackName) {
+                    seen.add(k);
+                    tracks.push(mapItunesResult(item, tracks.length + 1));
+                    if (tracks.length >= limit) break;
+                }
+            }
+            if (tracks.length > 0) {
+                if (tracks.length === 1 || isRingtone) {
+                    const t = tracks[0];
+                    return {
+                        success: true,
+                        reply: `Here is **${t.title}** by **${t.artist}**! Tap play in the bubble below to listen immediately, or click **Download MP3** for the full tagged file.`,
+                        mode: isRingtone ? 'ringtone' : 'single',
+                        playlist_title: `${t.title} — ${t.artist}`,
+                        playlist_vibe: `${t.album} ${t.year ? '(' + t.year + ')' : ''}`,
+                        tracks: [t]
+                    };
+                }
+                return {
+                    success: true,
+                    reply: `I curated **${tracks.length} tracks** for **${cleanQ}**! Tap play on any audio bubble to listen in the chat, download individual MP3s, or grab the full Playlist ZIP.`,
+                    mode: 'playlist',
+                    playlist_title: `${cleanQ} — Curated Mix`,
+                    playlist_vibe: `AI Curated Selection • 320kbps & ID3 Tagged`,
+                    tracks
+                };
+            }
+        } catch (err) {
+            console.warn('iTunes fallback search error:', err);
+        }
+
+        return {
+            success: true,
+            reply: `I found **${cleanQ}** for you! Click **Download MP3** below to extract and tag the full 320kbps audio track.`,
+            mode: 'single',
+            playlist_title: cleanQ,
+            playlist_vibe: 'Direct Audio Extraction',
+            tracks: [{
+                index: 1,
+                title: cleanQ,
+                artist: 'MP3aud.io Search',
+                album: 'Single',
+                year: '2026',
+                duration: '3:30',
+                duration_sec: 210,
+                artwork_url: 'favicon.png',
+                preview_url: '',
+                search_query: cleanQ.startsWith('http') ? cleanQ : `ytsearch1:${cleanQ} official audio`
+            }]
+        };
+    }
+
+    // --- Audio Playback Engine for Chat Bubbles & Mini Player ---
+    function updateAllBubblePlayStates() {
+        document.querySelectorAll('.track-audio-bubble').forEach(el => {
+            const bid = el.getAttribute('data-bubble-id');
+            const btn = el.querySelector('.track-play-btn');
+            const isThisActive = (bid === activeBubbleId);
+            el.classList.toggle('is-playing', isThisActive && !globalAudio.paused);
+            if (btn) {
+                btn.innerHTML = (isThisActive && !globalAudio.paused) ? '⏸' : '▶';
+            }
+            if (!isThisActive) {
+                const fill = el.querySelector('.track-scrub-fill');
+                if (fill) fill.style.width = '0%';
+            }
+        });
+        if (miniPlayIcon) {
+            miniPlayIcon.textContent = globalAudio.paused ? '▶' : '⏸';
+        }
+    }
+
+    function playTrackFromQueue(queue, index) {
+        if (!queue || index < 0 || index >= queue.length) return;
+        currentQueue = queue;
+        currentQueueIndex = index;
+        const track = currentQueue[currentQueueIndex];
+
+        if (!track.preview_url) {
+            showToast('No instant preview stream for this track — click "⬇ MP3" to extract the full audio!', 'info');
+            return;
+        }
+
+        if (activeBubbleId === track.bubbleId && globalAudio.src === track.preview_url) {
+            if (globalAudio.paused) {
+                globalAudio.play().catch(() => { });
+            } else {
+                globalAudio.pause();
+            }
+            updateAllBubblePlayStates();
+            return;
+        }
+
+        activeBubbleId = track.bubbleId;
+        globalAudio.src = track.preview_url;
+        globalAudio.currentTime = 0;
+        globalAudio.play().catch(err => {
+            console.warn('Audio playback blocked or failed:', err);
+            showToast('Could not play stream preview. Try clicking Download MP3.', 'error');
+        });
+
+        if (miniPlayerBar) {
+            miniPlayerBar.classList.remove('hidden');
+            if (miniPlayerArt) miniPlayerArt.src = track.artwork_url || 'favicon.png';
+            if (miniPlayerTitle) miniPlayerTitle.textContent = track.title || 'Track';
+            if (miniPlayerArtist) miniPlayerArtist.textContent = track.artist || 'Artist';
+            if (miniDownloadMp3Btn) {
+                miniDownloadMp3Btn.onclick = () => {
+                    const bubbleEl = document.querySelector(`.track-audio-bubble[data-bubble-id="${track.bubbleId}"]`);
+                    const statusContainer = bubbleEl ? bubbleEl.closest('.assistant-bubble').querySelector('.bubble-conversion-container') : null;
+                    triggerTrackOrPlaylistDownload([track], `${track.artist} - ${track.title}`, statusContainer);
+                };
+            }
+        }
+        updateAllBubblePlayStates();
+    }
+
+    globalAudio.addEventListener('play', updateAllBubblePlayStates);
+    globalAudio.addEventListener('pause', updateAllBubblePlayStates);
+    globalAudio.addEventListener('timeupdate', () => {
+        const dur = globalAudio.duration || 30;
+        const cur = globalAudio.currentTime || 0;
+        const pct = Math.min(100, (cur / dur) * 100);
+
+        if (miniCurrentTime) miniCurrentTime.textContent = formatTime(cur);
+        if (miniTotalTime) miniTotalTime.textContent = formatTime(dur);
+        if (miniSeekSlider) miniSeekSlider.value = pct;
+
+        if (activeBubbleId) {
+            const activeEl = document.querySelector(`.track-audio-bubble[data-bubble-id="${activeBubbleId}"]`);
+            if (activeEl) {
+                const fill = activeEl.querySelector('.track-scrub-fill');
+                const durBadge = activeEl.querySelector('.track-duration-badge');
+                if (fill) fill.style.width = `${pct}%`;
+                if (durBadge) durBadge.textContent = `${formatTime(cur)} / ${formatTime(dur)}`;
+            }
+        }
+    });
+
+    globalAudio.addEventListener('ended', () => {
+        if (currentQueue && currentQueueIndex + 1 < currentQueue.length) {
+            playTrackFromQueue(currentQueue, currentQueueIndex + 1);
+        } else {
+            updateAllBubblePlayStates();
+        }
+    });
+
+    if (miniPlayPauseBtn) {
+        miniPlayPauseBtn.addEventListener('click', () => {
+            if (!globalAudio.src) return;
+            if (globalAudio.paused) globalAudio.play();
+            else globalAudio.pause();
+        });
+    }
+    if (miniPrevBtn) {
+        miniPrevBtn.addEventListener('click', () => {
+            if (currentQueueIndex > 0) playTrackFromQueue(currentQueue, currentQueueIndex - 1);
+            else globalAudio.currentTime = 0;
+        });
+    }
+    if (miniNextBtn) {
+        miniNextBtn.addEventListener('click', () => {
+            if (currentQueue && currentQueueIndex + 1 < currentQueue.length) {
+                playTrackFromQueue(currentQueue, currentQueueIndex + 1);
+            }
+        });
+    }
+    if (miniSeekSlider) {
+        miniSeekSlider.addEventListener('input', () => {
+            if (globalAudio.duration) {
+                globalAudio.currentTime = (parseFloat(miniSeekSlider.value) / 100) * globalAudio.duration;
+            }
+        });
+    }
+    if (miniCloseBtn) {
+        miniCloseBtn.addEventListener('click', () => {
+            globalAudio.pause();
+            if (miniPlayerBar) miniPlayerBar.classList.add('hidden');
+        });
+    }
+
+    // --- 1-Click MP3 & Playlist ZIP Download Engine inside Chat Thread ---
+    async function triggerTrackOrPlaylistDownload(tracksList, playlistTitle, statusContainer) {
+        if (!tracksList || tracksList.length === 0) return;
+
+        const isSingle = tracksList.length === 1;
+        const increaseQuality = increaseQualityInput ? increaseQualityInput.checked : false;
+        const autoAddAlbumArt = autoAddAlbumArtInput ? autoAddAlbumArtInput.checked : true;
+        const transcribeAudio = attachLyricsInput ? attachLyricsInput.checked : false;
+        const isRingtone = videoToMp3Input ? videoToMp3Input.checked : false;
+
+        let box = null;
+        if (statusContainer) {
+            statusContainer.innerHTML = `
+                <div class="bubble-conversion-box">
+                    <div class="bubble-conversion-header">
+                        <span class="conv-status-label">⚡ Initializing ${isSingle ? 'MP3 track' : `playlist (${tracksList.length} tracks)`}...</span>
+                        <span class="conv-pct-label">0%</span>
+                    </div>
+                    <div class="bubble-progress-track">
+                        <div class="bubble-progress-fill" style="width: 10%;"></div>
+                    </div>
+                    <div class="conv-action-slot"></div>
+                </div>
+            `;
+            box = statusContainer.querySelector('.bubble-conversion-box');
+        } else {
+            showToast(`Preparing ${isSingle ? tracksList[0].title : playlistTitle}...`, 'info');
+        }
+
+        const updateBox = (label, pct, readyUrl = null, readyLabel = null) => {
+            if (!box) return;
+            const lbl = box.querySelector('.conv-status-label');
+            const pctEl = box.querySelector('.conv-pct-label');
+            const fill = box.querySelector('.bubble-progress-fill');
+            const slot = box.querySelector('.conv-action-slot');
+            if (lbl) lbl.textContent = label;
+            if (pctEl) pctEl.textContent = `${Math.round(pct)}%`;
+            if (fill) fill.style.width = `${Math.max(5, Math.min(100, pct))}%`;
+            if (readyUrl && slot) {
+                slot.innerHTML = `<a href="${readyUrl}" class="bubble-ready-download-link" target="_blank" download>✅ ${readyLabel || 'Click to Save File'}</a>`;
+            }
+        };
+
+        try {
+            const sessionId = (crypto && crypto.randomUUID) ? crypto.randomUUID() : ('sess_' + Date.now());
+            let resp = await fetch(`${BACKEND_URL}/api/assistant/prepare_download`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    session_id: sessionId,
+                    tracks: tracksList,
+                    playlist_title: playlistTitle,
+                    increase_quality: increaseQuality,
+                    auto_add_album_art: autoAddAlbumArt,
+                    transcribe_audio: transcribeAudio,
+                    is_ringtone: isRingtone
+                })
+            });
+
+            // Fallback to /start_conversion if /api/assistant/prepare_download is not yet live on remote server
+            if (resp.status === 404) {
+                const firstQuery = tracksList[0].search_query || `ytsearch1:${tracksList[0].artist} - ${tracksList[0].title} official audio`;
+                resp = await fetch(`${BACKEND_URL}/start_conversion`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        session_id: sessionId,
+                        url: firstQuery,
+                        increase_quality: increaseQuality,
+                        auto_add_album_art: autoAddAlbumArt,
+                        transcribe_audio: transcribeAudio,
+                        video_to_mp3: isRingtone,
+                        is_ringtone: isRingtone
+                    })
+                });
+            }
+
+            const data = await resp.json();
+            if (!resp.ok) {
+                if (data.requires_payment) {
+                    updateBox(`⚠️ ${data.error}`, 0);
+                    openModal('accountModal');
+                    return;
+                }
+                throw new Error(data.error || 'Failed to queue download');
+            }
+
+            pollConversionJobInChat(sessionId, isSingle, isRingtone, tracksList[0], updateBox);
+            checkAuthStatus();
+        } catch (err) {
+            console.warn('Backend conversion queue error:', err);
+            // Direct preview stream download fallback if backend is unreachable
+            if (isSingle && tracksList[0].preview_url) {
+                updateBox(
+                    `✅ Instant Audio Stream Ready: ${tracksList[0].artist} - ${tracksList[0].title}`,
+                    100,
+                    tracksList[0].preview_url,
+                    `Download Audio (${tracksList[0].title})`
+                );
+            } else {
+                updateBox(`⚠️ Could not reach audio conversion server: ${err.message}`, 0);
+            }
+        }
+    }
+
+    function pollConversionJobInChat(sessionId, isSingle, isRingtone, firstTrack, updateBox) {
+        const poll = async () => {
+            try {
+                const res = await fetch(`${BACKEND_URL}/status/${sessionId}`);
+                if (!res.ok) throw new Error('Status check failed');
+                const statusData = await res.json();
+
+                if (statusData.status === 'queued') {
+                    updateBox(`⏳ Queued (Position #${statusData.queue_position || 1})...`, 12);
+                    setTimeout(poll, 1800);
+                } else if (statusData.status === 'processing') {
+                    const total = Math.max(1, statusData.total || 1);
+                    const done = statusData.completed || 0;
+                    const sub = statusData.sub_progress || 0;
+                    const pct = Math.min(95, ((done + sub / 100) / total) * 100);
+                    const stepText = statusData.current_status || `Processing track ${statusData.current_track || 1} of ${total}...`;
+                    updateBox(`🎧 ${stepText}`, pct);
+                    setTimeout(poll, 1500);
+                } else if (statusData.status === 'completed') {
+                    const ext = isRingtone ? 'm4r' : 'mp3';
+                    const dlUrl = isSingle
+                        ? `${BACKEND_URL}/download_mp3/${sessionId}?ext=${ext}`
+                        : `${BACKEND_URL}${statusData.zip_path || `/download/${sessionId}/playlist_backup.zip`}`;
+                    const label = isSingle
+                        ? `Download ${ext.toUpperCase()} (${firstTrack ? firstTrack.title : 'Track'})`
+                        : `Download Full Playlist (.ZIP)`;
+
+                    updateBox(`🎉 Ready! High-res ID3 tags & cover art embedded.`, 100, dlUrl, label);
+                    showToast('Your download is ready!', 'success');
+
+                    // Trigger automatic download
+                    const a = document.createElement('a');
+                    a.href = dlUrl;
+                    a.download = '';
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                } else {
+                    updateBox(`⚠️ Error: ${statusData.error || 'Conversion interrupted'}`, 0);
+                }
+            } catch (e) {
+                updateBox(`⚠️ Connection lost while checking status.`, 0);
+            }
+        };
+        poll();
+    }
+
+    // --- Render User & Assistant Message Bubbles ---
+    function scrollToBottom() {
+        if (!chatMessages) return;
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    function appendUserBubble(text) {
+        const row = document.createElement('div');
+        row.className = 'msg-row user-row';
+        const nowStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        row.innerHTML = `
+            <div class="msg-bubble user-bubble">
+                <div class="msg-text"><p>${escapeHtml(text)}</p></div>
+                <span class="msg-time">${nowStr} ✓✓</span>
+            </div>
+        `;
+        chatMessages.appendChild(row);
+        scrollToBottom();
+    }
+
+    function appendTypingBubble() {
+        const row = document.createElement('div');
+        row.className = 'msg-row assistant-row typing-row';
+        row.innerHTML = `
+            <div class="msg-avatar">🎧</div>
+            <div class="msg-bubble assistant-bubble" style="max-width: 110px;">
+                <div class="typing-dots"><span></span><span></span><span></span></div>
+            </div>
+        `;
+        chatMessages.appendChild(row);
+        scrollToBottom();
+        return row;
+    }
+
+    function appendAssistantMusicBubble(payload) {
+        const tracks = (payload.tracks || []).map((t, i) => ({
+            ...t,
+            bubbleId: `b_${Date.now()}_${i}_${Math.random().toString(36).slice(2, 6)}`
+        }));
+        const isPlaylist = tracks.length > 1;
+        const playlistTitle = payload.playlist_title || 'Curated Selection';
+        const playlistVibe = payload.playlist_vibe || '320kbps Studio Audio • Auto ID3 Tagged';
+        const nowStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+        const row = document.createElement('div');
+        row.className = 'msg-row assistant-row';
+
+        let playlistHeaderHtml = '';
+        if (isPlaylist) {
+            playlistHeaderHtml = `
+                <div class="playlist-header-card">
+                    <div class="playlist-header-meta">
+                        <span class="playlist-badge-eyebrow">✨ AI CURATED PLAYLIST &bull; ${tracks.length} TRACKS</span>
+                        <h3>${escapeHtml(playlistTitle)}</h3>
+                        <span>${escapeHtml(playlistVibe)}</span>
+                    </div>
+                    <div class="playlist-header-actions">
+                        <button type="button" class="btn-play-all-chat">▶ Play All in Chat</button>
+                        <button type="button" class="btn-download-playlist-zip">📦 Download Playlist (.ZIP)</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        const tracksHtml = tracks.map((t, idx) => {
+            const art = t.artwork_url || 'favicon.png';
+            const subMeta = [t.artist, t.album, t.year].filter(Boolean).join(' • ');
+            const isRingtoneMode = (payload.mode === 'ringtone') || (videoToMp3Input && videoToMp3Input.checked);
+            return `
+                <div class="track-audio-bubble" data-bubble-id="${t.bubbleId}" data-track-idx="${idx}">
+                    <div class="track-cover-wrap">
+                        <img src="${escapeHtml(art)}" alt="${escapeHtml(t.title)}" class="track-cover-img" loading="lazy" onerror="this.src='favicon.png'">
+                    </div>
+                    <button type="button" class="track-play-btn" title="Play track in chat" aria-label="Play ${escapeHtml(t.title)}">▶</button>
+                    <div class="track-bubble-center">
+                        <div class="track-title-line">
+                            <span class="track-title-text">${escapeHtml(t.title)}</span>
+                            <span class="track-duration-badge">${escapeHtml(t.duration || '3:30')}</span>
+                        </div>
+                        <div class="track-sub-line">
+                            <span class="track-quality-pill">320k ID3</span>
+                            <span>${escapeHtml(subMeta)}</span>
+                        </div>
+                        <div class="track-waveform-row">
+                            <div class="track-scrub-bar" title="Click to seek">
+                                <div class="track-scrub-fill"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="track-dl-actions">
+                        <button type="button" class="btn-track-mp3" data-idx="${idx}">
+                            ${isRingtoneMode ? '⬇ Ringtone' : '⬇ MP3'}
+                        </button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        row.innerHTML = `
+            <div class="msg-avatar">🎧</div>
+            <div class="msg-bubble assistant-bubble">
+                <div class="msg-sender-name">
+                    <span>MP3aud.io Assistant</span>
+                    <span class="msg-time">${nowStr}</span>
+                </div>
+                <div class="msg-text">
+                    <p>${formatMarkdownBold(payload.reply || 'Here are your tracks!')}</p>
+                </div>
+                ${playlistHeaderHtml}
+                <div class="tracks-bubble-stack">
+                    ${tracksHtml}
+                </div>
+                <div class="bubble-conversion-container"></div>
+            </div>
+        `;
+
+        chatMessages.appendChild(row);
+        scrollToBottom();
+
+        const bubbleEl = row.querySelector('.assistant-bubble');
+        const statusContainer = bubbleEl.querySelector('.bubble-conversion-container');
+
+        // Wire up Play buttons & Scrubbing on each track bubble
+        bubbleEl.querySelectorAll('.track-audio-bubble').forEach(trackEl => {
+            const idx = parseInt(trackEl.getAttribute('data-track-idx'), 10);
+            const playBtn = trackEl.querySelector('.track-play-btn');
+            const scrubBar = trackEl.querySelector('.track-scrub-bar');
+            const dlBtn = trackEl.querySelector('.btn-track-mp3');
+
+            if (playBtn) {
+                playBtn.addEventListener('click', () => {
+                    playTrackFromQueue(tracks, idx);
+                });
+            }
+            if (scrubBar) {
+                scrubBar.addEventListener('click', (e) => {
+                    const rect = scrubBar.getBoundingClientRect();
+                    const ratio = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+                    if (activeBubbleId !== tracks[idx].bubbleId) {
+                        playTrackFromQueue(tracks, idx);
+                    } else if (globalAudio.duration) {
+                        globalAudio.currentTime = ratio * globalAudio.duration;
+                    }
+                });
+            }
+            if (dlBtn) {
+                dlBtn.addEventListener('click', () => {
+                    triggerTrackOrPlaylistDownload([tracks[idx]], `${tracks[idx].artist} - ${tracks[idx].title}`, statusContainer);
+                });
+            }
+        });
+
+        // Wire up Playlist-level Play All & Download ZIP buttons
+        const playAllBtn = bubbleEl.querySelector('.btn-play-all-chat');
+        if (playAllBtn) {
+            playAllBtn.addEventListener('click', () => {
+                playTrackFromQueue(tracks, 0);
+            });
+        }
+
+        const zipBtn = bubbleEl.querySelector('.btn-download-playlist-zip');
+        if (zipBtn) {
+            zipBtn.addEventListener('click', () => {
+                triggerTrackOrPlaylistDownload(tracks, playlistTitle, statusContainer);
+            });
+        }
+    }
+
+    // --- Send Message Handler (Text Request or Attached Local Files) ---
+    async function sendUserMessage(customText = null) {
+        if (pendingFiles.length > 0 && !customText) {
+            await handleSendLocalFilesInChat();
+            return;
+        }
+
+        const text = (customText !== null ? customText : (chatInput ? chatInput.value : '')).trim();
+        if (!text) return;
+
+        if (customText === null && chatInput) {
+            chatInput.value = '';
+            chatInput.style.height = 'auto';
+        }
+
+        appendUserBubble(text);
+        saveRecentPrompt(text);
+        chatHistory.push({ role: 'user', content: text });
+
+        const typingRow = appendTypingBubble();
+
+        try {
+            let result = null;
+            try {
+                const resp = await fetch(`${BACKEND_URL}/api/assistant/chat`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        message: text,
+                        history: chatHistory.slice(-6),
+                        options: {
+                            auto_add_album_art: autoAddAlbumArtInput ? autoAddAlbumArtInput.checked : true,
+                            increase_quality: increaseQualityInput ? increaseQualityInput.checked : false,
+                            is_ringtone: videoToMp3Input ? videoToMp3Input.checked : false,
+                            transcribe_audio: attachLyricsInput ? attachLyricsInput.checked : false
+                        }
+                    })
+                });
+                if (resp.ok) {
+                    result = await resp.json();
+                }
+            } catch (networkErr) {
+                console.info('Using direct client curation fallback:', networkErr);
+            }
+
+            if (!result || !result.success) {
+                result = await clientSideCurateFallback(text);
+            }
+
+            typingRow.remove();
+            appendAssistantMusicBubble(result);
+            chatHistory.push({ role: 'assistant', content: result.reply || '' });
+        } catch (err) {
+            typingRow.remove();
+            showToast('Something went wrong processing your message.', 'error');
+        }
+    }
+
+    // --- Local File Upload in Chat ---
+    function setPendingFiles(fileList) {
+        const files = Array.from(fileList || []);
+        if (files.length === 0) return;
+        const MAX_SIZE = 50 * 1024 * 1024;
+        if (files.some(f => f.size > MAX_SIZE)) {
+            showToast('One or more files exceed the 50MB per-track limit.', 'error');
+            return;
+        }
+        pendingFiles = files;
+        if (attachedFilesPreview && attachedFilesLabel) {
+            attachedFilesLabel.textContent = files.length === 1
+                ? `📎 ${files[0].name}`
+                : `📎 ${files.length} media files attached`;
+            attachedFilesPreview.classList.remove('hidden');
+        }
+    }
+
+    async function handleSendLocalFilesInChat() {
+        const files = [...pendingFiles];
+        pendingFiles = [];
+        if (fileInput) fileInput.value = '';
+        if (attachedFilesPreview) attachedFilesPreview.classList.add('hidden');
+
+        const userText = (chatInput && chatInput.value.trim())
+            ? chatInput.value.trim()
+            : `Enhance & tag ${files.length === 1 ? files[0].name : `${files.length} media files`}`;
+        if (chatInput) chatInput.value = '';
+
+        appendUserBubble(`📎 ${userText}`);
+
+        const nowStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        const row = document.createElement('div');
+        row.className = 'msg-row assistant-row';
+        row.innerHTML = `
+            <div class="msg-avatar">🎧</div>
+            <div class="msg-bubble assistant-bubble">
+                <div class="msg-sender-name">
+                    <span>MP3aud.io Assistant</span>
+                    <span class="msg-time">${nowStr}</span>
+                </div>
+                <div class="msg-text">
+                    <p>I received your <strong>${files.length} media ${files.length === 1 ? 'file' : 'files'}</strong>! Processing with your selected audio &amp; metadata enhancements now:</p>
+                </div>
+                <div class="bubble-conversion-container">
+                    <div class="bubble-conversion-box">
+                        <div class="bubble-conversion-header">
+                            <span class="conv-status-label">📤 Uploading media files...</span>
+                            <span class="conv-pct-label">10%</span>
+                        </div>
+                        <div class="bubble-progress-track">
+                            <div class="bubble-progress-fill" style="width: 10%;"></div>
+                        </div>
+                        <div class="conv-action-slot"></div>
+                    </div>
+                </div>
+            </div>
+        `;
+        chatMessages.appendChild(row);
+        scrollToBottom();
+
+        const box = row.querySelector('.bubble-conversion-box');
+        const updateBox = (label, pct, readyUrl = null, readyLabel = null) => {
+            const lbl = box.querySelector('.conv-status-label');
+            const pctEl = box.querySelector('.conv-pct-label');
+            const fill = box.querySelector('.bubble-progress-fill');
+            const slot = box.querySelector('.conv-action-slot');
+            if (lbl) lbl.textContent = label;
+            if (pctEl) pctEl.textContent = `${Math.round(pct)}%`;
+            if (fill) fill.style.width = `${Math.max(5, Math.min(100, pct))}%`;
+            if (readyUrl && slot) {
+                slot.innerHTML = `<a href="${readyUrl}" class="bubble-ready-download-link" target="_blank" download>✅ ${readyLabel || 'Download Processed Files'}</a>`;
+            }
+        };
+
+        try {
+            const sessionId = (crypto && crypto.randomUUID) ? crypto.randomUUID() : ('sess_' + Date.now());
+            const formData = new FormData();
+            formData.append('session_id', sessionId);
+            files.forEach(f => formData.append('files', f));
+            formData.append('auto_add_album_art', autoAddAlbumArtInput ? String(autoAddAlbumArtInput.checked) : 'true');
+            formData.append('increase_quality', increaseQualityInput ? String(increaseQualityInput.checked) : 'false');
+            formData.append('video_to_mp3', videoToMp3Input ? String(videoToMp3Input.checked) : 'false');
+            formData.append('attach_lyrics', attachLyricsInput ? String(attachLyricsInput.checked) : 'false');
+
+            const resp = await fetch(`${BACKEND_URL}/process_local_files`, {
+                method: 'POST',
+                body: formData
+            });
+            const data = await resp.json();
+            if (!resp.ok) {
+                if (data.requires_payment) {
+                    updateBox(`⚠️ ${data.error}`, 0);
+                    openModal('accountModal');
+                    return;
+                }
+                throw new Error(data.error || 'Upload failed');
+            }
+            pollConversionJobInChat(sessionId, files.length === 1, videoToMp3Input && videoToMp3Input.checked, { title: files[0].name }, updateBox);
+            checkAuthStatus();
+        } catch (err) {
+            updateBox(`⚠️ Upload error: ${err.message}`, 0);
+        }
+    }
+
+    if (attachFileBtn && fileInput) {
+        attachFileBtn.addEventListener('click', () => fileInput.click());
+        fileInput.addEventListener('change', () => setPendingFiles(fileInput.files));
+    }
+    if (clearAttachedFilesBtn) {
+        clearAttachedFilesBtn.addEventListener('click', () => {
+            pendingFiles = [];
+            if (fileInput) fileInput.value = '';
+            if (attachedFilesPreview) attachedFilesPreview.classList.add('hidden');
+        });
+    }
+
+    // Drag and drop files anywhere into window
+    let dragCounter = 0;
+    window.addEventListener('dragenter', (e) => {
+        if (e.dataTransfer && Array.from(e.dataTransfer.types || []).includes('Files')) {
+            dragCounter++;
+            if (dragDropOverlay) dragDropOverlay.classList.remove('hidden');
+        }
+    });
+    window.addEventListener('dragleave', () => {
+        dragCounter = Math.max(0, dragCounter - 1);
+        if (dragCounter === 0 && dragDropOverlay) dragDropOverlay.classList.add('hidden');
+    });
+    window.addEventListener('drop', (e) => {
+        dragCounter = 0;
+        if (dragDropOverlay) dragDropOverlay.classList.add('hidden');
+        if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+            setPendingFiles(e.dataTransfer.files);
+            handleSendLocalFilesInChat();
+        }
+    });
+
+    // --- Composer Input & Quick Prompt Wiring ---
+    if (chatComposerForm) {
+        chatComposerForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            sendUserMessage();
+        });
+    }
+    if (chatInput) {
+        chatInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendUserMessage();
+            }
+        });
+        chatInput.addEventListener('input', () => {
+            chatInput.style.height = 'auto';
+            chatInput.style.height = Math.min(110, chatInput.scrollHeight) + 'px';
+        });
+    }
+
+    document.querySelectorAll('[data-prompt]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const promptText = btn.getAttribute('data-prompt');
+            toggleSidebar(false);
+            sendUserMessage(promptText);
+        });
+    });
+
+    // --- Voice Input (Web Speech API) ---
+    if (voiceInputBtn) {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (SpeechRecognition) {
+            const recognition = new SpeechRecognition();
+            recognition.lang = 'en-US';
+            recognition.interimResults = false;
+
+            recognition.onstart = () => {
+                voiceInputBtn.classList.add('recording');
+                showToast('Listening... speak a song, artist, or playlist vibe!');
+            };
+            recognition.onend = () => {
+                voiceInputBtn.classList.remove('recording');
+            };
+            recognition.onresult = (event) => {
+                const transcript = event.results[0][0].transcript;
+                if (transcript) {
+                    if (chatInput) chatInput.value = transcript;
+                    sendUserMessage(transcript);
+                }
+            };
+            voiceInputBtn.addEventListener('click', () => {
+                try { recognition.start(); } catch (e) { recognition.stop(); }
+            });
+        } else {
+            voiceInputBtn.addEventListener('click', () => {
+                showToast('Voice dictation is not supported in this browser.', 'info');
+            });
+        }
+    }
+
+    // --- WhatsApp & Telegram Bot Info & Webhook Binding ---
+    async function loadBotConfig() {
+        try {
+            const res = await fetch(`${BACKEND_URL}/api/assistant/bot-info`);
+            if (!res.ok) return;
+            const info = await res.json();
+            if (info.telegram_url) {
+                const sTg = document.getElementById('sidebarTelegramLink');
+                const mTg = document.getElementById('modalTelegramBtn');
+                const hTg = document.getElementById('tgBotHandleDisplay');
+                const qTg = document.getElementById('tgQrImage');
+                if (sTg) sTg.href = info.telegram_url;
+                if (mTg) mTg.href = info.telegram_url;
+                if (hTg && info.telegram_bot_username) hTg.textContent = info.telegram_bot_username;
+                if (qTg) qTg.src = `https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=${encodeURIComponent(info.telegram_url)}`;
+            }
+            if (info.whatsapp_url) {
+                const sWa = document.getElementById('sidebarWhatsappLink');
+                const mWa = document.getElementById('modalWhatsappBtn');
+                const qWa = document.getElementById('waQrImage');
+                if (sWa) sWa.href = info.whatsapp_url;
+                if (mWa) mWa.href = info.whatsapp_url;
+                if (qWa) qWa.src = `https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=${encodeURIComponent(info.whatsapp_url)}`;
+            }
+        } catch (e) { }
+    }
+    loadBotConfig();
+
+    const bindTelegramWebhookBtn = document.getElementById('bindTelegramWebhookBtn');
+    if (bindTelegramWebhookBtn) {
+        bindTelegramWebhookBtn.addEventListener('click', async () => {
+            const tokenInput = document.getElementById('tgBotTokenInput');
+            const statusMsg = document.getElementById('botSetupStatusMsg');
+            const botToken = tokenInput ? tokenInput.value.trim() : '';
+            if (statusMsg) statusMsg.textContent = 'Registering Telegram webhook...';
+            try {
+                const res = await fetch(`${BACKEND_URL}/api/bot/setup-telegram`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ bot_token: botToken })
+                });
+                const data = await res.json();
+                if (res.ok && data.ok) {
+                    if (statusMsg) statusMsg.innerHTML = `<span style="color:#4ade80;">✅ Telegram Webhook bound! Message your bot now.</span>`;
+                } else {
+                    if (statusMsg) statusMsg.innerHTML = `<span style="color:#f87171;">⚠️ ${escapeHtml(data.description || data.error || 'Failed to bind webhook')}</span>`;
+                }
+            } catch (e) {
+                if (statusMsg) statusMsg.innerHTML = `<span style="color:#f87171;">⚠️ Could not reach backend webhook endpoint.</span>`;
+            }
+        });
+    }
+
+    // --- Authentication, Magic Link & Stripe Checkout Integration ---
+    async function checkAuthStatus() {
+        try {
+            const res = await fetch(`${BACKEND_URL}/auth/me`);
+            if (!res.ok) return;
+            const data = await res.json();
+            if (data.token) localStorage.setItem('session_token', data.token);
+
+            const credits = data.paid_track_credits || 0;
+            if (paidCreditsDisplay) paidCreditsDisplay.textContent = credits;
+            if (headerPaidCreditsDisplay) headerPaidCreditsDisplay.textContent = credits;
+
+            if (data.authenticated && data.email) {
+                if (userDashboard) userDashboard.classList.remove('hidden');
+                if (guestPricingGrid) guestPricingGrid.classList.add('hidden');
+                if (userEmailDisplay) userEmailDisplay.textContent = data.email;
+                if (sidebarAccountLabel) sidebarAccountLabel.textContent = data.email;
+                if (sidebarAccountSub) sidebarAccountSub.textContent = `Logged In • Priority Queue Active`;
+                if (headerAccountBtnText) headerAccountBtnText.textContent = `${credits} Credits`;
+            } else {
+                if (userDashboard) userDashboard.classList.add('hidden');
+                if (guestPricingGrid) guestPricingGrid.classList.remove('hidden');
+                if (sidebarAccountLabel) sidebarAccountLabel.textContent = 'Free Guest Pass';
+                if (sidebarAccountSub) sidebarAccountSub.textContent = '5 Free Tracks/Req • Tap for Credits';
+                if (headerAccountBtnText) headerAccountBtnText.textContent = 'Sign In / Credits';
+            }
+        } catch (e) { }
+    }
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const magicToken = urlParams.get('token');
+    if (magicToken) {
+        fetch(`${BACKEND_URL}/auth/verify`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ token: magicToken })
+        })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success && data.token) {
+                    localStorage.setItem('session_token', data.token);
+                    showToast('Logged in! Your credits are ready.', 'success');
+                    checkAuthStatus();
+                } else {
+                    showToast(data.error || 'Login link expired.', 'error');
+                }
+                window.history.replaceState({}, document.title, window.location.pathname);
+            })
+            .catch(() => { });
+    } else {
+        checkAuthStatus();
+    }
+
+    if (urlParams.get('success')) {
+        showToast('Payment successful! +350 Track Credits added.', 'success');
+        window.history.replaceState({}, document.title, window.location.pathname);
+        checkAuthStatus();
+    } else if (urlParams.get('canceled')) {
+        showToast('Checkout canceled.', 'info');
+        window.history.replaceState({}, document.title, window.location.pathname);
+    }
+
+    // Handle deep-linked query (?q= or ?url=) from WhatsApp / Telegram / Share links
+    const initialQuery = urlParams.get('q') || urlParams.get('url');
+    if (initialQuery) {
+        window.history.replaceState({}, document.title, window.location.pathname);
+        setTimeout(() => sendUserMessage(initialQuery), 300);
+    }
+
+    if (sendLinkBtn && loginEmail) {
+        sendLinkBtn.addEventListener('click', async () => {
+            const email = loginEmail.value.trim();
+            if (!email) {
+                if (authMessage) authMessage.innerHTML = `<span style="color:#f87171; font-size:0.78rem;">Please enter your email address.</span>`;
+                return;
+            }
+            sendLinkBtn.disabled = true;
+            sendLinkBtn.textContent = 'Sending...';
+            try {
+                const res = await fetch(`${BACKEND_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email })
+                });
+                const data = await res.json();
+                if (res.ok && data.success) {
+                    if (authMessage) authMessage.innerHTML = `<span style="color:#4ade80; font-size:0.78rem;">✅ Magic login link sent! Check your email inbox.</span>`;
+                } else {
+                    if (authMessage) authMessage.innerHTML = `<span style="color:#f87171; font-size:0.78rem;">⚠️ ${escapeHtml(data.error || 'Failed to send link')}</span>`;
+                }
+            } catch (e) {
+                if (authMessage) authMessage.innerHTML = `<span style="color:#f87171; font-size:0.78rem;">⚠️ Network error sending login link.</span>`;
+            } finally {
+                sendLinkBtn.disabled = false;
+                sendLinkBtn.textContent = 'Send Login Link';
+            }
+        });
+    }
+
+    if (buyCreditsBtn) {
+        buyCreditsBtn.addEventListener('click', async () => {
+            buyCreditsBtn.disabled = true;
+            buyCreditsBtn.textContent = 'Redirecting to Stripe...';
+            try {
+                const res = await fetch(`${BACKEND_URL}/create-checkout-session`, { method: 'POST' });
+                const data = await res.json();
+                if (data.url) {
+                    window.location.href = data.url;
+                } else {
+                    showToast(data.error || 'Please sign in first.', 'error');
+                    buyCreditsBtn.disabled = false;
+                    buyCreditsBtn.textContent = 'Buy 350 Credits ($3.99)';
+                }
+            } catch (e) {
+                showToast('Could not start checkout.', 'error');
+                buyCreditsBtn.disabled = false;
+                buyCreditsBtn.textContent = 'Buy 350 Credits ($3.99)';
+            }
+        });
+    }
+
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', async () => {
+            localStorage.removeItem('session_token');
+            try { await fetch(`${BACKEND_URL}/auth/logout`, { method: 'POST' }); } catch (e) { }
+            checkAuthStatus();
+            showToast('Signed out.');
+        });
+    }
+});
+
+    </script>
+    <script src="script.js?v=20261103_4"></script>
 </body>
 
 </html>
