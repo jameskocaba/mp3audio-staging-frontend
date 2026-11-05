@@ -2067,6 +2067,11 @@ document.addEventListener('DOMContentLoaded', () => {
             return await curatePresetVibePlaylist(fallbackKey, true);
         }
 
+        // If the user was just having a normal conversation, return conversational reply rather than treating text as a track
+        if (!wantsPlaylist && !wantsSingleTrack) {
+            return await generateConversationalReply(rawText, lower);
+        }
+
         return {
             success: true,
             reply: `I lined up **${cleanQ}** for you! 🎵 Click **⬇ MP3** below to extract and tag the full 320kbps studio audio track:`,
@@ -2605,17 +2610,14 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             let result = null;
 
-            // 1. Check if this is a follow-up question, playback command, track swap, or conversational message (no playlist requested)
+            // 1. Check if this is an explicit playback control command (pause, resume, skip, swap)
             const followUpAns = await answerFollowUpQuestion(text, lowerText);
             if (followUpAns) {
                 await new Promise(r => setTimeout(r, 320));
                 result = followUpAns;
-            } else if (isPureConvOrLifeMoment) {
-                await new Promise(r => setTimeout(r, 380));
-                result = await clientSideCurateFallback(text);
             }
 
-            // 2. If not a pure follow-up question, try backend up to 2.1s, then fall back to instant human client curation
+            // 2. ALWAYS query the backend LLM assistant API first for genuine, context-aware AI conversation & music curation
             if (!result) {
                 try {
                     const backendCall = (async () => {
@@ -2624,7 +2626,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({
                                 message: text,
-                                history: chatHistory.slice(-6),
+                                history: chatHistory.slice(-8),
                                 current_tracks: (assistantMemory.lastTracks || []).slice(0, 6),
                                 options: {
                                     auto_add_album_art: autoAddAlbumArtInput ? autoAddAlbumArtInput.checked : true,
@@ -2633,20 +2635,20 @@ document.addEventListener('DOMContentLoaded', () => {
                                     transcribe_audio: attachLyricsInput ? attachLyricsInput.checked : false
                                 }
                             })
-                        }, 2100);
+                        }, 4800);
                         if (resp && resp.ok) {
                             return await resp.json();
                         }
                         return null;
                     })();
 
-                    const raceTimeout = new Promise(resolve => setTimeout(() => resolve(null), 2200));
+                    const raceTimeout = new Promise(resolve => setTimeout(() => resolve(null), 5000));
                     result = await Promise.race([backendCall, raceTimeout]);
                 } catch (networkErr) {
-                    console.info('Using instant client curation:', networkErr);
+                    console.info('Backend assistant offline or timed out, using client fallback:', networkErr);
                 }
 
-                let shouldUseClientCuration = !result || !result.success || (result.mode !== 'chat' && (!Array.isArray(result.tracks) || result.tracks.length === 0));
+                let shouldUseClientCuration = !result || !result.success;
                 if (!shouldUseClientCuration && isAskingForNew && Array.isArray(result.tracks) && result.tracks.length > 0) {
                     const allAlreadyShown = result.tracks.every(t =>
                         shownTrackKeys.has(`${(t.title || '').toLowerCase()}|${(t.artist || '').toLowerCase()}`)
