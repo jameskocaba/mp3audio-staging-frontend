@@ -297,8 +297,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const probeServer = async () => {
             try {
-                const r = await fetch(`${BACKEND_URL}/health_check`, { cache: 'no-store' });
+                const r = await fetch(`${BACKEND_URL}/health`, { cache: 'no-store' });
                 if (r && r.ok) {
+                    unlockChatAfterWake();
+                    return true;
+                }
+            } catch (_) {}
+            try {
+                const r2 = await fetch(`${BACKEND_URL}/health_check`, { cache: 'no-store' });
+                if (r2 && r2.ok) {
                     unlockChatAfterWake();
                     return true;
                 }
@@ -318,11 +325,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (assistantStatusText && !isBackendAwake) {
                         assistantStatusText.innerHTML = `⏱️ Cloud server waking up... (~${serverWakeSecondsRemaining}s remaining)`;
                     }
-                } else if (wakeCountdownEl) {
-                    wakeCountdownEl.textContent = 'almost ready...';
-                    if (assistantStatusText && !isBackendAwake) {
-                        assistantStatusText.innerHTML = '⏱️ Cloud server booting... almost ready!';
-                    }
+                } else {
+                    if (wakeCountdownEl) wakeCountdownEl.textContent = 'ready!';
+                    probeServer().then(awake => {
+                        if (awake || serverWakeSecondsRemaining <= -4) {
+                            unlockChatAfterWake();
+                        }
+                    });
+                    serverWakeSecondsRemaining--;
                 }
             }, 1000);
 
@@ -2762,8 +2772,13 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Send Message Handler (Text Request or Attached Local Files) ---
     async function sendUserMessage(customText = null) {
         if (!isBackendAwake) {
-            showToast(`Cloud server is waking up (~${serverWakeSecondsRemaining}s). Chat will unlock automatically when ready!`, 'info');
-            return;
+            const probe = await fetch(`${BACKEND_URL}/health`, { cache: 'no-store' }).then(r => r.ok).catch(() => false);
+            if (probe) {
+                unlockChatAfterWake();
+            } else {
+                showToast(`Cloud server is still spinning up (~${Math.max(1, serverWakeSecondsRemaining)}s). Chat will unlock automatically!`, 'info');
+                return;
+            }
         }
 
         if (pendingFiles.length > 0 && !customText) {
