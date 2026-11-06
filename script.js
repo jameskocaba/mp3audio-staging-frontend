@@ -231,18 +231,187 @@ document.addEventListener('DOMContentLoaded', () => {
     let lastVibeKey = '';
     let rotationCursor = 0;
     let isBackendAwake = false;
+    let serverWakeSecondsRemaining = 55;
+    let serverWakeCountdownTimer = null;
+    let serverWakePollTimer = null;
 
-    // Eagerly ping backend on initial page load to start spinning up Render if asleep
-    try {
-        fetch(`${BACKEND_URL}/health_check`).then(r => {
-            if (r && r.ok) {
-                isBackendAwake = true;
-                if (assistantStatusText) {
-                    assistantStatusText.innerHTML = 'Online &bull; AI Personal Assistant &amp; DJ';
-                }
+    function unlockChatAfterWake() {
+        if (isBackendAwake) return;
+        isBackendAwake = true;
+        if (serverWakeCountdownTimer) clearInterval(serverWakeCountdownTimer);
+        if (serverWakePollTimer) clearInterval(serverWakePollTimer);
+
+        const wakeCard = document.getElementById('serverWakeCard');
+        const wakeTitle = document.getElementById('serverWakeTitle');
+        const wakeSub = document.getElementById('serverWakeSub');
+        const chatComposer = document.querySelector('.chat-composer');
+        const chatInput = document.getElementById('chatInput');
+        const sendBtn = document.getElementById('sendMessageBtn');
+
+        if (wakeCard) {
+            wakeCard.classList.add('awake-success');
+            if (wakeTitle) wakeTitle.innerHTML = '<span>✅</span> Cloud Server Awake &amp; AI Ready!';
+            if (wakeSub) wakeSub.textContent = 'Render cloud backend is online. Instant conversation & audio curation unlocked!';
+            setTimeout(() => {
+                wakeCard.style.opacity = '0';
+                wakeCard.style.transform = 'translateY(-6px)';
+                setTimeout(() => {
+                    wakeCard.style.display = 'none';
+                }, 350);
+            }, 3000);
+        }
+
+        if (chatComposer) {
+            chatComposer.classList.remove('server-sleeping');
+        }
+        if (chatInput) {
+            chatInput.removeAttribute('disabled');
+            chatInput.placeholder = 'Text MP3aud.io for any song, artist, playlist vibe, or paste a link...';
+        }
+        if (sendBtn) {
+            sendBtn.removeAttribute('disabled');
+        }
+        if (assistantStatusText) {
+            assistantStatusText.innerHTML = 'Online &bull; AI Personal Assistant &amp; DJ';
+        }
+    }
+
+    function initServerWakeGate() {
+        const wakeCountdownEl = document.getElementById('serverWakeCountdown');
+        const chatComposer = document.querySelector('.chat-composer');
+        const chatInput = document.getElementById('chatInput');
+        const sendBtn = document.getElementById('sendMessageBtn');
+
+        // Initial locked state
+        if (!isBackendAwake) {
+            if (chatComposer) chatComposer.classList.add('server-sleeping');
+            if (chatInput) {
+                chatInput.setAttribute('disabled', 'disabled');
+                chatInput.placeholder = '⏱️ Cloud server is booting... please wait (~55s)';
             }
-        }).catch(() => {});
-    } catch (_) {}
+            if (sendBtn) sendBtn.setAttribute('disabled', 'disabled');
+            if (assistantStatusText) {
+                assistantStatusText.innerHTML = '⏱️ Waking up AI engine... (~55s on first load)';
+            }
+        }
+
+        const probeServer = async () => {
+            try {
+                const r = await fetch(`${BACKEND_URL}/health_check`, { cache: 'no-store' });
+                if (r && r.ok) {
+                    unlockChatAfterWake();
+                    return true;
+                }
+            } catch (_) {}
+            return false;
+        };
+
+        probeServer().then(awake => {
+            if (awake) return;
+
+            serverWakeCountdownTimer = setInterval(() => {
+                if (serverWakeSecondsRemaining > 1) {
+                    serverWakeSecondsRemaining--;
+                    if (wakeCountdownEl) {
+                        wakeCountdownEl.textContent = `${serverWakeSecondsRemaining}s`;
+                    }
+                    if (assistantStatusText && !isBackendAwake) {
+                        assistantStatusText.innerHTML = `⏱️ Cloud server waking up... (~${serverWakeSecondsRemaining}s remaining)`;
+                    }
+                } else if (wakeCountdownEl) {
+                    wakeCountdownEl.textContent = 'almost ready...';
+                    if (assistantStatusText && !isBackendAwake) {
+                        assistantStatusText.innerHTML = '⏱️ Cloud server booting... almost ready!';
+                    }
+                }
+            }, 1000);
+
+            serverWakePollTimer = setInterval(async () => {
+                if (isBackendAwake) {
+                    clearInterval(serverWakePollTimer);
+                    return;
+                }
+                const ok = await probeServer();
+                if (ok) {
+                    clearInterval(serverWakePollTimer);
+                }
+            }, 2500);
+        });
+    }
+
+    function initAiKeyConfig() {
+        const keyInput = document.getElementById('customAiKeyInput');
+        const saveBtn = document.getElementById('saveAiKeyBtn');
+        const clearBtn = document.getElementById('clearAiKeyBtn');
+        const badge = document.getElementById('aiKeyStatusBadge');
+        const successNotice = document.getElementById('aiKeySuccessNotice');
+
+        const updateStatus = () => {
+            const saved = (localStorage.getItem('mp3audio_custom_ai_key') || '').trim();
+            if (saved) {
+                if (keyInput) keyInput.value = saved;
+                if (badge) {
+                    if (saved.startsWith('gsk_')) {
+                        badge.textContent = '⚡ Groq Llama 3.3 70B Active';
+                        badge.style.background = 'rgba(16, 185, 129, 0.2)';
+                        badge.style.color = '#6ee7b7';
+                    } else if (saved.startsWith('sk-or-')) {
+                        badge.textContent = '⚡ OpenRouter Active';
+                        badge.style.background = 'rgba(16, 185, 129, 0.2)';
+                        badge.style.color = '#6ee7b7';
+                    } else {
+                        badge.textContent = '⚡ OpenAI GPT-4o Active';
+                        badge.style.background = 'rgba(16, 185, 129, 0.2)';
+                        badge.style.color = '#6ee7b7';
+                    }
+                }
+                if (clearBtn) clearBtn.classList.remove('hidden');
+            } else {
+                if (keyInput) keyInput.value = '';
+                if (badge) {
+                    badge.textContent = 'Default Studio AI';
+                    badge.style.background = 'rgba(59, 130, 246, 0.2)';
+                    badge.style.color = '#93c5fd';
+                }
+                if (clearBtn) clearBtn.classList.add('hidden');
+            }
+        };
+
+        if (saveBtn && keyInput) {
+            saveBtn.addEventListener('click', () => {
+                const val = (keyInput.value || '').trim();
+                if (!val) {
+                    showToast('Please enter an API key or leave empty for default AI.', 'warning');
+                    return;
+                }
+                try {
+                    localStorage.setItem('mp3audio_custom_ai_key', val);
+                    updateStatus();
+                    if (successNotice) {
+                        successNotice.classList.remove('hidden');
+                        setTimeout(() => successNotice.classList.add('hidden'), 4000);
+                    }
+                    showToast('AI Key saved! Live high-speed Llama 3.3 70B inference active.', 'success');
+                } catch (e) {
+                    console.error('Storage error:', e);
+                }
+            });
+        }
+
+        if (clearBtn && keyInput) {
+            clearBtn.addEventListener('click', () => {
+                try {
+                    localStorage.removeItem('mp3audio_custom_ai_key');
+                    updateStatus();
+                    showToast('Custom key removed. Restored default AI.', 'info');
+                } catch (e) {
+                    console.error('Storage error:', e);
+                }
+            });
+        }
+
+        updateStatus();
+    }
 
     async function fetchWithTimeout(url, options = {}, timeoutMs = 2000) {
         const controller = new AbortController();
@@ -2592,6 +2761,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Send Message Handler (Text Request or Attached Local Files) ---
     async function sendUserMessage(customText = null) {
+        if (!isBackendAwake) {
+            showToast(`Cloud server is waking up (~${serverWakeSecondsRemaining}s). Chat will unlock automatically when ready!`, 'info');
+            return;
+        }
+
         if (pendingFiles.length > 0 && !customText) {
             await handleSendLocalFilesInChat();
             return;
@@ -2617,20 +2791,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const isPureConvOrLifeMoment = Boolean(assistantMemory.awaitingPlaylistVibe || isGenericMakePlaylist || !isExplicitMusicReq || isConversationalOnlyMessage(lowerText));
         const looksLikeQuestion = /\?$/.test(text) || /^(who|what|when|where|why|how|which|tell me|can you tell|do you know|explain|swap|replace|pause|resume|next|skip)\b/i.test(lowerText);
 
-        let wakeTimer = null;
-        let wakeSeconds = 0;
-        if (!isBackendAwake && assistantStatusText) {
-            assistantStatusText.innerHTML = '⏱️ Waking up AI engine... (~60s on first load)';
-            wakeTimer = setInterval(() => {
-                wakeSeconds += 2;
-                if (!isBackendAwake && assistantStatusText) {
-                    const remaining = Math.max(0, 60 - wakeSeconds);
-                    assistantStatusText.innerHTML = remaining > 0
-                        ? `⏱️ Cloud server waking up... (~${remaining}s remaining)`
-                        : `⏱️ Cloud server booting... almost ready!`;
-                }
-            }, 2000);
-        } else if (assistantStatusText) {
+        if (assistantStatusText) {
             assistantStatusText.textContent = (isPureConvOrLifeMoment || looksLikeQuestion)
                 ? 'typing a reply...'
                 : 'digging through crates & curating tracks...';
@@ -2648,12 +2809,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // 2. ALWAYS query the backend LLM assistant API first for genuine, context-aware AI conversation & music curation
             if (!result) {
-                const waitTimeoutMs = isBackendAwake ? 12000 : 70000;
+                const waitTimeoutMs = 15000;
                 try {
+                    const customAiKey = (localStorage.getItem('mp3audio_custom_ai_key') || '').trim();
+                    const reqHeaders = { 'Content-Type': 'application/json' };
+                    if (customAiKey) {
+                        reqHeaders['X-AI-Key'] = customAiKey;
+                    }
+
                     const backendCall = (async () => {
                         const resp = await fetchWithTimeout(`${BACKEND_URL}/api/assistant/chat`, {
                             method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
+                            headers: reqHeaders,
                             body: JSON.stringify({
                                 message: text,
                                 history: chatHistory.slice(-8),
@@ -3394,4 +3561,8 @@ document.addEventListener('DOMContentLoaded', () => {
             showToast('Signed out.');
         });
     }
+
+    // Initialize Server Wake Gating and AI Key Configuration
+    initServerWakeGate();
+    initAiKeyConfig();
 });

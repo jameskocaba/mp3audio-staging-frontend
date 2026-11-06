@@ -1262,6 +1262,109 @@ body.messenger-body {
     z-index: 20;
 }
 
+/* ==========================================================================
+   SERVER COLD START WAKE-UP GATING & CARD
+   ========================================================================== */
+.server-wake-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 15px;
+    margin-bottom: 10px;
+    background: linear-gradient(135deg, rgba(30, 58, 138, 0.45) 0%, rgba(15, 23, 42, 0.7) 100%);
+    border: 1px solid rgba(59, 130, 246, 0.45);
+    border-radius: 12px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+    animation: wakeCardFadeIn 0.3s ease-out;
+    transition: all 0.35s ease;
+}
+
+.server-wake-card.awake-success {
+    background: linear-gradient(135deg, rgba(6, 78, 59, 0.55) 0%, rgba(15, 23, 42, 0.7) 100%);
+    border-color: rgba(16, 185, 129, 0.6);
+}
+
+.server-wake-spinner {
+    width: 22px;
+    height: 22px;
+    border: 3px solid rgba(96, 165, 250, 0.2);
+    border-top-color: #60a5fa;
+    border-radius: 50%;
+    animation: wakeSpin 0.9s linear infinite;
+    flex-shrink: 0;
+}
+
+.server-wake-card.awake-success .server-wake-spinner {
+    display: none;
+}
+
+@keyframes wakeSpin {
+    to { transform: rotate(360deg); }
+}
+
+@keyframes wakeCardFadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.server-wake-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.server-wake-title {
+    font-size: 0.86rem;
+    font-weight: 700;
+    color: #93c5fd;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.server-wake-card.awake-success .server-wake-title {
+    color: #6ee7b7;
+}
+
+.server-wake-sub {
+    font-size: 0.77rem;
+    color: #cbd5e1;
+    margin-top: 2px;
+    line-height: 1.4;
+}
+
+.server-wake-badge-timer {
+    display: inline-block;
+    padding: 1px 7px;
+    background: rgba(37, 99, 235, 0.35);
+    border: 1px solid rgba(96, 165, 250, 0.5);
+    border-radius: 999px;
+    font-family: monospace;
+    font-weight: 700;
+    color: #93c5fd;
+}
+
+/* Chat Composer Gating when server is sleeping */
+.chat-composer.server-sleeping {
+    position: relative;
+}
+
+.chat-composer.server-sleeping .composer-bar {
+    opacity: 0.5;
+    pointer-events: none;
+    user-select: none;
+    filter: grayscale(0.25);
+}
+
+.chat-composer.server-sleeping #chatInput {
+    cursor: not-allowed;
+}
+
+.chat-composer.server-sleeping .composer-send-btn,
+.chat-composer.server-sleeping .composer-icon-btn {
+    cursor: not-allowed;
+    opacity: 0.45;
+}
+
 .attached-files-preview {
     margin-bottom: 8px;
 }

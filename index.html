@@ -46,7 +46,7 @@
         gtag('config', 'G-VGVP90K1M4');
     </script>
 
-    <link rel="stylesheet" href="style.css?v=20261106_01">
+    <link rel="stylesheet" href="style.css?v=20261106_02">
     <style id="inlined-main-style">
 /* ==========================================================================
    MP3AUD.IO — AI TEXT MESSAGING PERSONAL MUSIC ASSISTANT STYLESHEET
@@ -1312,6 +1312,109 @@ body.messenger-body {
     z-index: 20;
 }
 
+/* ==========================================================================
+   SERVER COLD START WAKE-UP GATING & CARD
+   ========================================================================== */
+.server-wake-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 15px;
+    margin-bottom: 10px;
+    background: linear-gradient(135deg, rgba(30, 58, 138, 0.45) 0%, rgba(15, 23, 42, 0.7) 100%);
+    border: 1px solid rgba(59, 130, 246, 0.45);
+    border-radius: 12px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+    animation: wakeCardFadeIn 0.3s ease-out;
+    transition: all 0.35s ease;
+}
+
+.server-wake-card.awake-success {
+    background: linear-gradient(135deg, rgba(6, 78, 59, 0.55) 0%, rgba(15, 23, 42, 0.7) 100%);
+    border-color: rgba(16, 185, 129, 0.6);
+}
+
+.server-wake-spinner {
+    width: 22px;
+    height: 22px;
+    border: 3px solid rgba(96, 165, 250, 0.2);
+    border-top-color: #60a5fa;
+    border-radius: 50%;
+    animation: wakeSpin 0.9s linear infinite;
+    flex-shrink: 0;
+}
+
+.server-wake-card.awake-success .server-wake-spinner {
+    display: none;
+}
+
+@keyframes wakeSpin {
+    to { transform: rotate(360deg); }
+}
+
+@keyframes wakeCardFadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.server-wake-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.server-wake-title {
+    font-size: 0.86rem;
+    font-weight: 700;
+    color: #93c5fd;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.server-wake-card.awake-success .server-wake-title {
+    color: #6ee7b7;
+}
+
+.server-wake-sub {
+    font-size: 0.77rem;
+    color: #cbd5e1;
+    margin-top: 2px;
+    line-height: 1.4;
+}
+
+.server-wake-badge-timer {
+    display: inline-block;
+    padding: 1px 7px;
+    background: rgba(37, 99, 235, 0.35);
+    border: 1px solid rgba(96, 165, 250, 0.5);
+    border-radius: 999px;
+    font-family: monospace;
+    font-weight: 700;
+    color: #93c5fd;
+}
+
+/* Chat Composer Gating when server is sleeping */
+.chat-composer.server-sleeping {
+    position: relative;
+}
+
+.chat-composer.server-sleeping .composer-bar {
+    opacity: 0.5;
+    pointer-events: none;
+    user-select: none;
+    filter: grayscale(0.25);
+}
+
+.chat-composer.server-sleeping #chatInput {
+    cursor: not-allowed;
+}
+
+.chat-composer.server-sleeping .composer-send-btn,
+.chat-composer.server-sleeping .composer-icon-btn {
+    cursor: not-allowed;
+    opacity: 0.45;
+}
+
 .attached-files-preview {
     margin-bottom: 8px;
 }
@@ -2200,11 +2303,24 @@ body.messenger-body {
             </div>
 
             <!-- Bottom Message Composer Bar -->
-            <footer class="chat-composer">
+            <footer class="chat-composer server-sleeping">
                 <!-- Hidden File Input for Uploading Audio/Video into Chat -->
                 <input type="file" id="fileInput" multiple
                     accept="audio/*,video/*,.mp3,.wav,.flac,.aac,.ogg,.m4a,.wma,.mp4,.mov,.avi,.mkv,.webm"
                     style="display: none;">
+
+                                <!-- Server Cold Start Wake-Up Card (Gating Notice) -->
+                <div id="serverWakeCard" class="server-wake-card">
+                    <div class="server-wake-spinner" id="serverWakeSpinner"></div>
+                    <div class="server-wake-info">
+                        <div class="server-wake-title" id="serverWakeTitle">
+                            <span>â±ï¸</span> Cloud AI Engine Booting...
+                        </div>
+                        <div class="server-wake-sub" id="serverWakeSub">
+                            Render server is waking up from sleep mode (~<span id="serverWakeCountdown" class="server-wake-badge-timer">55s</span>). Chat will unlock automatically when ready!
+                        </div>
+                    </div>
+                </div>
 
                 <div id="attachedFilesPreview" class="attached-files-preview hidden">
                     <div class="attached-pill">
@@ -2236,11 +2352,9 @@ body.messenger-body {
                         </svg>
                     </button>
 
-                    <textarea id="chatInput" rows="1"
-                        placeholder="Text MP3aud.io for any song, artist, playlist vibe, or paste a link..."
-                        aria-label="Message MP3aud.io"></textarea>
+                    <textarea id="chatInput" rows="1" disabled="disabled" placeholder="â±ï¸ Cloud server is booting... please wait (~55s)" aria-label="Message MP3aud.io"></textarea>
 
-                    <button type="submit" id="sendMessageBtn" class="composer-send-btn" aria-label="Send message">
+                    <button type="submit" id="sendMessageBtn" class="composer-send-btn" disabled="disabled" aria-label="Send message">
                         <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor"
                             stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                             <line x1="22" y1="2" x2="11" y2="13"></line>
@@ -2334,6 +2448,28 @@ body.messenger-body {
         <div class="modal-content account-modal-content">
             <span class="close" onclick="closeModal('accountModal')" aria-label="Close modal">&times;</span>
             <h2 id="accountModalTitle" style="margin-top:0; margin-bottom: 14px;">Account &amp; AI Music Credits</h2>
+
+            <!-- AI Engine & API Key Configuration -->
+            <div class="ai-key-config-box" style="margin-bottom: 20px; padding: 14px 16px; background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.28); border-radius: 10px;">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span style="font-size: 1.15rem;">ðŸ§ </span>
+                        <strong style="color: #60a5fa; font-size: 0.92rem;">AI Engine Configuration</strong>
+                    </div>
+                    <span id="aiKeyStatusBadge" style="font-size: 0.75rem; padding: 3px 8px; border-radius: 999px; background: rgba(59, 130, 246, 0.2); color: #93c5fd;">Default Studio AI</span>
+                </div>
+                <p style="font-size: 0.8rem; color: var(--text-muted); margin: 0 0 10px; line-height: 1.45;">
+                    Connect a free <strong>Groq API Key</strong> (Llama 3.3 70B, ultra-fast 300ms inference) or OpenAI key for unlimited natural conversation and instant track curation. Get a free key at <a href="https://console.groq.com/keys" target="_blank" rel="noopener" style="color: #60a5fa; text-decoration: underline;">console.groq.com</a>.
+                </p>
+                <div style="display: flex; gap: 8px;">
+                    <input type="password" id="customAiKeyInput" placeholder="Paste Groq (gsk_...) or OpenAI (sk-...) API Key" style="flex: 1; padding: 8px 12px; font-size: 0.82rem; background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 6px; color: var(--text-main);" />
+                    <button type="button" id="saveAiKeyBtn" class="btn-primary" style="padding: 8px 16px; font-size: 0.82rem; white-space: nowrap;">Save Key</button>
+                    <button type="button" id="clearAiKeyBtn" class="btn-secondary hidden" style="padding: 8px 12px; font-size: 0.82rem;">Remove</button>
+                </div>
+                <div id="aiKeySuccessNotice" class="hidden" style="margin-top: 8px; font-size: 0.78rem; color: #34d399;">
+                    âœ“ Key saved! All chat requests now use your high-speed Llama 3.3 70B / OpenAI engine.
+                </div>
+            </div>
 
             <!-- Logged In View -->
             <div id="userDashboard" class="pricing-cards-grid hidden">
@@ -2759,18 +2895,187 @@ document.addEventListener('DOMContentLoaded', () => {
     let lastVibeKey = '';
     let rotationCursor = 0;
     let isBackendAwake = false;
+    let serverWakeSecondsRemaining = 55;
+    let serverWakeCountdownTimer = null;
+    let serverWakePollTimer = null;
 
-    // Eagerly ping backend on initial page load to start spinning up Render if asleep
-    try {
-        fetch(`${BACKEND_URL}/health_check`).then(r => {
-            if (r && r.ok) {
-                isBackendAwake = true;
-                if (assistantStatusText) {
-                    assistantStatusText.innerHTML = 'Online &bull; AI Personal Assistant &amp; DJ';
-                }
+    function unlockChatAfterWake() {
+        if (isBackendAwake) return;
+        isBackendAwake = true;
+        if (serverWakeCountdownTimer) clearInterval(serverWakeCountdownTimer);
+        if (serverWakePollTimer) clearInterval(serverWakePollTimer);
+
+        const wakeCard = document.getElementById('serverWakeCard');
+        const wakeTitle = document.getElementById('serverWakeTitle');
+        const wakeSub = document.getElementById('serverWakeSub');
+        const chatComposer = document.querySelector('.chat-composer');
+        const chatInput = document.getElementById('chatInput');
+        const sendBtn = document.getElementById('sendMessageBtn');
+
+        if (wakeCard) {
+            wakeCard.classList.add('awake-success');
+            if (wakeTitle) wakeTitle.innerHTML = '<span>✅</span> Cloud Server Awake &amp; AI Ready!';
+            if (wakeSub) wakeSub.textContent = 'Render cloud backend is online. Instant conversation & audio curation unlocked!';
+            setTimeout(() => {
+                wakeCard.style.opacity = '0';
+                wakeCard.style.transform = 'translateY(-6px)';
+                setTimeout(() => {
+                    wakeCard.style.display = 'none';
+                }, 350);
+            }, 3000);
+        }
+
+        if (chatComposer) {
+            chatComposer.classList.remove('server-sleeping');
+        }
+        if (chatInput) {
+            chatInput.removeAttribute('disabled');
+            chatInput.placeholder = 'Text MP3aud.io for any song, artist, playlist vibe, or paste a link...';
+        }
+        if (sendBtn) {
+            sendBtn.removeAttribute('disabled');
+        }
+        if (assistantStatusText) {
+            assistantStatusText.innerHTML = 'Online &bull; AI Personal Assistant &amp; DJ';
+        }
+    }
+
+    function initServerWakeGate() {
+        const wakeCountdownEl = document.getElementById('serverWakeCountdown');
+        const chatComposer = document.querySelector('.chat-composer');
+        const chatInput = document.getElementById('chatInput');
+        const sendBtn = document.getElementById('sendMessageBtn');
+
+        // Initial locked state
+        if (!isBackendAwake) {
+            if (chatComposer) chatComposer.classList.add('server-sleeping');
+            if (chatInput) {
+                chatInput.setAttribute('disabled', 'disabled');
+                chatInput.placeholder = '⏱️ Cloud server is booting... please wait (~55s)';
             }
-        }).catch(() => {});
-    } catch (_) {}
+            if (sendBtn) sendBtn.setAttribute('disabled', 'disabled');
+            if (assistantStatusText) {
+                assistantStatusText.innerHTML = '⏱️ Waking up AI engine... (~55s on first load)';
+            }
+        }
+
+        const probeServer = async () => {
+            try {
+                const r = await fetch(`${BACKEND_URL}/health_check`, { cache: 'no-store' });
+                if (r && r.ok) {
+                    unlockChatAfterWake();
+                    return true;
+                }
+            } catch (_) {}
+            return false;
+        };
+
+        probeServer().then(awake => {
+            if (awake) return;
+
+            serverWakeCountdownTimer = setInterval(() => {
+                if (serverWakeSecondsRemaining > 1) {
+                    serverWakeSecondsRemaining--;
+                    if (wakeCountdownEl) {
+                        wakeCountdownEl.textContent = `${serverWakeSecondsRemaining}s`;
+                    }
+                    if (assistantStatusText && !isBackendAwake) {
+                        assistantStatusText.innerHTML = `⏱️ Cloud server waking up... (~${serverWakeSecondsRemaining}s remaining)`;
+                    }
+                } else if (wakeCountdownEl) {
+                    wakeCountdownEl.textContent = 'almost ready...';
+                    if (assistantStatusText && !isBackendAwake) {
+                        assistantStatusText.innerHTML = '⏱️ Cloud server booting... almost ready!';
+                    }
+                }
+            }, 1000);
+
+            serverWakePollTimer = setInterval(async () => {
+                if (isBackendAwake) {
+                    clearInterval(serverWakePollTimer);
+                    return;
+                }
+                const ok = await probeServer();
+                if (ok) {
+                    clearInterval(serverWakePollTimer);
+                }
+            }, 2500);
+        });
+    }
+
+    function initAiKeyConfig() {
+        const keyInput = document.getElementById('customAiKeyInput');
+        const saveBtn = document.getElementById('saveAiKeyBtn');
+        const clearBtn = document.getElementById('clearAiKeyBtn');
+        const badge = document.getElementById('aiKeyStatusBadge');
+        const successNotice = document.getElementById('aiKeySuccessNotice');
+
+        const updateStatus = () => {
+            const saved = (localStorage.getItem('mp3audio_custom_ai_key') || '').trim();
+            if (saved) {
+                if (keyInput) keyInput.value = saved;
+                if (badge) {
+                    if (saved.startsWith('gsk_')) {
+                        badge.textContent = '⚡ Groq Llama 3.3 70B Active';
+                        badge.style.background = 'rgba(16, 185, 129, 0.2)';
+                        badge.style.color = '#6ee7b7';
+                    } else if (saved.startsWith('sk-or-')) {
+                        badge.textContent = '⚡ OpenRouter Active';
+                        badge.style.background = 'rgba(16, 185, 129, 0.2)';
+                        badge.style.color = '#6ee7b7';
+                    } else {
+                        badge.textContent = '⚡ OpenAI GPT-4o Active';
+                        badge.style.background = 'rgba(16, 185, 129, 0.2)';
+                        badge.style.color = '#6ee7b7';
+                    }
+                }
+                if (clearBtn) clearBtn.classList.remove('hidden');
+            } else {
+                if (keyInput) keyInput.value = '';
+                if (badge) {
+                    badge.textContent = 'Default Studio AI';
+                    badge.style.background = 'rgba(59, 130, 246, 0.2)';
+                    badge.style.color = '#93c5fd';
+                }
+                if (clearBtn) clearBtn.classList.add('hidden');
+            }
+        };
+
+        if (saveBtn && keyInput) {
+            saveBtn.addEventListener('click', () => {
+                const val = (keyInput.value || '').trim();
+                if (!val) {
+                    showToast('Please enter an API key or leave empty for default AI.', 'warning');
+                    return;
+                }
+                try {
+                    localStorage.setItem('mp3audio_custom_ai_key', val);
+                    updateStatus();
+                    if (successNotice) {
+                        successNotice.classList.remove('hidden');
+                        setTimeout(() => successNotice.classList.add('hidden'), 4000);
+                    }
+                    showToast('AI Key saved! Live high-speed Llama 3.3 70B inference active.', 'success');
+                } catch (e) {
+                    console.error('Storage error:', e);
+                }
+            });
+        }
+
+        if (clearBtn && keyInput) {
+            clearBtn.addEventListener('click', () => {
+                try {
+                    localStorage.removeItem('mp3audio_custom_ai_key');
+                    updateStatus();
+                    showToast('Custom key removed. Restored default AI.', 'info');
+                } catch (e) {
+                    console.error('Storage error:', e);
+                }
+            });
+        }
+
+        updateStatus();
+    }
 
     async function fetchWithTimeout(url, options = {}, timeoutMs = 2000) {
         const controller = new AbortController();
@@ -5120,6 +5425,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Send Message Handler (Text Request or Attached Local Files) ---
     async function sendUserMessage(customText = null) {
+        if (!isBackendAwake) {
+            showToast(`Cloud server is waking up (~${serverWakeSecondsRemaining}s). Chat will unlock automatically when ready!`, 'info');
+            return;
+        }
+
         if (pendingFiles.length > 0 && !customText) {
             await handleSendLocalFilesInChat();
             return;
@@ -5145,20 +5455,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const isPureConvOrLifeMoment = Boolean(assistantMemory.awaitingPlaylistVibe || isGenericMakePlaylist || !isExplicitMusicReq || isConversationalOnlyMessage(lowerText));
         const looksLikeQuestion = /\?$/.test(text) || /^(who|what|when|where|why|how|which|tell me|can you tell|do you know|explain|swap|replace|pause|resume|next|skip)\b/i.test(lowerText);
 
-        let wakeTimer = null;
-        let wakeSeconds = 0;
-        if (!isBackendAwake && assistantStatusText) {
-            assistantStatusText.innerHTML = '⏱️ Waking up AI engine... (~60s on first load)';
-            wakeTimer = setInterval(() => {
-                wakeSeconds += 2;
-                if (!isBackendAwake && assistantStatusText) {
-                    const remaining = Math.max(0, 60 - wakeSeconds);
-                    assistantStatusText.innerHTML = remaining > 0
-                        ? `⏱️ Cloud server waking up... (~${remaining}s remaining)`
-                        : `⏱️ Cloud server booting... almost ready!`;
-                }
-            }, 2000);
-        } else if (assistantStatusText) {
+        if (assistantStatusText) {
             assistantStatusText.textContent = (isPureConvOrLifeMoment || looksLikeQuestion)
                 ? 'typing a reply...'
                 : 'digging through crates & curating tracks...';
@@ -5176,12 +5473,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // 2. ALWAYS query the backend LLM assistant API first for genuine, context-aware AI conversation & music curation
             if (!result) {
-                const waitTimeoutMs = isBackendAwake ? 12000 : 70000;
+                const waitTimeoutMs = 15000;
                 try {
+                    const customAiKey = (localStorage.getItem('mp3audio_custom_ai_key') || '').trim();
+                    const reqHeaders = { 'Content-Type': 'application/json' };
+                    if (customAiKey) {
+                        reqHeaders['X-AI-Key'] = customAiKey;
+                    }
+
                     const backendCall = (async () => {
                         const resp = await fetchWithTimeout(`${BACKEND_URL}/api/assistant/chat`, {
                             method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
+                            headers: reqHeaders,
                             body: JSON.stringify({
                                 message: text,
                                 history: chatHistory.slice(-8),
@@ -5922,10 +6225,14 @@ document.addEventListener('DOMContentLoaded', () => {
             showToast('Signed out.');
         });
     }
+
+    // Initialize Server Wake Gating and AI Key Configuration
+    initServerWakeGate();
+    initAiKeyConfig();
 });
 
 </script>
-    <script src="script.js?v=20261106_01"></script>
+    <script src="script.js?v=20261106_02"></script>
 </body>
 
 </html>
