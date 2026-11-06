@@ -210,6 +210,9 @@ document.addEventListener('DOMContentLoaded', () => {
                             <div class="msg-sender-name">MP3aud.io Assistant <span class="msg-time">Just now</span></div>
                             <div class="msg-text">
                                 <p>Hey! 👋 How's your day going? We can chat about whatever's on your mind, talk about your favorite artists, or whenever you'd like me to put together a playlist or pull up a song, just let me know.</p>
+                                <div class="server-wake-notice" style="margin-top: 10px; padding: 9px 12px; background: rgba(59, 130, 246, 0.12); border-left: 3px solid #3b82f6; border-radius: 6px; font-size: 0.82rem; color: #93c5fd; line-height: 1.45;">
+                                    ⏱️ <strong>Note:</strong> If the chat bot was asleep, it will wake up in about <strong>60 seconds</strong> on your first message. Once awake, real-time AI conversation and instant track curation are active!
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -227,6 +230,19 @@ document.addEventListener('DOMContentLoaded', () => {
     const shownTrackKeys = new Set();
     let lastVibeKey = '';
     let rotationCursor = 0;
+    let isBackendAwake = false;
+
+    // Eagerly ping backend on initial page load to start spinning up Render if asleep
+    try {
+        fetch(`${BACKEND_URL}/health_check`).then(r => {
+            if (r && r.ok) {
+                isBackendAwake = true;
+                if (assistantStatusText) {
+                    assistantStatusText.innerHTML = 'Online &bull; AI Personal Assistant &amp; DJ';
+                }
+            }
+        }).catch(() => {});
+    } catch (_) {}
 
     async function fetchWithTimeout(url, options = {}, timeoutMs = 2000) {
         const controller = new AbortController();
@@ -2601,7 +2617,20 @@ document.addEventListener('DOMContentLoaded', () => {
         const isPureConvOrLifeMoment = Boolean(assistantMemory.awaitingPlaylistVibe || isGenericMakePlaylist || !isExplicitMusicReq || isConversationalOnlyMessage(lowerText));
         const looksLikeQuestion = /\?$/.test(text) || /^(who|what|when|where|why|how|which|tell me|can you tell|do you know|explain|swap|replace|pause|resume|next|skip)\b/i.test(lowerText);
 
-        if (assistantStatusText) {
+        let wakeTimer = null;
+        let wakeSeconds = 0;
+        if (!isBackendAwake && assistantStatusText) {
+            assistantStatusText.innerHTML = '⏱️ Waking up AI engine... (~60s on first load)';
+            wakeTimer = setInterval(() => {
+                wakeSeconds += 2;
+                if (!isBackendAwake && assistantStatusText) {
+                    const remaining = Math.max(0, 60 - wakeSeconds);
+                    assistantStatusText.innerHTML = remaining > 0
+                        ? `⏱️ Cloud server waking up... (~${remaining}s remaining)`
+                        : `⏱️ Cloud server booting... almost ready!`;
+                }
+            }, 2000);
+        } else if (assistantStatusText) {
             assistantStatusText.textContent = (isPureConvOrLifeMoment || looksLikeQuestion)
                 ? 'typing a reply...'
                 : 'digging through crates & curating tracks...';
@@ -2619,6 +2648,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // 2. ALWAYS query the backend LLM assistant API first for genuine, context-aware AI conversation & music curation
             if (!result) {
+                const waitTimeoutMs = isBackendAwake ? 12000 : 70000;
                 try {
                     const backendCall = (async () => {
                         const resp = await fetchWithTimeout(`${BACKEND_URL}/api/assistant/chat`, {
@@ -2635,15 +2665,18 @@ document.addEventListener('DOMContentLoaded', () => {
                                     transcribe_audio: attachLyricsInput ? attachLyricsInput.checked : false
                                 }
                             })
-                        }, 4800);
+                        }, waitTimeoutMs - 2000);
                         if (resp && resp.ok) {
                             return await resp.json();
                         }
                         return null;
                     })();
 
-                    const raceTimeout = new Promise(resolve => setTimeout(() => resolve(null), 5000));
+                    const raceTimeout = new Promise(resolve => setTimeout(() => resolve(null), waitTimeoutMs));
                     result = await Promise.race([backendCall, raceTimeout]);
+                    if (result && result.success) {
+                        isBackendAwake = true;
+                    }
                 } catch (networkErr) {
                     console.info('Backend assistant offline or timed out, using client fallback:', networkErr);
                 }
@@ -2684,9 +2717,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 showToast('Something went wrong processing your message.', 'error');
             }
         } finally {
+            if (wakeTimer) clearInterval(wakeTimer);
             if (typingRow && typingRow.parentNode) typingRow.remove();
             if (assistantStatusText) {
-                assistantStatusText.innerHTML = 'Online &bull; Personal Music DJ &amp; Assistant';
+                assistantStatusText.innerHTML = 'Online &bull; AI Personal Assistant &amp; DJ';
             }
         }
     }
