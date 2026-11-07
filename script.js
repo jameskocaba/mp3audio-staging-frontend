@@ -258,7 +258,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 setTimeout(() => {
                     wakeCard.style.display = 'none';
                 }, 350);
-            }, 3000);
+            }, 1500);
         }
 
         if (chatComposer) {
@@ -277,35 +277,22 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function initServerWakeGate() {
+        if (window.__serverWakeGateInitialized) return;
+        window.__serverWakeGateInitialized = true;
+
+        const wakeCard = document.getElementById('serverWakeCard');
         const wakeCountdownEl = document.getElementById('serverWakeCountdown');
         const chatComposer = document.querySelector('.chat-composer');
         const chatInput = document.getElementById('chatInput');
         const sendBtn = document.getElementById('sendMessageBtn');
 
-        // Initial locked state
-        if (!isBackendAwake) {
-            if (chatComposer) chatComposer.classList.add('server-sleeping');
-            if (chatInput) {
-                chatInput.setAttribute('disabled', 'disabled');
-                chatInput.placeholder = '⏱️ Cloud server is booting... please wait (~55s)';
-            }
-            if (sendBtn) sendBtn.setAttribute('disabled', 'disabled');
-            if (assistantStatusText) {
-                assistantStatusText.innerHTML = '⏱️ Waking up AI engine... (~55s on first load)';
-            }
-        }
-
         const probeServer = async () => {
             try {
-                const r = await fetch(`${BACKEND_URL}/health`, { cache: 'no-store' });
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 3500);
+                const r = await fetch(`${BACKEND_URL}/health`, { cache: 'no-store', signal: controller.signal });
+                clearTimeout(timeoutId);
                 if (r && r.ok) {
-                    unlockChatAfterWake();
-                    return true;
-                }
-            } catch (_) {}
-            try {
-                const r2 = await fetch(`${BACKEND_URL}/health_check`, { cache: 'no-store' });
-                if (r2 && r2.ok) {
                     unlockChatAfterWake();
                     return true;
                 }
@@ -313,8 +300,18 @@ document.addEventListener('DOMContentLoaded', () => {
             return false;
         };
 
+        // Check if server is already awake immediately
         probeServer().then(awake => {
             if (awake) return;
+
+            // Only show wake card if server is actually sleeping
+            if (!isBackendAwake) {
+                if (wakeCard) wakeCard.style.display = 'flex';
+                if (chatComposer) chatComposer.classList.add('server-sleeping');
+                if (assistantStatusText) {
+                    assistantStatusText.innerHTML = '⏱️ Cloud server waking up... (~55s)';
+                }
+            }
 
             serverWakeCountdownTimer = setInterval(() => {
                 if (serverWakeSecondsRemaining > 1) {
@@ -327,12 +324,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 } else {
                     if (wakeCountdownEl) wakeCountdownEl.textContent = 'ready!';
-                    probeServer().then(awake => {
-                        if (awake || serverWakeSecondsRemaining <= -4) {
-                            unlockChatAfterWake();
-                        }
-                    });
-                    serverWakeSecondsRemaining--;
+                    unlockChatAfterWake();
                 }
             }, 1000);
 
