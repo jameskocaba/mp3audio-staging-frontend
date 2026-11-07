@@ -1622,79 +1622,672 @@ body.messenger-body {
     gap: 6px;
 }
 
-/* Bot Connect Modal */
+/* Bot Connect Modal & QR Code Hub */
 .bot-eyebrow {
-    font-size: 0.7rem;
+    font-size: 0.72rem;
     font-weight: 800;
     color: var(--brand-emerald-hover);
-    letter-spacing: 0.06em;
+    letter-spacing: 0.08em;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    text-transform: uppercase;
 }
 
 .bot-cards-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 14px;
-    margin: 16px 0;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+    margin: 18px 0;
+}
+
+@media (max-width: 680px) {
+    .bot-cards-grid {
+        grid-template-columns: 1fr;
+    }
 }
 
 .bot-connect-card {
-    padding: 16px;
-    border-radius: 12px;
-    background: rgba(255, 255, 255, 0.03);
+    padding: 18px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.035);
     border: 1px solid var(--border-subtle);
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    gap: 12px;
+    gap: 14px;
+    transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.bot-connect-card.webapp-card {
+    border-top: 3px solid #38bdf8;
+    background: linear-gradient(180deg, rgba(56, 189, 248, 0.07) 0%, rgba(255, 255, 255, 0.02) 100%);
+    box-shadow: 0 4px 20px rgba(56, 189, 248, 0.08);
+}
+.bot-connect-card.webapp-card:hover {
+    border-color: rgba(56, 189, 248, 0.6);
+    box-shadow: 0 8px 28px rgba(56, 189, 248, 0.22);
+}
+
+.bot-connect-card.telegram-card {
+    border-top: 3px solid var(--telegram-blue);
+}
+.bot-connect-card.telegram-card:hover {
+    border-color: rgba(36, 161, 222, 0.5);
+    box-shadow: 0 8px 24px rgba(36, 161, 222, 0.14);
+}
+
+.bot-connect-card.whatsapp-card {
+    border-top: 3px solid var(--whatsapp-green);
+}
+.bot-connect-card.whatsapp-card:hover {
+    border-color: rgba(37, 211, 102, 0.5);
+    box-shadow: 0 8px 24px rgba(37, 211, 102, 0.14);
 }
 
 .bot-card-top {
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
-    gap: 10px;
+    gap: 12px;
 }
 
 .bot-platform-badge {
     display: flex;
     flex-direction: column;
-    gap: 3px;
+    gap: 4px;
 }
 
 .bot-platform-badge strong {
-    font-size: 0.95rem;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    gap: 6px;
 }
 
-.bot-platform-badge span {
-    font-size: 0.75rem;
-    color: var(--text-secondary);
+.bot-status-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.72rem;
+    color: #4ade80;
+    font-weight: 600;
+}
+.bot-status-tag .live-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #4ade80;
+    box-shadow: 0 0 6px #4ade80;
+    display: inline-block;
+}
+
+.bot-qr-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 12px;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+    margin: 4px auto;
 }
 
 .bot-qr-img {
-    width: 84px;
-    height: 84px;
-    border-radius: 8px;
-    background: #ffffff;
-    padding: 4px;
+    width: 160px;
+    height: 160px;
+    display: block;
+    border-radius: 6px;
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+}
+
+.bot-qr-caption {
+    margin-top: 6px;
+    font-size: 0.68rem;
+    color: #475569;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.bot-features-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin: 4px 0;
+}
+
+.bot-feature-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+}
+
+.bot-feature-item svg {
+    color: #38bdf8;
+    flex-shrink: 0;
+}
+.whatsapp-card .bot-feature-item svg {
+    color: #4ade80;
+}
+
+.bot-actions-row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 8px;
 }
 
 .bot-launch-btn {
-    display: block;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
     text-align: center;
     padding: 10px 14px;
     border-radius: 8px;
     font-weight: 700;
-    font-size: 0.84rem;
+    font-size: 0.85rem;
     text-decoration: none;
     color: #ffffff;
+    transition: opacity 0.15s ease, transform 0.15s ease;
+}
+.bot-launch-btn:hover {
+    opacity: 0.92;
+    transform: translateY(-1px);
+}
+
+.webapp-launch-btn {
+    background: linear-gradient(135deg, #0284c7 0%, #38bdf8 100%);
+    box-shadow: 0 4px 16px rgba(56, 189, 248, 0.3);
 }
 
 .tg-launch-btn {
-    background: var(--telegram-blue);
+    background: linear-gradient(135deg, #24A1DE 0%, #1d82b4 100%);
 }
 
 .wa-launch-btn {
-    background: #1da851;
+    background: linear-gradient(135deg, #25D366 0%, #1da851 100%);
+}
+
+.webapp-pill {
+    border-color: rgba(56, 189, 248, 0.35);
+    background: rgba(56, 189, 248, 0.05);
+}
+.webapp-pill:hover {
+    border-color: rgba(56, 189, 248, 0.7);
+    background: rgba(56, 189, 248, 0.12);
+}
+.webapp-pill svg {
+    color: #38bdf8;
+}
+
+.pwa-install-banner {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    margin: 14px 0 10px;
+    background: rgba(56, 189, 248, 0.08);
+    border: 1px dashed rgba(56, 189, 248, 0.35);
+    border-radius: 10px;
+}
+.pwa-install-icon {
+    font-size: 1.5rem;
+    flex-shrink: 0;
+}
+.pwa-install-text {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    font-size: 0.82rem;
+    color: #cbd5e1;
+    line-height: 1.4;
+}
+.pwa-install-text strong {
+    color: #38bdf8;
+    font-size: 0.88rem;
+}
+
+/* 1-Tap Streaming Deep-Links for Apple Music, Spotify & YouTube Music */
+.playlist-header-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    width: 100%;
+    flex-wrap: wrap;
+}
+
+.playlist-connect-bar {
+    width: 100%;
+    margin-top: 12px;
+    padding: 12px;
+    background: rgba(0, 0, 0, 0.35);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.playlist-connect-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    font-size: 0.8rem;
+    color: #e2e8f0;
+}
+
+.playlist-connect-title .connect-icon {
+    font-size: 1rem;
+    color: #38bdf8;
+}
+
+.playlist-connect-title strong {
+    color: #ffffff;
+    font-size: 0.86rem;
+    letter-spacing: 0.02em;
+}
+
+.playlist-connect-title .connect-subtitle {
+    font-size: 0.74rem;
+    color: #94a3b8;
+}
+
+.playlist-streaming-buttons {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 8px;
+    width: 100%;
+}
+
+.stream-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    text-decoration: none;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.05);
+    color: #ffffff;
+    cursor: pointer;
+    transition: all 0.18s ease;
+    text-align: left;
+}
+
+.stream-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.stream-btn-icon {
+    font-size: 1.25rem;
+    flex-shrink: 0;
+}
+
+.stream-btn-text {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.2;
+    overflow: hidden;
+}
+
+.stream-btn-text strong {
+    font-size: 0.78rem;
+    font-weight: 700;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+.stream-btn-text small {
+    font-size: 0.68rem;
+    opacity: 0.8;
+    white-space: nowrap;
+}
+
+/* Specific Streaming Service Styling */
+.stream-btn.apple-stream-btn {
+    background: linear-gradient(135deg, rgba(250, 45, 72, 0.16) 0%, rgba(250, 45, 72, 0.06) 100%);
+    border-color: rgba(250, 45, 72, 0.4);
+    color: #ff5470;
+}
+.stream-btn.apple-stream-btn:hover {
+    background: linear-gradient(135deg, rgba(250, 45, 72, 0.28) 0%, rgba(250, 45, 72, 0.14) 100%);
+    border-color: #ff5470;
+    box-shadow: 0 4px 16px rgba(250, 45, 72, 0.25);
+}
+.stream-btn.apple-stream-btn .stream-btn-text strong {
+    color: #ffffff;
+}
+
+.stream-btn.spotify-stream-btn {
+    background: linear-gradient(135deg, rgba(30, 215, 96, 0.16) 0%, rgba(30, 215, 96, 0.06) 100%);
+    border-color: rgba(30, 215, 96, 0.4);
+    color: #1ed760;
+}
+.stream-btn.spotify-stream-btn:hover {
+    background: linear-gradient(135deg, rgba(30, 215, 96, 0.28) 0%, rgba(30, 215, 96, 0.14) 100%);
+    border-color: #1ed760;
+    box-shadow: 0 4px 16px rgba(30, 215, 96, 0.25);
+}
+.stream-btn.spotify-stream-btn .stream-btn-text strong {
+    color: #ffffff;
+}
+
+.stream-btn.ytmusic-stream-btn {
+    background: linear-gradient(135deg, rgba(255, 0, 0, 0.16) 0%, rgba(255, 0, 0, 0.06) 100%);
+    border-color: rgba(255, 0, 0, 0.4);
+    color: #ff4e45;
+}
+.stream-btn.ytmusic-stream-btn:hover {
+    background: linear-gradient(135deg, rgba(255, 0, 0, 0.28) 0%, rgba(255, 0, 0, 0.14) 100%);
+    border-color: #ff4e45;
+    box-shadow: 0 4px 16px rgba(255, 0, 0, 0.25);
+}
+.stream-btn.ytmusic-stream-btn .stream-btn-text strong {
+    color: #ffffff;
+}
+
+.stream-btn.export-m3u-btn {
+    background: rgba(56, 189, 248, 0.1);
+    border-color: rgba(56, 189, 248, 0.35);
+    color: #38bdf8;
+}
+.stream-btn.export-m3u-btn:hover {
+    background: rgba(56, 189, 248, 0.2);
+    border-color: #38bdf8;
+}
+.stream-btn.export-m3u-btn .stream-btn-text strong {
+    color: #ffffff;
+}
+
+.stream-btn.copy-tracklist-btn {
+    background: rgba(168, 85, 247, 0.1);
+    border-color: rgba(168, 85, 247, 0.35);
+    color: #c084fc;
+}
+.stream-btn.copy-tracklist-btn:hover {
+    background: rgba(168, 85, 247, 0.2);
+    border-color: #c084fc;
+}
+.stream-btn.copy-tracklist-btn .stream-btn-text strong {
+    color: #ffffff;
+}
+
+@media (max-width: 600px) {
+    .playlist-streaming-buttons {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+.playlist-streaming-links {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
+    padding-top: 8px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+.streaming-label {
+    font-size: 0.74rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #94a3b8;
+}
+.stream-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    border-radius: 9999px;
+    font-size: 0.76rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: transform 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+}
+.stream-pill.apple-pill {
+    background: rgba(250, 45, 72, 0.14);
+    color: #ff5470;
+    border: 1px solid rgba(250, 45, 72, 0.35);
+}
+.stream-pill.apple-pill:hover {
+    background: rgba(250, 45, 72, 0.25);
+    box-shadow: 0 2px 10px rgba(250, 45, 72, 0.25);
+    transform: translateY(-1px);
+}
+.stream-pill.spotify-pill {
+    background: rgba(30, 215, 96, 0.14);
+    color: #1ed760;
+    border: 1px solid rgba(30, 215, 96, 0.35);
+}
+.stream-pill.spotify-pill:hover {
+    background: rgba(30, 215, 96, 0.25);
+    box-shadow: 0 2px 10px rgba(30, 215, 96, 0.25);
+    transform: translateY(-1px);
+}
+.stream-pill.ytmusic-pill {
+    background: rgba(255, 0, 0, 0.14);
+    color: #ff4e45;
+    border: 1px solid rgba(255, 0, 0, 0.35);
+}
+.stream-pill.ytmusic-pill:hover {
+    background: rgba(255, 0, 0, 0.25);
+    box-shadow: 0 2px 10px rgba(255, 0, 0, 0.25);
+    transform: translateY(-1px);
+}
+
+.track-streaming-btns {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-right: 4px;
+}
+.track-stream-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    font-size: 0.82rem;
+    text-decoration: none;
+    transition: background 0.15s ease, transform 0.15s ease;
+}
+.track-stream-link:hover {
+    background: rgba(255, 255, 255, 0.16);
+    transform: scale(1.1);
+}
+
+.bot-copy-btn {
+    padding: 8px 12px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid var(--border-subtle);
+    color: var(--text-primary);
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    white-space: nowrap;
+}
+.bot-copy-btn:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.25);
+}
+
+/* Quick Vibe Chips inside QR Modal */
+.modal-vibe-presets-row {
+    margin: 14px 0 6px;
+    padding: 12px 14px;
+    background: rgba(0, 0, 0, 0.22);
+    border-radius: 10px;
+    border: 1px solid var(--border-subtle);
+}
+.modal-vibe-presets-title {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 8px;
+}
+.modal-vibe-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+}
+.modal-vibe-chip {
+    padding: 5px 11px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid var(--border-subtle);
+    font-size: 0.76rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+.modal-vibe-chip:hover,
+.modal-vibe-chip.active {
+    background: rgba(36, 161, 222, 0.2);
+    border-color: var(--telegram-blue);
+    color: #ffffff;
+}
+
+/* 3-Step Simple Guide */
+.modal-steps-strip {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+    margin: 16px 0;
+    padding: 12px;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 10px;
+    border: 1px solid var(--border-subtle);
+}
+@media (max-width: 600px) {
+    .modal-steps-strip {
+        grid-template-columns: 1fr;
+    }
+}
+.modal-step-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+    line-height: 1.35;
+}
+.modal-step-num {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: rgba(0, 168, 132, 0.2);
+    border: 1px solid var(--brand-emerald-hover);
+    color: var(--brand-emerald-hover);
+    font-weight: 800;
+    font-size: 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+/* Sidebar QR Preview Card */
+.sidebar-qr-card {
+    padding: 10px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--border-subtle);
+    border-radius: 10px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    transition: border-color 0.18s ease, background 0.18s ease, transform 0.18s ease;
+}
+.sidebar-qr-card:hover {
+    background: rgba(255, 255, 255, 0.07);
+    border-color: rgba(36, 161, 222, 0.4);
+    transform: translateY(-1px);
+}
+.sidebar-qr-thumbs {
+    display: flex;
+    gap: 5px;
+    flex-shrink: 0;
+}
+.sidebar-qr-thumb {
+    width: 44px;
+    height: 44px;
+    border-radius: 6px;
+    background: #ffffff;
+    padding: 2px;
+    display: block;
+}
+.sidebar-qr-card-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+.sidebar-qr-card-info strong {
+    font-size: 0.8rem;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+.sidebar-qr-card-info span {
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+    line-height: 1.3;
+}
+
+/* Welcome Bubble QR Strip */
+.welcome-qr-strip {
+    margin-top: 12px;
+    padding: 10px 14px;
+    background: linear-gradient(135deg, rgba(36, 161, 222, 0.14) 0%, rgba(37, 211, 102, 0.14) 100%);
+    border: 1px solid rgba(56, 189, 248, 0.3);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    cursor: pointer;
+    transition: all 0.18s ease;
+}
+.welcome-qr-strip:hover {
+    background: linear-gradient(135deg, rgba(36, 161, 222, 0.22) 0%, rgba(37, 211, 102, 0.22) 100%);
+    border-color: rgba(56, 189, 248, 0.6);
+    transform: translateY(-1px);
+}
+.welcome-qr-strip-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.welcome-qr-strip-left strong {
+    font-size: 0.83rem;
+    color: #ffffff;
+}
+.welcome-qr-strip-action {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #38bdf8;
+    white-space: nowrap;
 }
 
 .bot-webhook-details {
@@ -3403,6 +3996,81 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const VIBE_KEYS_LIST = Object.keys(CLIENT_VIBE_SEEDS);
 
+    function makeStreamingUrls(title, artist = '') {
+        const query = `${artist} ${title}`.trim() || title;
+        const enc = encodeURIComponent(query);
+        return {
+            apple_music: `https://music.apple.com/search?term=${enc}`,
+            spotify: `https://open.spotify.com/search/${enc}`,
+            youtube_music: `https://music.youtube.com/search?q=${enc}`
+        };
+    }
+
+    function downloadPlaylistM3U(tracks, playlistTitle) {
+        if (!tracks || tracks.length === 0) {
+            showToast('No tracks to export.', 'info');
+            return;
+        }
+        const safeTitle = (playlistTitle || 'Curated Playlist').trim();
+        let m3u = '#EXTM3U\n';
+        m3u += `#PLAYLIST:${safeTitle}\n\n`;
+        tracks.forEach((t, i) => {
+            const dur = t.duration_sec || 210;
+            const artist = (t.artist || 'Featured Artist').trim();
+            const title = (t.title || `Track ${i + 1}`).trim();
+            m3u += `#EXTINF:${dur},${artist} - ${title}\n`;
+            const url = t.preview_url || t.apple_music_url || t.spotify_url || `https://mp3aud.io/?q=${encodeURIComponent(artist + ' ' + title)}`;
+            m3u += `${url}\n\n`;
+        });
+        const blob = new Blob([m3u], { type: 'audio/x-mpegurl;charset=utf-8' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        const fileName = (safeTitle.replace(/[^a-zA-Z0-9_\-\s]/g, '').trim().replace(/\s+/g, '_') || 'playlist') + '.m3u8';
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(() => {
+            document.body.removeChild(a);
+            URL.revokeObjectURL(a.href);
+        }, 300);
+        showToast(`Exported ${tracks.length} tracks to ${fileName}! Drag into Apple Music or iTunes to load.`, 'success');
+    }
+
+    function copyPlaylistTracklist(tracks, playlistTitle) {
+        if (!tracks || tracks.length === 0) {
+            showToast('No tracks to copy.', 'info');
+            return;
+        }
+        const safeTitle = (playlistTitle || 'Curated Playlist').trim();
+        const lines = tracks.map((t, i) => `${i + 1}. ${t.artist || 'Artist'} - ${t.title || 'Track'}`);
+        const text = `${safeTitle}\n${'—'.repeat(safeTitle.length)}\n` + lines.join('\n') + `\n\nCurated by MP3aud.io`;
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(text).then(() => {
+                showToast(`Copied ${tracks.length} tracks to clipboard! Ready to paste into Spotify, Apple Music, or SongShift.`, 'success');
+            }).catch(() => {
+                promptCopyText(text);
+            });
+        } else {
+            promptCopyText(text);
+        }
+    }
+
+    function promptCopyText(text) {
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.select();
+        try {
+            document.execCommand('copy');
+            showToast('Tracklist copied to clipboard!', 'success');
+        } catch (_) {
+            showToast('Could not auto-copy. Please copy from chat.', 'info');
+        }
+        document.body.removeChild(ta);
+    }
+
     function mapItunesResult(item, idx) {
         const title = item.trackName || `Track ${idx}`;
         const artist = item.artistName || 'Artist';
@@ -3410,6 +4078,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const artwork = (item.artworkUrl100 || '').replace('100x100bb.jpg', '600x600bb.jpg');
         const durSec = item.trackTimeMillis ? Math.max(1, Math.round(item.trackTimeMillis / 1000)) : 210;
         const yearMatch = (item.releaseDate || '').match(/\b(19\d\d|20\d\d)\b/);
+        const stLinks = makeStreamingUrls(title, artist);
         return {
             index: idx,
             title,
@@ -3420,7 +4089,10 @@ document.addEventListener('DOMContentLoaded', () => {
             duration_sec: durSec,
             artwork_url: artwork || 'favicon.png',
             preview_url: item.previewUrl || '',
-            search_query: `ytsearch1:${artist} - ${title} official audio`
+            search_query: `ytsearch1:${artist} - ${title} official audio`,
+            apple_music_url: item.trackViewUrl || stLinks.apple_music,
+            spotify_url: stLinks.spotify,
+            youtube_music_url: stLinks.youtube_music
         };
     }
 
@@ -3431,6 +4103,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const year = seedObj.year || '2025';
         const duration = seedObj.duration || '3:30';
         const duration_sec = seedObj.duration_sec || 210;
+        const stLinks = makeStreamingUrls(title, artist);
         return {
             index: idx,
             title,
@@ -3441,7 +4114,10 @@ document.addEventListener('DOMContentLoaded', () => {
             duration_sec,
             artwork_url: 'favicon.png',
             preview_url: '',
-            search_query: `ytsearch1:${artist} - ${title} official audio`
+            search_query: `ytsearch1:${artist} - ${title} official audio`,
+            apple_music_url: stLinks.apple_music,
+            spotify_url: stLinks.spotify,
+            youtube_music_url: stLinks.youtube_music
         };
     }
 
@@ -4148,6 +4824,30 @@ document.addEventListener('DOMContentLoaded', () => {
                     tracks: []
                 };
             }
+        }
+
+        // 6. Streaming Connection & Export Intent (Apple Music, Spotify, YouTube Music)
+        if (/\b(apple\s*music|spotify|youtube\s*music|streaming|stream in|connect|export|transfer|sync)\b/i.test(lower)) {
+            const pTitle = assistantMemory.lastPlaylistTitle || 'Curated Selection';
+            const plLinks = makeStreamingUrls(pTitle);
+            const countStr = tracks.length > 0 ? `your **${tracks.length}-track** playlist (*${pTitle}*)` : 'your music';
+            return {
+                success: true,
+                mode: 'chat',
+                reply: `Connecting ${countStr} to **Apple Music**, **Spotify**, or **YouTube Music** is instant! ⚡\n\n` +
+                    `Here are your direct options:\n\n` +
+                    `1. **🍎 Apple Music:** Tap [Open in Apple Music](${plLinks.apple_music}) to open the playlist directly in your Apple Music app.\n` +
+                    `2. **🟢 Spotify:** Tap [Open in Spotify](${plLinks.spotify}) to open and save this playlist directly in Spotify.\n` +
+                    `3. **🔴 YouTube Music:** Tap [Open in YouTube Music](${plLinks.youtube_music}) to stream the official tracks in YouTube Music.\n\n` +
+                    `💡 **Pro-Tip:** In the playlist card above, tap **📥 Export .M3U8** to download a universal file you can drag into Apple Music/iTunes, or tap **📋 Copy Tracklist** to paste into Spotify or SongShift!`,
+                suggestions: [
+                    `🍎 Open in Apple Music`,
+                    `🟢 Open in Spotify`,
+                    `🔴 Open in YouTube Music`,
+                    `📥 Download Playlist (.ZIP)`
+                ],
+                tracks: []
+            };
         }
 
         return null;
@@ -5285,7 +5985,7 @@ document.addEventListener('DOMContentLoaded', () => {
             bubbleId: `b_${Date.now()}_${i}_${Math.random().toString(36).slice(2, 6)}`
         }));
         const hasTracks = tracks.length > 0;
-        const isPlaylist = tracks.length > 1;
+        const isPlaylist = (tracks.length > 1) || (payload.mode === 'playlist');
         const playlistTitle = payload.playlist_title || 'Curated Selection';
         const playlistVibe = payload.playlist_vibe || '320kbps Studio Audio • Auto ID3 Tagged';
         const nowStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -5295,17 +5995,69 @@ document.addEventListener('DOMContentLoaded', () => {
 
         let playlistHeaderHtml = '';
         if (isPlaylist) {
+            const plLinks = makeStreamingUrls(playlistTitle);
+            const amPl = (payload.streaming_links && payload.streaming_links.apple_music) || plLinks.apple_music;
+            const spPl = (payload.streaming_links && payload.streaming_links.spotify) || plLinks.spotify;
+            const ytPl = (payload.streaming_links && payload.streaming_links.youtube_music) || plLinks.youtube_music;
             playlistHeaderHtml = `
                 <div class="playlist-header-card">
-                    <div class="playlist-header-meta">
-                        <span class="playlist-badge-eyebrow">✨ AI CURATED PLAYLIST &bull; ${tracks.length} TRACKS</span>
-                        <h3>${escapeHtml(playlistTitle)}</h3>
-                        <span>${escapeHtml(playlistVibe)}</span>
+                    <div class="playlist-header-top">
+                        <div class="playlist-header-meta">
+                            <span class="playlist-badge-eyebrow">✨ AI CURATED PLAYLIST &bull; ${tracks.length} TRACKS</span>
+                            <h3>${escapeHtml(playlistTitle)}</h3>
+                            <span>${escapeHtml(playlistVibe)}</span>
+                        </div>
+                        <div class="playlist-header-actions">
+                            <button type="button" class="btn-play-all-chat" title="Play all tracks sequentially in chat">▶ Play All in Chat</button>
+                            <button type="button" class="btn-new-playlist-chat" title="Curate a fresh playlist">🔄 New Playlist</button>
+                            <button type="button" class="btn-download-playlist-zip" title="Download all songs as 320kbps MP3s in one ZIP">📦 Download MP3s (.ZIP)</button>
+                        </div>
                     </div>
-                    <div class="playlist-header-actions">
-                        <button type="button" class="btn-play-all-chat">▶ Play All in Chat</button>
-                        <button type="button" class="btn-new-playlist-chat" title="Curate a fresh playlist">🔄 New Playlist</button>
-                        <button type="button" class="btn-download-playlist-zip">📦 Download Playlist (.ZIP)</button>
+
+                    <!-- Prominent Connect to Apple Music, Spotify & YouTube Music Bar -->
+                    <div class="playlist-connect-bar">
+                        <div class="playlist-connect-title">
+                            <span class="connect-icon">⚡</span>
+                            <strong>Connect &amp; Listen On:</strong>
+                            <span class="connect-subtitle">Open this playlist directly in your favorite music app:</span>
+                        </div>
+                        <div class="playlist-streaming-buttons">
+                            <a href="${escapeHtml(amPl)}" target="_blank" rel="noopener" class="stream-btn apple-stream-btn" title="Open and save playlist in Apple Music">
+                                <span class="stream-btn-icon">🍎</span>
+                                <span class="stream-btn-text">
+                                    <strong>Apple Music</strong>
+                                    <small>Open in app &rarr;</small>
+                                </span>
+                            </a>
+                            <a href="${escapeHtml(spPl)}" target="_blank" rel="noopener" class="stream-btn spotify-stream-btn" title="Open and save playlist in Spotify">
+                                <span class="stream-btn-icon">🟢</span>
+                                <span class="stream-btn-text">
+                                    <strong>Spotify</strong>
+                                    <small>Open in app &rarr;</small>
+                                </span>
+                            </a>
+                            <a href="${escapeHtml(ytPl)}" target="_blank" rel="noopener" class="stream-btn ytmusic-stream-btn" title="Open and save playlist in YouTube Music">
+                                <span class="stream-btn-icon">🔴</span>
+                                <span class="stream-btn-text">
+                                    <strong>YouTube Music</strong>
+                                    <small>Open in app &rarr;</small>
+                                </span>
+                            </a>
+                            <button type="button" class="stream-btn export-m3u-btn" title="Download .M3U8 playlist file to import into Apple Music, iTunes, or media player">
+                                <span class="stream-btn-icon">📥</span>
+                                <span class="stream-btn-text">
+                                    <strong>Export .M3U8</strong>
+                                    <small>Apple Music / iTunes</small>
+                                </span>
+                            </button>
+                            <button type="button" class="stream-btn copy-tracklist-btn" title="Copy tracklist to paste into Spotify, SongShift, or Soundiiz">
+                                <span class="stream-btn-icon">📋</span>
+                                <span class="stream-btn-text">
+                                    <strong>Copy Tracklist</strong>
+                                    <small>For SongShift / Spotify</small>
+                                </span>
+                            </button>
+                        </div>
                     </div>
                 </div>
             `;
@@ -5315,6 +6067,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const art = t.artwork_url || 'favicon.png';
             const subMeta = [t.artist, t.album, t.year].filter(Boolean).join(' • ');
             const isRingtoneMode = (payload.mode === 'ringtone') || (videoToMp3Input && videoToMp3Input.checked);
+            const tLinks = makeStreamingUrls(t.title, t.artist);
+            const amUrl = t.apple_music_url || tLinks.apple_music;
+            const spUrl = t.spotify_url || tLinks.spotify;
+            const ytUrl = t.youtube_music_url || tLinks.youtube_music;
             return `
                 <div class="track-audio-bubble" data-bubble-id="${t.bubbleId}" data-track-idx="${idx}">
                     <div class="track-cover-wrap">
@@ -5337,6 +6093,11 @@ document.addEventListener('DOMContentLoaded', () => {
                         </div>
                     </div>
                     <div class="track-dl-actions">
+                        <div class="track-streaming-btns">
+                            <a href="${escapeHtml(amUrl)}" target="_blank" rel="noopener" class="track-stream-link" title="Open in Apple Music">🍎</a>
+                            <a href="${escapeHtml(spUrl)}" target="_blank" rel="noopener" class="track-stream-link" title="Open in Spotify">🟢</a>
+                            <a href="${escapeHtml(ytUrl)}" target="_blank" rel="noopener" class="track-stream-link" title="Open in YouTube Music">🔴</a>
+                        </div>
                         <button type="button" class="btn-track-mp3" data-idx="${idx}">
                             ${isRingtoneMode ? '⬇ Ringtone' : '⬇ MP3'}
                         </button>
@@ -5421,6 +6182,20 @@ document.addEventListener('DOMContentLoaded', () => {
         if (zipBtn) {
             zipBtn.addEventListener('click', () => {
                 triggerTrackOrPlaylistDownload(tracks, playlistTitle, statusContainer);
+            });
+        }
+
+        const m3uBtn = bubbleEl.querySelector('.export-m3u-btn');
+        if (m3uBtn) {
+            m3uBtn.addEventListener('click', () => {
+                downloadPlaylistM3U(tracks, playlistTitle);
+            });
+        }
+
+        const copyTracklistBtn = bubbleEl.querySelector('.copy-tracklist-btn');
+        if (copyTracklistBtn) {
+            copyTracklistBtn.addEventListener('click', () => {
+                copyPlaylistTracklist(tracks, playlistTitle);
             });
         }
     }
@@ -5761,50 +6536,111 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // --- WhatsApp & Telegram Bot Info & Webhook Binding ---
-    let isTelegramBotConnected = Boolean(localStorage.getItem('mp3audio_tg_bot_url'));
+    // --- Mobile Web App, WhatsApp & Telegram Bot Info & QR Code Hub ---
+    const currentOrigin = (window.location && window.location.origin) ? window.location.origin : 'https://mp3aud.io';
+    window.currentWebAppUrl = `${currentOrigin}/?q=chill%20late-night%20synthwave%20playlist`;
+    window.currentTelegramBotUrl = 'https://t.me/MP3audioBot?start=welcome';
+    window.currentWhatsappBotUrl = 'https://wa.me/?text=Send%20me%20a%20chill%20late-night%20synthwave%20playlist';
+
+    window.copyBotLink = function(platform) {
+        let link = window.currentWebAppUrl;
+        let name = 'Web App Link';
+        if (platform === 'telegram') {
+            link = window.currentTelegramBotUrl;
+            name = 'Telegram Bot';
+        } else if (platform === 'whatsapp') {
+            link = window.currentWhatsappBotUrl;
+            name = 'WhatsApp Assistant';
+        }
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(link).then(() => {
+                showToast(`Copied ${name} to clipboard!`, 'success');
+            }).catch(() => {
+                prompt(`Copy ${name}:`, link);
+            });
+        } else {
+            prompt(`Copy ${name}:`, link);
+        }
+    };
+
+    window.setModalStarterVibe = function(vibeKey, promptText, btnEl) {
+        document.querySelectorAll('.modal-vibe-chip').forEach(c => c.classList.remove('active'));
+        if (btnEl) btnEl.classList.add('active');
+
+        const origin = (window.location && window.location.origin) ? window.location.origin : 'https://mp3aud.io';
+
+        // 1. Update Instant Mobile Web App deep-link & QR code
+        const webAppVibeUrl = `${origin}/?q=${encodeURIComponent(promptText)}`;
+        window.currentWebAppUrl = webAppVibeUrl;
+
+        const mWeb = document.getElementById('modalWebAppBtn');
+        const qWeb = document.getElementById('webAppQrImage');
+        const thumbWeb = document.getElementById('sidebarWebQrThumb');
+        const sWeb = document.getElementById('sidebarWebLink');
+
+        if (mWeb) mWeb.href = webAppVibeUrl;
+        if (sWeb) sWeb.href = webAppVibeUrl;
+        const webQr = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&margin=8&data=${encodeURIComponent(webAppVibeUrl)}`;
+        if (qWeb) qWeb.src = webQr;
+        if (thumbWeb) thumbWeb.src = `https://api.qrserver.com/v1/create-qr-code/?size=100x100&margin=2&data=${encodeURIComponent(webAppVibeUrl)}`;
+
+        // 2. Update Telegram Bot deep-link & QR code
+        const baseTg = (window.currentTelegramBotUrl || 'https://t.me/MP3audioBot').split('?')[0];
+        const tgVibeUrl = `${baseTg}?start=${encodeURIComponent(vibeKey)}`;
+        window.currentTelegramBotUrl = tgVibeUrl;
+
+        const mTg = document.getElementById('modalTelegramBtn');
+        const qTg = document.getElementById('tgQrImage');
+        const thumbTg = document.getElementById('sidebarTgQrThumb');
+        const sTg = document.getElementById('sidebarTelegramLink');
+
+        if (mTg) mTg.href = tgVibeUrl;
+        if (sTg) sTg.href = tgVibeUrl;
+        const tgQr = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&margin=8&data=${encodeURIComponent(tgVibeUrl)}`;
+        if (qTg) qTg.src = tgQr;
+        if (thumbTg) thumbTg.src = `https://api.qrserver.com/v1/create-qr-code/?size=100x100&margin=2&data=${encodeURIComponent(tgVibeUrl)}`;
+
+        // 3. Update WhatsApp deep-link & QR code
+        const baseWa = (window.currentWhatsappBotUrl || 'https://wa.me/').split('?')[0];
+        const waVibeUrl = `${baseWa}?text=${encodeURIComponent(promptText)}`;
+        window.currentWhatsappBotUrl = waVibeUrl;
+
+        const mWa = document.getElementById('modalWhatsappBtn');
+        const qWa = document.getElementById('waQrImage');
+        const thumbWa = document.getElementById('sidebarWaQrThumb');
+        const sWa = document.getElementById('sidebarWhatsappLink');
+
+        if (mWa) mWa.href = waVibeUrl;
+        if (sWa) sWa.href = waVibeUrl;
+        const waQr = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&margin=8&data=${encodeURIComponent(waVibeUrl)}`;
+        if (qWa) qWa.src = waQr;
+        if (thumbWa) thumbWa.src = `https://api.qrserver.com/v1/create-qr-code/?size=100x100&margin=2&data=${encodeURIComponent(waVibeUrl)}`;
+
+        showToast(`QR Code updated for: ${promptText.slice(0, 30)}...`, 'info');
+    };
 
     function applyTelegramBotUi(tgUrl, tgHandle, isConnected) {
-        isTelegramBotConnected = Boolean(isConnected);
         const sTg = document.getElementById('sidebarTelegramLink');
         const mTg = document.getElementById('modalTelegramBtn');
         const hTg = document.getElementById('tgBotHandleDisplay');
         const qTg = document.getElementById('tgQrImage');
-        const sSub = sTg ? sTg.querySelector('.channel-pill-text span') : null;
+        const thumbTg = document.getElementById('sidebarTgQrThumb');
+        const sSub = document.getElementById('sidebarTgSub');
 
         if (tgUrl) {
             const deepUrl = tgUrl.includes('?') ? tgUrl : `${tgUrl}?start=welcome`;
+            window.currentTelegramBotUrl = deepUrl;
             if (sTg) sTg.href = deepUrl;
             if (mTg) mTg.href = deepUrl;
-            if (qTg) qTg.src = `https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=${encodeURIComponent(deepUrl)}`;
+            const qrSrc = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&margin=8&data=${encodeURIComponent(deepUrl)}`;
+            if (qTg) qTg.src = qrSrc;
+            if (thumbTg) thumbTg.src = `https://api.qrserver.com/v1/create-qr-code/?size=100x100&margin=2&data=${encodeURIComponent(deepUrl)}`;
         }
         if (tgHandle) {
             if (hTg) hTg.textContent = tgHandle;
-            if (sSub) sSub.textContent = isConnected ? tgHandle : 'Tap to Connect Bot';
+            if (sSub) sSub.textContent = tgHandle;
         }
     }
-
-    // Intercept clicks on Telegram buttons if no BotFather token has been linked yet
-    ['sidebarTelegramLink', 'modalTelegramBtn'].forEach(btnId => {
-        const el = document.getElementById(btnId);
-        if (el) {
-            el.addEventListener('click', (e) => {
-                if (!isTelegramBotConnected) {
-                    e.preventDefault();
-                    if (typeof openModal === 'function') openModal('botConnectModal');
-                    const detailsEl = document.querySelector('.bot-webhook-details');
-                    if (detailsEl) detailsEl.open = true;
-                    const tokenInput = document.getElementById('tgBotTokenInput');
-                    if (tokenInput) setTimeout(() => tokenInput.focus(), 120);
-                    const statusMsg = document.getElementById('botSetupStatusMsg');
-                    if (statusMsg) {
-                        statusMsg.innerHTML = `<span style="color:#fbbf24;">⚡ Step 1: Open <a href="https://t.me/BotFather" target="_blank" rel="noopener" style="color:#38bdf8;text-decoration:underline;">@BotFather in Telegram</a> and send <code>/newbot</code>.<br>Step 2: Paste your Bot Token above and click <strong>Activate Telegram Webhook</strong> so the <strong>Start</strong> button in Telegram connects to your assistant!</span>`;
-                    }
-                    showToast('Paste your free @BotFather token to activate your Telegram bot!', 'info');
-                }
-            });
-        }
-    });
 
     // --- Direct Website-Powered Telegram Bot Engine (100% on MP3aud.io Website, Zero Render Setup) ---
     let activeTgPollToken = '';
@@ -6036,29 +6872,81 @@ document.addEventListener('DOMContentLoaded', () => {
         if (savedUrl && savedHandle) {
             applyTelegramBotUi(savedUrl, savedHandle, true);
         } else {
-            applyTelegramBotUi('https://t.me/BotFather', 'Tap to Connect Bot', false);
+            applyTelegramBotUi('https://t.me/MP3audioBot?start=welcome', '@MP3audioBot', true);
         }
 
         try {
             const res = await fetchWithTimeout(`${BACKEND_URL}/api/assistant/bot-info`, {}, 2500);
             if (!res.ok) return;
             const info = await res.json();
-            if (info.telegram_configured && info.telegram_url) {
+            if (info.telegram_url) {
                 localStorage.setItem('mp3audio_tg_bot_url', info.telegram_url);
                 localStorage.setItem('mp3audio_tg_bot_handle', info.telegram_bot_username || '@MP3audioBot');
                 applyTelegramBotUi(info.telegram_url, info.telegram_bot_username, true);
             }
             if (info.whatsapp_url) {
+                window.currentWhatsappBotUrl = info.whatsapp_url;
                 const sWa = document.getElementById('sidebarWhatsappLink');
                 const mWa = document.getElementById('modalWhatsappBtn');
                 const qWa = document.getElementById('waQrImage');
+                const thumbWa = document.getElementById('sidebarWaQrThumb');
+                const hWa = document.getElementById('waBotNumberDisplay');
                 if (sWa) sWa.href = info.whatsapp_url;
                 if (mWa) mWa.href = info.whatsapp_url;
-                if (qWa) qWa.src = `https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=${encodeURIComponent(info.whatsapp_url)}`;
+                if (qWa) qWa.src = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&margin=8&data=${encodeURIComponent(info.whatsapp_url)}`;
+                if (thumbWa) thumbWa.src = `https://api.qrserver.com/v1/create-qr-code/?size=100x100&margin=2&data=${encodeURIComponent(info.whatsapp_url)}`;
+                if (hWa && info.whatsapp_number) hWa.textContent = info.whatsapp_number;
             }
+            // Ensure Web App QR code and deep-link are dynamically initialized
+            const origin = (window.location && window.location.origin) ? window.location.origin : 'https://mp3aud.io';
+            const defaultPrompt = 'chill late-night synthwave playlist';
+            const webAppVibeUrl = `${origin}/?q=${encodeURIComponent(defaultPrompt)}`;
+            window.currentWebAppUrl = webAppVibeUrl;
+            const mWeb = document.getElementById('modalWebAppBtn');
+            const qWeb = document.getElementById('webAppQrImage');
+            const thumbWeb = document.getElementById('sidebarWebQrThumb');
+            const sWeb = document.getElementById('sidebarWebLink');
+            if (mWeb) mWeb.href = webAppVibeUrl;
+            if (sWeb) sWeb.href = webAppVibeUrl;
+            const webQr = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&margin=8&data=${encodeURIComponent(webAppVibeUrl)}`;
+            if (qWeb) qWeb.src = webQr;
+            if (thumbWeb) thumbWeb.src = `https://api.qrserver.com/v1/create-qr-code/?size=100x100&margin=2&data=${encodeURIComponent(webAppVibeUrl)}`;
         } catch (e) { }
     }
     loadBotConfig();
+
+    const saveTgPhoneBtn = document.getElementById('saveTgPhoneBtn');
+    if (saveTgPhoneBtn) {
+        saveTgPhoneBtn.addEventListener('click', async () => {
+            const phoneInput = document.getElementById('tgPhoneInput');
+            const statusMsg = document.getElementById('botSetupStatusMsg');
+            const rawPhone = phoneInput ? phoneInput.value.trim() : '';
+            if (!rawPhone) {
+                if (statusMsg) statusMsg.innerHTML = '<span style="color:#f87171;">⚠️ Please enter an international phone number (e.g. +1 555 123 4567).</span>';
+                return;
+            }
+            let cleanPhone = rawPhone.replace(/[^\d+]/g, '');
+            if (!cleanPhone.startsWith('+')) cleanPhone = '+' + cleanPhone;
+
+            const phoneUrl = `https://t.me/${cleanPhone}`;
+            localStorage.setItem('mp3audio_tg_bot_url', phoneUrl);
+            localStorage.setItem('mp3audio_tg_bot_handle', rawPhone);
+            applyTelegramBotUi(phoneUrl, rawPhone, true);
+
+            try {
+                fetch(`${BACKEND_URL}/api/bot/setup-telegram`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ telegram_phone: rawPhone })
+                }).catch(() => {});
+            } catch (e) {}
+
+            if (statusMsg) {
+                statusMsg.innerHTML = `<span style="color:#4ade80;">✅ Telegram Phone Number Set: <strong>${escapeHtml(rawPhone)}</strong>!<br>QR code updated to open <code>${escapeHtml(phoneUrl)}</code> directly in Telegram!</span>`;
+            }
+            showToast(`Telegram QR code updated to phone ${rawPhone}!`, 'success');
+        });
+    }
 
     const bindTelegramWebhookBtn = document.getElementById('bindTelegramWebhookBtn');
     if (bindTelegramWebhookBtn) {
