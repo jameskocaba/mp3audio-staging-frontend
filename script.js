@@ -3434,6 +3434,39 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     loadBotConfig();
 
+    const saveTgPhoneBtn = document.getElementById('saveTgPhoneBtn');
+    if (saveTgPhoneBtn) {
+        saveTgPhoneBtn.addEventListener('click', async () => {
+            const phoneInput = document.getElementById('tgPhoneInput');
+            const statusMsg = document.getElementById('botSetupStatusMsg');
+            const rawPhone = phoneInput ? phoneInput.value.trim() : '';
+            if (!rawPhone) {
+                if (statusMsg) statusMsg.innerHTML = '<span style="color:#f87171;">⚠️ Please enter an international phone number (e.g. +1 555 123 4567).</span>';
+                return;
+            }
+            let cleanPhone = rawPhone.replace(/[^\d+]/g, '');
+            if (!cleanPhone.startsWith('+')) cleanPhone = '+' + cleanPhone;
+
+            const phoneUrl = `https://t.me/${cleanPhone}`;
+            localStorage.setItem('mp3audio_tg_bot_url', phoneUrl);
+            localStorage.setItem('mp3audio_tg_bot_handle', rawPhone);
+            applyTelegramBotUi(phoneUrl, rawPhone, true);
+
+            try {
+                fetch(`${BACKEND_URL}/api/bot/setup-telegram`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ telegram_phone: rawPhone })
+                }).catch(() => {});
+            } catch (e) {}
+
+            if (statusMsg) {
+                statusMsg.innerHTML = `<span style="color:#4ade80;">✅ Telegram Phone Number Set: <strong>${escapeHtml(rawPhone)}</strong>!<br>QR code updated to open <code>${escapeHtml(phoneUrl)}</code> directly in Telegram!</span>`;
+            }
+            showToast(`Telegram QR code updated to phone ${rawPhone}!`, 'success');
+        });
+    }
+
     const bindTelegramWebhookBtn = document.getElementById('bindTelegramWebhookBtn');
     if (bindTelegramWebhookBtn) {
         bindTelegramWebhookBtn.addEventListener('click', async () => {

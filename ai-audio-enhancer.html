@@ -2826,10 +2826,15 @@ body.messenger-body {
                         <label>WhatsApp Webhook URL:</label>
                         <code id="webhookWaUrlDisplay">https://audio-converter-backend.onrender.com/webhook/whatsapp</code>
                     </div>
+                    <div class="tg-token-setup-row" style="margin-bottom: 8px;">
+                        <input type="text" id="tgPhoneInput"
+                            placeholder="Telegram Phone Number (e.g. +1 555 123 4567)">
+                        <button type="button" id="saveTgPhoneBtn" style="white-space: nowrap;">Set Telegram Phone</button>
+                    </div>
                     <div class="tg-token-setup-row">
                         <input type="password" id="tgBotTokenInput"
-                            placeholder="Paste Telegram BotFather Token (optional custom bind)">
-                        <button type="button" id="bindTelegramWebhookBtn">Activate Telegram Webhook</button>
+                            placeholder="Paste Telegram BotFather Token (optional custom bot)">
+                        <button type="button" id="bindTelegramWebhookBtn">Activate Bot Webhook</button>
                     </div>
                     <div id="botSetupStatusMsg" class="bot-setup-status"></div>
                 </div>
@@ -6493,6 +6498,39 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (e) { }
     }
     loadBotConfig();
+
+    const saveTgPhoneBtn = document.getElementById('saveTgPhoneBtn');
+    if (saveTgPhoneBtn) {
+        saveTgPhoneBtn.addEventListener('click', async () => {
+            const phoneInput = document.getElementById('tgPhoneInput');
+            const statusMsg = document.getElementById('botSetupStatusMsg');
+            const rawPhone = phoneInput ? phoneInput.value.trim() : '';
+            if (!rawPhone) {
+                if (statusMsg) statusMsg.innerHTML = '<span style="color:#f87171;">⚠️ Please enter an international phone number (e.g. +1 555 123 4567).</span>';
+                return;
+            }
+            let cleanPhone = rawPhone.replace(/[^\d+]/g, '');
+            if (!cleanPhone.startsWith('+')) cleanPhone = '+' + cleanPhone;
+
+            const phoneUrl = `https://t.me/${cleanPhone}`;
+            localStorage.setItem('mp3audio_tg_bot_url', phoneUrl);
+            localStorage.setItem('mp3audio_tg_bot_handle', rawPhone);
+            applyTelegramBotUi(phoneUrl, rawPhone, true);
+
+            try {
+                fetch(`${BACKEND_URL}/api/bot/setup-telegram`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ telegram_phone: rawPhone })
+                }).catch(() => {});
+            } catch (e) {}
+
+            if (statusMsg) {
+                statusMsg.innerHTML = `<span style="color:#4ade80;">✅ Telegram Phone Number Set: <strong>${escapeHtml(rawPhone)}</strong>!<br>QR code updated to open <code>${escapeHtml(phoneUrl)}</code> directly in Telegram!</span>`;
+            }
+            showToast(`Telegram QR code updated to phone ${rawPhone}!`, 'success');
+        });
+    }
 
     const bindTelegramWebhookBtn = document.getElementById('bindTelegramWebhookBtn');
     if (bindTelegramWebhookBtn) {
