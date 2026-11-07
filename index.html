@@ -50,7 +50,7 @@
         gtag('config', 'G-VGVP90K1M4');
     </script>
 
-    <link rel="stylesheet" href="style.css?v=20261106_03">
+    <link rel="stylesheet" href="style.css?v=20261107_05">
     <style id="inlined-main-style">
 /* ==========================================================================
    MP3AUD.IO — AI TEXT MESSAGING PERSONAL MUSIC ASSISTANT STYLESHEET
@@ -1859,6 +1859,180 @@ body.messenger-body {
 }
 
 /* 1-Tap Streaming Deep-Links for Apple Music, Spotify & YouTube Music */
+.playlist-header-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    width: 100%;
+    flex-wrap: wrap;
+}
+
+.playlist-connect-bar {
+    width: 100%;
+    margin-top: 12px;
+    padding: 12px;
+    background: rgba(0, 0, 0, 0.35);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.playlist-connect-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    font-size: 0.8rem;
+    color: #e2e8f0;
+}
+
+.playlist-connect-title .connect-icon {
+    font-size: 1rem;
+    color: #38bdf8;
+}
+
+.playlist-connect-title strong {
+    color: #ffffff;
+    font-size: 0.86rem;
+    letter-spacing: 0.02em;
+}
+
+.playlist-connect-title .connect-subtitle {
+    font-size: 0.74rem;
+    color: #94a3b8;
+}
+
+.playlist-streaming-buttons {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 8px;
+    width: 100%;
+}
+
+.stream-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    text-decoration: none;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.05);
+    color: #ffffff;
+    cursor: pointer;
+    transition: all 0.18s ease;
+    text-align: left;
+}
+
+.stream-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.stream-btn-icon {
+    font-size: 1.25rem;
+    flex-shrink: 0;
+}
+
+.stream-btn-text {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.2;
+    overflow: hidden;
+}
+
+.stream-btn-text strong {
+    font-size: 0.78rem;
+    font-weight: 700;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+.stream-btn-text small {
+    font-size: 0.68rem;
+    opacity: 0.8;
+    white-space: nowrap;
+}
+
+/* Specific Streaming Service Styling */
+.stream-btn.apple-stream-btn {
+    background: linear-gradient(135deg, rgba(250, 45, 72, 0.16) 0%, rgba(250, 45, 72, 0.06) 100%);
+    border-color: rgba(250, 45, 72, 0.4);
+    color: #ff5470;
+}
+.stream-btn.apple-stream-btn:hover {
+    background: linear-gradient(135deg, rgba(250, 45, 72, 0.28) 0%, rgba(250, 45, 72, 0.14) 100%);
+    border-color: #ff5470;
+    box-shadow: 0 4px 16px rgba(250, 45, 72, 0.25);
+}
+.stream-btn.apple-stream-btn .stream-btn-text strong {
+    color: #ffffff;
+}
+
+.stream-btn.spotify-stream-btn {
+    background: linear-gradient(135deg, rgba(30, 215, 96, 0.16) 0%, rgba(30, 215, 96, 0.06) 100%);
+    border-color: rgba(30, 215, 96, 0.4);
+    color: #1ed760;
+}
+.stream-btn.spotify-stream-btn:hover {
+    background: linear-gradient(135deg, rgba(30, 215, 96, 0.28) 0%, rgba(30, 215, 96, 0.14) 100%);
+    border-color: #1ed760;
+    box-shadow: 0 4px 16px rgba(30, 215, 96, 0.25);
+}
+.stream-btn.spotify-stream-btn .stream-btn-text strong {
+    color: #ffffff;
+}
+
+.stream-btn.ytmusic-stream-btn {
+    background: linear-gradient(135deg, rgba(255, 0, 0, 0.16) 0%, rgba(255, 0, 0, 0.06) 100%);
+    border-color: rgba(255, 0, 0, 0.4);
+    color: #ff4e45;
+}
+.stream-btn.ytmusic-stream-btn:hover {
+    background: linear-gradient(135deg, rgba(255, 0, 0, 0.28) 0%, rgba(255, 0, 0, 0.14) 100%);
+    border-color: #ff4e45;
+    box-shadow: 0 4px 16px rgba(255, 0, 0, 0.25);
+}
+.stream-btn.ytmusic-stream-btn .stream-btn-text strong {
+    color: #ffffff;
+}
+
+.stream-btn.export-m3u-btn {
+    background: rgba(56, 189, 248, 0.1);
+    border-color: rgba(56, 189, 248, 0.35);
+    color: #38bdf8;
+}
+.stream-btn.export-m3u-btn:hover {
+    background: rgba(56, 189, 248, 0.2);
+    border-color: #38bdf8;
+}
+.stream-btn.export-m3u-btn .stream-btn-text strong {
+    color: #ffffff;
+}
+
+.stream-btn.copy-tracklist-btn {
+    background: rgba(168, 85, 247, 0.1);
+    border-color: rgba(168, 85, 247, 0.35);
+    color: #c084fc;
+}
+.stream-btn.copy-tracklist-btn:hover {
+    background: rgba(168, 85, 247, 0.2);
+    border-color: #c084fc;
+}
+.stream-btn.copy-tracklist-btn .stream-btn-text strong {
+    color: #ffffff;
+}
+
+@media (max-width: 600px) {
+    .playlist-streaming-buttons {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
 .playlist-streaming-links {
     display: flex;
     align-items: center;
@@ -6931,7 +7105,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 </script>
-    <script src="script.js?v=20261106_04"></script>
+    <script src="script.js?v=20261107_05"></script>
 </body>
 
 </html>

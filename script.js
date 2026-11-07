@@ -749,6 +749,71 @@ document.addEventListener('DOMContentLoaded', () => {
         };
     }
 
+    function downloadPlaylistM3U(tracks, playlistTitle) {
+        if (!tracks || tracks.length === 0) {
+            showToast('No tracks to export.', 'info');
+            return;
+        }
+        const safeTitle = (playlistTitle || 'Curated Playlist').trim();
+        let m3u = '#EXTM3U\n';
+        m3u += `#PLAYLIST:${safeTitle}\n\n`;
+        tracks.forEach((t, i) => {
+            const dur = t.duration_sec || 210;
+            const artist = (t.artist || 'Featured Artist').trim();
+            const title = (t.title || `Track ${i + 1}`).trim();
+            m3u += `#EXTINF:${dur},${artist} - ${title}\n`;
+            const url = t.preview_url || t.apple_music_url || t.spotify_url || `https://mp3aud.io/?q=${encodeURIComponent(artist + ' ' + title)}`;
+            m3u += `${url}\n\n`;
+        });
+        const blob = new Blob([m3u], { type: 'audio/x-mpegurl;charset=utf-8' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        const fileName = (safeTitle.replace(/[^a-zA-Z0-9_\-\s]/g, '').trim().replace(/\s+/g, '_') || 'playlist') + '.m3u8';
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(() => {
+            document.body.removeChild(a);
+            URL.revokeObjectURL(a.href);
+        }, 300);
+        showToast(`Exported ${tracks.length} tracks to ${fileName}! Drag into Apple Music or iTunes to load.`, 'success');
+    }
+
+    function copyPlaylistTracklist(tracks, playlistTitle) {
+        if (!tracks || tracks.length === 0) {
+            showToast('No tracks to copy.', 'info');
+            return;
+        }
+        const safeTitle = (playlistTitle || 'Curated Playlist').trim();
+        const lines = tracks.map((t, i) => `${i + 1}. ${t.artist || 'Artist'} - ${t.title || 'Track'}`);
+        const text = `${safeTitle}\n${'—'.repeat(safeTitle.length)}\n` + lines.join('\n') + `\n\nCurated by MP3aud.io`;
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(text).then(() => {
+                showToast(`Copied ${tracks.length} tracks to clipboard! Ready to paste into Spotify, Apple Music, or SongShift.`, 'success');
+            }).catch(() => {
+                promptCopyText(text);
+            });
+        } else {
+            promptCopyText(text);
+        }
+    }
+
+    function promptCopyText(text) {
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.select();
+        try {
+            document.execCommand('copy');
+            showToast('Tracklist copied to clipboard!', 'success');
+        } catch (_) {
+            showToast('Could not auto-copy. Please copy from chat.', 'info');
+        }
+        document.body.removeChild(ta);
+    }
+
     function mapItunesResult(item, idx) {
         const title = item.trackName || `Track ${idx}`;
         const artist = item.artistName || 'Artist';
@@ -1502,6 +1567,30 @@ document.addEventListener('DOMContentLoaded', () => {
                     tracks: []
                 };
             }
+        }
+
+        // 6. Streaming Connection & Export Intent (Apple Music, Spotify, YouTube Music)
+        if (/\b(apple\s*music|spotify|youtube\s*music|streaming|stream in|connect|export|transfer|sync)\b/i.test(lower)) {
+            const pTitle = assistantMemory.lastPlaylistTitle || 'Curated Selection';
+            const plLinks = makeStreamingUrls(pTitle);
+            const countStr = tracks.length > 0 ? `your **${tracks.length}-track** playlist (*${pTitle}*)` : 'your music';
+            return {
+                success: true,
+                mode: 'chat',
+                reply: `Connecting ${countStr} to **Apple Music**, **Spotify**, or **YouTube Music** is instant! ⚡\n\n` +
+                    `Here are your direct options:\n\n` +
+                    `1. **🍎 Apple Music:** Tap [Open in Apple Music](${plLinks.apple_music}) to open the playlist directly in your Apple Music app.\n` +
+                    `2. **🟢 Spotify:** Tap [Open in Spotify](${plLinks.spotify}) to open and save this playlist directly in Spotify.\n` +
+                    `3. **🔴 YouTube Music:** Tap [Open in YouTube Music](${plLinks.youtube_music}) to stream the official tracks in YouTube Music.\n\n` +
+                    `💡 **Pro-Tip:** In the playlist card above, tap **📥 Export .M3U8** to download a universal file you can drag into Apple Music/iTunes, or tap **📋 Copy Tracklist** to paste into Spotify or SongShift!`,
+                suggestions: [
+                    `🍎 Open in Apple Music`,
+                    `🟢 Open in Spotify`,
+                    `🔴 Open in YouTube Music`,
+                    `📥 Download Playlist (.ZIP)`
+                ],
+                tracks: []
+            };
         }
 
         return null;
@@ -2639,7 +2728,7 @@ document.addEventListener('DOMContentLoaded', () => {
             bubbleId: `b_${Date.now()}_${i}_${Math.random().toString(36).slice(2, 6)}`
         }));
         const hasTracks = tracks.length > 0;
-        const isPlaylist = tracks.length > 1;
+        const isPlaylist = (tracks.length > 1) || (payload.mode === 'playlist');
         const playlistTitle = payload.playlist_title || 'Curated Selection';
         const playlistVibe = payload.playlist_vibe || '320kbps Studio Audio • Auto ID3 Tagged';
         const nowStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -2655,21 +2744,63 @@ document.addEventListener('DOMContentLoaded', () => {
             const ytPl = (payload.streaming_links && payload.streaming_links.youtube_music) || plLinks.youtube_music;
             playlistHeaderHtml = `
                 <div class="playlist-header-card">
-                    <div class="playlist-header-meta">
-                        <span class="playlist-badge-eyebrow">✨ AI CURATED PLAYLIST &bull; ${tracks.length} TRACKS</span>
-                        <h3>${escapeHtml(playlistTitle)}</h3>
-                        <span>${escapeHtml(playlistVibe)}</span>
+                    <div class="playlist-header-top">
+                        <div class="playlist-header-meta">
+                            <span class="playlist-badge-eyebrow">✨ AI CURATED PLAYLIST &bull; ${tracks.length} TRACKS</span>
+                            <h3>${escapeHtml(playlistTitle)}</h3>
+                            <span>${escapeHtml(playlistVibe)}</span>
+                        </div>
+                        <div class="playlist-header-actions">
+                            <button type="button" class="btn-play-all-chat" title="Play all tracks sequentially in chat">▶ Play All in Chat</button>
+                            <button type="button" class="btn-new-playlist-chat" title="Curate a fresh playlist">🔄 New Playlist</button>
+                            <button type="button" class="btn-download-playlist-zip" title="Download all songs as 320kbps MP3s in one ZIP">📦 Download MP3s (.ZIP)</button>
+                        </div>
                     </div>
-                    <div class="playlist-header-actions">
-                        <button type="button" class="btn-play-all-chat">▶ Play All in Chat</button>
-                        <button type="button" class="btn-new-playlist-chat" title="Curate a fresh playlist">🔄 New Playlist</button>
-                        <button type="button" class="btn-download-playlist-zip">📦 Download Playlist (.ZIP)</button>
-                    </div>
-                    <div class="playlist-streaming-links">
-                        <span class="streaming-label">Stream in:</span>
-                        <a href="${escapeHtml(amPl)}" target="_blank" rel="noopener" class="stream-pill apple-pill" title="Open playlist in Apple Music">🍎 Apple Music</a>
-                        <a href="${escapeHtml(spPl)}" target="_blank" rel="noopener" class="stream-pill spotify-pill" title="Open playlist in Spotify">🟢 Spotify</a>
-                        <a href="${escapeHtml(ytPl)}" target="_blank" rel="noopener" class="stream-pill ytmusic-pill" title="Open playlist in YouTube Music">🔴 YouTube Music</a>
+
+                    <!-- Prominent Connect to Apple Music, Spotify & YouTube Music Bar -->
+                    <div class="playlist-connect-bar">
+                        <div class="playlist-connect-title">
+                            <span class="connect-icon">⚡</span>
+                            <strong>Connect &amp; Listen On:</strong>
+                            <span class="connect-subtitle">Open this playlist directly in your favorite music app:</span>
+                        </div>
+                        <div class="playlist-streaming-buttons">
+                            <a href="${escapeHtml(amPl)}" target="_blank" rel="noopener" class="stream-btn apple-stream-btn" title="Open and save playlist in Apple Music">
+                                <span class="stream-btn-icon">🍎</span>
+                                <span class="stream-btn-text">
+                                    <strong>Apple Music</strong>
+                                    <small>Open in app &rarr;</small>
+                                </span>
+                            </a>
+                            <a href="${escapeHtml(spPl)}" target="_blank" rel="noopener" class="stream-btn spotify-stream-btn" title="Open and save playlist in Spotify">
+                                <span class="stream-btn-icon">🟢</span>
+                                <span class="stream-btn-text">
+                                    <strong>Spotify</strong>
+                                    <small>Open in app &rarr;</small>
+                                </span>
+                            </a>
+                            <a href="${escapeHtml(ytPl)}" target="_blank" rel="noopener" class="stream-btn ytmusic-stream-btn" title="Open and save playlist in YouTube Music">
+                                <span class="stream-btn-icon">🔴</span>
+                                <span class="stream-btn-text">
+                                    <strong>YouTube Music</strong>
+                                    <small>Open in app &rarr;</small>
+                                </span>
+                            </a>
+                            <button type="button" class="stream-btn export-m3u-btn" title="Download .M3U8 playlist file to import into Apple Music, iTunes, or media player">
+                                <span class="stream-btn-icon">📥</span>
+                                <span class="stream-btn-text">
+                                    <strong>Export .M3U8</strong>
+                                    <small>Apple Music / iTunes</small>
+                                </span>
+                            </button>
+                            <button type="button" class="stream-btn copy-tracklist-btn" title="Copy tracklist to paste into Spotify, SongShift, or Soundiiz">
+                                <span class="stream-btn-icon">📋</span>
+                                <span class="stream-btn-text">
+                                    <strong>Copy Tracklist</strong>
+                                    <small>For SongShift / Spotify</small>
+                                </span>
+                            </button>
+                        </div>
                     </div>
                 </div>
             `;
@@ -2794,6 +2925,20 @@ document.addEventListener('DOMContentLoaded', () => {
         if (zipBtn) {
             zipBtn.addEventListener('click', () => {
                 triggerTrackOrPlaylistDownload(tracks, playlistTitle, statusContainer);
+            });
+        }
+
+        const m3uBtn = bubbleEl.querySelector('.export-m3u-btn');
+        if (m3uBtn) {
+            m3uBtn.addEventListener('click', () => {
+                downloadPlaylistM3U(tracks, playlistTitle);
+            });
+        }
+
+        const copyTracklistBtn = bubbleEl.querySelector('.copy-tracklist-btn');
+        if (copyTracklistBtn) {
+            copyTracklistBtn.addEventListener('click', () => {
+                copyPlaylistTracklist(tracks, playlistTitle);
             });
         }
     }
