@@ -3279,46 +3279,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // --- Instant Mobile Web App & PWA Home Screen Hub ---
-    const currentOrigin = (window.location && window.location.origin) ? window.location.origin : 'https://mp3aud.io';
-    window.currentWebAppUrl = `${currentOrigin}/?q=chill%20late-night%20synthwave%20playlist`;
-
-    window.copyBotLink = function(platform) {
-        const link = window.currentWebAppUrl;
-        const name = 'Instant Mobile Web App link';
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-            navigator.clipboard.writeText(link).then(() => {
-                showToast(`Copied ${name} to clipboard!`, 'success');
-            }).catch(() => {
-                prompt(`Copy ${name}:`, link);
-            });
-        } else {
-            prompt(`Copy ${name}:`, link);
-        }
-    };
-
-    window.setModalStarterVibe = function(vibeKey, promptText, btnEl) {
-        document.querySelectorAll('.modal-vibe-chip').forEach(c => c.classList.remove('active'));
-        if (btnEl) btnEl.classList.add('active');
-
-        const origin = (window.location && window.location.origin) ? window.location.origin : 'https://mp3aud.io';
-        const webAppVibeUrl = `${origin}/?q=${encodeURIComponent(promptText)}`;
-        window.currentWebAppUrl = webAppVibeUrl;
-
-        const mWeb = document.getElementById('modalWebAppBtn');
-        const qWeb = document.getElementById('webAppQrImage');
-        const thumbWeb = document.getElementById('sidebarWebQrThumb');
-        const sWeb = document.getElementById('sidebarWebLink');
-
-        if (mWeb) mWeb.href = webAppVibeUrl;
-        if (sWeb) sWeb.href = webAppVibeUrl;
-        const webQr = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&margin=8&data=${encodeURIComponent(webAppVibeUrl)}`;
-        if (qWeb) qWeb.src = webQr;
-        if (thumbWeb) thumbWeb.src = `https://api.qrserver.com/v1/create-qr-code/?size=100x100&margin=2&data=${encodeURIComponent(webAppVibeUrl)}`;
-
-        showToast(`QR Code updated for: ${promptText.slice(0, 30)}...`, 'info');
-    };
-
     // --- Authentication, Magic Link & Stripe Checkout Integration ---
     async function checkAuthStatus() {
         try {
