@@ -9,9 +9,9 @@
     <title>MP3aud.io | AI Text Messaging Personal Assistant for Music, Tracks &amp; Playlists</title>
     <meta name="title" content="MP3aud.io | AI Text Messaging Personal Assistant for Music, Tracks &amp; Playlists">
     <meta name="description"
-        content="Text MP3aud.io on Web, WhatsApp, or Telegram to receive curated music tracks, playlists, and 320kbps MP3/ZIP downloads with HD album art directly in the messaging app.">
+        content="Text MP3aud.io on Web, iPhone, or Android to receive curated music tracks, playlists, 1-tap streaming links for Apple Music, Spotify &amp; YouTube Music, and 320kbps MP3/ZIP downloads.">
     <meta name="keywords"
-        content="AI music assistant, text for music, WhatsApp music bot, Telegram music bot, AI playlist generator, MP3 chat assistant, download MP3 playlist, 320kbps music assistant, custom ringtone bot, MP3aud.io">
+        content="AI music assistant, text for music, mobile music app, AI playlist generator, MP3 chat assistant, download MP3 playlist, 320kbps music assistant, Apple Music, Spotify, YouTube Music, MP3aud.io">
     <meta name="author" content="MP3aud.io">
     <meta name="robots" content="index, follow">
     <link rel="canonical" href="https://mp3aud.io/">
@@ -50,7 +50,7 @@
     <style id="inlined-main-style">
 /* ==========================================================================
    MP3AUD.IO — AI TEXT MESSAGING PERSONAL MUSIC ASSISTANT STYLESHEET
-   WhatsApp / Telegram / Studio Dark Messaging Theme
+   Studio Dark Messaging Theme & Mobile Web App
    ========================================================================== */
 
 :root {
@@ -71,8 +71,8 @@
     --brand-orange-hover: #ff6a1f;
     --brand-emerald: #00a884;
     --brand-emerald-hover: #06cf9c;
-    --telegram-blue: #24A1DE;
-    --whatsapp-green: #25D366;
+    --accent-cyan: #38bdf8;
+    --online-green: #10b981;
     --radius-lg: 14px;
     --radius-md: 10px;
     --radius-sm: 8px;
@@ -178,8 +178,8 @@ body.messenger-body {
     width: 7px;
     height: 7px;
     border-radius: 50%;
-    background-color: var(--whatsapp-green);
-    box-shadow: 0 0 8px var(--whatsapp-green);
+    background-color: var(--online-green);
+    box-shadow: 0 0 8px var(--online-green);
     display: inline-block;
 }
 
@@ -263,34 +263,6 @@ body.messenger-body {
     color: #ffffff;
     border: 1px solid rgba(255, 255, 255, 0.09);
     transition: all 0.18s ease;
-}
-
-.telegram-pill {
-    background: rgba(36, 161, 222, 0.13);
-}
-
-.telegram-pill:hover {
-    background: rgba(36, 161, 222, 0.24);
-    border-color: var(--telegram-blue);
-}
-
-.telegram-pill svg {
-    color: var(--telegram-blue);
-    flex-shrink: 0;
-}
-
-.whatsapp-pill {
-    background: rgba(37, 211, 102, 0.12);
-}
-
-.whatsapp-pill:hover {
-    background: rgba(37, 211, 102, 0.24);
-    border-color: var(--whatsapp-green);
-}
-
-.whatsapp-pill svg {
-    color: var(--whatsapp-green);
-    flex-shrink: 0;
 }
 
 .channel-pill-text {
@@ -571,7 +543,7 @@ body.messenger-body {
     width: 10px;
     height: 10px;
     border-radius: 50%;
-    background-color: var(--whatsapp-green);
+    background-color: var(--online-green);
     border: 2px solid var(--bg-header);
 }
 
@@ -648,8 +620,8 @@ body.messenger-body {
 }
 
 .chat-mode-chip:has(input:checked) .chip-indicator {
-    background: var(--whatsapp-green);
-    box-shadow: 0 0 6px var(--whatsapp-green);
+    background: var(--online-green);
+    box-shadow: 0 0 6px var(--online-green);
 }
 
 .header-bot-connect-btn,
@@ -1137,7 +1109,7 @@ body.messenger-body {
     margin-top: 8px;
     padding: 7px 14px;
     border-radius: 7px;
-    background: var(--whatsapp-green);
+    background: var(--online-green);
     color: #06281e;
     font-weight: 800;
     font-size: 0.8rem;
@@ -1669,22 +1641,6 @@ body.messenger-body {
     box-shadow: 0 8px 28px rgba(56, 189, 248, 0.22);
 }
 
-.bot-connect-card.telegram-card {
-    border-top: 3px solid var(--telegram-blue);
-}
-.bot-connect-card.telegram-card:hover {
-    border-color: rgba(36, 161, 222, 0.5);
-    box-shadow: 0 8px 24px rgba(36, 161, 222, 0.14);
-}
-
-.bot-connect-card.whatsapp-card {
-    border-top: 3px solid var(--whatsapp-green);
-}
-.bot-connect-card.whatsapp-card:hover {
-    border-color: rgba(37, 211, 102, 0.5);
-    box-shadow: 0 8px 24px rgba(37, 211, 102, 0.14);
-}
-
 .bot-card-top {
     display: flex;
     align-items: flex-start;
@@ -1772,9 +1728,6 @@ body.messenger-body {
 .bot-feature-item svg {
     color: #38bdf8;
     flex-shrink: 0;
-}
-.whatsapp-card .bot-feature-item svg {
-    color: #4ade80;
 }
 
 .bot-actions-row {
@@ -2162,8 +2115,8 @@ body.messenger-body {
 }
 .modal-vibe-chip:hover,
 .modal-vibe-chip.active {
-    background: rgba(36, 161, 222, 0.2);
-    border-color: var(--telegram-blue);
+    background: rgba(56, 189, 248, 0.2);
+    border-color: #38bdf8;
     color: #ffffff;
 }
 
@@ -2325,33 +2278,6 @@ body.messenger-body {
     color: #86efac;
     font-size: 0.75rem;
     word-break: break-all;
-}
-
-.tg-token-setup-row {
-    display: flex;
-    gap: 8px;
-    margin-top: 4px;
-}
-
-.tg-token-setup-row input {
-    flex: 1;
-    padding: 8px 10px;
-    border-radius: 6px;
-    border: 1px solid var(--border-subtle);
-    background: #0b141a;
-    color: #ffffff;
-    font-size: 0.78rem;
-}
-
-.tg-token-setup-row button {
-    padding: 8px 12px;
-    border-radius: 6px;
-    border: none;
-    background: var(--telegram-blue);
-    color: #ffffff;
-    font-weight: 700;
-    font-size: 0.76rem;
-    cursor: pointer;
 }
 
 /* Account & Pricing Cards inside Modal */
@@ -2566,9 +2492,9 @@ body.messenger-body {
       "@type": "WebApplication",
       "name": "MP3aud.io Music Messaging Assistant",
       "url": "https://mp3aud.io/",
-      "description": "AI text messaging personal assistant for music. Text any song, artist, mood, or link on Web, WhatsApp, or Telegram and receive playable audio bubbles and 1-click MP3/ZIP downloads.",
+      "description": "AI text messaging personal assistant for music. Text any song, artist, mood, or link and receive playable audio bubbles, streaming links for Apple Music, Spotify & YouTube Music, and 1-click MP3/ZIP downloads.",
       "applicationCategory": "MultimediaApplication",
-      "operatingSystem": "Web, iOS, Android, WhatsApp, Telegram",
+      "operatingSystem": "Web, iOS, Android, PWA",
       "offers": {
         "@type": "Offer",
         "price": "0",
@@ -2622,36 +2548,33 @@ body.messenger-body {
                 </button>
             </div>
 
-            <!-- Messaging Apps Integration Card (WhatsApp & Telegram) -->
+                        <!-- Mobile App & Streaming Card -->
             <div class="sidebar-section messaging-channels-section">
                 <div class="sidebar-section-header">
-                    <span>TEXT US ON YOUR PHONE</span>
-                    <button type="button" class="channel-setup-link" onclick="openModal('botConnectModal')">QR &amp; Setup</button>
+                    <span>MOBILE APP &amp; STREAMING</span>
+                    <button type="button" class="channel-setup-link" onclick="openModal('botConnectModal')">📱 QR Code</button>
                 </div>
-                <div class="channel-buttons-grid">
-                    <a id="sidebarTelegramLink" href="https://t.me/MP3audioBot" target="_blank" rel="noopener"
-                        class="channel-pill telegram-pill" title="Open MP3aud.io Assistant in Telegram">
-                        <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
-                            <path
-                                d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z" />
-                        </svg>
-                        <div class="channel-pill-text">
-                            <strong>Telegram Bot</strong>
-                            <span>@MP3audioBot</span>
-                        </div>
-                    </a>
 
-                    <a id="sidebarWhatsappLink"
-                        href="https://wa.me/?text=Send%20me%20a%20chill%20late-night%20synthwave%20playlist"
-                        target="_blank" rel="noopener" class="channel-pill whatsapp-pill"
-                        title="Open MP3aud.io Assistant in WhatsApp">
+                <!-- Instant QR Preview Card -->
+                <div class="sidebar-qr-card" onclick="openModal('botConnectModal')" title="Click to view QR Code &amp; Mobile Web App">
+                    <div class="sidebar-qr-thumbs" style="display:flex; justify-content:center;">
+                        <img id="sidebarWebQrThumb" src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&margin=2&data=https%3A%2F%2Fmp3aud.io%2F%3Fq%3Dchill%2520late-night%2520synthwave%2520playlist" alt="Mobile Web App QR" class="sidebar-qr-thumb" style="width: 72px; height: 72px;">
+                    </div>
+                    <div class="sidebar-qr-card-info" style="text-align: center;">
+                        <strong>📸 Scan for Mobile Web App</strong>
+                        <span>Point camera to chat &amp; stream in Apple Music, Spotify &amp; MP3s &rarr;</span>
+                    </div>
+                </div>
+
+                <div class="channel-buttons-grid" style="grid-template-columns: 1fr;">
+                    <a id="sidebarWebLink" href="https://mp3aud.io/?q=chill%20late-night%20synthwave%20playlist" target="_blank" rel="noopener"
+                        class="channel-pill webapp-pill" title="Open MP3aud.io Instant Mobile Web App">
                         <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
-                            <path
-                                d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.617-.087-.116-.708-.94-.708-1.793s.448-1.273.607-1.446c.159-.173.346-.217.462-.217l.332.006c.106.005.249-.04.39.298.144.347.491 1.2.534 1.287.043.087.072.188.014.304-.058.116-.087.188-.173.289l-.26.304c-.087.086-.177.18-.076.354.101.174.449.741.964 1.201.662.591 1.221.774 1.394.86s.274.072.376-.043c.101-.116.433-.506.549-.68.116-.173.231-.145.39-.087s1.011.477 1.184.564.289.13.332.202c.045.072.045.419-.1.824zm-3.423-14.416c-6.627 0-12 5.373-12 12 0 2.126.556 4.124 1.533 5.862l-1.533 5.602 5.736-1.504c1.693.922 3.633 1.447 5.695 1.447 6.627 0 12-5.373 12-12s-5.373-12-11.431-11.407z" />
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
                         </svg>
                         <div class="channel-pill-text">
-                            <strong>WhatsApp Bot</strong>
-                            <span>Instant Audio DM</span>
+                            <strong>Instant Mobile Web App</strong>
+                            <span id="sidebarWebSub">100% Free • No App Store Needed</span>
                         </div>
                     </a>
                 </div>
@@ -2819,12 +2742,12 @@ body.messenger-body {
                     </label>
 
                     <button type="button" class="header-bot-connect-btn" onclick="openModal('botConnectModal')"
-                        title="Connect on WhatsApp or Telegram">
+                        title="Scan QR Code to stream and chat on iPhone or Android">
                         <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor"
                             stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
                         </svg>
-                        <span>WhatsApp / Telegram</span>
+                        <span>📱 Mobile App</span>
                     </button>
 
                     <button type="button" id="headerLoginLink" class="header-account-btn"
@@ -2959,78 +2882,102 @@ body.messenger-body {
         </main>
     </div>
 
-    <!-- =====================================================
-         MODAL 1: WHATSAPP & TELEGRAM BOT HUB (QR CODES + WEBHOOK SETUP)
+        <!-- =====================================================
+         MODAL 1: INSTANT MOBILE WEB APP & STREAMING HUB
          ===================================================== -->
     <div id="botConnectModal" class="modal" role="dialog" aria-labelledby="botConnectTitle" aria-hidden="true">
-        <div class="modal-content bot-modal-content">
+        <div class="modal-content bot-modal-content" style="max-width: 680px;">
             <span class="close" onclick="closeModal('botConnectModal')" aria-label="Close modal">&times;</span>
             <div class="bot-modal-header">
-                <span class="bot-eyebrow">📱 MOBILE MESSAGING INTEGRATION</span>
-                <h2 id="botConnectTitle">Text MP3aud.io on WhatsApp &amp; Telegram</h2>
-                <p>Chat with your personal music assistant directly from your phone's messaging app to receive playable tracks and 1-click MP3/ZIP downloads on the go.</p>
+                <span class="bot-eyebrow">📱 INSTANT MOBILE WEB APP</span>
+                <h2 id="botConnectTitle">Scan QR Code to Stream &amp; Chat on Your Phone</h2>
+                <p>Point your camera at the QR code below to open MP3aud.io on your <strong>iPhone</strong> or <strong>Android</strong> device. Get curated playlists with 1-tap links to <strong>Apple Music</strong>, <strong>Spotify</strong> &amp; <strong>YouTube Music</strong>, playable lockscreen audio, and 320kbps MP3 / ZIP downloads!</p>
             </div>
 
-            <div class="bot-cards-grid">
-                <!-- Telegram Bot Card -->
-                <div class="bot-connect-card telegram-card">
-                    <div class="bot-card-top">
-                        <div class="bot-platform-badge tg-badge">
-                            <strong>Telegram Bot</strong>
-                            <span id="tgBotHandleDisplay">@MP3audioBot</span>
-                        </div>
-                        <img id="tgQrImage"
-                            src="https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=https%3A%2F%2Ft.me%2FMP3audioBot"
-                            alt="Telegram Bot QR Code" class="bot-qr-img">
-                    </div>
-                    <p class="bot-card-desc">Send any song title, artist, mood playlist, or link and receive native playable audio bubbles + full ZIP archives inside Telegram.</p>
-                    <a id="modalTelegramBtn" href="https://t.me/MP3audioBot" target="_blank" rel="noopener"
-                        class="bot-launch-btn tg-launch-btn">
-                        Open in Telegram &rarr;
-                    </a>
+            <!-- 3-Step Visual Instruction Strip -->
+            <div class="modal-steps-strip">
+                <div class="modal-step-item">
+                    <span class="modal-step-num">1</span>
+                    <span>Open Camera app on your iPhone or Android</span>
                 </div>
-
-                <!-- WhatsApp Bot Card -->
-                <div class="bot-connect-card whatsapp-card">
-                    <div class="bot-card-top">
-                        <div class="bot-platform-badge wa-badge">
-                            <strong>WhatsApp Assistant</strong>
-                            <span id="waBotNumberDisplay">Instant Audio DM</span>
-                        </div>
-                        <img id="waQrImage"
-                            src="https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=https%3A%2F%2Fwa.me%2F%3Ftext%3DSend%2520me%2520a%2520chill%2520late-night%2520synthwave%2520playlist"
-                            alt="WhatsApp Bot QR Code" class="bot-qr-img">
-                    </div>
-                    <p class="bot-card-desc">Text our WhatsApp bot for instant playlist curation, audio previews, custom ringtones, and 1-click MP3 download links.</p>
-                    <a id="modalWhatsappBtn"
-                        href="https://wa.me/?text=Send%20me%20a%20chill%20late-night%20synthwave%20playlist"
-                        target="_blank" rel="noopener" class="bot-launch-btn wa-launch-btn">
-                        Open in WhatsApp &rarr;
-                    </a>
+                <div class="modal-step-item">
+                    <span class="modal-step-num">2</span>
+                    <span>Point camera at QR code &amp; tap the banner link</span>
+                </div>
+                <div class="modal-step-item">
+                    <span class="modal-step-num">3</span>
+                    <span>Tap <strong>Send</strong> to stream in Apple Music, Spotify &amp; MP3!</span>
                 </div>
             </div>
 
-            <!-- Webhook & Bot Admin Setup Accordion -->
-            <details class="bot-webhook-details">
-                <summary>⚙️ Bot Owner / Webhook Configuration (Telegram &amp; WhatsApp API)</summary>
-                <div class="bot-webhook-body">
-                    <p>Your backend is equipped with live webhook endpoints for both <strong>Telegram Bot API</strong> and <strong>WhatsApp (Twilio &amp; Meta Cloud API)</strong>:</p>
-                    <div class="webhook-url-row">
-                        <label>Telegram Webhook URL:</label>
-                        <code id="webhookTgUrlDisplay">https://audio-converter-backend.onrender.com/webhook/telegram</code>
+            <div class="bot-cards-grid" style="grid-template-columns: 1fr;">
+                <!-- Instant Mobile Web App Card (Featured & 100% Free) -->
+                <div class="bot-connect-card webapp-card">
+                    <div class="bot-card-top">
+                        <div class="bot-platform-badge webapp-badge">
+                            <strong>
+                                <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" style="color:#38bdf8;"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+                                Instant Mobile Web App
+                            </strong>
+                            <span class="bot-status-tag"><span class="live-dot" style="background:#38bdf8;"></span> <span id="webAppStatusDisplay">Featured • 100% Free</span></span>
+                        </div>
                     </div>
-                    <div class="webhook-url-row">
-                        <label>WhatsApp Webhook URL:</label>
-                        <code id="webhookWaUrlDisplay">https://audio-converter-backend.onrender.com/webhook/whatsapp</code>
+
+                    <div class="bot-qr-container">
+                        <img id="webAppQrImage"
+                            src="https://api.qrserver.com/v1/create-qr-code/?size=240x240&margin=8&data=https%3A%2F%2Fmp3aud.io%2F%3Fq%3Dchill%2520late-night%2520synthwave%2520playlist"
+                            alt="Mobile Web App QR Code" class="bot-qr-img">
+                        <span class="bot-qr-caption">📷 Scan with iPhone / Android Camera</span>
                     </div>
-                    <div class="tg-token-setup-row">
-                        <input type="password" id="tgBotTokenInput"
-                            placeholder="Paste Telegram BotFather Token (optional one-click bind)">
-                        <button type="button" id="bindTelegramWebhookBtn">Activate Telegram Webhook</button>
+
+                    <div class="bot-features-list">
+                        <div class="bot-feature-item">
+                            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                            <span><strong>No app download required:</strong> launches immediately in Safari &amp; Chrome</span>
+                        </div>
+                        <div class="bot-feature-item">
+                            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                            <span>1-tap links for <strong>Apple Music</strong>, <strong>Spotify</strong> &amp; <strong>YouTube Music</strong></span>
+                        </div>
+                        <div class="bot-feature-item">
+                            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                            <span>Lockscreen audio player + 320kbps MP3 &amp; ZIP downloads</span>
+                        </div>
                     </div>
-                    <div id="botSetupStatusMsg" class="bot-setup-status"></div>
+
+                    <div class="bot-actions-row">
+                        <a id="modalWebAppBtn" href="https://mp3aud.io/?q=chill%20late-night%20synthwave%20playlist" target="_blank" rel="noopener"
+                            class="bot-launch-btn webapp-launch-btn">
+                            🚀 Launch Web Player &rarr;
+                        </a>
+                        <button type="button" class="bot-copy-btn" onclick="copyBotLink('webapp')" title="Copy Web App link">
+                            📋 Copy
+                        </button>
+                    </div>
                 </div>
-            </details>
+            </div>
+
+            <!-- PWA 1-Tap Home Screen Banner -->
+            <div class="pwa-install-banner">
+                <div class="pwa-install-icon">📲</div>
+                <div class="pwa-install-text">
+                    <strong>Add to Your iPhone or Android Home Screen (Fullscreen App):</strong>
+                    <span>In Safari or Chrome on your phone, tap <strong>Share</strong> (or Menu) &rarr; tap <strong>"Add to Home Screen"</strong> to run MP3aud.io as a native app with zero store downloads!</span>
+                </div>
+            </div>
+
+            <!-- Instant Vibe Selector: Pre-charges the QR Code & Start Deep-Link -->
+            <div class="modal-vibe-presets-row">
+                <div class="modal-vibe-presets-title">⚡ Select a Starter Vibe to Load into QR Code:</div>
+                <div class="modal-vibe-chips">
+                    <button type="button" class="modal-vibe-chip active" onclick="setModalStarterVibe('synthwave', 'chill late-night synthwave playlist', this)">🌙 Synthwave Mix</button>
+                    <button type="button" class="modal-vibe-chip" onclick="setModalStarterVibe('workout', '90s hip hop workout playlist', this)">🏋️ Workout Hype</button>
+                    <button type="button" class="modal-vibe-chip" onclick="setModalStarterVibe('lofi', 'lo-fi study beats playlist', this)">☕ Lo-Fi Study</button>
+                    <button type="button" class="modal-vibe-chip" onclick="setModalStarterVibe('tophits', 'today top hits playlist', this)">🔥 2026 Top Hits</button>
+                    <button type="button" class="modal-vibe-chip" onclick="setModalStarterVibe('rock', 'classic rock anthems playlist', this)">🎸 Classic Rock</button>
+                    <button type="button" class="modal-vibe-chip" onclick="setModalStarterVibe('welcome', 'send me a new playlist', this)">🎲 Surprise Mix</button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -3219,7 +3166,7 @@ body.messenger-body {
         <div class="modal-content">
             <span class="close" onclick="closeModal('aboutModal')" aria-label="Close modal">&times;</span>
             <h2 id="aboutTitle">About MP3aud.io Personal Music Assistant</h2>
-            <p>MP3aud.io is an AI-powered conversational music assistant available on the Web, Telegram, and WhatsApp. Text any song, artist, mood, or playlist idea—or drop a link or media file—and receive playable tracks, high-resolution album artwork, ID3 metadata tags, and 1-click MP3/ZIP downloads right inside your chat thread.</p>
+            <p>MP3aud.io is an AI-powered conversational music assistant available on the Web, iPhone, and Android (Progressive Web App). Text any song, artist, mood, or playlist idea—or drop a link or media file—and receive playable tracks, high-resolution album artwork, ID3 metadata tags, and 1-click MP3/ZIP downloads right inside your chat thread.</p>
         </div>
     </div>
 
@@ -4713,7 +4660,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 suggestions: [
                     `🎧 Curate a freeplaylist right now`,
                     `🔊 What audio quality are the MP3s?`,
-                    `📱 Can I use this on Telegram?`
+                    `📲 How do I install the mobile app?`
                 ],
                 tracks: []
             };
@@ -6536,22 +6483,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // --- Mobile Web App, WhatsApp & Telegram Bot Info & QR Code Hub ---
+    // --- Instant Mobile Web App & PWA Home Screen Hub ---
     const currentOrigin = (window.location && window.location.origin) ? window.location.origin : 'https://mp3aud.io';
     window.currentWebAppUrl = `${currentOrigin}/?q=chill%20late-night%20synthwave%20playlist`;
-    window.currentTelegramBotUrl = 'https://t.me/MP3audioBot?start=welcome';
-    window.currentWhatsappBotUrl = 'https://wa.me/?text=Send%20me%20a%20chill%20late-night%20synthwave%20playlist';
 
     window.copyBotLink = function(platform) {
-        let link = window.currentWebAppUrl;
-        let name = 'Web App Link';
-        if (platform === 'telegram') {
-            link = window.currentTelegramBotUrl;
-            name = 'Telegram Bot';
-        } else if (platform === 'whatsapp') {
-            link = window.currentWhatsappBotUrl;
-            name = 'WhatsApp Assistant';
-        }
+        const link = window.currentWebAppUrl;
+        const name = 'Instant Mobile Web App link';
         if (navigator.clipboard && navigator.clipboard.writeText) {
             navigator.clipboard.writeText(link).then(() => {
                 showToast(`Copied ${name} to clipboard!`, 'success');
@@ -6568,8 +6506,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (btnEl) btnEl.classList.add('active');
 
         const origin = (window.location && window.location.origin) ? window.location.origin : 'https://mp3aud.io';
-
-        // 1. Update Instant Mobile Web App deep-link & QR code
         const webAppVibeUrl = `${origin}/?q=${encodeURIComponent(promptText)}`;
         window.currentWebAppUrl = webAppVibeUrl;
 
@@ -6584,412 +6520,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (qWeb) qWeb.src = webQr;
         if (thumbWeb) thumbWeb.src = `https://api.qrserver.com/v1/create-qr-code/?size=100x100&margin=2&data=${encodeURIComponent(webAppVibeUrl)}`;
 
-        // 2. Update Telegram Bot deep-link & QR code
-        const baseTg = (window.currentTelegramBotUrl || 'https://t.me/MP3audioBot').split('?')[0];
-        const tgVibeUrl = `${baseTg}?start=${encodeURIComponent(vibeKey)}`;
-        window.currentTelegramBotUrl = tgVibeUrl;
-
-        const mTg = document.getElementById('modalTelegramBtn');
-        const qTg = document.getElementById('tgQrImage');
-        const thumbTg = document.getElementById('sidebarTgQrThumb');
-        const sTg = document.getElementById('sidebarTelegramLink');
-
-        if (mTg) mTg.href = tgVibeUrl;
-        if (sTg) sTg.href = tgVibeUrl;
-        const tgQr = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&margin=8&data=${encodeURIComponent(tgVibeUrl)}`;
-        if (qTg) qTg.src = tgQr;
-        if (thumbTg) thumbTg.src = `https://api.qrserver.com/v1/create-qr-code/?size=100x100&margin=2&data=${encodeURIComponent(tgVibeUrl)}`;
-
-        // 3. Update WhatsApp deep-link & QR code
-        const baseWa = (window.currentWhatsappBotUrl || 'https://wa.me/').split('?')[0];
-        const waVibeUrl = `${baseWa}?text=${encodeURIComponent(promptText)}`;
-        window.currentWhatsappBotUrl = waVibeUrl;
-
-        const mWa = document.getElementById('modalWhatsappBtn');
-        const qWa = document.getElementById('waQrImage');
-        const thumbWa = document.getElementById('sidebarWaQrThumb');
-        const sWa = document.getElementById('sidebarWhatsappLink');
-
-        if (mWa) mWa.href = waVibeUrl;
-        if (sWa) sWa.href = waVibeUrl;
-        const waQr = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&margin=8&data=${encodeURIComponent(waVibeUrl)}`;
-        if (qWa) qWa.src = waQr;
-        if (thumbWa) thumbWa.src = `https://api.qrserver.com/v1/create-qr-code/?size=100x100&margin=2&data=${encodeURIComponent(waVibeUrl)}`;
-
         showToast(`QR Code updated for: ${promptText.slice(0, 30)}...`, 'info');
     };
-
-    function applyTelegramBotUi(tgUrl, tgHandle, isConnected) {
-        const sTg = document.getElementById('sidebarTelegramLink');
-        const mTg = document.getElementById('modalTelegramBtn');
-        const hTg = document.getElementById('tgBotHandleDisplay');
-        const qTg = document.getElementById('tgQrImage');
-        const thumbTg = document.getElementById('sidebarTgQrThumb');
-        const sSub = document.getElementById('sidebarTgSub');
-
-        if (tgUrl) {
-            const deepUrl = tgUrl.includes('?') ? tgUrl : `${tgUrl}?start=welcome`;
-            window.currentTelegramBotUrl = deepUrl;
-            if (sTg) sTg.href = deepUrl;
-            if (mTg) mTg.href = deepUrl;
-            const qrSrc = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&margin=8&data=${encodeURIComponent(deepUrl)}`;
-            if (qTg) qTg.src = qrSrc;
-            if (thumbTg) thumbTg.src = `https://api.qrserver.com/v1/create-qr-code/?size=100x100&margin=2&data=${encodeURIComponent(deepUrl)}`;
-        }
-        if (tgHandle) {
-            if (hTg) hTg.textContent = tgHandle;
-            if (sSub) sSub.textContent = tgHandle;
-        }
-    }
-
-    // --- Direct Website-Powered Telegram Bot Engine (100% on MP3aud.io Website, Zero Render Setup) ---
-    let activeTgPollToken = '';
-    let tgUpdateOffset = 0;
-    let tgPollRunning = false;
-
-    async function handleTelegramUpdateInBrowser(botToken, update) {
-        const apiBase = `https://api.telegram.org/bot${botToken}`;
-        let chatId = null;
-        let textMsg = '';
-        let bizId = null;
-
-        if (update.callback_query) {
-            const cb = update.callback_query;
-            chatId = cb.message && cb.message.chat ? cb.message.chat.id : null;
-            bizId = cb.message ? cb.message.business_connection_id : null;
-            const data = cb.data || '';
-            fetch(`${apiBase}/answerCallbackQuery`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ callback_query_id: cb.id, text: '🎧 Curating your playlist...' })
-            }).catch(() => {});
-            if (data.startsWith('curate:')) {
-                textMsg = data.slice(7).trim() || 'send me a new playlist';
-            }
-        } else {
-            const msg = update.message || update.business_message || update.edited_message;
-            if (msg && msg.chat) {
-                chatId = msg.chat.id;
-                textMsg = (msg.text || msg.caption || '').trim();
-                bizId = msg.business_connection_id || null;
-            }
-        }
-
-        if (!chatId || !textMsg) return;
-        const bizParams = bizId ? { business_connection_id: bizId } : {};
-
-        let lower = textMsg.toLowerCase();
-        if (lower.startsWith('/start ')) {
-            const payload = textMsg.slice(7).trim().replace(/_/g, ' ');
-            if (payload && !['welcome', 'start', 'help', 'menu'].includes(payload.toLowerCase())) {
-                textMsg = payload;
-                lower = textMsg.toLowerCase();
-            } else {
-                lower = '/start';
-            }
-        }
-
-        if (['/start', '/help', 'hi', 'hello', 'hey', 'menu', 'start'].includes(lower)) {
-            const welcomeHtml =
-                `🎧 <b>Welcome to MP3aud.io Personal Music Assistant!</b>\n\n` +
-                `Text me right here in Telegram for any song, artist, or playlist mood — I'll reply directly in this chat with <b>playable audio tracks</b> and <b>1-click MP3/ZIP downloads</b>:\n\n` +
-                `• <b>Playlist Curation:</b> <i>"Send me a chill late-night synthwave playlist"</i>\n` +
-                `• <b>Fresh Mixes:</b> <i>"Make me a new playlist"</i> or tap a button below\n` +
-                `• <b>Any Song or Artist:</b> <i>"Blinding Lights by The Weeknd"</i>\n\n` +
-                `👇 <b>Tap a vibe below or type any request to start:</b>`;
-
-            const starterKb = [
-                [
-                    { text: '🌙 Synthwave Mix', callback_data: 'curate:chill late-night synthwave playlist' },
-                    { text: '🏋️ 90s Workout', callback_data: 'curate:90s hip hop workout playlist' }
-                ],
-                [
-                    { text: '☕ Lo-Fi Study', callback_data: 'curate:lo-fi study beats playlist' },
-                    { text: '🔄 Surprise Playlist', callback_data: 'curate:send me a new playlist' }
-                ]
-            ];
-
-            await fetch(`${apiBase}/sendMessage`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    chat_id: chatId,
-                    text: welcomeHtml,
-                    parse_mode: 'HTML',
-                    reply_markup: { inline_keyboard: starterKb },
-                    ...bizParams
-                })
-            });
-            return;
-        }
-
-        fetch(`${apiBase}/sendChatAction`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ chat_id: chatId, action: 'upload_audio', ...bizParams })
-        }).catch(() => {});
-
-        const curated = await clientSideCurateFallback(textMsg);
-        const tracks = curated.tracks || [];
-        const cleanReply = (curated.reply || 'Here are your curated tracks!').replace(/\*\*(.+?)\*\*/g, '$1').replace(/\*(.+?)\*/g, '$1');
-
-        if (tracks.length === 0) {
-            const chatKb = [
-                [
-                    { text: '🌙 Late-Night Synthwave', callback_data: 'curate:chill late-night synthwave playlist' },
-                    { text: '🌿 Help Me Unwind', callback_data: 'curate:i had a long day help me unwind' }
-                ],
-                [
-                    { text: '⚡ Make It Upbeat', callback_data: 'curate:make it more upbeat' },
-                    { text: '🎲 Surprise Playlist', callback_data: 'curate:send me a new playlist' }
-                ]
-            ];
-            await fetch(`${apiBase}/sendMessage`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    chat_id: chatId,
-                    text: escapeHtml(cleanReply),
-                    parse_mode: 'HTML',
-                    reply_markup: { inline_keyboard: chatKb },
-                    ...bizParams
-                })
-            });
-            return;
-        }
-
-        const playlistTitle = curated.playlist_title || 'MP3aud.io Curated Mix';
-        const trackLines = tracks.slice(0, 6).map((t, i) =>
-            `${i + 1}. <b>${escapeHtml(t.title)}</b> — ${escapeHtml(t.artist)} (${escapeHtml(t.duration || '3:30')})`
-        ).join('\n');
-        const followUpLine = curated.follow_up_note
-            ? `\n\n💬 <i>${escapeHtml(curated.follow_up_note.replace(/\*\*(.+?)\*\*/g, '$1').replace(/\*(.+?)\*/g, '$1'))}</i>`
-            : '';
-
-        const webUrl = `${window.location.origin}/?q=${encodeURIComponent(textMsg)}`;
-        const inlineKb = [
-            [
-                { text: '⚡ More Upbeat', callback_data: 'curate:make it more upbeat' },
-                { text: '🌙 Make It Chiller', callback_data: 'curate:make it chiller' }
-            ],
-            [
-                { text: '🔄 Curate New Playlist', callback_data: 'curate:send me a new playlist' },
-                { text: '🎧 Open & Download ZIP', url: webUrl }
-            ]
-        ];
-
-        await fetch(`${apiBase}/sendMessage`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                chat_id: chatId,
-                text: `🎵 <b>${escapeHtml(playlistTitle)}</b>\n${escapeHtml(cleanReply)}\n\n${trackLines}${followUpLine}`,
-                parse_mode: 'HTML',
-                reply_markup: { inline_keyboard: inlineKb },
-                ...bizParams
-            })
-        });
-
-        for (const t of tracks.slice(0, 6)) {
-            if (t.preview_url) {
-                await fetch(`${apiBase}/sendAudio`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        chat_id: chatId,
-                        audio: t.preview_url,
-                        title: t.title || 'Track',
-                        performer: t.artist || 'Artist',
-                        thumbnail: t.artwork_url || '',
-                        caption: `🎵 ${t.title} — ${t.artist}\n💿 ${t.album || 'MP3aud.io'}`,
-                        ...bizParams
-                    })
-                }).catch(() => {});
-            }
-        }
-    }
-
-    async function startWebsiteTelegramBotEngine(botToken) {
-        if (!botToken || !botToken.includes(':')) return;
-        activeTgPollToken = botToken;
-        if (tgPollRunning) return;
-        tgPollRunning = true;
-
-        try {
-            // Clear webhook while website tab is active so website responds to /start in <0.5s with zero Render dependency
-            await fetch(`https://api.telegram.org/bot${botToken}/deleteWebhook?drop_pending_updates=false`);
-        } catch (_) {}
-
-        while (activeTgPollToken === botToken) {
-            try {
-                const res = await fetch(
-                    `https://api.telegram.org/bot${botToken}/getUpdates?offset=${tgUpdateOffset}&timeout=10&allowed_updates=${encodeURIComponent(JSON.stringify(['message', 'business_message', 'callback_query']))}`
-                );
-                if (!res.ok) {
-                    await new Promise(r => setTimeout(r, 2500));
-                    continue;
-                }
-                const data = await res.json();
-                if (data && data.ok && Array.isArray(data.result)) {
-                    for (const upd of data.result) {
-                        tgUpdateOffset = Math.max(tgUpdateOffset, (upd.update_id || 0) + 1);
-                        handleTelegramUpdateInBrowser(botToken, upd).catch(err => console.warn('TG update err:', err));
-                    }
-                }
-            } catch (_) {
-                await new Promise(r => setTimeout(r, 2000));
-            }
-        }
-        tgPollRunning = false;
-    }
-
-    // When closing the website tab, hand off to the stateless backend webhook so the bot keeps working 24/7
-    window.addEventListener('pagehide', () => {
-        const savedToken = localStorage.getItem('mp3audio_tg_bot_token');
-        if (savedToken && savedToken.includes(':')) {
-            const webhookTarget = `${BACKEND_URL}/webhook/telegram/${encodeURIComponent(savedToken)}`;
-            fetch(`https://api.telegram.org/bot${savedToken}/setWebhook`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    url: webhookTarget,
-                    allowed_updates: ['message', 'edited_message', 'business_message', 'edited_business_message', 'callback_query']
-                }),
-                keepalive: true
-            }).catch(() => {});
-        }
-    });
-
-    async function loadBotConfig() {
-        const savedUrl = localStorage.getItem('mp3audio_tg_bot_url');
-        const savedHandle = localStorage.getItem('mp3audio_tg_bot_handle');
-        const savedToken = localStorage.getItem('mp3audio_tg_bot_token');
-        if (savedToken) {
-            const tokenInput = document.getElementById('tgBotTokenInput');
-            if (tokenInput && !tokenInput.value) tokenInput.value = savedToken;
-            startWebsiteTelegramBotEngine(savedToken);
-        }
-        if (savedUrl && savedHandle) {
-            applyTelegramBotUi(savedUrl, savedHandle, true);
-        } else {
-            applyTelegramBotUi('https://t.me/MP3audioBot?start=welcome', '@MP3audioBot', true);
-        }
-
-        try {
-            const res = await fetchWithTimeout(`${BACKEND_URL}/api/assistant/bot-info`, {}, 2500);
-            if (!res.ok) return;
-            const info = await res.json();
-            if (info.telegram_url) {
-                localStorage.setItem('mp3audio_tg_bot_url', info.telegram_url);
-                localStorage.setItem('mp3audio_tg_bot_handle', info.telegram_bot_username || '@MP3audioBot');
-                applyTelegramBotUi(info.telegram_url, info.telegram_bot_username, true);
-            }
-            if (info.whatsapp_url) {
-                window.currentWhatsappBotUrl = info.whatsapp_url;
-                const sWa = document.getElementById('sidebarWhatsappLink');
-                const mWa = document.getElementById('modalWhatsappBtn');
-                const qWa = document.getElementById('waQrImage');
-                const thumbWa = document.getElementById('sidebarWaQrThumb');
-                const hWa = document.getElementById('waBotNumberDisplay');
-                if (sWa) sWa.href = info.whatsapp_url;
-                if (mWa) mWa.href = info.whatsapp_url;
-                if (qWa) qWa.src = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&margin=8&data=${encodeURIComponent(info.whatsapp_url)}`;
-                if (thumbWa) thumbWa.src = `https://api.qrserver.com/v1/create-qr-code/?size=100x100&margin=2&data=${encodeURIComponent(info.whatsapp_url)}`;
-                if (hWa && info.whatsapp_number) hWa.textContent = info.whatsapp_number;
-            }
-            // Ensure Web App QR code and deep-link are dynamically initialized
-            const origin = (window.location && window.location.origin) ? window.location.origin : 'https://mp3aud.io';
-            const defaultPrompt = 'chill late-night synthwave playlist';
-            const webAppVibeUrl = `${origin}/?q=${encodeURIComponent(defaultPrompt)}`;
-            window.currentWebAppUrl = webAppVibeUrl;
-            const mWeb = document.getElementById('modalWebAppBtn');
-            const qWeb = document.getElementById('webAppQrImage');
-            const thumbWeb = document.getElementById('sidebarWebQrThumb');
-            const sWeb = document.getElementById('sidebarWebLink');
-            if (mWeb) mWeb.href = webAppVibeUrl;
-            if (sWeb) sWeb.href = webAppVibeUrl;
-            const webQr = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&margin=8&data=${encodeURIComponent(webAppVibeUrl)}`;
-            if (qWeb) qWeb.src = webQr;
-            if (thumbWeb) thumbWeb.src = `https://api.qrserver.com/v1/create-qr-code/?size=100x100&margin=2&data=${encodeURIComponent(webAppVibeUrl)}`;
-        } catch (e) { }
-    }
-    loadBotConfig();
-
-    const saveTgPhoneBtn = document.getElementById('saveTgPhoneBtn');
-    if (saveTgPhoneBtn) {
-        saveTgPhoneBtn.addEventListener('click', async () => {
-            const phoneInput = document.getElementById('tgPhoneInput');
-            const statusMsg = document.getElementById('botSetupStatusMsg');
-            const rawPhone = phoneInput ? phoneInput.value.trim() : '';
-            if (!rawPhone) {
-                if (statusMsg) statusMsg.innerHTML = '<span style="color:#f87171;">⚠️ Please enter an international phone number (e.g. +1 555 123 4567).</span>';
-                return;
-            }
-            let cleanPhone = rawPhone.replace(/[^\d+]/g, '');
-            if (!cleanPhone.startsWith('+')) cleanPhone = '+' + cleanPhone;
-
-            const phoneUrl = `https://t.me/${cleanPhone}`;
-            localStorage.setItem('mp3audio_tg_bot_url', phoneUrl);
-            localStorage.setItem('mp3audio_tg_bot_handle', rawPhone);
-            applyTelegramBotUi(phoneUrl, rawPhone, true);
-
-            try {
-                fetch(`${BACKEND_URL}/api/bot/setup-telegram`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ telegram_phone: rawPhone })
-                }).catch(() => {});
-            } catch (e) {}
-
-            if (statusMsg) {
-                statusMsg.innerHTML = `<span style="color:#4ade80;">✅ Telegram Phone Number Set: <strong>${escapeHtml(rawPhone)}</strong>!<br>QR code updated to open <code>${escapeHtml(phoneUrl)}</code> directly in Telegram!</span>`;
-            }
-            showToast(`Telegram QR code updated to phone ${rawPhone}!`, 'success');
-        });
-    }
-
-    const bindTelegramWebhookBtn = document.getElementById('bindTelegramWebhookBtn');
-    if (bindTelegramWebhookBtn) {
-        bindTelegramWebhookBtn.addEventListener('click', async () => {
-            const tokenInput = document.getElementById('tgBotTokenInput');
-            const statusMsg = document.getElementById('botSetupStatusMsg');
-            const botToken = tokenInput ? tokenInput.value.trim() : '';
-            if (!botToken || !botToken.includes(':')) {
-                if (statusMsg) {
-                    statusMsg.innerHTML = `<span style="color:#f87171;">⚠️ Please paste a valid Telegram Bot Token from <a href="https://t.me/BotFather" target="_blank" rel="noopener" style="color:#38bdf8;">@BotFather</a> (format: <code>123456789:ABCdef...</code>).</span>`;
-                }
-                return;
-            }
-            if (statusMsg) statusMsg.textContent = 'Activating Telegram bot directly on MP3aud.io...';
-
-            try {
-                // 1. Verify token & fetch real @username directly from Telegram Bot API (100% in browser, no Render needed)
-                const meRes = await fetch(`https://api.telegram.org/bot${botToken}/getMe`);
-                const meData = await meRes.json();
-                if (!meRes.ok || !meData.ok || !meData.result) {
-                    if (statusMsg) statusMsg.innerHTML = `<span style="color:#f87171;">⚠️ Invalid Bot Token: ${escapeHtml(meData.description || 'Could not verify with Telegram.')}</span>`;
-                    return;
-                }
-
-                const botUsername = meData.result.username;
-                const botUrl = `https://t.me/${botUsername}`;
-
-                // 2. Save in localStorage & start the direct Website-Powered Telegram Bot Engine immediately!
-                localStorage.setItem('mp3audio_tg_bot_token', botToken);
-                localStorage.setItem('mp3audio_tg_bot_url', botUrl);
-                localStorage.setItem('mp3audio_tg_bot_handle', `@${botUsername}`);
-                applyTelegramBotUi(botUrl, `@${botUsername}`, true);
-                startWebsiteTelegramBotEngine(botToken);
-
-                if (statusMsg) {
-                    statusMsg.innerHTML = `<span style="color:#4ade80;">✅ Live &amp; Active on MP3aud.io: <strong>@${escapeHtml(botUsername)}</strong>!<br><a href="${escapeHtml(botUrl)}?start=welcome" target="_blank" rel="noopener" style="color:#38bdf8;font-weight:700;text-decoration:underline;">Click here to open @${escapeHtml(botUsername)} in Telegram and tap Start &rarr;</a></span>`;
-                }
-                showToast(`Telegram Bot @${botUsername} is now live directly from MP3aud.io!`, 'success');
-            } catch (e) {
-                if (statusMsg) statusMsg.innerHTML = `<span style="color:#f87171;">⚠️ Network error verifying Telegram token.</span>`;
-            }
-        });
-    }
 
     // --- Authentication, Magic Link & Stripe Checkout Integration ---
     async function checkAuthStatus() {
@@ -7053,7 +6585,7 @@ document.addEventListener('DOMContentLoaded', () => {
         window.history.replaceState({}, document.title, window.location.pathname);
     }
 
-    // Handle deep-linked query (?q= or ?url=) from WhatsApp / Telegram / Share links
+    // Handle deep-linked query (?q= or ?url=) from QR / Mobile Web App / Share links
     const initialQuery = urlParams.get('q') || urlParams.get('url');
     if (initialQuery) {
         window.history.replaceState({}, document.title, window.location.pathname);
