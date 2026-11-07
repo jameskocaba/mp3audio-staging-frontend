@@ -1586,7 +1586,7 @@ body.messenger-body {
 
 .bot-cards-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
     gap: 16px;
     margin: 18px 0;
 }
@@ -1607,6 +1607,14 @@ body.messenger-body {
     justify-content: space-between;
     gap: 14px;
     transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.bot-connect-card.sms-card {
+    border-top: 3px solid #007aff;
+}
+.bot-connect-card.sms-card:hover {
+    border-color: rgba(0, 122, 255, 0.5);
+    box-shadow: 0 8px 24px rgba(0, 122, 255, 0.16);
 }
 
 .bot-connect-card.telegram-card {
@@ -1748,6 +1756,104 @@ body.messenger-body {
 
 .wa-launch-btn {
     background: linear-gradient(135deg, #25D366 0%, #1da851 100%);
+}
+
+.sms-launch-btn {
+    background: linear-gradient(135deg, #007aff 0%, #34c759 100%);
+}
+
+.sms-pill {
+    border-color: rgba(0, 122, 255, 0.3);
+}
+.sms-pill:hover {
+    border-color: rgba(0, 122, 255, 0.6);
+    background: rgba(0, 122, 255, 0.08);
+}
+.sms-pill svg {
+    color: #007aff;
+}
+
+/* 1-Tap Streaming Deep-Links for Apple Music, Spotify & YouTube Music */
+.playlist-streaming-links {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
+    padding-top: 8px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+.streaming-label {
+    font-size: 0.74rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #94a3b8;
+}
+.stream-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    border-radius: 9999px;
+    font-size: 0.76rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: transform 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+}
+.stream-pill.apple-pill {
+    background: rgba(250, 45, 72, 0.14);
+    color: #ff5470;
+    border: 1px solid rgba(250, 45, 72, 0.35);
+}
+.stream-pill.apple-pill:hover {
+    background: rgba(250, 45, 72, 0.25);
+    box-shadow: 0 2px 10px rgba(250, 45, 72, 0.25);
+    transform: translateY(-1px);
+}
+.stream-pill.spotify-pill {
+    background: rgba(30, 215, 96, 0.14);
+    color: #1ed760;
+    border: 1px solid rgba(30, 215, 96, 0.35);
+}
+.stream-pill.spotify-pill:hover {
+    background: rgba(30, 215, 96, 0.25);
+    box-shadow: 0 2px 10px rgba(30, 215, 96, 0.25);
+    transform: translateY(-1px);
+}
+.stream-pill.ytmusic-pill {
+    background: rgba(255, 0, 0, 0.14);
+    color: #ff4e45;
+    border: 1px solid rgba(255, 0, 0, 0.35);
+}
+.stream-pill.ytmusic-pill:hover {
+    background: rgba(255, 0, 0, 0.25);
+    box-shadow: 0 2px 10px rgba(255, 0, 0, 0.25);
+    transform: translateY(-1px);
+}
+
+.track-streaming-btns {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-right: 4px;
+}
+.track-stream-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    font-size: 0.82rem;
+    text-decoration: none;
+    transition: background 0.15s ease, transform 0.15s ease;
+}
+.track-stream-link:hover {
+    background: rgba(255, 255, 255, 0.16);
+    transform: scale(1.1);
 }
 
 .bot-copy-btn {

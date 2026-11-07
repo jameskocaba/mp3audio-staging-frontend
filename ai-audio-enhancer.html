@@ -2321,16 +2321,28 @@ body.messenger-body {
                 <!-- Instant QR Preview Card -->
                 <div class="sidebar-qr-card" onclick="openModal('botConnectModal')" title="Click to view full QR Codes">
                     <div class="sidebar-qr-thumbs">
+                        <img id="sidebarSmsQrThumb" src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&margin=2&data=sms%3A%3F%26body%3DSend%2520me%2520a%2520chill%2520late-night%2520synthwave%2520playlist" alt="iMessage SMS QR" class="sidebar-qr-thumb">
                         <img id="sidebarTgQrThumb" src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&margin=2&data=https%3A%2F%2Ft.me%2FMP3audioBot%3Fstart%3Dwelcome" alt="Telegram QR" class="sidebar-qr-thumb">
                         <img id="sidebarWaQrThumb" src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&margin=2&data=https%3A%2F%2Fwa.me%2F%3Ftext%3DSend%2520me%2520a%2520chill%2520late-night%2520synthwave%2520playlist" alt="WhatsApp QR" class="sidebar-qr-thumb">
                     </div>
                     <div class="sidebar-qr-card-info">
-                        <strong>📸 Scan to Chat &amp; Listen</strong>
-                        <span>Point camera to listen to playlists directly on Telegram &amp; WhatsApp &rarr;</span>
+                        <strong>📸 Scan to Chat &amp; Stream</strong>
+                        <span>Text on iMessage/SMS, Telegram &amp; WhatsApp for Apple Music, Spotify &amp; MP3s &rarr;</span>
                     </div>
                 </div>
 
                 <div class="channel-buttons-grid">
+                    <a id="sidebarSmsLink" href="sms:?&body=Send%20me%20a%20chill%20late-night%20synthwave%20playlist"
+                        class="channel-pill sms-pill" title="Text MP3aud.io on iPhone Messages or SMS">
+                        <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+                            <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 10H6v-2h12v2zm0-3H6V7h12v2z"/>
+                        </svg>
+                        <div class="channel-pill-text">
+                            <strong>iMessage / SMS</strong>
+                            <span id="sidebarSmsSub">+1 (800) MP3-AUD</span>
+                        </div>
+                    </a>
+
                     <a id="sidebarTelegramLink" href="https://t.me/MP3audioBot?start=welcome" target="_blank" rel="noopener"
                         class="channel-pill telegram-pill" title="Open MP3aud.io Assistant in Telegram">
                         <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
@@ -2680,15 +2692,15 @@ body.messenger-body {
     </div>
 
     <!-- =====================================================
-         MODAL 1: WHATSAPP & TELEGRAM BOT HUB (QR CODES & PLAYLIST LISTENING)
+         MODAL 1: WHATSAPP, TELEGRAM & iMESSAGE/SMS BOT HUB (QR CODES & PLAYLIST STREAMING)
          ===================================================== -->
     <div id="botConnectModal" class="modal" role="dialog" aria-labelledby="botConnectTitle" aria-hidden="true">
-        <div class="modal-content bot-modal-content" style="max-width: 740px;">
+        <div class="modal-content bot-modal-content" style="max-width: 900px;">
             <span class="close" onclick="closeModal('botConnectModal')" aria-label="Close modal">&times;</span>
             <div class="bot-modal-header">
                 <span class="bot-eyebrow">📱 MOBILE MESSAGING ASSISTANT</span>
-                <h2 id="botConnectTitle">Scan QR Code to Chat &amp; Listen on Your Phone</h2>
-                <p>Point your phone camera at either QR code below to launch the MP3aud.io chat bot. Generate personalized playlists that you can <strong>listen to directly inside Telegram</strong>!</p>
+                <h2 id="botConnectTitle">Scan QR Code to Chat &amp; Stream on Your Phone</h2>
+                <p>Point your camera at any QR code below to chat with MP3aud.io on <strong>iMessage / SMS</strong>, <strong>Telegram</strong>, or <strong>WhatsApp</strong>. Get curated playlists with 1-tap links to <strong>Apple Music</strong>, <strong>Spotify</strong> &amp; <strong>YouTube Music</strong>, or listen to playable audio and download 320kbps MP3s!</p>
             </div>
 
             <!-- 3-Step Visual Instruction Strip -->
@@ -2699,15 +2711,60 @@ body.messenger-body {
                 </div>
                 <div class="modal-step-item">
                     <span class="modal-step-num">2</span>
-                    <span>Point camera at either QR code &amp; tap yellow link</span>
+                    <span>Point camera at any QR code &amp; tap banner link</span>
                 </div>
                 <div class="modal-step-item">
                     <span class="modal-step-num">3</span>
-                    <span>Tap <strong>Start</strong> to generate &amp; play audio directly in chat!</span>
+                    <span>Tap <strong>Send</strong> to get instant playlists in Apple Music, Spotify &amp; MP3!</span>
                 </div>
             </div>
 
             <div class="bot-cards-grid">
+                <!-- iMessage & SMS Text Card (Twilio Phone Number) -->
+                <div class="bot-connect-card sms-card">
+                    <div class="bot-card-top">
+                        <div class="bot-platform-badge sms-badge">
+                            <strong>
+                                <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" style="color:#007aff;"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 10H6v-2h12v2zm0-3H6V7h12v2z"/></svg>
+                                iMessage &amp; SMS Text
+                            </strong>
+                            <span class="bot-status-tag"><span class="live-dot"></span> <span id="smsBotNumberDisplay">+1 (800) MP3-AUD</span> • Active</span>
+                        </div>
+                    </div>
+
+                    <div class="bot-qr-container">
+                        <img id="smsQrImage"
+                            src="https://api.qrserver.com/v1/create-qr-code/?size=240x240&margin=8&data=sms%3A%3F%26body%3DSend%2520me%2520a%2520chill%2520late-night%2520synthwave%2520playlist"
+                            alt="iMessage & SMS QR Code" class="bot-qr-img">
+                        <span class="bot-qr-caption">📷 Scan with iPhone / Android Camera</span>
+                    </div>
+
+                    <div class="bot-features-list">
+                        <div class="bot-feature-item">
+                            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                            <span><strong>Apple Messages &amp; SMS:</strong> no app download needed</span>
+                        </div>
+                        <div class="bot-feature-item">
+                            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                            <span>1-tap links for <strong>Apple Music</strong>, <strong>Spotify</strong> &amp; <strong>YouTube Music</strong></span>
+                        </div>
+                        <div class="bot-feature-item">
+                            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                            <span>High-res album art MMS + 320kbps MP3 / ZIP downloads</span>
+                        </div>
+                    </div>
+
+                    <div class="bot-actions-row">
+                        <a id="modalSmsBtn" href="sms:?&body=Send%20me%20a%20chill%20late-night%20synthwave%20playlist"
+                            class="bot-launch-btn sms-launch-btn">
+                            💬 Text on iPhone (iMessage) &rarr;
+                        </a>
+                        <button type="button" class="bot-copy-btn" onclick="copyBotLink('sms')" title="Copy phone number">
+                            📋 Copy
+                        </button>
+                    </div>
+                </div>
+
                 <!-- Telegram Bot Card -->
                 <div class="bot-connect-card telegram-card">
                     <div class="bot-card-top">
@@ -2815,9 +2872,13 @@ body.messenger-body {
 
             <!-- Webhook & Bot Admin Setup Accordion -->
             <details class="bot-webhook-details">
-                <summary>⚙️ Bot Owner / Webhook Configuration (Optional Telegram &amp; WhatsApp API Setup)</summary>
+                <summary>⚙️ Bot Owner &amp; Webhook Setup (Twilio SMS / iMessage, Telegram &amp; WhatsApp)</summary>
                 <div class="bot-webhook-body">
-                    <p>Your backend is equipped with live webhook endpoints for both <strong>Telegram Bot API</strong> and <strong>WhatsApp (Twilio &amp; Meta Cloud API)</strong>:</p>
+                    <p>Your backend provides live webhooks for <strong>Twilio SMS &amp; iMessage</strong>, <strong>Telegram Bot API</strong>, and <strong>WhatsApp Cloud API</strong>:</p>
+                    <div class="webhook-url-row">
+                        <label>Twilio SMS / iMessage Webhook:</label>
+                        <code id="webhookSmsUrlDisplay">https://audio-converter-backend.onrender.com/webhook/sms</code>
+                    </div>
                     <div class="webhook-url-row">
                         <label>Telegram Webhook URL:</label>
                         <code id="webhookTgUrlDisplay">https://audio-converter-backend.onrender.com/webhook/telegram</code>
@@ -2825,6 +2886,11 @@ body.messenger-body {
                     <div class="webhook-url-row">
                         <label>WhatsApp Webhook URL:</label>
                         <code id="webhookWaUrlDisplay">https://audio-converter-backend.onrender.com/webhook/whatsapp</code>
+                    </div>
+                    <div class="tg-token-setup-row" style="margin-bottom: 8px;">
+                        <input type="text" id="twilioPhoneInput"
+                            placeholder="Twilio SMS / iMessage Number (e.g. +1 800 555 0199)">
+                        <button type="button" id="saveTwilioPhoneBtn" style="white-space: nowrap;">Save Twilio Phone</button>
                     </div>
                     <div class="tg-token-setup-row" style="margin-bottom: 8px;">
                         <input type="text" id="tgPhoneInput"
