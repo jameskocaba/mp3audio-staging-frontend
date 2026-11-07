@@ -1954,3 +1954,57 @@ body.messenger-body {
         display: none;
     }
 }
+
+/* Hide all server download buttons to keep render bandwidth low */
+.btn-download-playlist-zip,
+.btn-track-mp3,
+#miniDownloadMp3Btn,
+.bubble-conversion-container {
+    display: none !important;
+}
+
+/* In-Chat Paywall Card when 5 Free Playlists Limit Reached */
+.chat-paywall-card {
+    margin-top: 12px;
+    padding: 16px 18px;
+    background: linear-gradient(135deg, rgba(255, 85, 0, 0.14), rgba(24, 34, 41, 0.96));
+    border: 1px solid rgba(255, 85, 0, 0.38);
+    border-radius: var(--radius-md);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.paywall-badge {
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    color: var(--brand-orange);
+    text-transform: uppercase;
+}
+.chat-paywall-card p {
+    font-size: 0.92rem;
+    line-height: 1.45;
+    color: var(--text-primary);
+    margin: 0;
+}
+.paywall-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 4px;
+}
+.btn-paywall-buy {
+    background: var(--brand-orange);
+    color: #fff;
+    border: none;
+    padding: 10px 18px;
+    font-size: 0.88rem;
+    font-weight: 700;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: background 0.15s ease, transform 0.1s ease;
+}
+.btn-paywall-buy:hover {
+    background: var(--brand-orange-hover);
+    transform: translateY(-1px);
+}

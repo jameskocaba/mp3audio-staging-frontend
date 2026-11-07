@@ -1419,16 +1419,16 @@ document.addEventListener('DOMContentLoaded', () => {
             };
         }
 
-        // 6. How-To / Feature / Pricing / Download / Ringtone / Platform Follow-Up Questions
+        // 6. How-To / Feature / Pricing / Streaming Follow-Up Questions
         if (/\b(how do i download|how to download|download all|download zip|where do i download|save mp3|get the zip)\b/i.test(lower)) {
             return {
                 success: true,
                 mode: 'chat',
-                reply: `Downloading is super easy! 📦\n\n• **For a single song:** Just click the **⬇ MP3** button on the right side of any track bubble to extract the full 320kbps MP3 with embedded Apple Music HD cover art.\n• **For the whole playlist:** Click the orange **📦 Download Playlist (.ZIP)** button at the top of the playlist card to bundle all tracks into one 1-click ZIP archive!`,
+                reply: `To keep streaming ultra-fast, responsive, and bandwidth-light, MP3aud.io connects directly with **Apple Music**, **Spotify**, and **YouTube Music**! ⚡\n\nWhenever I curate a playlist or track for you:\n• Tap 🍎 **Apple Music**, 🟢 **Spotify**, or 🔴 **YouTube Music** to stream and save it instantly in your music app.\n• Tap play on any audio bubble in the chat to preview tracks immediately!\n• Tap **📋 Copy Tracklist** or **📥 Export .M3U8** to transfer your mix anywhere.`,
                 suggestions: [
-                    `📱 How do I make a phone ringtone?`,
-                    `💰 Is this free or how do credits work?`,
-                    `🌙 Curate a synthwave playlist`
+                    `🌙 Curate a synthwave playlist`,
+                    `💰 How do credits work?`,
+                    `🔥 Send me today's top hits`
                 ],
                 tracks: []
             };
@@ -1438,11 +1438,11 @@ document.addEventListener('DOMContentLoaded', () => {
             return {
                 success: true,
                 mode: 'chat',
-                reply: `Here's how to set any track as your custom phone ringtone 📱:\n\n1. **Toggle on "📱 Ringtone"** in the top bar (or just tell me *"Make a ringtone of [Song]"*) and click **⬇ Ringtone**.\n2. **On Android:** Open **Settings → Sound & vibration → Phone ringtone → + Add Ringtone** and pick your downloaded `.mp3`!\n3. **On iPhone:** Open your downloaded `.m4r` / `.mp3` in Apple's free **GarageBand** app → long-press the project → **Share → Ringtone → Export**!\n\nWhat song should we turn into a ringtone first?`,
+                reply: `You can listen to 30-second audio preview clips of any song right inside the chat! 📱\n\nTo play and save the full tracks, simply tap the 🍎 **Apple Music**, 🟢 **Spotify**, or 🔴 **YouTube Music** buttons on any song bubble to open it directly in your music app!`,
                 suggestions: [
-                    `📱 Make a ringtone of Blinding Lights`,
-                    `📱 Make a ringtone of Track 1`,
-                    `🔥 Curate an upbeat playlist`
+                    `🔥 Curate an upbeat playlist`,
+                    `💰 How do credits work?`,
+                    `🌙 Send me a synthwave playlist`
                 ],
                 tracks: []
             };
@@ -1452,10 +1452,10 @@ document.addEventListener('DOMContentLoaded', () => {
             return {
                 success: true,
                 mode: 'chat',
-                reply: `Here's the breakdown—it's super friendly! ⚡\n\n• **100% Free Forever:** Chatting with me, curating playlists, listening to audio previews in chat, and downloading **1 to 5 tracks per request** (including embedded 1000px Apple Music cover art & ID3 tags) are completely **FREE** with zero signup!\n• **Pay-As-You-Go Credits ($3.99 for 350 Credits):** If you want large playlist ZIPs (6+ tracks at once), AI 320kbps studio mastering (1 credit/track), or AI lyrics transcription (10 credits/track), you can grab 350 non-expiring credits for $3.99 (~$0.01 per track) by clicking **Sign In / Credits** at the top right.`,
+                reply: `Here's how MP3aud.io works—it's super friendly! ⚡\n\n• **24/7 Free Unlimited Chat:** You can chat with me, discover music, explore artists, and get track recommendations 24/7 completely free with zero signup!\n• **5 Free Playlist Generations:** You get 5 free custom playlists curated with playable audio preview bubbles and 1-tap streaming links on Apple Music, Spotify, and YouTube Music.\n• **350 Playlist Credits ($3.99):** Once you've generated 5 playlists, you can top up 350 non-expiring credits for $3.99 (~$0.01 per playlist) by clicking **Sign In / Credits** at the top right.\n\n*(Note: To keep render server bandwidth fast and streaming instant, audio tracks connect directly with Apple Music, Spotify, and YouTube Music!)*`,
                 suggestions: [
-                    `🎧 Curate a freeplaylist right now`,
-                    `🔊 What audio quality are the MP3s?`,
+                    `🎧 Curate a free playlist right now`,
+                    `🍎 How do streaming links work?`,
                     `📲 How do I install the mobile app?`
                 ],
                 tracks: []
@@ -1466,13 +1466,15 @@ document.addEventListener('DOMContentLoaded', () => {
             return {
                 success: true,
                 mode: 'chat',
-                reply: `Every track you download is mastered in **high-bitrate MP3 (up to 320kbps CBR)** and automatically tagged with:\n\n• 🎨 **1000×1000px HD Album Artwork** sourced from Apple Music\n• 🏷️ **Complete ID3v2 Metadata** (Track Title, Artist, Album, Release Year & Genre)\n• 📝 **Optional AI Lyrics Transcription** embedded directly into the MP3's ` + '`USLT`' + ` lyrics tag!\n\nYou can toggle **🎨 HD Cover Art**, **⚡ 320kbps**, **📱 Ringtone**, and **📝 Lyrics** right in the top bar.`,
+                reply: `Every track curated by MP3aud.io includes:\n\n• 🎨 **1000×1000px HD Album Artwork** sourced from Apple Music\n• 🏷️ **Complete Track Metadata** (Track Title, Artist, Album & Year)\n• ⚡ **1-Tap Direct Streaming** into Apple Music, Spotify, and YouTube Music\n• 🎧 **In-Chat Audio Preview Playback** with live seek scrubber!`,
                 suggestions: [
                     `🌙 Send me a synthwave playlist`,
                     `🎸 Send me classic rock legends`,
                     `💰 How do credits work?`
                 ],
                 tracks: []
+            };
+        }
             };
         }
 
@@ -1587,7 +1589,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     `🍎 Open in Apple Music`,
                     `🟢 Open in Spotify`,
                     `🔴 Open in YouTube Music`,
-                    `📥 Download Playlist (.ZIP)`
+                    `🔄 Curate a new playlist`
                 ],
                 tracks: []
             };
@@ -2355,6 +2357,23 @@ document.addEventListener('DOMContentLoaded', () => {
             console.warn('iTunes fallback search error:', err);
         }
 
+        const storedUsed = parseInt(localStorage.getItem('mp3audio_free_playlists_used') || '0', 10);
+        const storedCredits = parseInt(document.getElementById('paidCreditsDisplay')?.textContent || '0', 10);
+        if (wantsPlaylist && storedUsed >= 5 && storedCredits < 1) {
+            return {
+                success: false,
+                requires_payment: true,
+                mode: 'chat',
+                reply: "⚡ **You've used all 5 of your free playlist generations!**\n\nYou can continue chatting with me about music, artists, and songs 24/7 at no charge. To curate more custom playlists, top up with 350 credits ($3.99) by clicking **Sign In / Credits** at the top right.",
+                suggestions: [
+                    "💳 Buy 350 Credits ($3.99)",
+                    "💬 Tell me a music fact",
+                    "🎵 What was the best album of 1999?"
+                ],
+                tracks: []
+            };
+        }
+
         // If custom search timed out and user wanted a playlist, never stall — serve a fresh rotated playlist!
         if (wantsPlaylist && !isRingtone) {
             const fallbackKey = VIBE_KEYS_LIST[rotationCursor++ % VIBE_KEYS_LIST.length];
@@ -2368,7 +2387,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         return {
             success: true,
-            reply: `I lined up **${cleanQ}** for you! 🎵 Click **⬇ MP3** below to extract and tag the full 320kbps studio audio track:`,
+            reply: `I lined up **${cleanQ}** for you! 🎵 Tap play below to preview, or stream directly in Apple Music, Spotify, or YouTube Music:`,
             follow_up_note: `Want me to put together a full playlist around **${cleanQ}** next?`,
             suggestions: [
                 `🎵 Build a playlist around ${cleanQ}`,
@@ -2453,7 +2472,7 @@ document.addEventListener('DOMContentLoaded', () => {
         globalAudio.currentTime = 0;
         globalAudio.play().catch(err => {
             console.warn('Audio playback blocked or failed:', err);
-            showToast('Could not play stream preview. Try clicking Download MP3.', 'error');
+            showToast('Could not play stream preview. Try opening in Apple Music, Spotify, or YouTube Music.', 'error');
         });
 
         if (miniPlayerBar) {
@@ -2461,13 +2480,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (miniPlayerArt) miniPlayerArt.src = track.artwork_url || 'favicon.png';
             if (miniPlayerTitle) miniPlayerTitle.textContent = track.title || 'Track';
             if (miniPlayerArtist) miniPlayerArtist.textContent = track.artist || 'Artist';
-            if (miniDownloadMp3Btn) {
-                miniDownloadMp3Btn.onclick = () => {
-                    const bubbleEl = document.querySelector(`.track-audio-bubble[data-bubble-id="${track.bubbleId}"]`);
-                    const statusContainer = bubbleEl ? bubbleEl.closest('.assistant-bubble').querySelector('.bubble-conversion-container') : null;
-                    triggerTrackOrPlaylistDownload([track], `${track.artist} - ${track.title}`, statusContainer);
-                };
-            }
+            if (miniDownloadMp3Btn) miniDownloadMp3Btn.style.display = 'none';
         }
         updateAllBubblePlayStates();
     }
@@ -2753,7 +2766,6 @@ document.addEventListener('DOMContentLoaded', () => {
                         <div class="playlist-header-actions">
                             <button type="button" class="btn-play-all-chat" title="Play all tracks sequentially in chat">▶ Play All in Chat</button>
                             <button type="button" class="btn-new-playlist-chat" title="Curate a fresh playlist">🔄 New Playlist</button>
-                            <button type="button" class="btn-download-playlist-zip" title="Download all songs as 320kbps MP3s in one ZIP">📦 Download MP3s (.ZIP)</button>
                         </div>
                     </div>
 
@@ -2841,9 +2853,6 @@ document.addEventListener('DOMContentLoaded', () => {
                             <a href="${escapeHtml(spUrl)}" target="_blank" rel="noopener" class="track-stream-link" title="Open in Spotify">🟢</a>
                             <a href="${escapeHtml(ytUrl)}" target="_blank" rel="noopener" class="track-stream-link" title="Open in YouTube Music">🔴</a>
                         </div>
-                        <button type="button" class="btn-track-mp3" data-idx="${idx}">
-                            ${isRingtoneMode ? '⬇ Ringtone' : '⬇ MP3'}
-                        </button>
                     </div>
                 </div>
             `;
@@ -2899,14 +2908,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 });
             }
-            if (dlBtn) {
-                dlBtn.addEventListener('click', () => {
-                    triggerTrackOrPlaylistDownload([tracks[idx]], `${tracks[idx].artist} - ${tracks[idx].title}`, statusContainer);
-                });
-            }
         });
 
-        // Wire up Playlist-level Play All, New Playlist & Download ZIP buttons
+        // Wire up Playlist-level Play All, New Playlist & Streaming Export buttons
         const playAllBtn = bubbleEl.querySelector('.btn-play-all-chat');
         if (playAllBtn) {
             playAllBtn.addEventListener('click', () => {
@@ -2918,13 +2922,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (newPlaylistBtn) {
             newPlaylistBtn.addEventListener('click', () => {
                 sendUserMessage('Send me a new playlist');
-            });
-        }
-
-        const zipBtn = bubbleEl.querySelector('.btn-download-playlist-zip');
-        if (zipBtn) {
-            zipBtn.addEventListener('click', () => {
-                triggerTrackOrPlaylistDownload(tracks, playlistTitle, statusContainer);
             });
         }
 
@@ -2940,6 +2937,25 @@ document.addEventListener('DOMContentLoaded', () => {
             copyTracklistBtn.addEventListener('click', () => {
                 copyPlaylistTracklist(tracks, playlistTitle);
             });
+        }
+
+        if (payload.requires_payment) {
+            const paywallEl = document.createElement('div');
+            paywallEl.className = 'chat-paywall-card';
+            paywallEl.innerHTML = `
+                <div class="paywall-badge">⚡ 5 FREE PLAYLISTS USED</div>
+                <p>You've used all 5 of your free playlist generations! You can keep chatting with me about music 24/7 at no charge. To curate more custom playlists, top up with 350 credits ($3.99).</p>
+                <div class="paywall-actions">
+                    <button type="button" class="btn-paywall-buy">Buy 350 Credits ($3.99)</button>
+                </div>
+            `;
+            const buyBtn = paywallEl.querySelector('.btn-paywall-buy');
+            if (buyBtn) {
+                buyBtn.addEventListener('click', () => {
+                    openModal('accountModal');
+                });
+            }
+            bubbleEl.appendChild(paywallEl);
         }
     }
 
@@ -3022,23 +3038,31 @@ document.addEventListener('DOMContentLoaded', () => {
                                 }
                             })
                         }, waitTimeoutMs - 2000);
-                        if (resp && resp.ok) {
-                            return await resp.json();
+                        if (resp) {
+                            const data = await resp.json().catch(() => null);
+                            if (data) {
+                                if (data.requires_payment) {
+                                    return data;
+                                }
+                                if (resp.ok && data.success) {
+                                    return data;
+                                }
+                            }
                         }
                         return null;
                     })();
 
                     const raceTimeout = new Promise(resolve => setTimeout(() => resolve(null), waitTimeoutMs));
                     result = await Promise.race([backendCall, raceTimeout]);
-                    if (result && result.success) {
+                    if (result && (result.success || result.requires_payment)) {
                         isBackendAwake = true;
                     }
                 } catch (networkErr) {
                     console.info('Backend assistant offline or timed out, using client fallback:', networkErr);
                 }
 
-                let shouldUseClientCuration = !result || !result.success;
-                if (!shouldUseClientCuration && isAskingForNew && Array.isArray(result.tracks) && result.tracks.length > 0) {
+                let shouldUseClientCuration = (!result || (!result.success && !result.requires_payment));
+                if (!shouldUseClientCuration && !result.requires_payment && isAskingForNew && Array.isArray(result.tracks) && result.tracks.length > 0) {
                     const allAlreadyShown = result.tracks.every(t =>
                         shownTrackKeys.has(`${(t.title || '').toLowerCase()}|${(t.artist || '').toLowerCase()}`)
                     );
@@ -3050,13 +3074,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 if (shouldUseClientCuration) {
                     result = await clientSideCurateFallback(text);
-                } else if (Array.isArray(result.tracks) && result.tracks.length > 0) {
+                } else if (result && !result.requires_payment && Array.isArray(result.tracks) && result.tracks.length > 0) {
                     result.tracks.forEach(t => {
                         shownTrackKeys.add(`${(t.title || '').toLowerCase()}|${(t.artist || '').toLowerCase()}`);
                     });
                     assistantMemory.lastTracks = result.tracks;
                     assistantMemory.lastPlaylistTitle = result.playlist_title || text;
                     if (result.tracks[0] && result.tracks[0].artist) assistantMemory.lastArtist = result.tracks[0].artist;
+                }
+
+                if (result) {
+                    if (result.free_playlists_used !== undefined) {
+                        localStorage.setItem('mp3audio_free_playlists_used', result.free_playlists_used);
+                    }
+                    if (result.credits_remaining !== undefined) {
+                        if (paidCreditsDisplay) paidCreditsDisplay.textContent = result.credits_remaining;
+                        if (headerPaidCreditsDisplay) headerPaidCreditsDisplay.textContent = result.credits_remaining;
+                    }
                 }
             }
 
@@ -3291,19 +3325,22 @@ document.addEventListener('DOMContentLoaded', () => {
             if (paidCreditsDisplay) paidCreditsDisplay.textContent = credits;
             if (headerPaidCreditsDisplay) headerPaidCreditsDisplay.textContent = credits;
 
+            const freePlsUsed = data.playlists_generated || 0;
+            const freePlsRemaining = Math.max(0, 5 - freePlsUsed);
+
             if (data.authenticated && data.email) {
                 if (userDashboard) userDashboard.classList.remove('hidden');
                 if (guestPricingGrid) guestPricingGrid.classList.add('hidden');
                 if (userEmailDisplay) userEmailDisplay.textContent = data.email;
                 if (sidebarAccountLabel) sidebarAccountLabel.textContent = data.email;
-                if (sidebarAccountSub) sidebarAccountSub.textContent = `Logged In • Priority Queue Active`;
+                if (sidebarAccountSub) sidebarAccountSub.textContent = credits > 0 ? `${credits} Credits Available` : `${freePlsRemaining} Free Playlists Left`;
                 if (headerAccountBtnText) headerAccountBtnText.textContent = `${credits} Credits`;
             } else {
                 if (userDashboard) userDashboard.classList.add('hidden');
                 if (guestPricingGrid) guestPricingGrid.classList.remove('hidden');
-                if (sidebarAccountLabel) sidebarAccountLabel.textContent = 'Free Guest Pass';
-                if (sidebarAccountSub) sidebarAccountSub.textContent = '5 Free Tracks/Req • Tap for Credits';
-                if (headerAccountBtnText) headerAccountBtnText.textContent = 'Sign In / Credits';
+                if (sidebarAccountLabel) sidebarAccountLabel.textContent = 'Free Pass';
+                if (sidebarAccountSub) sidebarAccountSub.textContent = `${freePlsRemaining} Free Playlists Left • Tap for Credits`;
+                if (headerAccountBtnText) headerAccountBtnText.textContent = credits > 0 ? `${credits} Credits` : 'Sign In / Credits';
             }
         } catch (e) { }
     }
