@@ -1622,79 +1622,361 @@ body.messenger-body {
     gap: 6px;
 }
 
-/* Bot Connect Modal */
+/* Bot Connect Modal & QR Code Hub */
 .bot-eyebrow {
-    font-size: 0.7rem;
+    font-size: 0.72rem;
     font-weight: 800;
     color: var(--brand-emerald-hover);
-    letter-spacing: 0.06em;
+    letter-spacing: 0.08em;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    text-transform: uppercase;
 }
 
 .bot-cards-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 14px;
-    margin: 16px 0;
+    gap: 16px;
+    margin: 18px 0;
+}
+
+@media (max-width: 680px) {
+    .bot-cards-grid {
+        grid-template-columns: 1fr;
+    }
 }
 
 .bot-connect-card {
-    padding: 16px;
-    border-radius: 12px;
-    background: rgba(255, 255, 255, 0.03);
+    padding: 18px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.035);
     border: 1px solid var(--border-subtle);
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    gap: 12px;
+    gap: 14px;
+    transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.bot-connect-card.telegram-card {
+    border-top: 3px solid var(--telegram-blue);
+}
+.bot-connect-card.telegram-card:hover {
+    border-color: rgba(36, 161, 222, 0.5);
+    box-shadow: 0 8px 24px rgba(36, 161, 222, 0.14);
+}
+
+.bot-connect-card.whatsapp-card {
+    border-top: 3px solid var(--whatsapp-green);
+}
+.bot-connect-card.whatsapp-card:hover {
+    border-color: rgba(37, 211, 102, 0.5);
+    box-shadow: 0 8px 24px rgba(37, 211, 102, 0.14);
 }
 
 .bot-card-top {
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
-    gap: 10px;
+    gap: 12px;
 }
 
 .bot-platform-badge {
     display: flex;
     flex-direction: column;
-    gap: 3px;
+    gap: 4px;
 }
 
 .bot-platform-badge strong {
-    font-size: 0.95rem;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    gap: 6px;
 }
 
-.bot-platform-badge span {
-    font-size: 0.75rem;
-    color: var(--text-secondary);
+.bot-status-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.72rem;
+    color: #4ade80;
+    font-weight: 600;
+}
+.bot-status-tag .live-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #4ade80;
+    box-shadow: 0 0 6px #4ade80;
+    display: inline-block;
+}
+
+.bot-qr-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 12px;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+    margin: 4px auto;
 }
 
 .bot-qr-img {
-    width: 84px;
-    height: 84px;
-    border-radius: 8px;
-    background: #ffffff;
-    padding: 4px;
+    width: 160px;
+    height: 160px;
+    display: block;
+    border-radius: 6px;
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+}
+
+.bot-qr-caption {
+    margin-top: 6px;
+    font-size: 0.68rem;
+    color: #475569;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.bot-features-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin: 4px 0;
+}
+
+.bot-feature-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+}
+
+.bot-feature-item svg {
+    color: #38bdf8;
+    flex-shrink: 0;
+}
+.whatsapp-card .bot-feature-item svg {
+    color: #4ade80;
+}
+
+.bot-actions-row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 8px;
 }
 
 .bot-launch-btn {
-    display: block;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
     text-align: center;
     padding: 10px 14px;
     border-radius: 8px;
     font-weight: 700;
-    font-size: 0.84rem;
+    font-size: 0.85rem;
     text-decoration: none;
     color: #ffffff;
+    transition: opacity 0.15s ease, transform 0.15s ease;
+}
+.bot-launch-btn:hover {
+    opacity: 0.92;
+    transform: translateY(-1px);
 }
 
 .tg-launch-btn {
-    background: var(--telegram-blue);
+    background: linear-gradient(135deg, #24A1DE 0%, #1d82b4 100%);
 }
 
 .wa-launch-btn {
-    background: #1da851;
+    background: linear-gradient(135deg, #25D366 0%, #1da851 100%);
+}
+
+.bot-copy-btn {
+    padding: 8px 12px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid var(--border-subtle);
+    color: var(--text-primary);
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    white-space: nowrap;
+}
+.bot-copy-btn:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.25);
+}
+
+/* Quick Vibe Chips inside QR Modal */
+.modal-vibe-presets-row {
+    margin: 14px 0 6px;
+    padding: 12px 14px;
+    background: rgba(0, 0, 0, 0.22);
+    border-radius: 10px;
+    border: 1px solid var(--border-subtle);
+}
+.modal-vibe-presets-title {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 8px;
+}
+.modal-vibe-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+}
+.modal-vibe-chip {
+    padding: 5px 11px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid var(--border-subtle);
+    font-size: 0.76rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+.modal-vibe-chip:hover,
+.modal-vibe-chip.active {
+    background: rgba(36, 161, 222, 0.2);
+    border-color: var(--telegram-blue);
+    color: #ffffff;
+}
+
+/* 3-Step Simple Guide */
+.modal-steps-strip {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+    margin: 16px 0;
+    padding: 12px;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 10px;
+    border: 1px solid var(--border-subtle);
+}
+@media (max-width: 600px) {
+    .modal-steps-strip {
+        grid-template-columns: 1fr;
+    }
+}
+.modal-step-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+    line-height: 1.35;
+}
+.modal-step-num {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: rgba(0, 168, 132, 0.2);
+    border: 1px solid var(--brand-emerald-hover);
+    color: var(--brand-emerald-hover);
+    font-weight: 800;
+    font-size: 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+/* Sidebar QR Preview Card */
+.sidebar-qr-card {
+    padding: 10px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--border-subtle);
+    border-radius: 10px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    transition: border-color 0.18s ease, background 0.18s ease, transform 0.18s ease;
+}
+.sidebar-qr-card:hover {
+    background: rgba(255, 255, 255, 0.07);
+    border-color: rgba(36, 161, 222, 0.4);
+    transform: translateY(-1px);
+}
+.sidebar-qr-thumbs {
+    display: flex;
+    gap: 5px;
+    flex-shrink: 0;
+}
+.sidebar-qr-thumb {
+    width: 44px;
+    height: 44px;
+    border-radius: 6px;
+    background: #ffffff;
+    padding: 2px;
+    display: block;
+}
+.sidebar-qr-card-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+.sidebar-qr-card-info strong {
+    font-size: 0.8rem;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+.sidebar-qr-card-info span {
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+    line-height: 1.3;
+}
+
+/* Welcome Bubble QR Strip */
+.welcome-qr-strip {
+    margin-top: 12px;
+    padding: 10px 14px;
+    background: linear-gradient(135deg, rgba(36, 161, 222, 0.14) 0%, rgba(37, 211, 102, 0.14) 100%);
+    border: 1px solid rgba(56, 189, 248, 0.3);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    cursor: pointer;
+    transition: all 0.18s ease;
+}
+.welcome-qr-strip:hover {
+    background: linear-gradient(135deg, rgba(36, 161, 222, 0.22) 0%, rgba(37, 211, 102, 0.22) 100%);
+    border-color: rgba(56, 189, 248, 0.6);
+    transform: translateY(-1px);
+}
+.welcome-qr-strip-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.welcome-qr-strip-left strong {
+    font-size: 0.83rem;
+    color: #ffffff;
+}
+.welcome-qr-strip-action {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #38bdf8;
+    white-space: nowrap;
 }
 
 .bot-webhook-details {
@@ -2033,10 +2315,23 @@ body.messenger-body {
             <div class="sidebar-section messaging-channels-section">
                 <div class="sidebar-section-header">
                     <span>TEXT US ON YOUR PHONE</span>
-                    <button type="button" class="channel-setup-link" onclick="openModal('botConnectModal')">QR &amp; Setup</button>
+                    <button type="button" class="channel-setup-link" onclick="openModal('botConnectModal')">📱 Scan QR</button>
                 </div>
+
+                <!-- Instant QR Preview Card -->
+                <div class="sidebar-qr-card" onclick="openModal('botConnectModal')" title="Click to view full QR Codes">
+                    <div class="sidebar-qr-thumbs">
+                        <img id="sidebarTgQrThumb" src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&margin=2&data=https%3A%2F%2Ft.me%2FMP3audioBot%3Fstart%3Dwelcome" alt="Telegram QR" class="sidebar-qr-thumb">
+                        <img id="sidebarWaQrThumb" src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&margin=2&data=https%3A%2F%2Fwa.me%2F%3Ftext%3DSend%2520me%2520a%2520chill%2520late-night%2520synthwave%2520playlist" alt="WhatsApp QR" class="sidebar-qr-thumb">
+                    </div>
+                    <div class="sidebar-qr-card-info">
+                        <strong>📸 Scan to Chat &amp; Listen</strong>
+                        <span>Point camera to listen to playlists directly on Telegram &amp; WhatsApp &rarr;</span>
+                    </div>
+                </div>
+
                 <div class="channel-buttons-grid">
-                    <a id="sidebarTelegramLink" href="https://t.me/MP3audioBot" target="_blank" rel="noopener"
+                    <a id="sidebarTelegramLink" href="https://t.me/MP3audioBot?start=welcome" target="_blank" rel="noopener"
                         class="channel-pill telegram-pill" title="Open MP3aud.io Assistant in Telegram">
                         <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
                             <path
@@ -2044,7 +2339,7 @@ body.messenger-body {
                         </svg>
                         <div class="channel-pill-text">
                             <strong>Telegram Bot</strong>
-                            <span>@MP3audioBot</span>
+                            <span id="sidebarTgSub">@MP3audioBot</span>
                         </div>
                     </a>
 
@@ -2058,7 +2353,7 @@ body.messenger-body {
                         </svg>
                         <div class="channel-pill-text">
                             <strong>WhatsApp Bot</strong>
-                            <span>Instant Audio DM</span>
+                            <span id="sidebarWaSub">Instant Audio DM</span>
                         </div>
                     </a>
                 </div>
@@ -2226,12 +2521,15 @@ body.messenger-body {
                     </label>
 
                     <button type="button" class="header-bot-connect-btn" onclick="openModal('botConnectModal')"
-                        title="Connect on WhatsApp or Telegram">
+                        title="Scan QR Code to chat and listen on Telegram or WhatsApp">
                         <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor"
                             stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                            <rect x="3" y="3" width="7" height="7"></rect>
+                            <rect x="14" y="3" width="7" height="7"></rect>
+                            <rect x="14" y="14" width="7" height="7"></rect>
+                            <rect x="3" y="14" width="7" height="7"></rect>
                         </svg>
-                        <span>WhatsApp / Telegram</span>
+                        <span>📱 Scan QR to Chat</span>
                     </button>
 
                     <button type="button" id="headerLoginLink" class="header-account-btn"
@@ -2248,13 +2546,28 @@ body.messenger-body {
                     <span>ENCRYPTED MUSIC MESSENGER &bull; INSTANT MP3 &amp; PLAYLIST DELIVERY</span>
                 </div>
 
-                                                <!-- Assistant Welcome Bubble -->
+                <!-- Assistant Welcome Bubble -->
                 <div class="msg-row assistant-row">
                     <div class="msg-avatar">🎧</div>
                     <div class="msg-bubble assistant-bubble welcome-bubble">
                         <div class="msg-sender-name">MP3aud.io Assistant <span class="msg-time">Just now</span></div>
                         <div class="msg-text">
                             <p>Hey! 👋 How's your day going? We can chat about whatever's on your mind, talk about your favorite artists, or whenever you'd like me to put together a playlist or pull up a song, just let me know.</p>
+                            
+                            <!-- Quick Scan to Chat & Listen Banner -->
+                            <div class="welcome-qr-strip" onclick="openModal('botConnectModal')" title="Scan QR Code to listen directly in Telegram or WhatsApp">
+                                <div class="welcome-qr-strip-left">
+                                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#38bdf8" stroke-width="2">
+                                        <rect x="3" y="3" width="7" height="7"></rect>
+                                        <rect x="14" y="3" width="7" height="7"></rect>
+                                        <rect x="14" y="14" width="7" height="7"></rect>
+                                        <rect x="3" y="14" width="7" height="7"></rect>
+                                    </svg>
+                                    <strong>Want to listen directly in Telegram or WhatsApp?</strong>
+                                </div>
+                                <span class="welcome-qr-strip-action">Scan QR Code &rarr;</span>
+                            </div>
+
                             <div class="server-wake-notice" style="margin-top: 10px; padding: 9px 12px; background: rgba(59, 130, 246, 0.12); border-left: 3px solid #3b82f6; border-radius: 6px; font-size: 0.82rem; color: #93c5fd; line-height: 1.45;">
                                 ⏱️ <strong>Note:</strong> If the chat bot was asleep, it will wake up in about <strong>60 seconds</strong> on your first message. Once awake, real-time AI conversation and instant track curation are active!
                             </div>
@@ -2367,15 +2680,31 @@ body.messenger-body {
     </div>
 
     <!-- =====================================================
-         MODAL 1: WHATSAPP & TELEGRAM BOT HUB (QR CODES + WEBHOOK SETUP)
+         MODAL 1: WHATSAPP & TELEGRAM BOT HUB (QR CODES & PLAYLIST LISTENING)
          ===================================================== -->
     <div id="botConnectModal" class="modal" role="dialog" aria-labelledby="botConnectTitle" aria-hidden="true">
-        <div class="modal-content bot-modal-content">
+        <div class="modal-content bot-modal-content" style="max-width: 740px;">
             <span class="close" onclick="closeModal('botConnectModal')" aria-label="Close modal">&times;</span>
             <div class="bot-modal-header">
-                <span class="bot-eyebrow">📱 MOBILE MESSAGING INTEGRATION</span>
-                <h2 id="botConnectTitle">Text MP3aud.io on WhatsApp &amp; Telegram</h2>
-                <p>Chat with your personal music assistant directly from your phone's messaging app to receive playable tracks and 1-click MP3/ZIP downloads on the go.</p>
+                <span class="bot-eyebrow">📱 MOBILE MESSAGING ASSISTANT</span>
+                <h2 id="botConnectTitle">Scan QR Code to Chat &amp; Listen on Your Phone</h2>
+                <p>Point your phone camera at either QR code below to launch the MP3aud.io chat bot. Generate personalized playlists that you can <strong>listen to directly inside Telegram</strong>!</p>
+            </div>
+
+            <!-- 3-Step Visual Instruction Strip -->
+            <div class="modal-steps-strip">
+                <div class="modal-step-item">
+                    <span class="modal-step-num">1</span>
+                    <span>Open Camera app on your iPhone or Android</span>
+                </div>
+                <div class="modal-step-item">
+                    <span class="modal-step-num">2</span>
+                    <span>Point camera at either QR code &amp; tap yellow link</span>
+                </div>
+                <div class="modal-step-item">
+                    <span class="modal-step-num">3</span>
+                    <span>Tap <strong>Start</strong> to generate &amp; play audio directly in chat!</span>
+                </div>
             </div>
 
             <div class="bot-cards-grid">
@@ -2383,43 +2712,110 @@ body.messenger-body {
                 <div class="bot-connect-card telegram-card">
                     <div class="bot-card-top">
                         <div class="bot-platform-badge tg-badge">
-                            <strong>Telegram Bot</strong>
-                            <span id="tgBotHandleDisplay">@MP3audioBot</span>
+                            <strong>
+                                <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" style="color:var(--telegram-blue);"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z" /></svg>
+                                Telegram Music Bot
+                            </strong>
+                            <span class="bot-status-tag"><span class="live-dot"></span> <span id="tgBotHandleDisplay">@MP3audioBot</span> • Live</span>
                         </div>
-                        <img id="tgQrImage"
-                            src="https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=https%3A%2F%2Ft.me%2FMP3audioBot"
-                            alt="Telegram Bot QR Code" class="bot-qr-img">
                     </div>
-                    <p class="bot-card-desc">Send any song title, artist, mood playlist, or link and receive native playable audio bubbles + full ZIP archives inside Telegram.</p>
-                    <a id="modalTelegramBtn" href="https://t.me/MP3audioBot" target="_blank" rel="noopener"
-                        class="bot-launch-btn tg-launch-btn">
-                        Open in Telegram &rarr;
-                    </a>
+
+                    <div class="bot-qr-container">
+                        <img id="tgQrImage"
+                            src="https://api.qrserver.com/v1/create-qr-code/?size=240x240&margin=8&data=https%3A%2F%2Ft.me%2FMP3audioBot%3Fstart%3Dwelcome"
+                            alt="Telegram Bot QR Code" class="bot-qr-img">
+                        <span class="bot-qr-caption">📷 Scan with Camera</span>
+                    </div>
+
+                    <div class="bot-features-list">
+                        <div class="bot-feature-item">
+                            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                            <span><strong>Listen directly in Telegram:</strong> playable audio bubbles</span>
+                        </div>
+                        <div class="bot-feature-item">
+                            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                            <span>Background lockscreen playback &amp; sequential playlist</span>
+                        </div>
+                        <div class="bot-feature-item">
+                            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                            <span>1-click 320kbps MP3 &amp; ZIP downloads with cover art</span>
+                        </div>
+                    </div>
+
+                    <div class="bot-actions-row">
+                        <a id="modalTelegramBtn" href="https://t.me/MP3audioBot?start=welcome" target="_blank" rel="noopener"
+                            class="bot-launch-btn tg-launch-btn">
+                            Open in Telegram &rarr;
+                        </a>
+                        <button type="button" class="bot-copy-btn" onclick="copyBotLink('telegram')" title="Copy link to share">
+                            📋 Copy
+                        </button>
+                    </div>
                 </div>
 
                 <!-- WhatsApp Bot Card -->
                 <div class="bot-connect-card whatsapp-card">
                     <div class="bot-card-top">
                         <div class="bot-platform-badge wa-badge">
-                            <strong>WhatsApp Assistant</strong>
-                            <span id="waBotNumberDisplay">Instant Audio DM</span>
+                            <strong>
+                                <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" style="color:var(--whatsapp-green);"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.617-.087-.116-.708-.94-.708-1.793s.448-1.273.607-1.446c.159-.173.346-.217.462-.217l.332.006c.106.005.249-.04.39.298.144.347.491 1.2.534 1.287.043.087.072.188.014.304-.058.116-.087.188-.173.289l-.26.304c-.087.086-.177.18-.076.354.101.174.449.741.964 1.201.662.591 1.221.774 1.394.86s.274.072.376-.043c.101-.116.433-.506.549-.68.116-.173.231-.145.39-.087s1.011.477 1.184.564.289.13.332.202c.045.072.045.419-.1.824zm-3.423-14.416c-6.627 0-12 5.373-12 12 0 2.126.556 4.124 1.533 5.862l-1.533 5.602 5.736-1.504c1.693.922 3.633 1.447 5.695 1.447 6.627 0 12-5.373 12-12s-5.373-12-11.431-11.407z" /></svg>
+                                WhatsApp Assistant
+                            </strong>
+                            <span class="bot-status-tag"><span class="live-dot"></span> <span id="waBotNumberDisplay">Instant Audio DM</span> • Active</span>
                         </div>
-                        <img id="waQrImage"
-                            src="https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=https%3A%2F%2Fwa.me%2F%3Ftext%3DSend%2520me%2520a%2520chill%2520late-night%2520synthwave%2520playlist"
-                            alt="WhatsApp Bot QR Code" class="bot-qr-img">
                     </div>
-                    <p class="bot-card-desc">Text our WhatsApp bot for instant playlist curation, audio previews, custom ringtones, and 1-click MP3 download links.</p>
-                    <a id="modalWhatsappBtn"
-                        href="https://wa.me/?text=Send%20me%20a%20chill%20late-night%20synthwave%20playlist"
-                        target="_blank" rel="noopener" class="bot-launch-btn wa-launch-btn">
-                        Open in WhatsApp &rarr;
-                    </a>
+
+                    <div class="bot-qr-container">
+                        <img id="waQrImage"
+                            src="https://api.qrserver.com/v1/create-qr-code/?size=240x240&margin=8&data=https%3A%2F%2Fwa.me%2F%3Ftext%3DSend%2520me%2520a%2520chill%2520late-night%2520synthwave%2520playlist"
+                            alt="WhatsApp Bot QR Code" class="bot-qr-img">
+                        <span class="bot-qr-caption">📷 Scan with Camera</span>
+                    </div>
+
+                    <div class="bot-features-list">
+                        <div class="bot-feature-item">
+                            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                            <span><strong>Text any vibe, mood or artist:</strong> instant replies</span>
+                        </div>
+                        <div class="bot-feature-item">
+                            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                            <span>Direct audio message clips delivered right to your chat</span>
+                        </div>
+                        <div class="bot-feature-item">
+                            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                            <span>1-click MP3 download links &amp; web stream player</span>
+                        </div>
+                    </div>
+
+                    <div class="bot-actions-row">
+                        <a id="modalWhatsappBtn"
+                            href="https://wa.me/?text=Send%20me%20a%20chill%20late-night%20synthwave%20playlist"
+                            target="_blank" rel="noopener" class="bot-launch-btn wa-launch-btn">
+                            Open in WhatsApp &rarr;
+                        </a>
+                        <button type="button" class="bot-copy-btn" onclick="copyBotLink('whatsapp')" title="Copy link to share">
+                            📋 Copy
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Instant Vibe Selector: Pre-charges the QR Code & Start Deep-Link -->
+            <div class="modal-vibe-presets-row">
+                <div class="modal-vibe-presets-title">⚡ Select a Starter Vibe to Load into QR Code:</div>
+                <div class="modal-vibe-chips">
+                    <button type="button" class="modal-vibe-chip active" onclick="setModalStarterVibe('synthwave', 'chill late-night synthwave playlist', this)">🌙 Synthwave Mix</button>
+                    <button type="button" class="modal-vibe-chip" onclick="setModalStarterVibe('workout', '90s hip hop workout playlist', this)">🏋️ Workout Hype</button>
+                    <button type="button" class="modal-vibe-chip" onclick="setModalStarterVibe('lofi', 'lo-fi study beats playlist', this)">☕ Lo-Fi Study</button>
+                    <button type="button" class="modal-vibe-chip" onclick="setModalStarterVibe('tophits', 'today top hits playlist', this)">🔥 2026 Top Hits</button>
+                    <button type="button" class="modal-vibe-chip" onclick="setModalStarterVibe('rock', 'classic rock anthems playlist', this)">🎸 Classic Rock</button>
+                    <button type="button" class="modal-vibe-chip" onclick="setModalStarterVibe('welcome', 'send me a new playlist', this)">🎲 Surprise Mix</button>
                 </div>
             </div>
 
             <!-- Webhook & Bot Admin Setup Accordion -->
             <details class="bot-webhook-details">
-                <summary>⚙️ Bot Owner / Webhook Configuration (Telegram &amp; WhatsApp API)</summary>
+                <summary>⚙️ Bot Owner / Webhook Configuration (Optional Telegram &amp; WhatsApp API Setup)</summary>
                 <div class="bot-webhook-body">
                     <p>Your backend is equipped with live webhook endpoints for both <strong>Telegram Bot API</strong> and <strong>WhatsApp (Twilio &amp; Meta Cloud API)</strong>:</p>
                     <div class="webhook-url-row">
@@ -2432,7 +2828,7 @@ body.messenger-body {
                     </div>
                     <div class="tg-token-setup-row">
                         <input type="password" id="tgBotTokenInput"
-                            placeholder="Paste Telegram BotFather Token (optional one-click bind)">
+                            placeholder="Paste Telegram BotFather Token (optional custom bind)">
                         <button type="button" id="bindTelegramWebhookBtn">Activate Telegram Webhook</button>
                     </div>
                     <div id="botSetupStatusMsg" class="bot-setup-status"></div>
@@ -5761,50 +6157,83 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // --- WhatsApp & Telegram Bot Info & Webhook Binding ---
-    let isTelegramBotConnected = Boolean(localStorage.getItem('mp3audio_tg_bot_url'));
+    // --- WhatsApp & Telegram Bot Info & QR Code Hub ---
+    window.currentTelegramBotUrl = 'https://t.me/MP3audioBot?start=welcome';
+    window.currentWhatsappBotUrl = 'https://wa.me/?text=Send%20me%20a%20chill%20late-night%20synthwave%20playlist';
+
+    window.copyBotLink = function(platform) {
+        const link = platform === 'telegram' ? window.currentTelegramBotUrl : window.currentWhatsappBotUrl;
+        const name = platform === 'telegram' ? 'Telegram Bot' : 'WhatsApp Assistant';
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(link).then(() => {
+                showToast(`Copied ${name} link to clipboard!`, 'success');
+            }).catch(() => {
+                prompt(`Copy ${name} link:`, link);
+            });
+        } else {
+            prompt(`Copy ${name} link:`, link);
+        }
+    };
+
+    window.setModalStarterVibe = function(vibeKey, promptText, btnEl) {
+        document.querySelectorAll('.modal-vibe-chip').forEach(c => c.classList.remove('active'));
+        if (btnEl) btnEl.classList.add('active');
+
+        const baseTg = (window.currentTelegramBotUrl || 'https://t.me/MP3audioBot').split('?')[0];
+        const tgVibeUrl = `${baseTg}?start=${encodeURIComponent(vibeKey)}`;
+        window.currentTelegramBotUrl = tgVibeUrl;
+
+        const mTg = document.getElementById('modalTelegramBtn');
+        const qTg = document.getElementById('tgQrImage');
+        const thumbTg = document.getElementById('sidebarTgQrThumb');
+        const sTg = document.getElementById('sidebarTelegramLink');
+
+        if (mTg) mTg.href = tgVibeUrl;
+        if (sTg) sTg.href = tgVibeUrl;
+        const tgQr = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&margin=8&data=${encodeURIComponent(tgVibeUrl)}`;
+        if (qTg) qTg.src = tgQr;
+        if (thumbTg) thumbTg.src = `https://api.qrserver.com/v1/create-qr-code/?size=100x100&margin=2&data=${encodeURIComponent(tgVibeUrl)}`;
+
+        const baseWa = (window.currentWhatsappBotUrl || 'https://wa.me/').split('?')[0];
+        const waVibeUrl = `${baseWa}?text=${encodeURIComponent(promptText)}`;
+        window.currentWhatsappBotUrl = waVibeUrl;
+
+        const mWa = document.getElementById('modalWhatsappBtn');
+        const qWa = document.getElementById('waQrImage');
+        const thumbWa = document.getElementById('sidebarWaQrThumb');
+        const sWa = document.getElementById('sidebarWhatsappLink');
+
+        if (mWa) mWa.href = waVibeUrl;
+        if (sWa) sWa.href = waVibeUrl;
+        const waQr = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&margin=8&data=${encodeURIComponent(waVibeUrl)}`;
+        if (qWa) qWa.src = waQr;
+        if (thumbWa) thumbWa.src = `https://api.qrserver.com/v1/create-qr-code/?size=100x100&margin=2&data=${encodeURIComponent(waVibeUrl)}`;
+
+        showToast(`QR Code updated for: ${promptText.slice(0, 30)}...`, 'info');
+    };
 
     function applyTelegramBotUi(tgUrl, tgHandle, isConnected) {
-        isTelegramBotConnected = Boolean(isConnected);
         const sTg = document.getElementById('sidebarTelegramLink');
         const mTg = document.getElementById('modalTelegramBtn');
         const hTg = document.getElementById('tgBotHandleDisplay');
         const qTg = document.getElementById('tgQrImage');
-        const sSub = sTg ? sTg.querySelector('.channel-pill-text span') : null;
+        const thumbTg = document.getElementById('sidebarTgQrThumb');
+        const sSub = document.getElementById('sidebarTgSub');
 
         if (tgUrl) {
             const deepUrl = tgUrl.includes('?') ? tgUrl : `${tgUrl}?start=welcome`;
+            window.currentTelegramBotUrl = deepUrl;
             if (sTg) sTg.href = deepUrl;
             if (mTg) mTg.href = deepUrl;
-            if (qTg) qTg.src = `https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=${encodeURIComponent(deepUrl)}`;
+            const qrSrc = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&margin=8&data=${encodeURIComponent(deepUrl)}`;
+            if (qTg) qTg.src = qrSrc;
+            if (thumbTg) thumbTg.src = `https://api.qrserver.com/v1/create-qr-code/?size=100x100&margin=2&data=${encodeURIComponent(deepUrl)}`;
         }
         if (tgHandle) {
             if (hTg) hTg.textContent = tgHandle;
-            if (sSub) sSub.textContent = isConnected ? tgHandle : 'Tap to Connect Bot';
+            if (sSub) sSub.textContent = tgHandle;
         }
     }
-
-    // Intercept clicks on Telegram buttons if no BotFather token has been linked yet
-    ['sidebarTelegramLink', 'modalTelegramBtn'].forEach(btnId => {
-        const el = document.getElementById(btnId);
-        if (el) {
-            el.addEventListener('click', (e) => {
-                if (!isTelegramBotConnected) {
-                    e.preventDefault();
-                    if (typeof openModal === 'function') openModal('botConnectModal');
-                    const detailsEl = document.querySelector('.bot-webhook-details');
-                    if (detailsEl) detailsEl.open = true;
-                    const tokenInput = document.getElementById('tgBotTokenInput');
-                    if (tokenInput) setTimeout(() => tokenInput.focus(), 120);
-                    const statusMsg = document.getElementById('botSetupStatusMsg');
-                    if (statusMsg) {
-                        statusMsg.innerHTML = `<span style="color:#fbbf24;">⚡ Step 1: Open <a href="https://t.me/BotFather" target="_blank" rel="noopener" style="color:#38bdf8;text-decoration:underline;">@BotFather in Telegram</a> and send <code>/newbot</code>.<br>Step 2: Paste your Bot Token above and click <strong>Activate Telegram Webhook</strong> so the <strong>Start</strong> button in Telegram connects to your assistant!</span>`;
-                    }
-                    showToast('Paste your free @BotFather token to activate your Telegram bot!', 'info');
-                }
-            });
-        }
-    });
 
     // --- Direct Website-Powered Telegram Bot Engine (100% on MP3aud.io Website, Zero Render Setup) ---
     let activeTgPollToken = '';
@@ -6036,25 +6465,30 @@ document.addEventListener('DOMContentLoaded', () => {
         if (savedUrl && savedHandle) {
             applyTelegramBotUi(savedUrl, savedHandle, true);
         } else {
-            applyTelegramBotUi('https://t.me/BotFather', 'Tap to Connect Bot', false);
+            applyTelegramBotUi('https://t.me/MP3audioBot?start=welcome', '@MP3audioBot', true);
         }
 
         try {
             const res = await fetchWithTimeout(`${BACKEND_URL}/api/assistant/bot-info`, {}, 2500);
             if (!res.ok) return;
             const info = await res.json();
-            if (info.telegram_configured && info.telegram_url) {
+            if (info.telegram_url) {
                 localStorage.setItem('mp3audio_tg_bot_url', info.telegram_url);
                 localStorage.setItem('mp3audio_tg_bot_handle', info.telegram_bot_username || '@MP3audioBot');
                 applyTelegramBotUi(info.telegram_url, info.telegram_bot_username, true);
             }
             if (info.whatsapp_url) {
+                window.currentWhatsappBotUrl = info.whatsapp_url;
                 const sWa = document.getElementById('sidebarWhatsappLink');
                 const mWa = document.getElementById('modalWhatsappBtn');
                 const qWa = document.getElementById('waQrImage');
+                const thumbWa = document.getElementById('sidebarWaQrThumb');
+                const hWa = document.getElementById('waBotNumberDisplay');
                 if (sWa) sWa.href = info.whatsapp_url;
                 if (mWa) mWa.href = info.whatsapp_url;
-                if (qWa) qWa.src = `https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=${encodeURIComponent(info.whatsapp_url)}`;
+                if (qWa) qWa.src = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&margin=8&data=${encodeURIComponent(info.whatsapp_url)}`;
+                if (thumbWa) thumbWa.src = `https://api.qrserver.com/v1/create-qr-code/?size=100x100&margin=2&data=${encodeURIComponent(info.whatsapp_url)}`;
+                if (hWa && info.whatsapp_number) hWa.textContent = info.whatsapp_number;
             }
         } catch (e) { }
     }

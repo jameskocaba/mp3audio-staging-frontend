@@ -3097,50 +3097,83 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // --- WhatsApp & Telegram Bot Info & Webhook Binding ---
-    let isTelegramBotConnected = Boolean(localStorage.getItem('mp3audio_tg_bot_url'));
+    // --- WhatsApp & Telegram Bot Info & QR Code Hub ---
+    window.currentTelegramBotUrl = 'https://t.me/MP3audioBot?start=welcome';
+    window.currentWhatsappBotUrl = 'https://wa.me/?text=Send%20me%20a%20chill%20late-night%20synthwave%20playlist';
+
+    window.copyBotLink = function(platform) {
+        const link = platform === 'telegram' ? window.currentTelegramBotUrl : window.currentWhatsappBotUrl;
+        const name = platform === 'telegram' ? 'Telegram Bot' : 'WhatsApp Assistant';
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(link).then(() => {
+                showToast(`Copied ${name} link to clipboard!`, 'success');
+            }).catch(() => {
+                prompt(`Copy ${name} link:`, link);
+            });
+        } else {
+            prompt(`Copy ${name} link:`, link);
+        }
+    };
+
+    window.setModalStarterVibe = function(vibeKey, promptText, btnEl) {
+        document.querySelectorAll('.modal-vibe-chip').forEach(c => c.classList.remove('active'));
+        if (btnEl) btnEl.classList.add('active');
+
+        const baseTg = (window.currentTelegramBotUrl || 'https://t.me/MP3audioBot').split('?')[0];
+        const tgVibeUrl = `${baseTg}?start=${encodeURIComponent(vibeKey)}`;
+        window.currentTelegramBotUrl = tgVibeUrl;
+
+        const mTg = document.getElementById('modalTelegramBtn');
+        const qTg = document.getElementById('tgQrImage');
+        const thumbTg = document.getElementById('sidebarTgQrThumb');
+        const sTg = document.getElementById('sidebarTelegramLink');
+
+        if (mTg) mTg.href = tgVibeUrl;
+        if (sTg) sTg.href = tgVibeUrl;
+        const tgQr = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&margin=8&data=${encodeURIComponent(tgVibeUrl)}`;
+        if (qTg) qTg.src = tgQr;
+        if (thumbTg) thumbTg.src = `https://api.qrserver.com/v1/create-qr-code/?size=100x100&margin=2&data=${encodeURIComponent(tgVibeUrl)}`;
+
+        const baseWa = (window.currentWhatsappBotUrl || 'https://wa.me/').split('?')[0];
+        const waVibeUrl = `${baseWa}?text=${encodeURIComponent(promptText)}`;
+        window.currentWhatsappBotUrl = waVibeUrl;
+
+        const mWa = document.getElementById('modalWhatsappBtn');
+        const qWa = document.getElementById('waQrImage');
+        const thumbWa = document.getElementById('sidebarWaQrThumb');
+        const sWa = document.getElementById('sidebarWhatsappLink');
+
+        if (mWa) mWa.href = waVibeUrl;
+        if (sWa) sWa.href = waVibeUrl;
+        const waQr = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&margin=8&data=${encodeURIComponent(waVibeUrl)}`;
+        if (qWa) qWa.src = waQr;
+        if (thumbWa) thumbWa.src = `https://api.qrserver.com/v1/create-qr-code/?size=100x100&margin=2&data=${encodeURIComponent(waVibeUrl)}`;
+
+        showToast(`QR Code updated for: ${promptText.slice(0, 30)}...`, 'info');
+    };
 
     function applyTelegramBotUi(tgUrl, tgHandle, isConnected) {
-        isTelegramBotConnected = Boolean(isConnected);
         const sTg = document.getElementById('sidebarTelegramLink');
         const mTg = document.getElementById('modalTelegramBtn');
         const hTg = document.getElementById('tgBotHandleDisplay');
         const qTg = document.getElementById('tgQrImage');
-        const sSub = sTg ? sTg.querySelector('.channel-pill-text span') : null;
+        const thumbTg = document.getElementById('sidebarTgQrThumb');
+        const sSub = document.getElementById('sidebarTgSub');
 
         if (tgUrl) {
             const deepUrl = tgUrl.includes('?') ? tgUrl : `${tgUrl}?start=welcome`;
+            window.currentTelegramBotUrl = deepUrl;
             if (sTg) sTg.href = deepUrl;
             if (mTg) mTg.href = deepUrl;
-            if (qTg) qTg.src = `https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=${encodeURIComponent(deepUrl)}`;
+            const qrSrc = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&margin=8&data=${encodeURIComponent(deepUrl)}`;
+            if (qTg) qTg.src = qrSrc;
+            if (thumbTg) thumbTg.src = `https://api.qrserver.com/v1/create-qr-code/?size=100x100&margin=2&data=${encodeURIComponent(deepUrl)}`;
         }
         if (tgHandle) {
             if (hTg) hTg.textContent = tgHandle;
-            if (sSub) sSub.textContent = isConnected ? tgHandle : 'Tap to Connect Bot';
+            if (sSub) sSub.textContent = tgHandle;
         }
     }
-
-    // Intercept clicks on Telegram buttons if no BotFather token has been linked yet
-    ['sidebarTelegramLink', 'modalTelegramBtn'].forEach(btnId => {
-        const el = document.getElementById(btnId);
-        if (el) {
-            el.addEventListener('click', (e) => {
-                if (!isTelegramBotConnected) {
-                    e.preventDefault();
-                    if (typeof openModal === 'function') openModal('botConnectModal');
-                    const detailsEl = document.querySelector('.bot-webhook-details');
-                    if (detailsEl) detailsEl.open = true;
-                    const tokenInput = document.getElementById('tgBotTokenInput');
-                    if (tokenInput) setTimeout(() => tokenInput.focus(), 120);
-                    const statusMsg = document.getElementById('botSetupStatusMsg');
-                    if (statusMsg) {
-                        statusMsg.innerHTML = `<span style="color:#fbbf24;">⚡ Step 1: Open <a href="https://t.me/BotFather" target="_blank" rel="noopener" style="color:#38bdf8;text-decoration:underline;">@BotFather in Telegram</a> and send <code>/newbot</code>.<br>Step 2: Paste your Bot Token above and click <strong>Activate Telegram Webhook</strong> so the <strong>Start</strong> button in Telegram connects to your assistant!</span>`;
-                    }
-                    showToast('Paste your free @BotFather token to activate your Telegram bot!', 'info');
-                }
-            });
-        }
-    });
 
     // --- Direct Website-Powered Telegram Bot Engine (100% on MP3aud.io Website, Zero Render Setup) ---
     let activeTgPollToken = '';
@@ -3372,25 +3405,30 @@ document.addEventListener('DOMContentLoaded', () => {
         if (savedUrl && savedHandle) {
             applyTelegramBotUi(savedUrl, savedHandle, true);
         } else {
-            applyTelegramBotUi('https://t.me/BotFather', 'Tap to Connect Bot', false);
+            applyTelegramBotUi('https://t.me/MP3audioBot?start=welcome', '@MP3audioBot', true);
         }
 
         try {
             const res = await fetchWithTimeout(`${BACKEND_URL}/api/assistant/bot-info`, {}, 2500);
             if (!res.ok) return;
             const info = await res.json();
-            if (info.telegram_configured && info.telegram_url) {
+            if (info.telegram_url) {
                 localStorage.setItem('mp3audio_tg_bot_url', info.telegram_url);
                 localStorage.setItem('mp3audio_tg_bot_handle', info.telegram_bot_username || '@MP3audioBot');
                 applyTelegramBotUi(info.telegram_url, info.telegram_bot_username, true);
             }
             if (info.whatsapp_url) {
+                window.currentWhatsappBotUrl = info.whatsapp_url;
                 const sWa = document.getElementById('sidebarWhatsappLink');
                 const mWa = document.getElementById('modalWhatsappBtn');
                 const qWa = document.getElementById('waQrImage');
+                const thumbWa = document.getElementById('sidebarWaQrThumb');
+                const hWa = document.getElementById('waBotNumberDisplay');
                 if (sWa) sWa.href = info.whatsapp_url;
                 if (mWa) mWa.href = info.whatsapp_url;
-                if (qWa) qWa.src = `https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=${encodeURIComponent(info.whatsapp_url)}`;
+                if (qWa) qWa.src = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&margin=8&data=${encodeURIComponent(info.whatsapp_url)}`;
+                if (thumbWa) thumbWa.src = `https://api.qrserver.com/v1/create-qr-code/?size=100x100&margin=2&data=${encodeURIComponent(info.whatsapp_url)}`;
+                if (hWa && info.whatsapp_number) hWa.textContent = info.whatsapp_number;
             }
         } catch (e) { }
     }
