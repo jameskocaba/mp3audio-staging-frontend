@@ -3134,21 +3134,21 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // --- iMessage, SMS, WhatsApp & Telegram Bot Info & QR Code Hub ---
+    // --- Mobile Web App, WhatsApp & Telegram Bot Info & QR Code Hub ---
+    const currentOrigin = (window.location && window.location.origin) ? window.location.origin : 'https://mp3aud.io';
+    window.currentWebAppUrl = `${currentOrigin}/?q=chill%20late-night%20synthwave%20playlist`;
     window.currentTelegramBotUrl = 'https://t.me/MP3audioBot?start=welcome';
     window.currentWhatsappBotUrl = 'https://wa.me/?text=Send%20me%20a%20chill%20late-night%20synthwave%20playlist';
-    window.currentSmsNumber = '+1 (800) MP3-AUD';
-    window.currentSmsUrl = 'sms:?&body=Send%20me%20a%20chill%20late-night%20synthwave%20playlist';
 
     window.copyBotLink = function(platform) {
-        let link = window.currentTelegramBotUrl;
-        let name = 'Telegram Bot';
-        if (platform === 'whatsapp') {
+        let link = window.currentWebAppUrl;
+        let name = 'Web App Link';
+        if (platform === 'telegram') {
+            link = window.currentTelegramBotUrl;
+            name = 'Telegram Bot';
+        } else if (platform === 'whatsapp') {
             link = window.currentWhatsappBotUrl;
             name = 'WhatsApp Assistant';
-        } else if (platform === 'sms') {
-            link = window.currentSmsNumber || window.currentSmsUrl;
-            name = 'iMessage / SMS Number';
         }
         if (navigator.clipboard && navigator.clipboard.writeText) {
             navigator.clipboard.writeText(link).then(() => {
@@ -3165,7 +3165,24 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('.modal-vibe-chip').forEach(c => c.classList.remove('active'));
         if (btnEl) btnEl.classList.add('active');
 
-        // 1. Update Telegram Bot deep-link & QR code
+        const origin = (window.location && window.location.origin) ? window.location.origin : 'https://mp3aud.io';
+
+        // 1. Update Instant Mobile Web App deep-link & QR code
+        const webAppVibeUrl = `${origin}/?q=${encodeURIComponent(promptText)}`;
+        window.currentWebAppUrl = webAppVibeUrl;
+
+        const mWeb = document.getElementById('modalWebAppBtn');
+        const qWeb = document.getElementById('webAppQrImage');
+        const thumbWeb = document.getElementById('sidebarWebQrThumb');
+        const sWeb = document.getElementById('sidebarWebLink');
+
+        if (mWeb) mWeb.href = webAppVibeUrl;
+        if (sWeb) sWeb.href = webAppVibeUrl;
+        const webQr = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&margin=8&data=${encodeURIComponent(webAppVibeUrl)}`;
+        if (qWeb) qWeb.src = webQr;
+        if (thumbWeb) thumbWeb.src = `https://api.qrserver.com/v1/create-qr-code/?size=100x100&margin=2&data=${encodeURIComponent(webAppVibeUrl)}`;
+
+        // 2. Update Telegram Bot deep-link & QR code
         const baseTg = (window.currentTelegramBotUrl || 'https://t.me/MP3audioBot').split('?')[0];
         const tgVibeUrl = `${baseTg}?start=${encodeURIComponent(vibeKey)}`;
         window.currentTelegramBotUrl = tgVibeUrl;
@@ -3181,7 +3198,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (qTg) qTg.src = tgQr;
         if (thumbTg) thumbTg.src = `https://api.qrserver.com/v1/create-qr-code/?size=100x100&margin=2&data=${encodeURIComponent(tgVibeUrl)}`;
 
-        // 2. Update WhatsApp deep-link & QR code
+        // 3. Update WhatsApp deep-link & QR code
         const baseWa = (window.currentWhatsappBotUrl || 'https://wa.me/').split('?')[0];
         const waVibeUrl = `${baseWa}?text=${encodeURIComponent(promptText)}`;
         window.currentWhatsappBotUrl = waVibeUrl;
@@ -3196,22 +3213,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const waQr = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&margin=8&data=${encodeURIComponent(waVibeUrl)}`;
         if (qWa) qWa.src = waQr;
         if (thumbWa) thumbWa.src = `https://api.qrserver.com/v1/create-qr-code/?size=100x100&margin=2&data=${encodeURIComponent(waVibeUrl)}`;
-
-        // 3. Update iMessage / SMS deep-link & QR code
-        const cleanSmsPhone = (window.currentSmsNumber || '').replace(/[^\d+]/g, '');
-        const smsVibeUrl = cleanSmsPhone ? `sms:${cleanSmsPhone}?&body=${encodeURIComponent(promptText)}` : `sms:?&body=${encodeURIComponent(promptText)}`;
-        window.currentSmsUrl = smsVibeUrl;
-
-        const mSms = document.getElementById('modalSmsBtn');
-        const qSms = document.getElementById('smsQrImage');
-        const thumbSms = document.getElementById('sidebarSmsQrThumb');
-        const sSms = document.getElementById('sidebarSmsLink');
-
-        if (mSms) mSms.href = smsVibeUrl;
-        if (sSms) sSms.href = smsVibeUrl;
-        const smsQr = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&margin=8&data=${encodeURIComponent(smsVibeUrl)}`;
-        if (qSms) qSms.src = smsQr;
-        if (thumbSms) thumbSms.src = `https://api.qrserver.com/v1/create-qr-code/?size=100x100&margin=2&data=${encodeURIComponent(smsVibeUrl)}`;
 
         showToast(`QR Code updated for: ${promptText.slice(0, 30)}...`, 'info');
     };
@@ -3494,75 +3495,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (thumbWa) thumbWa.src = `https://api.qrserver.com/v1/create-qr-code/?size=100x100&margin=2&data=${encodeURIComponent(info.whatsapp_url)}`;
                 if (hWa && info.whatsapp_number) hWa.textContent = info.whatsapp_number;
             }
-            if (info.sms_phone || info.sms_url) {
-                const sPhone = info.sms_phone || '+1 (800) MP3-AUD';
-                const sUrl = info.sms_url || 'sms:?&body=Send%20me%20a%20chill%20late-night%20synthwave%20playlist';
-                window.currentSmsNumber = sPhone;
-                window.currentSmsUrl = sUrl;
-                const sSms = document.getElementById('sidebarSmsLink');
-                const mSms = document.getElementById('modalSmsBtn');
-                const qSms = document.getElementById('smsQrImage');
-                const thumbSms = document.getElementById('sidebarSmsQrThumb');
-                const hSms = document.getElementById('smsBotNumberDisplay');
-                const sSub = document.getElementById('sidebarSmsSub');
-                if (sSms) sSms.href = sUrl;
-                if (mSms) mSms.href = sUrl;
-                if (qSms) qSms.src = info.sms_qr_url || `https://api.qrserver.com/v1/create-qr-code/?size=240x240&margin=8&data=${encodeURIComponent(sUrl)}`;
-                if (thumbSms) thumbSms.src = `https://api.qrserver.com/v1/create-qr-code/?size=100x100&margin=2&data=${encodeURIComponent(sUrl)}`;
-                if (hSms) hSms.textContent = sPhone;
-                if (sSub) sSub.textContent = sPhone;
-            }
+            // Ensure Web App QR code and deep-link are dynamically initialized
+            const origin = (window.location && window.location.origin) ? window.location.origin : 'https://mp3aud.io';
+            const defaultPrompt = 'chill late-night synthwave playlist';
+            const webAppVibeUrl = `${origin}/?q=${encodeURIComponent(defaultPrompt)}`;
+            window.currentWebAppUrl = webAppVibeUrl;
+            const mWeb = document.getElementById('modalWebAppBtn');
+            const qWeb = document.getElementById('webAppQrImage');
+            const thumbWeb = document.getElementById('sidebarWebQrThumb');
+            const sWeb = document.getElementById('sidebarWebLink');
+            if (mWeb) mWeb.href = webAppVibeUrl;
+            if (sWeb) sWeb.href = webAppVibeUrl;
+            const webQr = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&margin=8&data=${encodeURIComponent(webAppVibeUrl)}`;
+            if (qWeb) qWeb.src = webQr;
+            if (thumbWeb) thumbWeb.src = `https://api.qrserver.com/v1/create-qr-code/?size=100x100&margin=2&data=${encodeURIComponent(webAppVibeUrl)}`;
         } catch (e) { }
     }
     loadBotConfig();
-
-    const saveTwilioPhoneBtn = document.getElementById('saveTwilioPhoneBtn');
-    if (saveTwilioPhoneBtn) {
-        saveTwilioPhoneBtn.addEventListener('click', async () => {
-            const phoneInput = document.getElementById('twilioPhoneInput');
-            const statusMsg = document.getElementById('botSetupStatusMsg');
-            const rawPhone = phoneInput ? phoneInput.value.trim() : '';
-            if (!rawPhone) {
-                if (statusMsg) statusMsg.innerHTML = '<span style="color:#f87171;">⚠️ Please enter a Twilio phone number (e.g. +1 800 555 0199).</span>';
-                return;
-            }
-            let cleanPhone = rawPhone.replace(/[^\d+]/g, '');
-            if (!cleanPhone.startsWith('+')) cleanPhone = '+' + cleanPhone;
-
-            const smsUrl = `sms:${cleanPhone}?&body=Send%20me%20a%20chill%20late-night%20synthwave%20playlist`;
-            window.currentSmsNumber = rawPhone;
-            window.currentSmsUrl = smsUrl;
-            localStorage.setItem('mp3audio_sms_phone', rawPhone);
-
-            const mSms = document.getElementById('modalSmsBtn');
-            const qSms = document.getElementById('smsQrImage');
-            const thumbSms = document.getElementById('sidebarSmsQrThumb');
-            const hSms = document.getElementById('smsBotNumberDisplay');
-            const sSub = document.getElementById('sidebarSmsSub');
-            const sSms = document.getElementById('sidebarSmsLink');
-
-            if (mSms) mSms.href = smsUrl;
-            if (sSms) sSms.href = smsUrl;
-            const smsQr = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&margin=8&data=${encodeURIComponent(smsUrl)}`;
-            if (qSms) qSms.src = smsQr;
-            if (thumbSms) thumbSms.src = `https://api.qrserver.com/v1/create-qr-code/?size=100x100&margin=2&data=${encodeURIComponent(smsUrl)}`;
-            if (hSms) hSms.textContent = rawPhone;
-            if (sSub) sSub.textContent = rawPhone;
-
-            try {
-                fetch(`${BACKEND_URL}/api/bot/setup-sms`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ twilio_phone: rawPhone })
-                }).catch(() => {});
-            } catch (e) {}
-
-            if (statusMsg) {
-                statusMsg.innerHTML = `<span style="color:#4ade80;">✅ Twilio Phone Number Set: <strong>${escapeHtml(rawPhone)}</strong>!<br>QR code updated to open Apple Messages directly! Set your Twilio SMS webhook to <code>${BACKEND_URL}/webhook/sms</code></span>`;
-            }
-            showToast(`Twilio SMS / iMessage QR updated to ${rawPhone}!`, 'success');
-        });
-    }
 
     const saveTgPhoneBtn = document.getElementById('saveTgPhoneBtn');
     if (saveTgPhoneBtn) {

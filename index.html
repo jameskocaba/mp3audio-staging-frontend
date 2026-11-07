@@ -34,6 +34,10 @@
     <link rel="icon" type="image/png" href="favicon.png">
     <link rel="apple-touch-icon" href="favicon.png">
     <meta name="theme-color" content="#0b141a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="MP3aud.io">
+    <meta name="mobile-web-app-capable" content="yes">
 
     <link rel="preconnect" href="https://www.googletagmanager.com">
     <link rel="dns-prefetch" href="https://audio-converter-backend.onrender.com">
@@ -1659,6 +1663,16 @@ body.messenger-body {
     transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
+.bot-connect-card.webapp-card {
+    border-top: 3px solid #38bdf8;
+    background: linear-gradient(180deg, rgba(56, 189, 248, 0.07) 0%, rgba(255, 255, 255, 0.02) 100%);
+    box-shadow: 0 4px 20px rgba(56, 189, 248, 0.08);
+}
+.bot-connect-card.webapp-card:hover {
+    border-color: rgba(56, 189, 248, 0.6);
+    box-shadow: 0 8px 28px rgba(56, 189, 248, 0.22);
+}
+
 .bot-connect-card.telegram-card {
     border-top: 3px solid var(--telegram-blue);
 }
@@ -1792,12 +1806,139 @@ body.messenger-body {
     transform: translateY(-1px);
 }
 
+.webapp-launch-btn {
+    background: linear-gradient(135deg, #0284c7 0%, #38bdf8 100%);
+    box-shadow: 0 4px 16px rgba(56, 189, 248, 0.3);
+}
+
 .tg-launch-btn {
     background: linear-gradient(135deg, #24A1DE 0%, #1d82b4 100%);
 }
 
 .wa-launch-btn {
     background: linear-gradient(135deg, #25D366 0%, #1da851 100%);
+}
+
+.webapp-pill {
+    border-color: rgba(56, 189, 248, 0.35);
+    background: rgba(56, 189, 248, 0.05);
+}
+.webapp-pill:hover {
+    border-color: rgba(56, 189, 248, 0.7);
+    background: rgba(56, 189, 248, 0.12);
+}
+.webapp-pill svg {
+    color: #38bdf8;
+}
+
+.pwa-install-banner {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    margin: 14px 0 10px;
+    background: rgba(56, 189, 248, 0.08);
+    border: 1px dashed rgba(56, 189, 248, 0.35);
+    border-radius: 10px;
+}
+.pwa-install-icon {
+    font-size: 1.5rem;
+    flex-shrink: 0;
+}
+.pwa-install-text {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    font-size: 0.82rem;
+    color: #cbd5e1;
+    line-height: 1.4;
+}
+.pwa-install-text strong {
+    color: #38bdf8;
+    font-size: 0.88rem;
+}
+
+/* 1-Tap Streaming Deep-Links for Apple Music, Spotify & YouTube Music */
+.playlist-streaming-links {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
+    padding-top: 8px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+.streaming-label {
+    font-size: 0.74rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #94a3b8;
+}
+.stream-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    border-radius: 9999px;
+    font-size: 0.76rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: transform 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+}
+.stream-pill.apple-pill {
+    background: rgba(250, 45, 72, 0.14);
+    color: #ff5470;
+    border: 1px solid rgba(250, 45, 72, 0.35);
+}
+.stream-pill.apple-pill:hover {
+    background: rgba(250, 45, 72, 0.25);
+    box-shadow: 0 2px 10px rgba(250, 45, 72, 0.25);
+    transform: translateY(-1px);
+}
+.stream-pill.spotify-pill {
+    background: rgba(30, 215, 96, 0.14);
+    color: #1ed760;
+    border: 1px solid rgba(30, 215, 96, 0.35);
+}
+.stream-pill.spotify-pill:hover {
+    background: rgba(30, 215, 96, 0.25);
+    box-shadow: 0 2px 10px rgba(30, 215, 96, 0.25);
+    transform: translateY(-1px);
+}
+.stream-pill.ytmusic-pill {
+    background: rgba(255, 0, 0, 0.14);
+    color: #ff4e45;
+    border: 1px solid rgba(255, 0, 0, 0.35);
+}
+.stream-pill.ytmusic-pill:hover {
+    background: rgba(255, 0, 0, 0.25);
+    box-shadow: 0 2px 10px rgba(255, 0, 0, 0.25);
+    transform: translateY(-1px);
+}
+
+.track-streaming-btns {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-right: 4px;
+}
+.track-stream-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    font-size: 0.82rem;
+    text-decoration: none;
+    transition: background 0.15s ease, transform 0.15s ease;
+}
+.track-stream-link:hover {
+    background: rgba(255, 255, 255, 0.16);
+    transform: scale(1.1);
 }
 
 .bot-copy-btn {
@@ -2321,25 +2462,25 @@ body.messenger-body {
                 <!-- Instant QR Preview Card -->
                 <div class="sidebar-qr-card" onclick="openModal('botConnectModal')" title="Click to view full QR Codes">
                     <div class="sidebar-qr-thumbs">
-                        <img id="sidebarSmsQrThumb" src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&margin=2&data=sms%3A%3F%26body%3DSend%2520me%2520a%2520chill%2520late-night%2520synthwave%2520playlist" alt="iMessage SMS QR" class="sidebar-qr-thumb">
+                        <img id="sidebarWebQrThumb" src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&margin=2&data=https%3A%2F%2Fmp3aud.io%2F%3Fq%3Dchill%2520late-night%2520synthwave%2520playlist" alt="Web App QR" class="sidebar-qr-thumb">
                         <img id="sidebarTgQrThumb" src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&margin=2&data=https%3A%2F%2Ft.me%2FMP3audioBot%3Fstart%3Dwelcome" alt="Telegram QR" class="sidebar-qr-thumb">
                         <img id="sidebarWaQrThumb" src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&margin=2&data=https%3A%2F%2Fwa.me%2F%3Ftext%3DSend%2520me%2520a%2520chill%2520late-night%2520synthwave%2520playlist" alt="WhatsApp QR" class="sidebar-qr-thumb">
                     </div>
                     <div class="sidebar-qr-card-info">
-                        <strong>📸 Scan to Chat &amp; Stream</strong>
-                        <span>Text on iMessage/SMS, Telegram &amp; WhatsApp for Apple Music, Spotify &amp; MP3s &rarr;</span>
+                        <strong>📸 Scan for Mobile Web App</strong>
+                        <span>Point camera to chat &amp; stream in Apple Music, Spotify &amp; MP3s &rarr;</span>
                     </div>
                 </div>
 
                 <div class="channel-buttons-grid">
-                    <a id="sidebarSmsLink" href="sms:?&body=Send%20me%20a%20chill%20late-night%20synthwave%20playlist"
-                        class="channel-pill sms-pill" title="Text MP3aud.io on iPhone Messages or SMS">
+                    <a id="sidebarWebLink" href="https://mp3aud.io/?q=chill%20late-night%20synthwave%20playlist" target="_blank" rel="noopener"
+                        class="channel-pill webapp-pill" title="Open MP3aud.io Instant Mobile Web App">
                         <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
-                            <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 10H6v-2h12v2zm0-3H6V7h12v2z"/>
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
                         </svg>
                         <div class="channel-pill-text">
-                            <strong>iMessage / SMS</strong>
-                            <span id="sidebarSmsSub">+1 (800) MP3-AUD</span>
+                            <strong>Instant Web App</strong>
+                            <span id="sidebarWebSub">100% Free • No Install</span>
                         </div>
                     </a>
 
@@ -2720,29 +2861,29 @@ body.messenger-body {
             </div>
 
             <div class="bot-cards-grid">
-                <!-- iMessage & SMS Text Card (Twilio Phone Number) -->
-                <div class="bot-connect-card sms-card">
+                <!-- Instant Mobile Web App Card (Featured & 100% Free) -->
+                <div class="bot-connect-card webapp-card">
                     <div class="bot-card-top">
-                        <div class="bot-platform-badge sms-badge">
+                        <div class="bot-platform-badge webapp-badge">
                             <strong>
-                                <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" style="color:#007aff;"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 10H6v-2h12v2zm0-3H6V7h12v2z"/></svg>
-                                iMessage &amp; SMS Text
+                                <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" style="color:#38bdf8;"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+                                Instant Mobile Web App
                             </strong>
-                            <span class="bot-status-tag"><span class="live-dot"></span> <span id="smsBotNumberDisplay">+1 (800) MP3-AUD</span> • Active</span>
+                            <span class="bot-status-tag"><span class="live-dot" style="background:#38bdf8;"></span> <span id="webAppStatusDisplay">Featured • 100% Free</span></span>
                         </div>
                     </div>
 
                     <div class="bot-qr-container">
-                        <img id="smsQrImage"
-                            src="https://api.qrserver.com/v1/create-qr-code/?size=240x240&margin=8&data=sms%3A%3F%26body%3DSend%2520me%2520a%2520chill%2520late-night%2520synthwave%2520playlist"
-                            alt="iMessage & SMS QR Code" class="bot-qr-img">
+                        <img id="webAppQrImage"
+                            src="https://api.qrserver.com/v1/create-qr-code/?size=240x240&margin=8&data=https%3A%2F%2Fmp3aud.io%2F%3Fq%3Dchill%2520late-night%2520synthwave%2520playlist"
+                            alt="Mobile Web App QR Code" class="bot-qr-img">
                         <span class="bot-qr-caption">📷 Scan with iPhone / Android Camera</span>
                     </div>
 
                     <div class="bot-features-list">
                         <div class="bot-feature-item">
                             <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                            <span><strong>Apple Messages &amp; SMS:</strong> no app download needed</span>
+                            <span><strong>No app download required:</strong> launches immediately in Safari &amp; Chrome</span>
                         </div>
                         <div class="bot-feature-item">
                             <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
@@ -2750,16 +2891,16 @@ body.messenger-body {
                         </div>
                         <div class="bot-feature-item">
                             <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                            <span>High-res album art MMS + 320kbps MP3 / ZIP downloads</span>
+                            <span>Lockscreen audio player + 320kbps MP3 &amp; ZIP downloads</span>
                         </div>
                     </div>
 
                     <div class="bot-actions-row">
-                        <a id="modalSmsBtn" href="sms:?&body=Send%20me%20a%20chill%20late-night%20synthwave%20playlist"
-                            class="bot-launch-btn sms-launch-btn">
-                            💬 Text on iPhone (iMessage) &rarr;
+                        <a id="modalWebAppBtn" href="https://mp3aud.io/?q=chill%20late-night%20synthwave%20playlist" target="_blank" rel="noopener"
+                            class="bot-launch-btn webapp-launch-btn">
+                            🚀 Launch Web Player &rarr;
                         </a>
-                        <button type="button" class="bot-copy-btn" onclick="copyBotLink('sms')" title="Copy phone number">
+                        <button type="button" class="bot-copy-btn" onclick="copyBotLink('webapp')" title="Copy Web App link">
                             📋 Copy
                         </button>
                     </div>
@@ -2857,6 +2998,15 @@ body.messenger-body {
                 </div>
             </div>
 
+            <!-- PWA 1-Tap Home Screen Banner -->
+            <div class="pwa-install-banner">
+                <div class="pwa-install-icon">📲</div>
+                <div class="pwa-install-text">
+                    <strong>Add to Your iPhone or Android Home Screen (Fullscreen App):</strong>
+                    <span>In Safari or Chrome on your phone, tap <strong>Share</strong> (or Menu) &rarr; tap <strong>"Add to Home Screen"</strong> to run MP3aud.io as a native app with zero store downloads!</span>
+                </div>
+            </div>
+
             <!-- Instant Vibe Selector: Pre-charges the QR Code & Start Deep-Link -->
             <div class="modal-vibe-presets-row">
                 <div class="modal-vibe-presets-title">⚡ Select a Starter Vibe to Load into QR Code:</div>
@@ -2872,26 +3022,30 @@ body.messenger-body {
 
             <!-- Webhook & Bot Admin Setup Accordion -->
             <details class="bot-webhook-details">
-                <summary>⚙️ Bot Owner &amp; Webhook Setup (Twilio SMS / iMessage, Telegram &amp; WhatsApp)</summary>
+                <summary>⚙️ Mobile Web App Tips &amp; Optional Bot Settings</summary>
                 <div class="bot-webhook-body">
-                    <p>Your backend provides live webhooks for <strong>Twilio SMS &amp; iMessage</strong>, <strong>Telegram Bot API</strong>, and <strong>WhatsApp Cloud API</strong>:</p>
+                    <p>MP3aud.io is an installable Progressive Web App (PWA) with zero monthly fees or carrier registration requirements. You can also optionally link your own Telegram Bot token:</p>
                     <div class="webhook-url-row">
-                        <label>Twilio SMS / iMessage Webhook:</label>
-                        <code id="webhookSmsUrlDisplay">https://audio-converter-backend.onrender.com/webhook/sms</code>
+                        <label>Web App URL:</label>
+                        <code>https://mp3aud.io/</code>
                     </div>
                     <div class="webhook-url-row">
-                        <label>Telegram Webhook URL:</label>
+                        <label>Optional Telegram Webhook:</label>
                         <code id="webhookTgUrlDisplay">https://audio-converter-backend.onrender.com/webhook/telegram</code>
                     </div>
-                    <div class="webhook-url-row">
-                        <label>WhatsApp Webhook URL:</label>
-                        <code id="webhookWaUrlDisplay">https://audio-converter-backend.onrender.com/webhook/whatsapp</code>
-                    </div>
                     <div class="tg-token-setup-row" style="margin-bottom: 8px;">
-                        <input type="text" id="twilioPhoneInput"
-                            placeholder="Twilio SMS / iMessage Number (e.g. +1 800 555 0199)">
-                        <button type="button" id="saveTwilioPhoneBtn" style="white-space: nowrap;">Save Twilio Phone</button>
+                        <input type="text" id="tgPhoneInput"
+                            placeholder="Telegram Phone Number (e.g. +1 555 123 4567)">
+                        <button type="button" id="saveTgPhoneBtn" style="white-space: nowrap;">Set Telegram Phone</button>
                     </div>
+                    <div class="tg-token-setup-row">
+                        <input type="password" id="tgBotTokenInput"
+                            placeholder="Paste Telegram BotFather Token (optional custom bot)">
+                        <button type="button" id="bindTelegramWebhookBtn">Activate Bot Webhook</button>
+                    </div>
+                    <div id="botSetupStatusMsg" class="bot-setup-status"></div>
+                </div>
+            </details>
                     <div class="tg-token-setup-row" style="margin-bottom: 8px;">
                         <input type="text" id="tgPhoneInput"
                             placeholder="Telegram Phone Number (e.g. +1 555 123 4567)">

@@ -1609,12 +1609,14 @@ body.messenger-body {
     transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-.bot-connect-card.sms-card {
-    border-top: 3px solid #007aff;
+.bot-connect-card.webapp-card {
+    border-top: 3px solid #38bdf8;
+    background: linear-gradient(180deg, rgba(56, 189, 248, 0.07) 0%, rgba(255, 255, 255, 0.02) 100%);
+    box-shadow: 0 4px 20px rgba(56, 189, 248, 0.08);
 }
-.bot-connect-card.sms-card:hover {
-    border-color: rgba(0, 122, 255, 0.5);
-    box-shadow: 0 8px 24px rgba(0, 122, 255, 0.16);
+.bot-connect-card.webapp-card:hover {
+    border-color: rgba(56, 189, 248, 0.6);
+    box-shadow: 0 8px 28px rgba(56, 189, 248, 0.22);
 }
 
 .bot-connect-card.telegram-card {
@@ -1750,6 +1752,11 @@ body.messenger-body {
     transform: translateY(-1px);
 }
 
+.webapp-launch-btn {
+    background: linear-gradient(135deg, #0284c7 0%, #38bdf8 100%);
+    box-shadow: 0 4px 16px rgba(56, 189, 248, 0.3);
+}
+
 .tg-launch-btn {
     background: linear-gradient(135deg, #24A1DE 0%, #1d82b4 100%);
 }
@@ -1758,19 +1765,43 @@ body.messenger-body {
     background: linear-gradient(135deg, #25D366 0%, #1da851 100%);
 }
 
-.sms-launch-btn {
-    background: linear-gradient(135deg, #007aff 0%, #34c759 100%);
+.webapp-pill {
+    border-color: rgba(56, 189, 248, 0.35);
+    background: rgba(56, 189, 248, 0.05);
+}
+.webapp-pill:hover {
+    border-color: rgba(56, 189, 248, 0.7);
+    background: rgba(56, 189, 248, 0.12);
+}
+.webapp-pill svg {
+    color: #38bdf8;
 }
 
-.sms-pill {
-    border-color: rgba(0, 122, 255, 0.3);
+.pwa-install-banner {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    margin: 14px 0 10px;
+    background: rgba(56, 189, 248, 0.08);
+    border: 1px dashed rgba(56, 189, 248, 0.35);
+    border-radius: 10px;
 }
-.sms-pill:hover {
-    border-color: rgba(0, 122, 255, 0.6);
-    background: rgba(0, 122, 255, 0.08);
+.pwa-install-icon {
+    font-size: 1.5rem;
+    flex-shrink: 0;
 }
-.sms-pill svg {
-    color: #007aff;
+.pwa-install-text {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    font-size: 0.82rem;
+    color: #cbd5e1;
+    line-height: 1.4;
+}
+.pwa-install-text strong {
+    color: #38bdf8;
+    font-size: 0.88rem;
 }
 
 /* 1-Tap Streaming Deep-Links for Apple Music, Spotify & YouTube Music */
