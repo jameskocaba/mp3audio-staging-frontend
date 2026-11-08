@@ -1186,106 +1186,209 @@ body.messenger-body {
 }
 
 /* ==========================================================================
-   SERVER COLD START WAKE-UP GATING & CARD
+   RENDER SERVER WAKE-UP BOTTOM POPUP (60s COUNTDOWN TIMER)
    ========================================================================== */
-.server-wake-card {
+.server-wake-popup {
+    position: fixed;
+    bottom: 84px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: calc(100% - 28px);
+    max-width: 520px;
+    z-index: 9999;
+    pointer-events: auto;
+    animation: wakePopupSlideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+@keyframes wakePopupSlideUp {
+    from {
+        opacity: 0;
+        transform: translate(-50%, 20px) scale(0.97);
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, 0) scale(1);
+    }
+}
+
+.wake-popup-content {
+    position: relative;
     display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 11px 15px;
-    margin-bottom: 10px;
-    background: linear-gradient(135deg, rgba(30, 58, 138, 0.45) 0%, rgba(15, 23, 42, 0.7) 100%);
-    border: 1px solid rgba(59, 130, 246, 0.45);
-    border-radius: 12px;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
-    animation: wakeCardFadeIn 0.3s ease-out;
-    transition: all 0.35s ease;
+    align-items: flex-start;
+    gap: 13px;
+    padding: 13px 16px;
+    background: linear-gradient(135deg, rgba(15, 23, 42, 0.96) 0%, rgba(24, 38, 62, 0.95) 100%);
+    border: 1px solid rgba(96, 165, 250, 0.5);
+    border-radius: 14px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.65), 0 0 25px rgba(59, 130, 246, 0.25);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    overflow: hidden;
 }
 
-.server-wake-card.awake-success {
-    background: linear-gradient(135deg, rgba(6, 78, 59, 0.55) 0%, rgba(15, 23, 42, 0.7) 100%);
-    border-color: rgba(16, 185, 129, 0.6);
-}
-
-.server-wake-spinner {
+.wake-popup-spinner {
     width: 22px;
     height: 22px;
-    border: 3px solid rgba(96, 165, 250, 0.2);
+    border: 2.5px solid rgba(96, 165, 250, 0.2);
     border-top-color: #60a5fa;
     border-radius: 50%;
-    animation: wakeSpin 0.9s linear infinite;
+    animation: wakeSpin 0.85s linear infinite;
     flex-shrink: 0;
+    margin-top: 3px;
 }
 
-.server-wake-card.awake-success .server-wake-spinner {
+.wake-popup-body {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.wake-popup-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.wake-popup-badge {
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    color: #60a5fa;
+    text-transform: uppercase;
+}
+
+.wake-popup-timer {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 44px;
+    padding: 2px 9px;
+    background: rgba(37, 99, 235, 0.35);
+    border: 1px solid rgba(96, 165, 250, 0.6);
+    border-radius: 12px;
+    font-size: 0.82rem;
+    font-weight: 800;
+    color: #bfdbfe;
+    font-variant-numeric: tabular-nums;
+    box-shadow: 0 0 12px rgba(59, 130, 246, 0.3);
+}
+
+.wake-popup-title {
+    font-size: 0.90rem;
+    font-weight: 700;
+    color: #f1f5f9;
+    letter-spacing: -0.01em;
+}
+
+.wake-popup-sub {
+    font-size: 0.77rem;
+    color: #94a3b8;
+    line-height: 1.4;
+}
+
+.wake-progress-track {
+    width: 100%;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 4px;
+    margin-top: 6px;
+    overflow: hidden;
+}
+
+.wake-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #3b82f6 0%, #60a5fa 50%, #38bdf8 100%);
+    border-radius: 4px;
+    transition: width 0.9s linear;
+}
+
+.wake-popup-close {
+    background: transparent;
+    border: none;
+    color: #64748b;
+    font-size: 1.25rem;
+    line-height: 1;
+    cursor: pointer;
+    padding: 2px 4px;
+    border-radius: 4px;
+    transition: color 0.15s ease;
+}
+
+.wake-popup-close:hover {
+    color: #cbd5e1;
+}
+
+/* Success state when Render wakes up */
+.server-wake-popup.awake-success .wake-popup-content {
+    background: linear-gradient(135deg, rgba(6, 78, 59, 0.96) 0%, rgba(15, 23, 42, 0.95) 100%);
+    border-color: rgba(52, 211, 153, 0.6);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), 0 0 25px rgba(16, 185, 129, 0.3);
+}
+
+.server-wake-popup.awake-success .wake-popup-spinner {
     display: none;
+}
+
+.server-wake-popup.awake-success .wake-popup-badge {
+    color: #34d399;
+}
+
+.server-wake-popup.awake-success .wake-popup-timer {
+    background: rgba(16, 185, 129, 0.35);
+    border-color: rgba(52, 211, 153, 0.6);
+    color: #a7f3d0;
+}
+
+.server-wake-popup.awake-success .wake-progress-fill {
+    background: #10b981;
+    width: 100% !important;
 }
 
 @keyframes wakeSpin {
     to { transform: rotate(360deg); }
 }
 
-@keyframes wakeCardFadeIn {
-    from { opacity: 0; transform: translateY(6px); }
-    to { opacity: 1; transform: translateY(0); }
+@keyframes wakePulse {
+    0% { transform: translate(-50%, 0) scale(1); }
+    50% { transform: translate(-50%, -4px) scale(1.03); }
+    100% { transform: translate(-50%, 0) scale(1); }
 }
 
-.server-wake-info {
-    flex: 1;
-    min-width: 0;
+.server-wake-popup.pulse-attention {
+    animation: wakePulse 0.4s ease-out;
 }
 
-.server-wake-title {
-    font-size: 0.86rem;
-    font-weight: 700;
-    color: #93c5fd;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-
-.server-wake-card.awake-success .server-wake-title {
-    color: #6ee7b7;
-}
-
-.server-wake-sub {
-    font-size: 0.77rem;
-    color: #cbd5e1;
-    margin-top: 2px;
-    line-height: 1.4;
-}
-
-.server-wake-badge-timer {
-    display: inline-block;
-    padding: 1px 7px;
-    background: rgba(37, 99, 235, 0.35);
-    border: 1px solid rgba(96, 165, 250, 0.5);
-    border-radius: 999px;
-    font-family: monospace;
-    font-weight: 700;
-    color: #93c5fd;
-}
-
-/* Chat Composer Gating when server is sleeping */
+/* Never block composer interaction even during server cold start */
 .chat-composer.server-sleeping {
     position: relative;
 }
 
 .chat-composer.server-sleeping .composer-bar {
-    opacity: 0.5;
-    pointer-events: none;
-    user-select: none;
-    filter: grayscale(0.25);
+    opacity: 1;
+    pointer-events: auto;
+    user-select: auto;
+    filter: none;
 }
 
 .chat-composer.server-sleeping #chatInput {
-    cursor: not-allowed;
+    cursor: text;
 }
 
 .chat-composer.server-sleeping .composer-send-btn,
 .chat-composer.server-sleeping .composer-icon-btn {
-    cursor: not-allowed;
-    opacity: 0.45;
+    cursor: pointer;
+    opacity: 1;
+}
+
+@media (max-width: 768px) {
+    .server-wake-popup {
+        bottom: 76px;
+        width: calc(100% - 16px);
+    }
 }
 
 .attached-files-preview {

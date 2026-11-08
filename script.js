@@ -210,9 +210,6 @@ document.addEventListener('DOMContentLoaded', () => {
                             <div class="msg-sender-name">MP3aud.io Assistant <span class="msg-time">Just now</span></div>
                             <div class="msg-text">
                                 <p>Hey! 👋 How's your day going? We can chat about whatever's on your mind, talk about your favorite artists, or whenever you'd like me to put together a playlist or pull up a song, just let me know.</p>
-                                <div class="server-wake-notice" style="margin-top: 10px; padding: 9px 12px; background: rgba(59, 130, 246, 0.12); border-left: 3px solid #3b82f6; border-radius: 6px; font-size: 0.82rem; color: #93c5fd; line-height: 1.45;">
-                                    ⏱️ <strong>Note:</strong> If the chat bot was asleep, it will wake up in about <strong>60 seconds</strong> on your first message. Once awake, real-time AI conversation and instant track curation are active!
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -231,7 +228,8 @@ document.addEventListener('DOMContentLoaded', () => {
     let lastVibeKey = '';
     let rotationCursor = 0;
     let isBackendAwake = false;
-    let serverWakeSecondsRemaining = 55;
+    const SERVER_WAKE_TOTAL_SECONDS = 60;
+    let serverWakeSecondsRemaining = 60;
     let serverWakeCountdownTimer = null;
     let serverWakePollTimer = null;
 
@@ -241,24 +239,30 @@ document.addEventListener('DOMContentLoaded', () => {
         if (serverWakeCountdownTimer) clearInterval(serverWakeCountdownTimer);
         if (serverWakePollTimer) clearInterval(serverWakePollTimer);
 
-        const wakeCard = document.getElementById('serverWakeCard');
+        const wakePopup = document.getElementById('serverWakePopup') || document.getElementById('serverWakeCard');
         const wakeTitle = document.getElementById('serverWakeTitle');
         const wakeSub = document.getElementById('serverWakeSub');
+        const wakeBadge = document.getElementById('serverWakeBadge');
+        const wakeCountdownEl = document.getElementById('serverWakeCountdown');
+        const wakeFill = document.getElementById('serverWakeProgressFill');
         const chatComposer = document.querySelector('.chat-composer');
         const chatInput = document.getElementById('chatInput');
         const sendBtn = document.getElementById('sendMessageBtn');
 
-        if (wakeCard) {
-            wakeCard.classList.add('awake-success');
+        if (wakePopup) {
+            wakePopup.classList.add('awake-success');
+            if (wakeBadge) wakeBadge.textContent = 'ONLINE & CONNECTED';
+            if (wakeCountdownEl) wakeCountdownEl.textContent = 'READY';
             if (wakeTitle) wakeTitle.innerHTML = '<span>✅</span> Cloud Server Awake &amp; AI Ready!';
-            if (wakeSub) wakeSub.textContent = 'Render cloud backend is online. Instant conversation & audio curation unlocked!';
+            if (wakeSub) wakeSub.textContent = 'Render backend is online. Instant conversation & audio curation active!';
+            if (wakeFill) wakeFill.style.width = '100%';
             setTimeout(() => {
-                wakeCard.style.opacity = '0';
-                wakeCard.style.transform = 'translateY(-6px)';
+                wakePopup.style.opacity = '0';
+                wakePopup.style.transform = 'translate(-50%, 16px)';
                 setTimeout(() => {
-                    wakeCard.style.display = 'none';
+                    wakePopup.style.display = 'none';
                 }, 350);
-            }, 1500);
+            }, 1800);
         }
 
         if (chatComposer) {
@@ -280,16 +284,35 @@ document.addEventListener('DOMContentLoaded', () => {
         if (window.__serverWakeGateInitialized) return;
         window.__serverWakeGateInitialized = true;
 
-        const wakeCard = document.getElementById('serverWakeCard');
+        const wakePopup = document.getElementById('serverWakePopup') || document.getElementById('serverWakeCard');
         const wakeCountdownEl = document.getElementById('serverWakeCountdown');
+        const wakeCountdownInline = document.getElementById('serverWakeCountdownInline');
+        const wakeProgressFill = document.getElementById('serverWakeProgressFill');
+        const dismissBtn = document.getElementById('serverWakeDismissBtn');
         const chatComposer = document.querySelector('.chat-composer');
         const chatInput = document.getElementById('chatInput');
         const sendBtn = document.getElementById('sendMessageBtn');
 
+        // Always keep composer active and usable immediately so the site never stalls
+        if (chatComposer) chatComposer.classList.remove('server-sleeping');
+        if (chatInput) {
+            chatInput.removeAttribute('disabled');
+            chatInput.placeholder = 'Text MP3aud.io for any song, artist, playlist vibe, or paste a link...';
+        }
+        if (sendBtn) sendBtn.removeAttribute('disabled');
+
+        if (dismissBtn && wakePopup) {
+            dismissBtn.addEventListener('click', () => {
+                wakePopup.style.opacity = '0';
+                wakePopup.style.transform = 'translate(-50%, 16px)';
+                setTimeout(() => { wakePopup.style.display = 'none'; }, 300);
+            });
+        }
+
         const probeServer = async () => {
             try {
                 const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 3500);
+                const timeoutId = setTimeout(() => controller.abort(), 2500);
                 const r = await fetch(`${BACKEND_URL}/health`, { cache: 'no-store', signal: controller.signal });
                 clearTimeout(timeoutId);
                 if (r && r.ok) {
@@ -300,31 +323,35 @@ document.addEventListener('DOMContentLoaded', () => {
             return false;
         };
 
-        // Check if server is already awake immediately
+        // Check if server is already awake immediately with fast non-blocking probe
         probeServer().then(awake => {
             if (awake) return;
 
-            // Only show wake card if server is actually sleeping
-            if (!isBackendAwake) {
-                if (wakeCard) wakeCard.style.display = 'flex';
-                if (chatComposer) chatComposer.classList.add('server-sleeping');
+            // Only show bottom popup if server is actually sleeping
+            if (!isBackendAwake && wakePopup) {
+                wakePopup.style.display = 'block';
                 if (assistantStatusText) {
-                    assistantStatusText.innerHTML = '⏱️ Cloud server waking up... (~55s)';
+                    assistantStatusText.innerHTML = '⏱️ Cloud server waking up... (~60s)';
                 }
             }
 
             serverWakeCountdownTimer = setInterval(() => {
                 if (serverWakeSecondsRemaining > 1) {
                     serverWakeSecondsRemaining--;
-                    if (wakeCountdownEl) {
-                        wakeCountdownEl.textContent = `${serverWakeSecondsRemaining}s`;
+                    const secStr = `${serverWakeSecondsRemaining}s`;
+                    if (wakeCountdownEl) wakeCountdownEl.textContent = secStr;
+                    if (wakeCountdownInline) wakeCountdownInline.textContent = secStr;
+                    if (wakeProgressFill) {
+                        const pct = Math.min(100, Math.max(0, ((SERVER_WAKE_TOTAL_SECONDS - serverWakeSecondsRemaining) / SERVER_WAKE_TOTAL_SECONDS) * 100));
+                        wakeProgressFill.style.width = `${pct}%`;
                     }
                     if (assistantStatusText && !isBackendAwake) {
                         assistantStatusText.innerHTML = `⏱️ Cloud server waking up... (~${serverWakeSecondsRemaining}s remaining)`;
                     }
                 } else {
-                    if (wakeCountdownEl) wakeCountdownEl.textContent = 'ready!';
-                    unlockChatAfterWake();
+                    if (wakeCountdownEl) wakeCountdownEl.textContent = 'connecting...';
+                    if (wakeCountdownInline) wakeCountdownInline.textContent = 'few seconds';
+                    if (wakeProgressFill) wakeProgressFill.style.width = '96%';
                 }
             }, 1000);
 
@@ -2962,13 +2989,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Send Message Handler (Text Request or Attached Local Files) ---
     async function sendUserMessage(customText = null) {
         if (!isBackendAwake) {
-            const probe = await fetch(`${BACKEND_URL}/health`, { cache: 'no-store' }).then(r => r.ok).catch(() => false);
-            if (probe) {
-                unlockChatAfterWake();
-            } else {
-                showToast(`Cloud server is still spinning up (~${Math.max(1, serverWakeSecondsRemaining)}s). Chat will unlock automatically!`, 'info');
-                return;
-            }
+            // Trigger background wake ping without stalling or blocking the user
+            fetch(`${BACKEND_URL}/health`, { cache: 'no-store' }).then(r => {
+                if (r && r.ok) unlockChatAfterWake();
+            }).catch(() => {});
         }
 
         if (pendingFiles.length > 0 && !customText) {
@@ -3012,55 +3036,58 @@ document.addEventListener('DOMContentLoaded', () => {
                 result = followUpAns;
             }
 
-            // 2. ALWAYS query the backend LLM assistant API first for genuine, context-aware AI conversation & music curation
+            // 2. Query backend LLM if awake, or use instant client curation if sleeping (never stalls!)
             if (!result) {
-                const waitTimeoutMs = 15000;
-                try {
-                    const customAiKey = (localStorage.getItem('mp3audio_custom_ai_key') || '').trim();
-                    const reqHeaders = { 'Content-Type': 'application/json' };
-                    if (customAiKey) {
-                        reqHeaders['X-AI-Key'] = customAiKey;
-                    }
+                if (isBackendAwake) {
+                    const waitTimeoutMs = 12000;
+                    try {
+                        const customAiKey = (localStorage.getItem('mp3audio_custom_ai_key') || '').trim();
+                        const reqHeaders = { 'Content-Type': 'application/json' };
+                        if (customAiKey) {
+                            reqHeaders['X-AI-Key'] = customAiKey;
+                        }
 
-                    const backendCall = (async () => {
-                        const resp = await fetchWithTimeout(`${BACKEND_URL}/api/assistant/chat`, {
-                            method: 'POST',
-                            headers: reqHeaders,
-                            body: JSON.stringify({
-                                message: text,
-                                history: chatHistory.slice(-8),
-                                current_tracks: (assistantMemory.lastTracks || []).slice(0, 6),
-                                options: {
-                                    auto_add_album_art: autoAddAlbumArtInput ? autoAddAlbumArtInput.checked : true,
-                                    increase_quality: increaseQualityInput ? increaseQualityInput.checked : false,
-                                    is_ringtone: videoToMp3Input ? videoToMp3Input.checked : false,
-                                    transcribe_audio: attachLyricsInput ? attachLyricsInput.checked : false
-                                }
-                            })
-                        }, waitTimeoutMs - 2000);
-                        if (resp) {
-                            const data = await resp.json().catch(() => null);
-                            if (data) {
-                                if (data.requires_payment) {
-                                    return data;
-                                }
-                                if (resp.ok && data.success) {
-                                    return data;
+                        const backendCall = (async () => {
+                            const resp = await fetchWithTimeout(`${BACKEND_URL}/api/assistant/chat`, {
+                                method: 'POST',
+                                headers: reqHeaders,
+                                body: JSON.stringify({
+                                    message: text,
+                                    history: chatHistory.slice(-8),
+                                    current_tracks: (assistantMemory.lastTracks || []).slice(0, 6),
+                                    options: {
+                                        auto_add_album_art: autoAddAlbumArtInput ? autoAddAlbumArtInput.checked : true,
+                                        increase_quality: increaseQualityInput ? increaseQualityInput.checked : false,
+                                        is_ringtone: videoToMp3Input ? videoToMp3Input.checked : false,
+                                        transcribe_audio: attachLyricsInput ? attachLyricsInput.checked : false
+                                    }
+                                })
+                            }, waitTimeoutMs - 2000);
+                            if (resp) {
+                                const data = await resp.json().catch(() => null);
+                                if (data) {
+                                    if (data.requires_payment) {
+                                        return data;
+                                    }
+                                    if (resp.ok && data.success) {
+                                        return data;
+                                    }
                                 }
                             }
-                        }
-                        return null;
-                    })();
+                            return null;
+                        })();
 
-                    const raceTimeout = new Promise(resolve => setTimeout(() => resolve(null), waitTimeoutMs));
-                    result = await Promise.race([backendCall, raceTimeout]);
-                    if (result && (result.success || result.requires_payment)) {
-                        isBackendAwake = true;
+                        const raceTimeout = new Promise(resolve => setTimeout(() => resolve(null), waitTimeoutMs));
+                        result = await Promise.race([backendCall, raceTimeout]);
+                        if (result && (result.success || result.requires_payment)) {
+                            isBackendAwake = true;
+                        }
+                    } catch (networkErr) {
+                        console.info('Backend assistant offline or timed out, using instant client fallback:', networkErr);
                     }
-                } catch (networkErr) {
-                    console.info('Backend assistant offline or timed out, using client fallback:', networkErr);
                 }
 
+                // If backend is still sleeping or timed out, IMMEDIATELY serve response via client curation (no stall!)
                 let shouldUseClientCuration = (!result || (!result.success && !result.requires_payment));
                 if (!shouldUseClientCuration && !result.requires_payment && isAskingForNew && Array.isArray(result.tracks) && result.tracks.length > 0) {
                     const allAlreadyShown = result.tracks.every(t =>
