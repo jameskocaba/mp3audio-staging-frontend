@@ -50,7 +50,7 @@
         gtag('config', 'G-VGVP90K1M4');
     </script>
 
-    <link rel="stylesheet" href="style.css?v=20261108_01">
+    <link rel="stylesheet" href="style.css?v=20261108_04">
     <style id="inlined-main-style">
 /* ==========================================================================
    MP3AUD.IO — AI TEXT MESSAGING PERSONAL MUSIC ASSISTANT STYLESHEET
@@ -2487,7 +2487,7 @@ body.messenger-body {
                     </div>
                 </div>
 
-                <form id="chatComposerForm" class="composer-bar">
+                <form id="chatComposerForm" class="composer-bar" onsubmit="event.preventDefault(); if (window.sendUserMessage) { window.sendUserMessage(); } return false;">
                     <button type="button" id="attachFileBtn" class="composer-icon-btn"
                         title="Attach local audio or video files to convert/tag in chat"
                         aria-label="Attach audio or video files">
@@ -2510,9 +2510,9 @@ body.messenger-body {
                         </svg>
                     </button>
 
-                    <textarea id="chatInput" rows="1" placeholder="Text MP3aud.io for any song, artist, playlist vibe, or paste a link..." aria-label="Message MP3aud.io"></textarea>
+                    <textarea id="chatInput" rows="1" placeholder="Text MP3aud.io for any song, artist, playlist vibe, or paste a link..." aria-label="Message MP3aud.io" onkeydown="if(event.key==='Enter' && !event.shiftKey){event.preventDefault(); if (window.sendUserMessage) { window.sendUserMessage(); }}"></textarea>
 
-                    <button type="button" id="sendMessageBtn" class="composer-send-btn" aria-label="Send message">
+                    <button type="button" id="sendMessageBtn" class="composer-send-btn" aria-label="Send message" onclick="event.preventDefault(); if (window.sendUserMessage) { window.sendUserMessage(); }">
                         <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor"
                             stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                             <line x1="22" y1="2" x2="11" y2="13"></line>
@@ -2752,9 +2752,16 @@ body.messenger-body {
                 event.target.style.display = "none";
             }
         });
+        window.sendUserMessage = window.sendUserMessage || function(customText) {
+            var inp = document.getElementById('chatInput');
+            var txt = (customText !== null && customText !== undefined) ? customText : (inp ? inp.value : '');
+            if (!txt || !txt.trim()) return;
+            window.__pendingUserPrompt = txt.trim();
+            if (inp) inp.value = '';
+        };
     </script>
     <script id="inlined-main-script">
-document.addEventListener('DOMContentLoaded', () => {
+function initAssistantApp() {
     if (window.__MP3AUDIO_ASSISTANT_INIT__) return;
     window.__MP3AUDIO_ASSISTANT_INIT__ = true;
     // Prevent default browser file drop behavior outside handler
@@ -2839,6 +2846,45 @@ document.addEventListener('DOMContentLoaded', () => {
     const miniSeekSlider = document.getElementById('miniSeekSlider');
     const miniDownloadMp3Btn = document.getElementById('miniDownloadMp3Btn');
     const miniCloseBtn = document.getElementById('miniCloseBtn');
+
+    // Immediate early wiring for composer send button and inputs (guarantees responsiveness)
+    const earlySendBtn = document.getElementById('sendMessageBtn');
+    if (earlySendBtn) {
+        earlySendBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (typeof sendUserMessage === 'function') {
+                sendUserMessage();
+            } else if (typeof window.sendUserMessage === 'function') {
+                window.sendUserMessage();
+            }
+        });
+    }
+    if (chatComposerForm) {
+        chatComposerForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            if (typeof sendUserMessage === 'function') {
+                sendUserMessage();
+            } else if (typeof window.sendUserMessage === 'function') {
+                window.sendUserMessage();
+            }
+        });
+    }
+    if (chatInput) {
+        chatInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                if (typeof sendUserMessage === 'function') {
+                    sendUserMessage();
+                } else if (typeof window.sendUserMessage === 'function') {
+                    window.sendUserMessage();
+                }
+            }
+        });
+        chatInput.addEventListener('input', () => {
+            chatInput.style.height = 'auto';
+            chatInput.style.height = Math.min(110, chatInput.scrollHeight) + 'px';
+        });
+    }
 
     // State
     let chatHistory = [];
@@ -5889,6 +5935,12 @@ function appendAssistantMusicBubble(payload) {
         }
     }
 }
+window.sendUserMessage = sendUserMessage;
+if (window.__pendingUserPrompt) {
+    const queuedPrompt = window.__pendingUserPrompt;
+    window.__pendingUserPrompt = null;
+    sendUserMessage(queuedPrompt);
+}
 
 // --- Local File Upload in Chat ---
 function setPendingFiles(fileList) {
@@ -6231,10 +6283,16 @@ if (logoutBtn) {
 // Initialize Server Wake Gating and AI Key Configuration
 initServerWakeGate();
 initAiKeyConfig();
-});
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initAssistantApp);
+} else {
+    initAssistantApp();
+}
 
     </script>
-    <script src="script.js?v=20261108_03"></script>
+    <script src="script.js?v=20261108_04"></script>
 </body>
 
 </html>

@@ -1510,6 +1510,11 @@ body.messenger-body {
     transition: transform 0.15s ease, filter 0.15s ease;
 }
 
+.composer-send-btn svg,
+.composer-send-btn svg * {
+    pointer-events: none;
+}
+
 .composer-send-btn:hover {
     transform: scale(1.05);
     filter: brightness(1.1);

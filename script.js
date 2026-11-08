@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', () => {
+function initAssistantApp() {
     if (window.__MP3AUDIO_ASSISTANT_INIT__) return;
     window.__MP3AUDIO_ASSISTANT_INIT__ = true;
     // Prevent default browser file drop behavior outside handler
@@ -83,6 +83,45 @@ document.addEventListener('DOMContentLoaded', () => {
     const miniSeekSlider = document.getElementById('miniSeekSlider');
     const miniDownloadMp3Btn = document.getElementById('miniDownloadMp3Btn');
     const miniCloseBtn = document.getElementById('miniCloseBtn');
+
+    // Immediate early wiring for composer send button and inputs (guarantees responsiveness)
+    const earlySendBtn = document.getElementById('sendMessageBtn');
+    if (earlySendBtn) {
+        earlySendBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (typeof sendUserMessage === 'function') {
+                sendUserMessage();
+            } else if (typeof window.sendUserMessage === 'function') {
+                window.sendUserMessage();
+            }
+        });
+    }
+    if (chatComposerForm) {
+        chatComposerForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            if (typeof sendUserMessage === 'function') {
+                sendUserMessage();
+            } else if (typeof window.sendUserMessage === 'function') {
+                window.sendUserMessage();
+            }
+        });
+    }
+    if (chatInput) {
+        chatInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                if (typeof sendUserMessage === 'function') {
+                    sendUserMessage();
+                } else if (typeof window.sendUserMessage === 'function') {
+                    window.sendUserMessage();
+                }
+            }
+        });
+        chatInput.addEventListener('input', () => {
+            chatInput.style.height = 'auto';
+            chatInput.style.height = Math.min(110, chatInput.scrollHeight) + 'px';
+        });
+    }
 
     // State
     let chatHistory = [];
@@ -3133,6 +3172,12 @@ function appendAssistantMusicBubble(payload) {
         }
     }
 }
+window.sendUserMessage = sendUserMessage;
+if (window.__pendingUserPrompt) {
+    const queuedPrompt = window.__pendingUserPrompt;
+    window.__pendingUserPrompt = null;
+    sendUserMessage(queuedPrompt);
+}
 
 // --- Local File Upload in Chat ---
 function setPendingFiles(fileList) {
@@ -3475,4 +3520,10 @@ if (logoutBtn) {
 // Initialize Server Wake Gating and AI Key Configuration
 initServerWakeGate();
 initAiKeyConfig();
-});
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initAssistantApp);
+} else {
+    initAssistantApp();
+}
