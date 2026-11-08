@@ -3080,31 +3080,11 @@ function appendAssistantMusicBubble(payload) {
                         result = await Promise.race([backendCall, raceTimeout]);
                         if (result && (result.success || result.requires_payment)) {
                             isBackendAwake = true;
-                        })
-                    }, waitTimeoutMs - 2000);
-                    if (resp) {
-                        const data = await resp.json().catch(() => null);
-                        if (data) {
-                            if (data.requires_payment) {
-                                return data;
-                            }
-                            if (resp.ok && data.success) {
-                                return data;
-                            }
                         }
                     } catch (networkErr) {
                         console.info('Backend assistant offline or timed out, using instant client fallback:', networkErr);
                     }
                 }
-
-                // If backend is still sleeping or timed out, IMMEDIATELY serve response via client curation (no stall!)
-                const raceTimeout = new Promise(resolve => setTimeout(() => resolve(null), waitTimeoutMs));
-                result = await Promise.race([backendCall, raceTimeout]);
-                if (result && (result.success || result.requires_payment)) {
-                    isBackendAwake = true;
-                }
-            } catch (networkErr) {
-                console.info('Backend assistant offline or timed out, using client fallback:', networkErr);
             }
 
             let shouldUseClientCuration = (!result || (!result.success && !result.requires_payment));
@@ -3300,6 +3280,13 @@ window.addEventListener('drop', (e) => {
 });
 
 // --- Composer Input & Quick Prompt Wiring ---
+const sendMsgBtnEl = document.getElementById('sendMessageBtn');
+if (sendMsgBtnEl) {
+    sendMsgBtnEl.addEventListener('click', (e) => {
+        e.preventDefault();
+        sendUserMessage();
+    });
+}
 if (chatComposerForm) {
     chatComposerForm.addEventListener('submit', (e) => {
         e.preventDefault();
