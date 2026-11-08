@@ -34,6 +34,10 @@
     <link rel="icon" type="image/png" href="favicon.png">
     <link rel="apple-touch-icon" href="favicon.png">
     <meta name="theme-color" content="#0b141a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="MP3aud.io">
+    <meta name="mobile-web-app-capable" content="yes">
 
     <link rel="preconnect" href="https://www.googletagmanager.com">
     <link rel="dns-prefetch" href="https://audio-converter-backend.onrender.com">
@@ -2448,13 +2452,6 @@ body.messenger-body {
                     <button type="button" id="miniCloseBtn" class="mini-close-btn" aria-label="Close player">&times;</button>
                 </div>
             </div>
-
-            <!-- Bottom Message Composer Bar -->
-            <footer class="chat-composer">
-                <!-- Hidden File Input for Uploading Audio/Video into Chat -->
-                <input type="file" id="fileInput" multiple
-                    accept="audio/*,video/*,.mp3,.wav,.flac,.aac,.ogg,.m4a,.wma,.mp4,.mov,.avi,.mkv,.webm"
-                    style="display: none;">
             <!-- Render Server Cold Start Wake-Up Popup (Bottom of screen 60s Countdown) -->
             <div id="serverWakePopup" class="server-wake-popup" style="display: none;" role="status" aria-live="polite">
                 <div class="wake-popup-content">
@@ -2476,7 +2473,12 @@ body.messenger-body {
                 </div>
             </div>
 
-                </div>
+            <!-- Bottom Message Composer Bar -->
+            <footer class="chat-composer">
+                <!-- Hidden File Input for Uploading Audio/Video into Chat -->
+                <input type="file" id="fileInput" multiple
+                    accept="audio/*,video/*,.mp3,.wav,.flac,.aac,.ogg,.m4a,.wma,.mp4,.mov,.avi,.mkv,.webm"
+                    style="display: none;">
 
                 <div id="attachedFilesPreview" class="attached-files-preview hidden">
                     <div class="attached-pill">
@@ -2508,9 +2510,9 @@ body.messenger-body {
                         </svg>
                     </button>
 
-                    <textarea id="chatInput" rows="1" disabled="disabled" placeholder="â±ï¸ Cloud server is booting... please wait (~55s)" aria-label="Message MP3aud.io"></textarea>
+                    <textarea id="chatInput" rows="1" placeholder="Text MP3aud.io for any song, artist, playlist vibe, or paste a link..." aria-label="Message MP3aud.io"></textarea>
 
-                    <button type="submit" id="sendMessageBtn" class="composer-send-btn" disabled="disabled" aria-label="Send message">
+                    <button type="submit" id="sendMessageBtn" class="composer-send-btn" aria-label="Send message">
                         <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor"
                             stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                             <line x1="22" y1="2" x2="11" y2="13"></line>
@@ -2534,7 +2536,7 @@ body.messenger-body {
             <div class="ai-key-config-box" style="margin-bottom: 20px; padding: 14px 16px; background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.28); border-radius: 10px;">
                 <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
                     <div style="display: flex; align-items: center; gap: 8px;">
-                        <span style="font-size: 1.15rem;">ðŸ§ </span>
+                        <span style="font-size: 1.15rem;">🧠</span>
                         <strong style="color: #60a5fa; font-size: 0.92rem;">AI Engine Configuration</strong>
                     </div>
                     <span id="aiKeyStatusBadge" style="font-size: 0.75rem; padding: 3px 8px; border-radius: 999px; background: rgba(59, 130, 246, 0.2); color: #93c5fd;">Default Studio AI</span>
@@ -2548,7 +2550,7 @@ body.messenger-body {
                     <button type="button" id="clearAiKeyBtn" class="btn-secondary hidden" style="padding: 8px 12px; font-size: 0.82rem;">Remove</button>
                 </div>
                 <div id="aiKeySuccessNotice" class="hidden" style="margin-top: 8px; font-size: 0.78rem; color: #34d399;">
-                    âœ“ Key saved! All chat requests now use your high-speed Llama 3.3 70B / OpenAI engine.
+                    ✓ Key saved! All chat requests now use your high-speed Llama 3.3 70B / OpenAI engine.
                 </div>
             </div>
 
