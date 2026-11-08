@@ -50,7 +50,7 @@
         gtag('config', 'G-VGVP90K1M4');
     </script>
 
-    <link rel="stylesheet" href="style.css?v=20261108_05">
+    <link rel="stylesheet" href="style.css?v=20261108_06">
     <style id="inlined-main-style">
 /* ==========================================================================
    MP3AUD.IO — AI TEXT MESSAGING PERSONAL MUSIC ASSISTANT STYLESHEET
@@ -5926,7 +5926,7 @@ function appendAssistantMusicBubble(payload) {
             showToast('Something went wrong processing your message.', 'error');
         }
     } finally {
-        if (wakeTimer) clearInterval(wakeTimer);
+        if (typeof wakeTimer !== 'undefined' && wakeTimer) clearInterval(wakeTimer);
         if (typingRow && typingRow.parentNode) typingRow.remove();
         if (assistantStatusText) {
             assistantStatusText.innerHTML = 'Online &bull; AI Personal Assistant &amp; DJ';
@@ -6290,7 +6290,7 @@ if (document.readyState === 'loading') {
 }
 
     </script>
-    <script src="script.js?v=20261108_05"></script>
+    <script src="script.js?v=20261108_06"></script>
 </body>
 
 </html>

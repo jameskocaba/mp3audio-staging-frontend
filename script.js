@@ -3163,7 +3163,7 @@ function appendAssistantMusicBubble(payload) {
             showToast('Something went wrong processing your message.', 'error');
         }
     } finally {
-        if (wakeTimer) clearInterval(wakeTimer);
+        if (typeof wakeTimer !== 'undefined' && wakeTimer) clearInterval(wakeTimer);
         if (typingRow && typingRow.parentNode) typingRow.remove();
         if (assistantStatusText) {
             assistantStatusText.innerHTML = 'Online &bull; AI Personal Assistant &amp; DJ';
