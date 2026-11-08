@@ -2999,12 +2999,6 @@ function appendAssistantMusicBubble(payload) {
             await handleSendLocalFilesInChat();
             return;
         }
-    }
-
-    if (pendingFiles.length > 0 && !customText) {
-        await handleSendLocalFilesInChat();
-        return;
-    }
 
     const text = (customText !== null ? customText : (chatInput ? chatInput.value : '')).trim();
     if (!text) return;
@@ -3118,7 +3112,6 @@ function appendAssistantMusicBubble(payload) {
                     if (headerPaidCreditsDisplay) headerPaidCreditsDisplay.textContent = result.credits_remaining;
                 }
             }
-        }
 
         if (typingRow && typingRow.parentNode) typingRow.remove();
         appendAssistantMusicBubble(result);
