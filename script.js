@@ -1541,8 +1541,6 @@ function initAssistantApp() {
                 tracks: []
             };
         }
-    };
-}
 
         // 7. Artist / Song / Genre Biography & Trivia Follow-Up Questions ("who sings track 2?", "who is M83?", "tell me about...", "what other albums...")
         const isExplicitBioOrTrackQuestion =
