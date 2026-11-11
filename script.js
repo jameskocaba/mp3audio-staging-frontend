@@ -176,21 +176,57 @@ function initAssistantApp() {
             .replace(/\n/g, '<br>');
     }
 
-    // --- Mobile Sidebar Toggle ---
+    // --- Desktop & Mobile Sidebar Toggle ---
+    const appShell = document.querySelector('.messenger-app-shell');
     function toggleSidebar(open) {
         if (!assistantSidebar || !sidebarBackdrop) return;
+        if (window.innerWidth > 900 && appShell && open === undefined) {
+            appShell.classList.toggle('sidebar-collapsed');
+            return;
+        }
         if (open) {
             assistantSidebar.classList.add('open');
             sidebarBackdrop.classList.remove('hidden');
+            if (appShell) appShell.classList.remove('sidebar-collapsed');
         } else {
             assistantSidebar.classList.remove('open');
             sidebarBackdrop.classList.add('hidden');
         }
     }
 
-    if (openSidebarBtn) openSidebarBtn.addEventListener('click', () => toggleSidebar(true));
+    if (openSidebarBtn) {
+        openSidebarBtn.addEventListener('click', () => {
+            if (window.innerWidth > 900) {
+                toggleSidebar();
+            } else {
+                toggleSidebar(true);
+            }
+        });
+    }
     if (closeSidebarBtn) closeSidebarBtn.addEventListener('click', () => toggleSidebar(false));
     if (sidebarBackdrop) sidebarBackdrop.addEventListener('click', () => toggleSidebar(false));
+
+    // --- Header Audio Options Popover & Surprise Mix Button ---
+    const headerOptionsBtn = document.getElementById('headerOptionsBtn');
+    const headerOptionsPopover = document.getElementById('headerOptionsPopover');
+    const headerSurpriseBtn = document.getElementById('headerSurpriseBtn');
+
+    if (headerOptionsBtn && headerOptionsPopover) {
+        headerOptionsBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            headerOptionsPopover.classList.toggle('hidden');
+        });
+        document.addEventListener('click', (e) => {
+            if (!headerOptionsPopover.classList.contains('hidden') && !headerOptionsPopover.contains(e.target) && e.target !== headerOptionsBtn) {
+                headerOptionsPopover.classList.add('hidden');
+            }
+        });
+    }
+    if (headerSurpriseBtn) {
+        headerSurpriseBtn.addEventListener('click', () => {
+            sendUserMessage('Surprise me with a fresh 10-track playlist');
+        });
+    }
 
     // --- Recent Prompts Sidebar List ---
     function saveRecentPrompt(promptText) {
@@ -231,6 +267,56 @@ function initAssistantApp() {
         });
     }
 
+    function buildWelcomeScreenHtml() {
+        return `
+            <div class="chat-date-divider">
+                <span>✨ AI MUSIC CONCIERGE &bull; CURATED BY GENRE &amp; MOOD</span>
+            </div>
+            <div class="msg-row assistant-row">
+                <div class="msg-avatar">🎧</div>
+                <div class="msg-bubble assistant-bubble welcome-bubble">
+                    <div class="msg-sender-name">MP3aud.io Assistant <span class="msg-time">Just now</span></div>
+                    <div class="msg-text">
+                        <p>Hey! 👋 How's your day going? Tap any vibe below to curate a <strong>10-track playlist</strong> right now, or type any mood, genre, song, or artist to get started:</p>
+                    </div>
+                    <div class="welcome-vibe-section">
+                        <span class="welcome-vibe-label">⚡ Pick a Mood or Genre to Start Playing</span>
+                        <div class="welcome-vibe-grid">
+                            <button type="button" class="welcome-vibe-pill" data-prompt="Send me a chill late-night synthwave playlist">🌙 Late-Night Synthwave</button>
+                            <button type="button" class="welcome-vibe-pill" data-prompt="Send me a rainy window lo-fi study beats playlist">☕ Lo-Fi Focus Beats</button>
+                            <button type="button" class="welcome-vibe-pill" data-prompt="Send me a warm indie and acoustic playlist">🎸 Indie &amp; Acoustic</button>
+                            <button type="button" class="welcome-vibe-pill" data-prompt="Make me a high-energy 90s hip hop playlist">🔥 90s Hip-Hop Classics</button>
+                            <button type="button" class="welcome-vibe-pill" data-prompt="Send me a smooth R&B slow jams playlist">✨ Silk &amp; Soul R&amp;B</button>
+                            <button type="button" class="welcome-vibe-pill" data-prompt="Send me a country storytelling playlist">🤠 Country Storytelling</button>
+                            <button type="button" class="welcome-vibe-pill" data-prompt="Make me a high-adrenaline workout playlist">🏋️ Workout Energy</button>
+                            <button type="button" class="welcome-vibe-pill" data-prompt="Surprise me with a fresh 10-track playlist">🎲 Surprise 10-Track Mix</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    function wireWelcomePills(rootEl) {
+        if (!rootEl) return;
+        rootEl.querySelectorAll('.welcome-vibe-pill[data-prompt]').forEach(btn => {
+            if (btn.dataset.wired) return;
+            btn.dataset.wired = '1';
+            btn.addEventListener('click', () => {
+                const promptText = btn.getAttribute('data-prompt');
+                if (promptText) sendUserMessage(promptText);
+            });
+        });
+    }
+
+    if (chatMessages) {
+        // Enhance initial welcome screen if no user messages yet
+        if (chatMessages.querySelectorAll('.user-row').length === 0) {
+            chatMessages.innerHTML = buildWelcomeScreenHtml();
+            wireWelcomePills(chatMessages);
+        }
+    }
+
     if (newChatBtn) {
         newChatBtn.addEventListener('click', () => {
             toggleSidebar(false);
@@ -239,20 +325,8 @@ function initAssistantApp() {
             assistantMemory.pendingVibeKey = '';
             assistantMemory.pendingTopic = '';
             if (chatMessages) {
-                chatMessages.innerHTML = `
-                    <div class="chat-date-divider">
-                        <span>ENCRYPTED MUSIC MESSENGER &bull; INSTANT MP3 &amp; PLAYLIST DELIVERY</span>
-                    </div>
-                    <div class="msg-row assistant-row">
-                        <div class="msg-avatar">🎧</div>
-                        <div class="msg-bubble assistant-bubble welcome-bubble">
-                            <div class="msg-sender-name">MP3aud.io Assistant <span class="msg-time">Just now</span></div>
-                            <div class="msg-text">
-                                <p>Hey! 👋 How's your day going? We can chat about whatever's on your mind, talk about your favorite artists, or whenever you'd like me to put together a playlist or pull up a song, just let me know.</p>
-                            </div>
-                        </div>
-                    </div>
-                `;
+                chatMessages.innerHTML = buildWelcomeScreenHtml();
+                wireWelcomePills(chatMessages);
             }
             if (chatInput) {
                 chatInput.value = '';
@@ -492,7 +566,7 @@ function initAssistantApp() {
         }
     }
 
-    function itunesSearchJsonp(term, limit = 6, timeoutMs = 2000) {
+    function itunesSearchJsonp(term, limit = 10, timeoutMs = 2000) {
         return new Promise((resolve) => {
             const cbName = '__mp3audio_itunes_cb_' + Date.now() + '_' + Math.floor(Math.random() * 100000);
             const script = document.createElement('script');
@@ -531,7 +605,7 @@ function initAssistantApp() {
         });
     }
 
-    async function searchItunesFast(term, limit = 8, timeoutMs = 1700) {
+    async function searchItunesFast(term, limit = 10, timeoutMs = 1700) {
         const cacheKey = `${term.toLowerCase().trim()}|${limit}`;
         if (itunesResultCache.has(cacheKey)) {
             return itunesResultCache.get(cacheKey);
@@ -890,7 +964,11 @@ function initAssistantApp() {
             { title: "Edge of Seventeen", artist: "Stevie Nicks", album: "Bella Donna", year: "1981", duration: "5:28", duration_sec: 328 },
             { title: "Go Your Own Way", artist: "Fleetwood Mac", album: "Rumours", year: "1977", duration: "3:38", duration_sec: 218 },
             { title: "Free Fallin'", artist: "Tom Petty", album: "Full Moon Fever", year: "1989", duration: "4:14", duration_sec: 254 },
-            { title: "It's Too Late", artist: "Carole King", album: "Tapestry", year: "1971", duration: "3:53", duration_sec: 233 }
+            { title: "It's Too Late", artist: "Carole King", album: "Tapestry", year: "1971", duration: "3:53", duration_sec: 233 },
+            { title: "Tiny Dancer", artist: "Elton John", album: "Madman Across the Water", year: "1971", duration: "6:17", duration_sec: 377 },
+            { title: "Heart of Gold", artist: "Neil Young", album: "Harvest", year: "1972", duration: "3:07", duration_sec: 187 },
+            { title: "Rhiannon", artist: "Fleetwood Mac", album: "Fleetwood Mac", year: "1975", duration: "4:12", duration_sec: 252 },
+            { title: "Barracuda", artist: "Heart", album: "Little Queen", year: "1977", duration: "4:21", duration_sec: 261 }
         ]},
         "the weeknd": { vibeKey: "r&b", title: "Songs Like The Weeknd: Dark R&B & Synthpop", seeds: [
             { title: "Blinding Lights", artist: "The Weeknd", album: "After Hours", year: "2020", duration: "3:20", duration_sec: 200 },
@@ -898,7 +976,11 @@ function initAssistantApp() {
             { title: "Redbone", artist: "Childish Gambino", album: "Awaken, My Love!", year: "2016", duration: "5:26", duration_sec: 326 },
             { title: "One More Time", artist: "Daft Punk", album: "Discovery", year: "2001", duration: "5:20", duration_sec: 320 },
             { title: "Snooze", artist: "SZA", album: "SOS", year: "2022", duration: "3:21", duration_sec: 201 },
-            { title: "Midnight City", artist: "M83", album: "Hurry Up, We're Dreaming", year: "2011", duration: "4:03", duration_sec: 243 }
+            { title: "Midnight City", artist: "M83", album: "Hurry Up, We're Dreaming", year: "2011", duration: "4:03", duration_sec: 243 },
+            { title: "Pink + White", artist: "Frank Ocean", album: "Blonde", year: "2016", duration: "3:04", duration_sec: 184 },
+            { title: "Nightcall", artist: "Kavinsky", album: "OutRun", year: "2010", duration: "4:18", duration_sec: 258 },
+            { title: "Passionfruit", artist: "Drake", album: "More Life", year: "2017", duration: "4:58", duration_sec: 298 },
+            { title: "Earned It", artist: "The Weeknd", album: "Beauty Behind the Madness", year: "2015", duration: "4:37", duration_sec: 277 }
         ]},
         "taylor swift": { vibeKey: "pop", title: "Songs Like Taylor Swift: Emotional Pop & Storytelling", seeds: [
             { title: "Cruel Summer", artist: "Taylor Swift", album: "Lover", year: "2019", duration: "2:58", duration_sec: 178 },
@@ -906,7 +988,11 @@ function initAssistantApp() {
             { title: "Motion Sickness", artist: "Phoebe Bridgers", album: "Stranger in the Alps", year: "2017", duration: "3:49", duration_sec: 229 },
             { title: "Fast Car", artist: "Tracy Chapman", album: "Tracy Chapman", year: "1988", duration: "4:56", duration_sec: 296 },
             { title: "Slow Burn", artist: "Kacey Musgraves", album: "Golden Hour", year: "2018", duration: "4:06", duration_sec: 246 },
-            { title: "Green Light", artist: "Lorde", album: "Melodrama", year: "2017", duration: "3:54", duration_sec: 234 }
+            { title: "Green Light", artist: "Lorde", album: "Melodrama", year: "2017", duration: "3:54", duration_sec: 234 },
+            { title: "Birds of a Feather", artist: "Billie Eilish", album: "HIT ME HARD AND SOFT", year: "2024", duration: "3:30", duration_sec: 210 },
+            { title: "Espresso", artist: "Sabrina Carpenter", album: "Short n' Sweet", year: "2024", duration: "2:55", duration_sec: 175 },
+            { title: "Royals", artist: "Lorde", album: "Pure Heroine", year: "2013", duration: "3:10", duration_sec: 190 },
+            { title: "Dreams", artist: "Fleetwood Mac", album: "Rumours", year: "1977", duration: "4:17", duration_sec: 257 }
         ]},
         "kendrick lamar": { vibeKey: "hip hop", title: "Songs Like Kendrick Lamar: Conscious Hip-Hop", seeds: [
             { title: "HUMBLE.", artist: "Kendrick Lamar", album: "DAMN.", year: "2017", duration: "2:57", duration_sec: 177 },
@@ -914,7 +1000,11 @@ function initAssistantApp() {
             { title: "N.Y. State of Mind", artist: "Nas", album: "Illmatic", year: "1994", duration: "4:54", duration_sec: 294 },
             { title: "No Role Modelz", artist: "J. Cole", album: "2014 Forest Hills Drive", year: "2014", duration: "4:52", duration_sec: 292 },
             { title: "C.R.E.A.M.", artist: "Wu-Tang Clan", album: "Enter the Wu-Tang (36 Chambers)", year: "1993", duration: "4:12", duration_sec: 252 },
-            { title: "Shook Ones, Pt. II", artist: "Mobb Deep", album: "The Infamous", year: "1995", duration: "5:25", duration_sec: 325 }
+            { title: "Shook Ones, Pt. II", artist: "Mobb Deep", album: "The Infamous", year: "1995", duration: "5:25", duration_sec: 325 },
+            { title: "Ms. Jackson", artist: "OutKast", album: "Stankonia", year: "2000", duration: "4:30", duration_sec: 270 },
+            { title: "Electric Relaxation", artist: "A Tribe Called Quest", album: "Midnight Marauders", year: "1993", duration: "3:46", duration_sec: 226 },
+            { title: "Doomsday", artist: "MF DOOM", album: "Operation: Doomsday", year: "1999", duration: "4:58", duration_sec: 298 },
+            { title: "93 'Til Infinity", artist: "Souls of Mischief", album: "93 'til Infinity", year: "1993", duration: "4:46", duration_sec: 286 }
         ]},
         "radiohead": { vibeKey: "rock", title: "Songs Like Radiohead: Atmospheric Alt-Rock", seeds: [
             { title: "Creep", artist: "Radiohead", album: "Pablo Honey", year: "1993", duration: "3:58", duration_sec: 238 },
@@ -922,7 +1012,11 @@ function initAssistantApp() {
             { title: "Teardrop", artist: "Massive Attack", album: "Mezzanine", year: "1998", duration: "5:31", duration_sec: 331 },
             { title: "Space Song", artist: "Beach House", album: "Depression Cherry", year: "2015", duration: "5:20", duration_sec: 320 },
             { title: "The Scientist", artist: "Coldplay", album: "A Rush of Blood to the Head", year: "2002", duration: "5:09", duration_sec: 309 },
-            { title: "Breezeblocks", artist: "alt-J", album: "An Awesome Wave", year: "2012", duration: "3:47", duration_sec: 227 }
+            { title: "Breezeblocks", artist: "alt-J", album: "An Awesome Wave", year: "2012", duration: "3:47", duration_sec: 227 },
+            { title: "Everlong", artist: "Foo Fighters", album: "The Colour and the Shape", year: "1997", duration: "4:10", duration_sec: 250 },
+            { title: "Smells Like Teen Spirit", artist: "Nirvana", album: "Nevermind", year: "1991", duration: "5:01", duration_sec: 301 },
+            { title: "Karma Police", artist: "Radiohead", album: "OK Computer", year: "1997", duration: "4:21", duration_sec: 261 },
+            { title: "Apocalypse", artist: "Cigarettes After Sex", album: "Cigarettes After Sex", year: "2017", duration: "4:50", duration_sec: 290 }
         ]},
         "bon iver": { vibeKey: "acoustic", title: "Songs Like Bon Iver: Ethereal Indie Folk", seeds: [
             { title: "Skinny Love", artist: "Bon Iver", album: "For Emma, Forever Ago", year: "2007", duration: "3:58", duration_sec: 238 },
@@ -930,7 +1024,11 @@ function initAssistantApp() {
             { title: "San Luis", artist: "Gregory Alan Isakov", album: "Evening Machines", year: "2018", duration: "3:11", duration_sec: 191 },
             { title: "Chicago", artist: "Sufjan Stevens", album: "Illinois", year: "2005", duration: "6:04", duration_sec: 364 },
             { title: "Motion Sickness", artist: "Phoebe Bridgers", album: "Stranger in the Alps", year: "2017", duration: "3:49", duration_sec: 229 },
-            { title: "White Winter Hymnal", artist: "Fleet Foxes", album: "Fleet Foxes", year: "2008", duration: "2:27", duration_sec: 147 }
+            { title: "White Winter Hymnal", artist: "Fleet Foxes", album: "Fleet Foxes", year: "2008", duration: "2:27", duration_sec: 147 },
+            { title: "The Night We Met", artist: "Lord Huron", album: "Strange Trails", year: "2015", duration: "3:28", duration_sec: 208 },
+            { title: "Cherry Wine", artist: "Hozier", album: "Hozier", year: "2014", duration: "4:00", duration_sec: 240 },
+            { title: "Holocene", artist: "Bon Iver", album: "Bon Iver", year: "2011", duration: "5:36", duration_sec: 336 },
+            { title: "505", artist: "Arctic Monkeys", album: "Favourite Worst Nightmare", year: "2007", duration: "4:13", duration_sec: 253 }
         ]},
         "tame impala": { vibeKey: "chill", title: "Songs Like Tame Impala: Psych-Pop & Groove", seeds: [
             { title: "The Less I Know the Better", artist: "Tame Impala", album: "Currents", year: "2015", duration: "3:36", duration_sec: 216 },
@@ -938,7 +1036,11 @@ function initAssistantApp() {
             { title: "Chamber Of Reflection", artist: "Mac DeMarco", album: "Salad Days", year: "2014", duration: "3:51", duration_sec: 231 },
             { title: "Space Song", artist: "Beach House", album: "Depression Cherry", year: "2015", duration: "5:20", duration_sec: 320 },
             { title: "Redbone", artist: "Childish Gambino", album: "Awaken, My Love!", year: "2016", duration: "5:26", duration_sec: 326 },
-            { title: "Midnight City", artist: "M83", album: "Hurry Up, We're Dreaming", year: "2011", duration: "4:03", duration_sec: 243 }
+            { title: "Midnight City", artist: "M83", album: "Hurry Up, We're Dreaming", year: "2011", duration: "4:03", duration_sec: 243 },
+            { title: "Show Me How", artist: "Men I Trust", album: "Show Me How", year: "2018", duration: "3:35", duration_sec: 215 },
+            { title: "Walking On A Dream", artist: "Empire of the Sun", album: "Walking on a Dream", year: "2008", duration: "3:16", duration_sec: 196 },
+            { title: "Feel It All Around", artist: "Washed Out", album: "Life of Leisure", year: "2009", duration: "3:12", duration_sec: 192 },
+            { title: "Let It Happen", artist: "Tame Impala", album: "Currents", year: "2015", duration: "7:47", duration_sec: 467 }
         ]},
         "daft punk": { vibeKey: "edm", title: "Songs Like Daft Punk: French Touch & Electronic Funk", seeds: [
             { title: "Get Lucky", artist: "Daft Punk", album: "Random Access Memories", year: "2013", duration: "4:08", duration_sec: 248 },
@@ -946,7 +1048,11 @@ function initAssistantApp() {
             { title: "Midnight City", artist: "M83", album: "Hurry Up, We're Dreaming", year: "2011", duration: "4:03", duration_sec: 243 },
             { title: "Nightcall", artist: "Kavinsky", album: "OutRun", year: "2010", duration: "4:18", duration_sec: 258 },
             { title: "Levels", artist: "Avicii", album: "Levels", year: "2011", duration: "3:19", duration_sec: 199 },
-            { title: "Latch", artist: "Disclosure & Sam Smith", album: "Settle", year: "2012", duration: "4:16", duration_sec: 256 }
+            { title: "Latch", artist: "Disclosure & Sam Smith", album: "Settle", year: "2012", duration: "4:16", duration_sec: 256 },
+            { title: "Innerbloom", artist: "RÜFÜS DU SOL", album: "Bloom", year: "2016", duration: "9:38", duration_sec: 578 },
+            { title: "D.A.N.C.E.", artist: "Justice", album: "Cross", year: "2007", duration: "4:02", duration_sec: 242 },
+            { title: "Instant Crush", artist: "Daft Punk", album: "Random Access Memories", year: "2013", duration: "5:37", duration_sec: 337 },
+            { title: "Strobe", artist: "deadmau5", album: "For Lack of a Better Name", year: "2009", duration: "10:37", duration_sec: 637 }
         ]}
     };
 
@@ -1140,68 +1246,68 @@ function initAssistantApp() {
 
     const HUMAN_VIBE_INTROS = {
         synthwave: [
-            "Ooh, late-night synthwave is one of my absolute favorite moods. 🌆 Picture empty highways, neon reflections on wet pavement, and warm analog arpeggios—I pulled **6 essential tracks** for you:",
-            "Nothing beats that retro-futuristic analog glow. ⚡ I dug into the synthwave crates and lined up **6 tracks** built for a midnight drive:"
+            "Ooh, late-night synthwave is one of my absolute favorite moods. 🌆 Picture empty highways, neon reflections on wet pavement, and warm analog arpeggios—I pulled **10 essential tracks** for you:",
+            "Nothing beats that retro-futuristic analog glow. ⚡ I dug into the synthwave crates and lined up **10 tracks** built for a midnight drive:"
         ],
         workout: [
-            "Let's get after it!! 💪 When you need to push through a heavy set or lock into a run, you need relentless drums and zero filler. Here are **6 high-adrenaline anthems** to fuel your session:",
-            "Time to turn the intensity all the way up 🔥 I put together **6 heavy-hitting workout tracks** with massive basslines and nonstop momentum:"
+            "Let's get after it!! 💪 When you need to push through a heavy set or lock into a run, you need relentless drums and zero filler. Here are **10 high-adrenaline anthems** to fuel your session:",
+            "Time to turn the intensity all the way up 🔥 I put together **10 heavy-hitting workout tracks** with massive basslines and nonstop momentum:"
         ],
         "hip hop": [
-            "Now we're talking. 🎤 From iconic boom-bap drums to razor-sharp lyricism and heavy 808s, I pulled **6 hip-hop essentials** that never miss:",
-            "Respect the classics! 🙌 I lined up **6 heavyweight hip-hop tracks** with timeless production and lyrical heat:"
+            "Now we're talking. 🎤 From iconic boom-bap drums to razor-sharp lyricism and heavy 808s, I pulled **10 hip-hop essentials** that never miss:",
+            "Respect the classics! 🙌 I lined up **10 heavyweight hip-hop tracks** with timeless production and lyrical heat:"
         ],
         lofi: [
-            "Let's get you into a calm, effortless flow state. ☕ I picked **6 dusty lo-fi & chillhop beats** with warm Rhodes chords and vinyl texture—perfect for focusing or unwinding:",
-            "Cozy vibes incoming 🌧️ Here are **6 mellow, distraction-free lo-fi instrumentals** that feel like a warm cup of coffee by a rainy window:"
+            "Let's get you into a calm, effortless flow state. ☕ I picked **10 dusty lo-fi & chillhop beats** with warm Rhodes chords and vinyl texture—perfect for focusing or unwinding:",
+            "Cozy vibes incoming 🌧️ Here are **10 mellow, distraction-free lo-fi instrumentals** that feel like a warm cup of coffee by a rainy window:"
         ],
         acoustic: [
-            "Sometimes you just want stripped-back guitars, honest storytelling, and warm vocals that feel like they're right in the room with you. 🎸 Here are **6 intimate acoustic sessions**:",
-            "Taking it warm and unplugged 🌿 I curated **6 acoustic favorites** with rich fingerpicking and timeless melodies:"
+            "Sometimes you just want stripped-back guitars, honest storytelling, and warm vocals that feel like they're right in the room with you. 🎸 Here are **10 intimate acoustic sessions**:",
+            "Taking it warm and unplugged 🌿 I curated **10 acoustic favorites** with rich fingerpicking and timeless melodies:"
         ],
         rock: [
-            "Turn the amplifier up! ⚡ There's nothing quite like soaring vocals, driving drums, and guitar riffs everyone knows by heart. Here are **6 rock legends**:",
-            "Pure electricity from start to finish 🎸 I pulled **6 iconic rock anthems** that sound incredible at full volume:"
+            "Turn the amplifier up! ⚡ There's nothing quite like soaring vocals, driving drums, and guitar riffs everyone knows by heart. Here are **10 rock legends**:",
+            "Pure electricity from start to finish 🎸 I pulled **10 iconic rock anthems** that sound incredible at full volume:"
         ],
         jazz: [
-            "Dim the lights and pour a drink 🎷 I put together **6 timeless Blue Note & late-night jazz recordings** with smoky saxophone, velvet trumpet, and walking upright bass:",
-            "Pure sophistication. ✨ Here are **6 classic jazz masterpieces** that instantly turn any room into a cozy midnight lounge:"
+            "Dim the lights and pour a drink 🎷 I put together **10 timeless Blue Note & late-night jazz recordings** with smoky saxophone, velvet trumpet, and walking upright bass:",
+            "Pure sophistication. ✨ Here are **10 classic jazz masterpieces** that instantly turn any room into a cozy midnight lounge:"
         ],
         "r&b": [
-            "Smooth, lush, and straight from the soul. ✨ Whether you're winding down late at night or just in your feelings, these **6 R&B and neo-soul tracks** set the mood effortlessly:",
-            "Pure velvet vocals and deep pocket grooves 🌙 Here are **6 soulful R&B gems** I picked out for you:"
+            "Smooth, lush, and straight from the soul. ✨ Whether you're winding down late at night or just in your feelings, these **10 R&B and neo-soul tracks** set the mood effortlessly:",
+            "Pure velvet vocals and deep pocket grooves 🌙 Here are **10 soulful R&B gems** I picked out for you:"
         ],
         edm: [
-            "Hands in the air! 🙌 I lined up **6 euphoric electronic & house anthems** with massive builds and unforgettable drops:",
-            "Let's bring the club & festival energy right into the chat 🎧 Here are **6 electronic essentials** that hit hard:"
+            "Hands in the air! 🙌 I lined up **10 euphoric electronic & house anthems** with massive builds and unforgettable drops:",
+            "Let's bring the club & festival energy right into the chat 🎧 Here are **10 electronic essentials** that hit hard:"
         ],
         throwback: [
-            "Hop in the time machine! 📼 These **6 iconic 80s & 90s throwbacks** have hooks so good everyone in the room will be singing along within ten seconds:",
-            "Pure nostalgia gold ✨ I pulled **6 timeless retro hits** from the 80s and 90s that still sound fresh today:"
+            "Hop in the time machine! 📼 These **10 iconic 80s & 90s throwbacks** have hooks so good everyone in the room will be singing along within ten seconds:",
+            "Pure nostalgia gold ✨ I pulled **10 timeless retro hits** from the 80s and 90s that still sound fresh today:"
         ],
         pop: [
-            "Instant mood-lifters incoming! ✨ I grabbed **6 glossy, feel-good pop anthems** packed with infectious hooks and bright energy:",
-            "If you want pure feel-good momentum, this set is undefeated 🎉 Here are **6 chart-topping pop favorites**:"
+            "Instant mood-lifters incoming! ✨ I grabbed **10 glossy, feel-good pop anthems** packed with infectious hooks and bright energy:",
+            "If you want pure feel-good momentum, this set is undefeated 🎉 Here are **10 chart-topping pop favorites**:"
         ],
         chill: [
-            "Let's slow things down and let the room breathe 🌅 I curated **6 dreamy, laid-back tracks** with warm basslines and sunset grooves:",
-            "Easygoing, smooth, and zero stress 🌊 Here are **6 chill tracks** that melt the day away:"
+            "Let's slow things down and let the room breathe 🌅 I curated **10 dreamy, laid-back tracks** with warm basslines and sunset grooves:",
+            "Easygoing, smooth, and zero stress 🌊 Here are **10 chill tracks** that melt the day away:"
         ],
         melancholy: [
-            "Some days just call for music that sits right there with you without rushing you out of the feeling. ❤️ I pulled **6 deeply emotional, soulful ballads** with intimate piano and poignant vocals:",
-            "Raw emotion and heartfelt melody 🌧️ Here are **6 poignant, melancholic tracks** to sit in your feelings with:"
+            "Some days just call for music that sits right there with you without rushing you out of the feeling. ❤️ I pulled **10 deeply emotional, soulful ballads** with intimate piano and poignant vocals:",
+            "Raw emotion and heartfelt melody 🌧️ Here are **10 poignant, melancholic tracks** to sit in your feelings with:"
         ],
         country: [
-            "Nothing tells a story like honest songwriting and southern acoustic grit. 🌾 I lined up **6 standout modern and classic country tracks** built on soulful vocals and raw emotion:",
-            "Boot heels, acoustic guitars, and timeless storytelling 🎸 Here are **6 essential country records**:"
+            "Nothing tells a story like honest songwriting and southern acoustic grit. 🌾 I lined up **10 standout modern and classic country tracks** built on soulful vocals and raw emotion:",
+            "Boot heels, acoustic guitars, and timeless storytelling 🎸 Here are **10 essential country records**:"
         ],
         indie: [
-            "Ooh, love this sound. 🎸 Think hazy guitars, bittersweet melodies, and that sunset-on-a-rooftop feeling. Here are **6 standout indie tracks** for your rotation:",
-            "Pure dream-pop & bedroom indie magic ✨ Here are **6 standout indie favorites**:"
+            "Ooh, love this sound. 🎸 Think hazy guitars, bittersweet melodies, and that sunset-on-a-rooftop feeling. Here are **10 standout indie tracks** for your rotation:",
+            "Pure dream-pop & bedroom indie magic ✨ Here are **10 standout indie favorites**:"
         ],
         showcase: [
-            "You got it! 🎧 Music hits best when curated by sound, tempo, and feeling rather than just matching words in song titles. Here is a curated 6-track lineup selected purely for musical feel, blending soulful R&B, late-night synthwave, warm acoustic, and indie grooves:",
-            "Curating strictly by genre, tempo, and mood! 🎶 Here are **6 standout masterpieces** that showcase groove, atmosphere, and authentic songwriting across genres:"
+            "You got it! 🎧 Music hits best when curated by sound, tempo, and feeling rather than just matching words in song titles. Here is a curated 10-track lineup selected purely for musical feel, blending soulful R&B, late-night synthwave, warm acoustic, and indie grooves:",
+            "Curating strictly by genre, tempo, and mood! 🎶 Here are **10 standout masterpieces** that showcase groove, atmosphere, and authentic songwriting across genres:"
         ]
     };
 
@@ -1237,7 +1343,7 @@ function initAssistantApp() {
                     "Yeah, today was non-stop",
                     "Just trying to unwind on the couch"
                 ],
-                customIntro: "Sounds like it's been a heavy day—take a deep breath and let your shoulders drop. 🌿 Since you asked for a mix to unwind, I put together **6 warm, unhurried tracks** with soft melodies to help quiet the noise:",
+                customIntro: "Sounds like it's been a heavy day—take a deep breath and let your shoulders drop. 🌿 Since you asked for a mix to unwind, I put together **10 warm, unhurried tracks** with soft melodies to help quiet the noise:",
                 followUp: "How are you holding up? If you want something even softer like acoustic guitar or late-night jazz, just say the word."
             };
         }
@@ -1252,7 +1358,7 @@ function initAssistantApp() {
                     "Just taking it one hour at a time",
                     "Tell me a random story or fact"
                 ],
-                customIntro: "I'm really sorry you're going through that ❤️ Here are **6 soulful, heartfelt tracks** I pulled to sit right there with you:",
+                customIntro: "I'm really sorry you're going through that ❤️ Here are **10 soulful, heartfelt tracks** I pulled to sit right there with you:",
                 followUp: "I'm right here if you want to talk, or if you want more late-night soul or stripped-back acoustic ballads."
             };
         }
@@ -1267,7 +1373,7 @@ function initAssistantApp() {
                     "Just in a really great mood today",
                     "Hanging out with friends tonight"
                 ],
-                customIntro: "Now THAT is what I love to hear!! 🎉 Since we're celebrating, I lined up **6 infectious, feel-good anthems** to keep that high energy rolling:",
+                customIntro: "Now THAT is what I love to hear!! 🎉 Since we're celebrating, I lined up **10 infectious, feel-good anthems** to keep that high energy rolling:",
                 followUp: "What are we celebrating?! Tell me if you want to take this into full club/dance territory or throw on some 80s & 90s party classics next!"
             };
         }
@@ -1286,8 +1392,8 @@ function initAssistantApp() {
                     "Stuck in traffic unfortunately"
                 ],
                 customIntro: isNight
-                    ? "Windows cracked, city lights passing by—nothing beats a late-night drive. 🌃 Here are **6 hypnotic synth & night-drive tracks** built for the open road:"
-                    : "Nothing beats a great driving soundtrack with the road ahead of you 🛣️ I pulled **6 timeless road-trip anthems** built for cruising:",
+                    ? "Windows cracked, city lights passing by—nothing beats a late-night drive. 🌃 Here are **10 hypnotic synth & night-drive tracks** built for the open road:"
+                    : "Nothing beats a great driving soundtrack with the road ahead of you 🛣️ I pulled **10 timeless road-trip anthems** built for cruising:",
                 followUp: "Want to keep cruising on this wavelength, or switch the dial to indie chill or 90s hip-hop?"
             };
         }
@@ -1302,7 +1408,7 @@ function initAssistantApp() {
                     "Ordering takeout tonight instead",
                     "Trying out a brand new recipe"
                 ],
-                customIntro: "Ooh, setting the mood! 🍷 Here are **6 timeless lounge & soul classics** to keep you company in the kitchen:",
+                customIntro: "Ooh, setting the mood! 🍷 Here are **10 timeless lounge & soul classics** to keep you company in the kitchen:",
                 followUp: "What's on the menu tonight? Let me know if you want to blend in some smooth R&B or sunset indie next!"
             };
         }
@@ -1319,7 +1425,7 @@ function initAssistantApp() {
                     "What kind of music are you into?",
                     "Tell me a music joke"
                 ],
-                customIntro: `Since you asked for some tracks, I hand-picked **6 of my personal favorite songs** that hit the sweet spot between groove and melody:`,
+                customIntro: `Since you asked for some tracks, I hand-picked **10 of my personal favorite songs** that hit the sweet spot between groove and melody:`,
                 followUp: "Tell me which track in this batch catches your ear first, and I'll tailor the next round around it!"
             };
         }
@@ -1337,8 +1443,19 @@ function initAssistantApp() {
             return !shownTrackKeys.has(k);
         });
 
-        const chosenSeeds = (unseenSeeds.length >= 6 ? unseenSeeds : preset.seeds).slice(0, 6);
-        const usedSecondPage = unseenSeeds.length > 0 && unseenSeeds.length <= 6;
+        let chosenSeeds = unseenSeeds.slice(0, 10);
+        if (chosenSeeds.length < 10) {
+            const chosenSet = new Set(chosenSeeds.map(s => `${(s.title || '').toLowerCase()}|${(s.artist || '').toLowerCase()}`));
+            for (const s of preset.seeds) {
+                if (chosenSeeds.length >= 10) break;
+                const k = `${(s.title || '').toLowerCase()}|${(s.artist || '').toLowerCase()}`;
+                if (!chosenSet.has(k)) {
+                    chosenSeeds.push(s);
+                    chosenSet.add(k);
+                }
+            }
+        }
+        const usedSecondPage = unseenSeeds.length > 0 && unseenSeeds.length < preset.seeds.length;
 
         chosenSeeds.forEach(s => {
             shownTrackKeys.add(`${(s.title || '').toLowerCase()}|${(s.artist || '').toLowerCase()}`);
@@ -1356,7 +1473,7 @@ function initAssistantApp() {
 
         const intros = HUMAN_VIBE_INTROS[vibeKey] || HUMAN_VIBE_INTROS.chill;
         const defaultIntro = isNewOrMoreRequest
-            ? `Fresh crate dug! 🎧 I switched things up and curated **${playlistTitle}** for you—6 brand-new tracks starting with **${tracks[0] ? tracks[0].title : 'a classic'}** by **${tracks[0] ? tracks[0].artist : ''}**:`
+            ? `Fresh crate dug! 🎧 I switched things up and curated **${playlistTitle}** for you—10 brand-new tracks starting with **${tracks[0] ? tracks[0].title : 'a classic'}** by **${tracks[0] ? tracks[0].artist : ''}**:`
             : intros[assistantMemory.turnCount % intros.length];
 
         const followUpNote = customFollowUp || (
@@ -1387,12 +1504,16 @@ function initAssistantApp() {
         if (tracks.length === 0) return null;
 
         const ordinalMap = [
-            { idx: 0, re: /\b(track\s*#?1|song\s*#?1|number\s*1|#1|first\s+(track|song|one)|1st\s+(track|song|one)|the\s+first|opener)\b/i },
+            { idx: 9, re: /\b(track\s*#?10|song\s*#?10|number\s*10|#10|tenth\s+(track|song|one)|10th\s+(track|song|one)|the\s+tenth)\b/i },
+            { idx: 0, re: /\b(track\s*#?1\b|song\s*#?1\b|number\s*1\b|#1\b|first\s+(track|song|one)|1st\s+(track|song|one)|the\s+first|opener)\b/i },
             { idx: 1, re: /\b(track\s*#?2|song\s*#?2|number\s*2|#2|second\s+(track|song|one)|2nd\s+(track|song|one)|the\s+second)\b/i },
             { idx: 2, re: /\b(track\s*#?3|song\s*#?3|number\s*3|#3|third\s+(track|song|one)|3rd\s+(track|song|one)|the\s+third)\b/i },
             { idx: 3, re: /\b(track\s*#?4|song\s*#?4|number\s*4|#4|fourth\s+(track|song|one)|4th\s+(track|song|one)|the\s+fourth)\b/i },
             { idx: 4, re: /\b(track\s*#?5|song\s*#?5|number\s*5|#5|fifth\s+(track|song|one)|5th\s+(track|song|one)|the\s+fifth)\b/i },
-            { idx: 5, re: /\b(track\s*#?6|song\s*#?6|number\s*6|#6|sixth\s+(track|song|one)|6th\s+(track|song|one)|the\s+sixth)\b/i }
+            { idx: 5, re: /\b(track\s*#?6|song\s*#?6|number\s*6|#6|sixth\s+(track|song|one)|6th\s+(track|song|one)|the\s+sixth)\b/i },
+            { idx: 6, re: /\b(track\s*#?7|song\s*#?7|number\s*7|#7|seventh\s+(track|song|one)|7th\s+(track|song|one)|the\s+seventh)\b/i },
+            { idx: 7, re: /\b(track\s*#?8|song\s*#?8|number\s*8|#8|eighth\s+(track|song|one)|8th\s+(track|song|one)|the\s+eighth)\b/i },
+            { idx: 8, re: /\b(track\s*#?9|song\s*#?9|number\s*9|#9|ninth\s+(track|song|one)|9th\s+(track|song|one)|the\s+ninth)\b/i }
         ];
         for (const item of ordinalMap) {
             if (item.re.test(lower) && tracks[item.idx]) {
@@ -1448,7 +1569,7 @@ function initAssistantApp() {
         const ref = resolveReferencedTrack(lower);
 
         // 1. Voice / Chat Playback Commands ("play track 2", "play the first song", "pause", "next song")
-        if (/^(play|start playing|put on|listen to)\s+(track\s*#?\d|song\s*#?\d|number\s*\d|#\d|the\s+(first|second|third|fourth|fifth|sixth|last)\s*(track|song|one)?|(1st|2nd|3rd|4th|5th|6th)\s*(track|song|one)?)$/i.test(lower) && ref) {
+        if (/^(play|start playing|put on|listen to)\s+(track\s*#?\d+|song\s*#?\d+|number\s*\d+|#\d+|the\s+(first|second|third|fourth|fifth|sixth|seventh|eighth|ninth|tenth|last)\s*(track|song|one)?|(1st|2nd|3rd|4th|5th|6th|7th|8th|9th|10th)\s*(track|song|one)?)$/i.test(lower) && ref) {
             setTimeout(() => playTrackFromQueue(tracks, ref.idx), 80);
             return {
                 success: true,
@@ -1644,9 +1765,9 @@ function initAssistantApp() {
             return {
                 success: true,
                 mode: 'chat',
-                reply: `⏱️ Your current mix (**${assistantMemory.lastPlaylistTitle || 'Curated Playlist'}**) has **${tracks.length} tracks** with a total runtime of about **${totalMin} minutes**:\n\n• **Longest track:** **${longest.title}** by *${longest.artist}* (${longest.duration || '4:30'})\n• **Shortest track:** **${shortest.title}** by *${shortest.artist}* (${shortest.duration || '2:45'})\n\nWant me to add 6 more tracks for a longer session, or swap any song out?`,
+                reply: `⏱️ Your current mix (**${assistantMemory.lastPlaylistTitle || 'Curated Playlist'}**) has **${tracks.length} tracks** with a total runtime of about **${totalMin} minutes**:\n\n• **Longest track:** **${longest.title}** by *${longest.artist}* (${longest.duration || '4:30'})\n• **Shortest track:** **${shortest.title}** by *${shortest.artist}* (${shortest.duration || '2:45'})\n\nWant me to add 10 more tracks for a longer session, or swap any song out?`,
                 suggestions: [
-                    `🔥 Add 6 more tracks (Vol. 2)`,
+                    `🔥 Add 10 more tracks (Vol. 2)`,
                     `▶️ Play ${longest.title}`,
                     `🔄 Swap track 1`
                 ],
@@ -1739,9 +1860,9 @@ function initAssistantApp() {
                 return {
                     success: true,
                     mode: 'chat',
-                    reply: `🎤 **Track #${ref.idx + 1} (${t.title})** is by **${t.artist}** (from *${t.album || 'Single'}*${t.year ? ', ' + t.year : ''})!${bioParagraph}${hitsLine}\n\nWant me to put together a full 6-track **${t.artist}** spotlight playlist for you?`,
+                    reply: `🎤 **Track #${ref.idx + 1} (${t.title})** is by **${t.artist}** (from *${t.album || 'Single'}*${t.year ? ', ' + t.year : ''})!${bioParagraph}${hitsLine}\n\nWant me to put together a full 10-track **${t.artist}** spotlight playlist for you?`,
                     suggestions: [
-                        `🎵 Build a 6-track ${t.artist} playlist`,
+                        `🎵 Build a 10-track ${t.artist} playlist`,
                         `▶️ Play ${t.title}`,
                         `📅 When did ${t.title} come out?`,
                         `🔄 Surprise me with a new playlist`
@@ -1960,7 +2081,7 @@ function initAssistantApp() {
     async function fetchLiveConversationalAiReply(userText) {
         try {
             const activeTracksContext = (assistantMemory.lastTracks && assistantMemory.lastTracks.length > 0)
-                ? ` Current playlist on screen: ${assistantMemory.lastTracks.slice(0, 6).map((t, i) => `#${i + 1} "${t.title}" by ${t.artist} (${t.year || ''})`).join(', ')}.`
+                ? ` Current playlist on screen: ${assistantMemory.lastTracks.slice(0, 10).map((t, i) => `#${i + 1} "${t.title}" by ${t.artist} (${t.year || ''})`).join(', ')}.`
                 : '';
             const userContext = assistantMemory.userName
                 ? ` The user's name is ${assistantMemory.userName}. Address them by name naturally.`
@@ -2108,7 +2229,7 @@ function initAssistantApp() {
             return {
                 success: true,
                 mode: 'chat',
-                reply: `I'm your **AI Personal Assistant & Music DJ** on MP3aud.io! 🎧 Think of me like a music-obsessed friend who also has instant access to millions of songs. Here's what we can do together:\n\n• **Curate Custom Playlists:** Tell me any vibe, mood, decade, or activity and I'll build you a 6-track mix.\n• **Instant Audio & MP3s:** Preview full audio bubbles right in our chat, or download 320kbps MP3s with HD Apple Music cover art.\n• **Music Discovery & Trivia:** Ask me about any artist, album, release year, or backstories.\n• **Custom Phone Ringtones:** Extract custom iPhone (\`.m4r\`) and Android (\`.mp3\`) ringtones in one click.\n• **Everyday Conversation:** Chat with me about your day, work, cooking, or whatever is on your mind!\n\nWhat would you like to explore today${userDisplayName}?`,
+                reply: `I'm your **AI Personal Assistant & Music DJ** on MP3aud.io! 🎧 Think of me like a music-obsessed friend who also has instant access to millions of songs. Here's what we can do together:\n\n• **Curate Custom Playlists:** Tell me any vibe, mood, decade, or activity and I'll build you a 10-track mix.\n• **Instant Audio & MP3s:** Preview full audio bubbles right in our chat, or download 320kbps MP3s with HD Apple Music cover art.\n• **Music Discovery & Trivia:** Ask me about any artist, album, release year, or backstories.\n• **Custom Phone Ringtones:** Extract custom iPhone (\`.m4r\`) and Android (\`.mp3\`) ringtones in one click.\n• **Everyday Conversation:** Chat with me about your day, work, cooking, or whatever is on your mind!\n\nWhat would you like to explore today${userDisplayName}?`,
                 tracks: []
             };
         }
@@ -2411,7 +2532,7 @@ function initAssistantApp() {
                     suggestions: [
                         `📅 What year did these songs come out?`,
                         `💬 Tell me about ${assistantMemory.lastArtist || 'the lead artist'}`,
-                        `🔥 Give me 6 more in this style`,
+                        `🔥 Give me 10 more in this style`,
                         `🎲 Show me a different genre`
                     ],
                     tracks: []
@@ -2424,7 +2545,7 @@ function initAssistantApp() {
             return await curatePresetVibePlaylist(
                 nextKey,
                 true,
-                `Got you—let's pick up the tempo and bring the energy way up! ⚡ I swapped out the slower grooves for **6 punchy, high-BPM tracks** that hit right away:`,
+                `Got you—let's pick up the tempo and bring the energy way up! ⚡ I swapped out the slower grooves for **10 punchy, high-BPM tracks** that hit right away:`,
                 `How's that tempo feeling now? Say the word if you want to go even harder (full gym/festival energy) or ask me anything about these tracks!`
             );
         }
@@ -2434,7 +2555,7 @@ function initAssistantApp() {
             return await curatePresetVibePlaylist(
                 nextKey,
                 true,
-                `Say less—dialing it back to something much smoother, warmer, and more laid-back 🌙 Here are **6 mellow tracks** to let the room breathe:`,
+                `Say less—dialing it back to something much smoother, warmer, and more laid-back 🌙 Here are **10 mellow tracks** to let the room breathe:`,
                 `Better? Let me know if you want pure instrumental beats (no vocals) or warm acoustic guitar next.`
             );
         }
@@ -2442,7 +2563,7 @@ function initAssistantApp() {
             return await curatePresetVibePlaylist(
                 assistantMemory.lastVibeKey,
                 true,
-                `Keeping that exact wave going! 🌊 Here is **Volume 2** with **6 fresh tracks** in the same lane so the vibe never drops:`,
+                `Keeping that exact wave going! 🌊 Here is **Volume 2** with **10 fresh tracks** in the same lane so the vibe never drops:`,
                 `Still locked in! Tap ▶ Play All in Chat to queue these up right behind the first batch.`
             );
         }
@@ -2470,7 +2591,7 @@ function initAssistantApp() {
         if (wantsPlaylist && !isRingtone) {
             for (const [artKey, simObj] of Object.entries(ARTIST_SIMILAR_PRESETS)) {
                 if (lower.includes(artKey) && /\b(like|similar|style of|vibe of|around)\b/i.test(lower)) {
-                    const tracks = await enrichPresetSeedsNonBlocking(simObj.seeds);
+                    const tracks = await enrichPresetSeedsNonBlocking(simObj.seeds.slice(0, 10));
                     assistantMemory.lastTracks = tracks;
                     assistantMemory.lastArtist = tracks[0] ? tracks[0].artist : artKey;
                     assistantMemory.lastPlaylistTitle = simObj.title;
@@ -2479,7 +2600,7 @@ function initAssistantApp() {
                     const properArtist = artKey.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
                     return {
                         success: true,
-                        reply: `Great taste! 🎧 Here are **6 standout tracks** that capture the musical aesthetic, songwriting, and genre of **${properArtist}** without just repeating the name:`,
+                        reply: `Great taste! 🎧 Here are **10 standout tracks** that capture the musical aesthetic, songwriting, and genre of **${properArtist}** without just repeating the name:`,
                         follow_up_note: `How does this lineup feel? Tell me if you want to explore more songs in this specific genre or dial the tempo up or down!`,
                         suggestions: [
                             `🔥 More songs like this vibe`,
@@ -2562,7 +2683,7 @@ function initAssistantApp() {
             }
         }
 
-        const limit = (isRingtone || !wantsPlaylist) ? 1 : 6;
+        const limit = (isRingtone || !wantsPlaylist) ? 1 : 10;
 
         try {
             const results = await searchItunesFast(cleanQ, limit * 3, 1800);
@@ -2602,9 +2723,9 @@ function initAssistantApp() {
                         reply: isRingtone
                             ? `Great pick for a ringtone! 📱 I pulled **${t.title}** by **${t.artist}**. Tap play below to preview it, or click **⬇ Ringtone** to get your custom iPhone (.M4R) & Android (.MP3) files:`
                             : `Love that track! 🔥 Here is **${t.title}** by **${t.artist}** (${t.album || 'Single'}${t.year ? ', ' + t.year : ''}). Tap ▶ in the bubble below to listen right now, or grab the full 320kbps MP3:`,
-                        follow_up_note: `Want me to build a full 6-track playlist around **${t.artist}**, or pull more songs with this exact energy?`,
+                        follow_up_note: `Want me to build a full 10-track playlist around **${t.artist}**, or pull more songs with this exact energy?`,
                         suggestions: [
-                            `🎵 Build a 6-track ${t.artist} playlist`,
+                            `🎵 Build a 10-track ${t.artist} playlist`,
                             `🔥 More songs like ${t.title}`,
                             `📱 Make a ringtone of ${t.title}`,
                             `🎲 Surprise me with a new playlist`
@@ -3037,60 +3158,25 @@ function initAssistantApp() {
                 <div class="playlist-header-card">
                     <div class="playlist-header-top">
                         <div class="playlist-header-meta">
-                            <span class="playlist-badge-eyebrow">✨ AI CURATED PLAYLIST &bull; ${tracks.length} TRACKS</span>
+                            <span class="playlist-badge-eyebrow">✨ AI CURATED MIX &bull; ${tracks.length} TRACKS</span>
                             <h3>${escapeHtml(playlistTitle)}</h3>
                             <span>${escapeHtml(playlistVibe)}</span>
                         </div>
                         <div class="playlist-header-actions">
-                            <button type="button" class="btn-play-all-chat" title="Play all tracks sequentially in chat">▶ Play All in Chat</button>
-                            <button type="button" class="btn-new-playlist-chat" title="Curate a fresh playlist">🔄 New Playlist</button>
+                            <button type="button" class="btn-play-all-chat" title="Play all tracks sequentially in chat">▶ Play All</button>
+                            <button type="button" class="btn-shuffle-chat" title="Shuffle and play tracks">🔀 Shuffle</button>
+                            <button type="button" class="btn-new-playlist-chat" title="Curate a fresh playlist">🔄 New Mix</button>
+                            <button type="button" class="btn-toggle-tracks-chat" title="Collapse or expand tracklist">▾ Hide Tracks</button>
                         </div>
                     </div>
 
-                    <!-- Prominent Connect to Apple Music, Spotify & YouTube Music Bar -->
-                    <div class="playlist-connect-bar">
-                        <div class="playlist-connect-title">
-                            <span class="connect-icon">⚡</span>
-                            <strong>Connect &amp; Listen On:</strong>
-                            <span class="connect-subtitle">Open this playlist directly in your favorite music app:</span>
-                        </div>
-                        <div class="playlist-streaming-buttons">
-                            <a href="${escapeHtml(amPl)}" target="_blank" rel="noopener" class="stream-btn apple-stream-btn" title="Open and save playlist in Apple Music">
-                                <span class="stream-btn-icon">🍎</span>
-                                <span class="stream-btn-text">
-                                    <strong>Apple Music</strong>
-                                    <small>Open in app &rarr;</small>
-                                </span>
-                            </a>
-                            <a href="${escapeHtml(spPl)}" target="_blank" rel="noopener" class="stream-btn spotify-stream-btn" title="Open and save playlist in Spotify">
-                                <span class="stream-btn-icon">🟢</span>
-                                <span class="stream-btn-text">
-                                    <strong>Spotify</strong>
-                                    <small>Open in app &rarr;</small>
-                                </span>
-                            </a>
-                            <a href="${escapeHtml(ytPl)}" target="_blank" rel="noopener" class="stream-btn ytmusic-stream-btn" title="Open and save playlist in YouTube Music">
-                                <span class="stream-btn-icon">🔴</span>
-                                <span class="stream-btn-text">
-                                    <strong>YouTube Music</strong>
-                                    <small>Open in app &rarr;</small>
-                                </span>
-                            </a>
-                            <button type="button" class="stream-btn export-m3u-btn" title="Download .M3U8 playlist file to import into Apple Music, iTunes, or media player">
-                                <span class="stream-btn-icon">📥</span>
-                                <span class="stream-btn-text">
-                                    <strong>Export .M3U8</strong>
-                                    <small>Apple Music / iTunes</small>
-                                </span>
-                            </button>
-                            <button type="button" class="stream-btn copy-tracklist-btn" title="Copy tracklist to paste into Spotify, SongShift, or Soundiiz">
-                                <span class="stream-btn-icon">📋</span>
-                                <span class="stream-btn-text">
-                                    <strong>Copy Tracklist</strong>
-                                    <small>For SongShift / Spotify</small>
-                                </span>
-                            </button>
-                        </div>
+                    <div class="playlist-compact-stream-bar">
+                        <span class="playlist-compact-stream-label">Open in:</span>
+                        <a href="${escapeHtml(amPl)}" target="_blank" rel="noopener" class="compact-stream-pill apple-pill" title="Open playlist in Apple Music">🍎 Apple Music</a>
+                        <a href="${escapeHtml(spPl)}" target="_blank" rel="noopener" class="compact-stream-pill spotify-pill" title="Open playlist in Spotify">🟢 Spotify</a>
+                        <a href="${escapeHtml(ytPl)}" target="_blank" rel="noopener" class="compact-stream-pill ytmusic-pill" title="Open playlist in YouTube Music">🔴 YouTube Music</a>
+                        <button type="button" class="compact-stream-pill copy-tracklist-btn" title="Copy tracklist to clipboard">📋 Copy List</button>
+                        <button type="button" class="compact-stream-pill export-m3u-btn" title="Download .M3U8 playlist file">📥 .M3U8</button>
                     </div>
                 </div>
             `;
@@ -3099,24 +3185,24 @@ function initAssistantApp() {
         const tracksHtml = hasTracks ? tracks.map((t, idx) => {
             const art = t.artwork_url || 'favicon.png';
             const subMeta = [t.artist, t.album, t.year].filter(Boolean).join(' • ');
-            const isRingtoneMode = (payload.mode === 'ringtone') || (videoToMp3Input && videoToMp3Input.checked);
             const tLinks = makeStreamingUrls(t.title, t.artist);
             const amUrl = t.apple_music_url || tLinks.apple_music;
             const spUrl = t.spotify_url || tLinks.spotify;
             const ytUrl = t.youtube_music_url || tLinks.youtube_music;
+            const numStr = (idx + 1) < 10 ? `0${idx + 1}` : `${idx + 1}`;
             return `
                 <div class="track-audio-bubble" data-bubble-id="${t.bubbleId}" data-track-idx="${idx}">
+                    <span class="track-index-num">${numStr}</span>
                     <div class="track-cover-wrap">
                         <img src="${escapeHtml(art)}" alt="${escapeHtml(t.title)}" class="track-cover-img" loading="lazy" onerror="this.src='favicon.png'">
                     </div>
-                    <button type="button" class="track-play-btn" title="Play track in chat" aria-label="Play ${escapeHtml(t.title)}">▶</button>
+                    <button type="button" class="track-play-btn" title="Play preview in chat" aria-label="Play ${escapeHtml(t.title)}">▶</button>
                     <div class="track-bubble-center">
                         <div class="track-title-line">
                             <span class="track-title-text">${escapeHtml(t.title)}</span>
                             <span class="track-duration-badge">${escapeHtml(t.duration || '3:30')}</span>
                         </div>
                         <div class="track-sub-line">
-                            <span class="track-quality-pill">320k ID3</span>
                             <span>${escapeHtml(subMeta)}</span>
                         </div>
                         <div class="track-waveform-row">
@@ -3126,6 +3212,7 @@ function initAssistantApp() {
                         </div>
                     </div>
                     <div class="track-dl-actions">
+                        <button type="button" class="track-similar-btn" title="Curate 10 songs similar to ${escapeHtml(t.title)} by ${escapeHtml(t.artist)}">✨ <span class="sim-label">Similar</span></button>
                         <div class="track-streaming-btns">
                             <a href="${escapeHtml(amUrl)}" target="_blank" rel="noopener" class="track-stream-link" title="Open in Apple Music">🍎</a>
                             <a href="${escapeHtml(spUrl)}" target="_blank" rel="noopener" class="track-stream-link" title="Open in Spotify">🟢</a>
@@ -3137,7 +3224,22 @@ function initAssistantApp() {
         }).join('') : '';
 
         const followUpHtml = payload.follow_up_note
-            ? `<div class="msg-text" style="margin-top: 10px; font-size: 0.86rem; color: #cbd5e1;"><p>${formatMarkdownBold(payload.follow_up_note)}</p></div>`
+            ? `<div class="msg-text" style="margin-top: 10px; font-size: 0.85rem; color: #cbd5e1;"><p>${formatMarkdownBold(payload.follow_up_note)}</p></div>`
+            : '';
+
+        const suggestionChips = Array.isArray(payload.suggestions) && payload.suggestions.length > 0
+            ? payload.suggestions
+            : (hasTracks
+                ? [
+                    `🔥 More like ${tracks[0] ? tracks[0].artist : 'this vibe'}`,
+                    `⚡ Make it more upbeat`,
+                    `🌙 Make it chiller`,
+                    `🎲 Surprise me with a different genre`
+                ]
+                : []);
+
+        const suggestionsHtml = suggestionChips.length > 0
+            ? `<div class="reply-suggestions-row">${suggestionChips.map(s => `<button type="button" class="reply-suggestion-chip" data-suggest="${escapeHtml(s)}">${escapeHtml(s)}</button>`).join('')}</div>`
             : '';
 
         row.innerHTML = `
@@ -3153,6 +3255,7 @@ function initAssistantApp() {
                 ${playlistHeaderHtml}
                 ${hasTracks ? `<div class="tracks-bubble-stack">${tracksHtml}</div>` : ''}
                 ${followUpHtml}
+                ${suggestionsHtml}
                 <div class="bubble-conversion-container"></div>
             </div>
         `;
@@ -3161,22 +3264,32 @@ function initAssistantApp() {
         scrollToBottom();
 
         const bubbleEl = row.querySelector('.assistant-bubble');
-        const statusContainer = bubbleEl.querySelector('.bubble-conversion-container');
 
-        // Wire up Play buttons & Scrubbing on each track bubble
+        // Wire up Play buttons, row clicks, Similar track buttons & Scrubbing on each track bubble
         bubbleEl.querySelectorAll('.track-audio-bubble').forEach(trackEl => {
             const idx = parseInt(trackEl.getAttribute('data-track-idx'), 10);
             const playBtn = trackEl.querySelector('.track-play-btn');
             const scrubBar = trackEl.querySelector('.track-scrub-bar');
-            const dlBtn = trackEl.querySelector('.btn-track-mp3');
+            const simBtn = trackEl.querySelector('.track-similar-btn');
 
             if (playBtn) {
-                playBtn.addEventListener('click', () => {
+                playBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
                     playTrackFromQueue(tracks, idx);
+                });
+            }
+            if (simBtn) {
+                simBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const t = tracks[idx];
+                    if (t) {
+                        sendUserMessage(`Send me a playlist of songs like ${t.title} by ${t.artist}`);
+                    }
                 });
             }
             if (scrubBar) {
                 scrubBar.addEventListener('click', (e) => {
+                    e.stopPropagation();
                     const rect = scrubBar.getBoundingClientRect();
                     const ratio = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
                     if (activeBubbleId !== tracks[idx].bubbleId) {
@@ -3186,13 +3299,49 @@ function initAssistantApp() {
                     }
                 });
             }
+            // Clicking anywhere on the track card (outside external links or buttons) toggles playback
+            trackEl.addEventListener('click', (e) => {
+                if (e.target.closest('a, button, .track-scrub-bar')) return;
+                playTrackFromQueue(tracks, idx);
+            });
         });
 
-        // Wire up Playlist-level Play All, New Playlist & Streaming Export buttons
+        // Wire up interactive suggestion chips
+        bubbleEl.querySelectorAll('.reply-suggestion-chip').forEach(chip => {
+            chip.addEventListener('click', () => {
+                const rawSuggest = chip.getAttribute('data-suggest') || chip.textContent || '';
+                if (/buy\s+350\s+credits/i.test(rawSuggest)) {
+                    openModal('accountModal');
+                    return;
+                }
+                const cleanPrompt = rawSuggest.replace(/^[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}💬🎵🔥⚡🌙🎲📅▶️⏭️🔄💳🍎📲💰]+\s*/u, '').trim();
+                sendUserMessage(cleanPrompt || rawSuggest);
+            });
+        });
+
+        // Wire up Playlist-level Play All, Shuffle, Collapse/Expand, New Playlist & Streaming Export buttons
         const playAllBtn = bubbleEl.querySelector('.btn-play-all-chat');
         if (playAllBtn) {
             playAllBtn.addEventListener('click', () => {
                 playTrackFromQueue(tracks, 0);
+            });
+        }
+
+        const shuffleBtn = bubbleEl.querySelector('.btn-shuffle-chat');
+        if (shuffleBtn) {
+            shuffleBtn.addEventListener('click', () => {
+                const shuffled = [...tracks].sort(() => Math.random() - 0.5);
+                showToast(`🔀 Shuffling ${tracks.length} tracks from ${playlistTitle}!`, 'info');
+                playTrackFromQueue(shuffled, 0);
+            });
+        }
+
+        const toggleTracksBtn = bubbleEl.querySelector('.btn-toggle-tracks-chat');
+        const tracksStackEl = bubbleEl.querySelector('.tracks-bubble-stack');
+        if (toggleTracksBtn && tracksStackEl) {
+            toggleTracksBtn.addEventListener('click', () => {
+                const isHidden = tracksStackEl.classList.toggle('hidden');
+                toggleTracksBtn.textContent = isHidden ? `▸ Show ${tracks.length} Tracks` : '▾ Hide Tracks';
             });
         }
 
@@ -3298,7 +3447,7 @@ function initAssistantApp() {
                                 body: JSON.stringify({
                                     message: text,
                                     history: chatHistory.slice(-8),
-                                    current_tracks: (assistantMemory.lastTracks || []).slice(0, 6),
+                                    current_tracks: (assistantMemory.lastTracks || []).slice(0, 10),
                                     options: {
                                         auto_add_album_art: autoAddAlbumArtInput ? autoAddAlbumArtInput.checked : true,
                                         increase_quality: increaseQualityInput ? increaseQualityInput.checked : false,
@@ -3557,6 +3706,8 @@ function initAssistantApp() {
     }
 
     document.querySelectorAll('[data-prompt]').forEach(btn => {
+        if (btn.dataset.wired) return;
+        btn.dataset.wired = '1';
         btn.addEventListener('click', () => {
             const promptText = btn.getAttribute('data-prompt');
             toggleSidebar(false);

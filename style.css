@@ -2162,3 +2162,372 @@ body.messenger-body {
     background: var(--brand-orange-hover);
     transform: translateY(-1px);
 }
+
+/* ==========================================================================
+   INTERACTIVE, UNCLUTTERED STUDIO UI ENHANCEMENTS
+   ========================================================================== */
+
+/* Never show intrusive cold-start popup over chat composer */
+.server-wake-popup {
+    display: none !important;
+}
+
+/* Slimmer, collapsible sidebar on both desktop and mobile */
+.assistant-sidebar {
+    width: 288px;
+    min-width: 288px;
+    transition: margin-left 0.25s cubic-bezier(0.4, 0, 0.2, 1), transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.messenger-app-shell.sidebar-collapsed .assistant-sidebar {
+    margin-left: -288px;
+}
+
+.mobile-menu-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 9px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border-subtle);
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.mobile-menu-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.18);
+}
+
+/* Clean Top Header & Popover Audio Options Menu */
+.chat-header {
+    padding: 10px 20px;
+    backdrop-filter: blur(12px);
+    background-color: rgba(24, 34, 41, 0.92);
+}
+
+.chat-header-controls {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.header-action-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: var(--text-primary);
+    font-size: 0.77rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.16s ease;
+    user-select: none;
+}
+
+.header-action-pill:hover {
+    background: rgba(0, 168, 132, 0.18);
+    border-color: var(--brand-emerald);
+    transform: translateY(-1px);
+}
+
+.header-options-popover {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    width: 245px;
+    padding: 12px;
+    border-radius: 12px;
+    background: #182229;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    box-shadow: 0 14px 34px rgba(0, 0, 0, 0.55);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    z-index: 60;
+}
+
+.header-options-popover.hidden {
+    display: none !important;
+}
+
+.popover-section-title {
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-secondary);
+    margin-bottom: 2px;
+}
+
+.header-options-popover .chat-mode-chip {
+    width: 100%;
+    justify-content: flex-start;
+    padding: 7px 10px;
+    border-radius: 8px;
+}
+
+/* Interactive Welcome Mood & Genre Grid */
+.welcome-vibe-section {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.welcome-vibe-label {
+    font-size: 0.74rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+    display: block;
+}
+
+.welcome-vibe-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+}
+
+.welcome-vibe-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 13px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.11);
+    color: var(--text-primary);
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.16s ease;
+}
+
+.welcome-vibe-pill:hover {
+    background: linear-gradient(135deg, rgba(0, 168, 132, 0.24), rgba(255, 85, 0, 0.2));
+    border-color: var(--brand-emerald);
+    transform: translateY(-1px);
+    color: #ffffff;
+}
+
+/* Interactive Follow-Up Suggestion Chips inside Assistant Bubbles */
+.reply-suggestions-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.reply-suggestion-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 6px 12px;
+    border-radius: 999px;
+    background: rgba(0, 168, 132, 0.11);
+    border: 1px solid rgba(0, 168, 132, 0.3);
+    color: #d1fae5;
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    text-align: left;
+}
+
+.reply-suggestion-chip:hover {
+    background: rgba(0, 168, 132, 0.26);
+    border-color: var(--brand-emerald-hover);
+    color: #ffffff;
+    transform: translateY(-1px);
+}
+
+/* Compact, Uncluttered Playlist Header Card */
+.playlist-header-card {
+    margin-top: 10px;
+    padding: 11px 14px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, rgba(255, 85, 0, 0.11) 0%, rgba(0, 168, 132, 0.11) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+}
+
+.playlist-compact-stream-bar {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding-top: 8px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.playlist-compact-stream-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    margin-right: 2px;
+}
+
+.compact-stream-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 0.74rem;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--text-primary);
+    transition: all 0.15s ease;
+}
+
+.compact-stream-pill:hover {
+    background: rgba(255, 255, 255, 0.14);
+    transform: translateY(-1px);
+}
+
+.compact-stream-pill.apple-pill {
+    border-color: rgba(250, 45, 72, 0.35);
+    background: rgba(250, 45, 72, 0.12);
+    color: #ff6b81;
+}
+
+.compact-stream-pill.spotify-pill {
+    border-color: rgba(30, 215, 96, 0.35);
+    background: rgba(30, 215, 96, 0.12);
+    color: #2ee56d;
+}
+
+.compact-stream-pill.ytmusic-pill {
+    border-color: rgba(255, 0, 0, 0.35);
+    background: rgba(255, 0, 0, 0.12);
+    color: #ff6b6b;
+}
+
+.btn-shuffle-chat,
+.btn-toggle-tracks-chat {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 7px 11px;
+    border-radius: var(--radius-sm);
+    font-size: 0.77rem;
+    font-weight: 600;
+    cursor: pointer;
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--text-primary);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    transition: all 0.16s ease;
+}
+
+.btn-shuffle-chat:hover,
+.btn-toggle-tracks-chat:hover {
+    background: rgba(255, 255, 255, 0.16);
+    border-color: var(--brand-emerald);
+}
+
+/* Sleek, Compact Track Rows (All 10 Fit Cleanly Without Visual Clutter) */
+.tracks-bubble-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    margin-top: 8px;
+}
+
+.track-audio-bubble {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 10px;
+    border-radius: 10px;
+    background-color: rgba(19, 29, 36, 0.85);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    cursor: pointer;
+    transition: background-color 0.15s ease, border-color 0.15s ease, transform 0.12s ease;
+}
+
+.track-audio-bubble:hover {
+    background-color: var(--bg-track-card-hover);
+    border-color: rgba(255, 255, 255, 0.15);
+}
+
+.track-index-num {
+    width: 20px;
+    font-size: 0.74rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+    flex-shrink: 0;
+}
+
+.track-audio-bubble.is-playing .track-index-num {
+    color: var(--brand-emerald-hover);
+}
+
+.track-cover-wrap {
+    width: 40px;
+    height: 40px;
+    border-radius: 7px;
+}
+
+.track-play-btn {
+    width: 32px;
+    height: 32px;
+    font-size: 0.82rem;
+}
+
+.track-waveform-row {
+    display: none;
+    margin-top: 4px;
+}
+
+.track-audio-bubble.is-playing .track-waveform-row {
+    display: flex;
+}
+
+.track-similar-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    padding: 4px 8px;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--text-secondary);
+    font-size: 0.7rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    white-space: nowrap;
+}
+
+.track-similar-btn:hover {
+    background: rgba(0, 168, 132, 0.2);
+    border-color: var(--brand-emerald);
+    color: #ffffff;
+}
+
+@media (max-width: 900px) {
+    .messenger-app-shell.sidebar-collapsed .assistant-sidebar {
+        margin-left: 0;
+    }
+    .track-similar-btn span.sim-label {
+        display: none;
+    }
+}
