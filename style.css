@@ -2531,3 +2531,423 @@ body.messenger-body {
         display: none;
     }
 }
+
+/* ==========================================================================
+   RINGTONE CREATION & SETUP GUIDE STYLES
+   ========================================================================== */
+
+.header-action-pill.rt-guide-pill {
+    background: rgba(255, 85, 0, 0.12);
+    border-color: rgba(255, 85, 0, 0.35);
+    color: #ff9d66;
+}
+
+.header-action-pill.rt-guide-pill:hover {
+    background: rgba(255, 85, 0, 0.22);
+    border-color: var(--brand-orange);
+    color: #ffffff;
+}
+
+.track-ringtone-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+    border-radius: 6px;
+    background: rgba(255, 85, 0, 0.12);
+    border: 1px solid rgba(255, 85, 0, 0.35);
+    color: #ffaa75;
+    font-size: 0.7rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    white-space: nowrap;
+}
+
+.track-ringtone-btn:hover {
+    background: rgba(255, 85, 0, 0.26);
+    border-color: var(--brand-orange);
+    color: #ffffff;
+    transform: translateY(-1px);
+}
+
+.track-ringtone-btn .rt-cost-pill {
+    display: inline-block;
+    padding: 1px 4px;
+    border-radius: 4px;
+    background: rgba(255, 85, 0, 0.3);
+    color: #fff;
+    font-size: 0.62rem;
+    font-weight: 700;
+}
+
+@media (max-width: 600px) {
+    .track-ringtone-btn span.rt-btn-label {
+        display: none;
+    }
+}
+
+/* Ringtone Modal Enhancements */
+#ringtoneModal .modal-content,
+#ringtoneDownloadModal .modal-content {
+    max-width: 760px;
+    width: 95%;
+}
+
+.rt-modal-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--brand-orange);
+    background: rgba(255, 85, 0, 0.12);
+    padding: 4px 10px;
+    border-radius: 6px;
+    margin-bottom: 8px;
+}
+
+.rt-modal-title {
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: #ffffff;
+    margin-bottom: 6px;
+}
+
+.rt-modal-desc {
+    font-size: 0.88rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    margin-bottom: 18px;
+}
+
+/* Platform Switcher Tabs */
+.rt-platform-tabs {
+    display: flex;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 4px;
+    border-radius: var(--radius-md);
+    margin-bottom: 16px;
+    border: 1px solid var(--border-subtle);
+}
+
+.rt-platform-tab {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: transparent;
+    border: none;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.18s ease;
+}
+
+.rt-platform-tab:hover {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.rt-platform-tab.active {
+    background: var(--bg-assistant-bubble);
+    color: #ffffff;
+    border: 1px solid var(--brand-orange);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* Method Switcher for iOS */
+.rt-method-switch {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 14px;
+}
+
+.rt-method-btn {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--border-subtle);
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.16s ease;
+}
+
+.rt-method-btn.active {
+    background: rgba(0, 168, 132, 0.15);
+    border-color: var(--brand-emerald);
+    color: #ffffff;
+}
+
+.rt-panel {
+    display: none;
+    animation: rtFadeIn 0.2s ease-out;
+}
+
+.rt-panel.active {
+    display: block;
+}
+
+.rt-method-view {
+    display: none;
+}
+
+.rt-method-view.active {
+    display: block;
+}
+
+@keyframes rtFadeIn {
+    from { opacity: 0; transform: translateY(3px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Alert Banner */
+.rt-alert-banner {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    background: rgba(56, 189, 248, 0.08);
+    border: 1px solid rgba(56, 189, 248, 0.25);
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin-bottom: 14px;
+}
+
+.rt-alert-icon {
+    font-size: 1.2rem;
+    line-height: 1;
+}
+
+.rt-alert-banner p {
+    font-size: 0.84rem;
+    color: #bae6fd;
+    line-height: 1.45;
+    margin: 0;
+}
+
+/* Steps List & Cards */
+.rt-steps-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.rt-step-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    background: var(--bg-track-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: 10px;
+    padding: 12px 14px;
+    transition: all 0.16s ease;
+}
+
+.rt-step-card:hover {
+    border-color: rgba(255, 255, 255, 0.18);
+    background: var(--bg-track-card-hover);
+}
+
+.rt-step-badge {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    min-width: 26px;
+    border-radius: 50%;
+    background: var(--brand-orange);
+    color: #ffffff;
+    font-size: 0.8rem;
+    font-weight: 800;
+}
+
+.rt-step-body strong {
+    display: block;
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 3px;
+}
+
+.rt-step-body p {
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+    line-height: 1.45;
+    margin: 0;
+}
+
+.rt-step-body code {
+    background: rgba(255, 255, 255, 0.08);
+    padding: 2px 5px;
+    border-radius: 4px;
+    color: var(--accent-cyan);
+    font-size: 0.8rem;
+}
+
+/* Technical Specs Table */
+.rt-specs-box {
+    margin-top: 16px;
+    background: var(--bg-track-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.rt-specs-box h4 {
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: #ffffff;
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border-subtle);
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.rt-specs-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.82rem;
+    text-align: left;
+}
+
+.rt-specs-table th {
+    padding: 10px 14px;
+    color: var(--text-muted);
+    font-weight: 600;
+    border-bottom: 1px solid var(--border-subtle);
+}
+
+.rt-specs-table td {
+    padding: 10px 14px;
+    color: var(--text-secondary);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.rt-specs-table tr:last-child td {
+    border-bottom: none;
+}
+
+.rt-modal-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 18px;
+    padding-top: 14px;
+    border-top: 1px solid var(--border-subtle);
+    flex-wrap: wrap;
+}
+
+.rt-full-guide-link {
+    color: var(--brand-orange);
+    text-decoration: none;
+    font-size: 0.84rem;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: color 0.15s ease;
+}
+
+.rt-full-guide-link:hover {
+    color: var(--brand-orange-hover);
+    text-decoration: underline;
+}
+
+/* Download Ringtone Action Card in Modal */
+.rt-download-card {
+    background: var(--bg-track-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: 12px;
+    padding: 18px;
+    margin-bottom: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.rt-track-preview-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.rt-track-art {
+    width: 48px;
+    height: 48px;
+    border-radius: 8px;
+    object-fit: cover;
+}
+
+.rt-track-meta {
+    flex: 1;
+    min-width: 0;
+}
+
+.rt-track-meta h4 {
+    font-size: 0.98rem;
+    font-weight: 700;
+    color: #ffffff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.rt-track-meta p {
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+    margin: 2px 0 0 0;
+}
+
+.rt-format-buttons-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.rt-dl-format-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    padding: 12px 10px;
+    border-radius: 10px;
+    border: 1px solid var(--border-subtle);
+    background: var(--bg-assistant-bubble);
+    color: #ffffff;
+    cursor: pointer;
+    font-size: 0.82rem;
+    font-weight: 700;
+    transition: all 0.18s ease;
+    text-decoration: none;
+}
+
+.rt-dl-format-btn.ios-btn:hover {
+    border-color: #38bdf8;
+    background: rgba(56, 189, 248, 0.12);
+    transform: translateY(-1px);
+}
+
+.rt-dl-format-btn.android-btn:hover {
+    border-color: #10b981;
+    background: rgba(16, 185, 129, 0.12);
+    transform: translateY(-1px);
+}
+
+.rt-dl-format-btn span.subtext {
+    font-size: 0.68rem;
+    font-weight: 500;
+    color: var(--text-muted);
+}

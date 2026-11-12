@@ -2586,6 +2586,426 @@ body.messenger-body {
     }
 }
 
+/* ==========================================================================
+   RINGTONE CREATION & SETUP GUIDE STYLES
+   ========================================================================== */
+
+.header-action-pill.rt-guide-pill {
+    background: rgba(255, 85, 0, 0.12);
+    border-color: rgba(255, 85, 0, 0.35);
+    color: #ff9d66;
+}
+
+.header-action-pill.rt-guide-pill:hover {
+    background: rgba(255, 85, 0, 0.22);
+    border-color: var(--brand-orange);
+    color: #ffffff;
+}
+
+.track-ringtone-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+    border-radius: 6px;
+    background: rgba(255, 85, 0, 0.12);
+    border: 1px solid rgba(255, 85, 0, 0.35);
+    color: #ffaa75;
+    font-size: 0.7rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    white-space: nowrap;
+}
+
+.track-ringtone-btn:hover {
+    background: rgba(255, 85, 0, 0.26);
+    border-color: var(--brand-orange);
+    color: #ffffff;
+    transform: translateY(-1px);
+}
+
+.track-ringtone-btn .rt-cost-pill {
+    display: inline-block;
+    padding: 1px 4px;
+    border-radius: 4px;
+    background: rgba(255, 85, 0, 0.3);
+    color: #fff;
+    font-size: 0.62rem;
+    font-weight: 700;
+}
+
+@media (max-width: 600px) {
+    .track-ringtone-btn span.rt-btn-label {
+        display: none;
+    }
+}
+
+/* Ringtone Modal Enhancements */
+#ringtoneModal .modal-content,
+#ringtoneDownloadModal .modal-content {
+    max-width: 760px;
+    width: 95%;
+}
+
+.rt-modal-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--brand-orange);
+    background: rgba(255, 85, 0, 0.12);
+    padding: 4px 10px;
+    border-radius: 6px;
+    margin-bottom: 8px;
+}
+
+.rt-modal-title {
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: #ffffff;
+    margin-bottom: 6px;
+}
+
+.rt-modal-desc {
+    font-size: 0.88rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    margin-bottom: 18px;
+}
+
+/* Platform Switcher Tabs */
+.rt-platform-tabs {
+    display: flex;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 4px;
+    border-radius: var(--radius-md);
+    margin-bottom: 16px;
+    border: 1px solid var(--border-subtle);
+}
+
+.rt-platform-tab {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: transparent;
+    border: none;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.18s ease;
+}
+
+.rt-platform-tab:hover {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.rt-platform-tab.active {
+    background: var(--bg-assistant-bubble);
+    color: #ffffff;
+    border: 1px solid var(--brand-orange);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* Method Switcher for iOS */
+.rt-method-switch {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 14px;
+}
+
+.rt-method-btn {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--border-subtle);
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.16s ease;
+}
+
+.rt-method-btn.active {
+    background: rgba(0, 168, 132, 0.15);
+    border-color: var(--brand-emerald);
+    color: #ffffff;
+}
+
+.rt-panel {
+    display: none;
+    animation: rtFadeIn 0.2s ease-out;
+}
+
+.rt-panel.active {
+    display: block;
+}
+
+.rt-method-view {
+    display: none;
+}
+
+.rt-method-view.active {
+    display: block;
+}
+
+@keyframes rtFadeIn {
+    from { opacity: 0; transform: translateY(3px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Alert Banner */
+.rt-alert-banner {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    background: rgba(56, 189, 248, 0.08);
+    border: 1px solid rgba(56, 189, 248, 0.25);
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin-bottom: 14px;
+}
+
+.rt-alert-icon {
+    font-size: 1.2rem;
+    line-height: 1;
+}
+
+.rt-alert-banner p {
+    font-size: 0.84rem;
+    color: #bae6fd;
+    line-height: 1.45;
+    margin: 0;
+}
+
+/* Steps List & Cards */
+.rt-steps-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.rt-step-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    background: var(--bg-track-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: 10px;
+    padding: 12px 14px;
+    transition: all 0.16s ease;
+}
+
+.rt-step-card:hover {
+    border-color: rgba(255, 255, 255, 0.18);
+    background: var(--bg-track-card-hover);
+}
+
+.rt-step-badge {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    min-width: 26px;
+    border-radius: 50%;
+    background: var(--brand-orange);
+    color: #ffffff;
+    font-size: 0.8rem;
+    font-weight: 800;
+}
+
+.rt-step-body strong {
+    display: block;
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 3px;
+}
+
+.rt-step-body p {
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+    line-height: 1.45;
+    margin: 0;
+}
+
+.rt-step-body code {
+    background: rgba(255, 255, 255, 0.08);
+    padding: 2px 5px;
+    border-radius: 4px;
+    color: var(--accent-cyan);
+    font-size: 0.8rem;
+}
+
+/* Technical Specs Table */
+.rt-specs-box {
+    margin-top: 16px;
+    background: var(--bg-track-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.rt-specs-box h4 {
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: #ffffff;
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border-subtle);
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.rt-specs-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.82rem;
+    text-align: left;
+}
+
+.rt-specs-table th {
+    padding: 10px 14px;
+    color: var(--text-muted);
+    font-weight: 600;
+    border-bottom: 1px solid var(--border-subtle);
+}
+
+.rt-specs-table td {
+    padding: 10px 14px;
+    color: var(--text-secondary);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.rt-specs-table tr:last-child td {
+    border-bottom: none;
+}
+
+.rt-modal-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 18px;
+    padding-top: 14px;
+    border-top: 1px solid var(--border-subtle);
+    flex-wrap: wrap;
+}
+
+.rt-full-guide-link {
+    color: var(--brand-orange);
+    text-decoration: none;
+    font-size: 0.84rem;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: color 0.15s ease;
+}
+
+.rt-full-guide-link:hover {
+    color: var(--brand-orange-hover);
+    text-decoration: underline;
+}
+
+/* Download Ringtone Action Card in Modal */
+.rt-download-card {
+    background: var(--bg-track-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: 12px;
+    padding: 18px;
+    margin-bottom: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.rt-track-preview-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.rt-track-art {
+    width: 48px;
+    height: 48px;
+    border-radius: 8px;
+    object-fit: cover;
+}
+
+.rt-track-meta {
+    flex: 1;
+    min-width: 0;
+}
+
+.rt-track-meta h4 {
+    font-size: 0.98rem;
+    font-weight: 700;
+    color: #ffffff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.rt-track-meta p {
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+    margin: 2px 0 0 0;
+}
+
+.rt-format-buttons-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.rt-dl-format-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    padding: 12px 10px;
+    border-radius: 10px;
+    border: 1px solid var(--border-subtle);
+    background: var(--bg-assistant-bubble);
+    color: #ffffff;
+    cursor: pointer;
+    font-size: 0.82rem;
+    font-weight: 700;
+    transition: all 0.18s ease;
+    text-decoration: none;
+}
+
+.rt-dl-format-btn.ios-btn:hover {
+    border-color: #38bdf8;
+    background: rgba(56, 189, 248, 0.12);
+    transform: translateY(-1px);
+}
+
+.rt-dl-format-btn.android-btn:hover {
+    border-color: #10b981;
+    background: rgba(16, 185, 129, 0.12);
+    transform: translateY(-1px);
+}
+
+.rt-dl-format-btn span.subtext {
+    font-size: 0.68rem;
+    font-weight: 500;
+    color: var(--text-muted);
+}
+
 </style>
 
     <script type="application/ld+json">
@@ -2727,6 +3147,11 @@ body.messenger-body {
                         <span>Surprise Mix</span>
                     </button>
 
+                    <button type="button" id="headerRingtoneGuideBtn" class="header-action-pill rt-guide-pill" onclick="openModal('ringtoneModal')" title="How to Install Phone Ringtones (iPhone &amp; Android)">
+                        <span>📱</span>
+                        <span>Ringtone Guide</span>
+                    </button>
+
                     <button type="button" id="headerOptionsBtn" class="header-action-pill" title="Audio &amp; Metadata Options">
                         <span>⚙️</span>
                         <span>Options</span>
@@ -2746,10 +3171,10 @@ body.messenger-body {
                             <span>⚡ 320kbps Master</span>
                         </label>
 
-                        <label class="chat-mode-chip" title="Include Apple iPhone .M4R &amp; Android .MP3 custom ringtones">
+                        <label class="chat-mode-chip" title="Include Apple iPhone .M4R &amp; Android .MP3 custom ringtones (1 Credit / track)">
                             <input type="checkbox" id="videoToMp3">
                             <span class="chip-indicator"></span>
-                            <span>📱 Ringtone Mode</span>
+                            <span>📱 Ringtone Mode (1 Credit)</span>
                         </label>
 
                         <label class="chat-mode-chip" title="Transcribe and embed AI lyrics into MP3 metadata (10 Credits / track)">
@@ -2779,7 +3204,7 @@ body.messenger-body {
                         <div class="msg-sender-name">MP3aud.io Assistant <span class="msg-time">Just now</span></div>
                         <div class="msg-text">
                             <p>Hey! 👋 How's your day going? We can chat about whatever's on your mind, talk about your favorite artists, or whenever you'd like me to put together a playlist or pull up a song, just let me know.</p>
-                    </div>
+                        </div>
                     </div>
                 </div>
             </section>
@@ -3031,12 +3456,9 @@ body.messenger-body {
                             Enter your email to receive a passwordless login link and unlock 350 credits:
                         </p>
                         <ul class="plan-features-list payg-list">
-                            <li><strong>+350 Playlist Generations</strong> (~<ul class="plan-features-list payg-list">
-                            <li><strong>350 Track Credits</strong> (~$0.011 per track)</li>
+                            <li><strong>350 Track Credits</strong> (~$0.011 per track / playlist)</li>
+                            <li><strong>📱 Custom iPhone (.M4R) &amp; Android (.MP3) Ringtones</strong></li>
                             <li><strong>AI 320k Bitrate Mastering</strong></li>
-                            <li><strong>Large Playlist ZIP Downloads</strong></li>
-                            <li><strong>Credits never expire</strong></li>
-                        </ul>.01 per playlist)</li>
                             <li><strong>1-Click Connect &amp; Stream</strong> to Apple Music, Spotify, YouTube Music</li>
                             <li><strong>Universal .M3U8 &amp; Tracklist Export</strong></li>
                             <li><strong>Credits never expire</strong> &middot; No monthly fees</li>
@@ -3060,21 +3482,270 @@ body.messenger-body {
     <div id="ringtoneModal" class="modal" role="dialog" aria-labelledby="ringtoneModalTitle" aria-hidden="true">
         <div class="modal-content">
             <span class="close" onclick="closeModal('ringtoneModal')" aria-label="Close modal">&times;</span>
-            <h2 id="ringtoneModalTitle">📱 How to Set Your Track as a Phone Ringtone</h2>
-            <p>Toggle <strong>📱 Ringtone</strong> in the top chat bar (or text <em>"Make me a ringtone of..."</em>) to get both Apple iPhone (<code>.m4r</code>) and Android (<code>.mp3</code>) ringtone files.</p>
-            <h3>🍏 Apple iPhone (No Computer Needed via GarageBand)</h3>
-            <ol class="modal-steps">
-                <li>Download your track from the chat bubble to your iPhone <strong>Files</strong> app.</li>
-                <li>Open Apple's free <strong>GarageBand</strong> app &rarr; tap <strong>Audio Recorder</strong> &rarr; tap the <strong>Tracks</strong> icon (top left).</li>
-                <li>Tap the <strong>Loop icon</strong> (top right) &rarr; <strong>Files</strong> &rarr; drag your downloaded file onto the timeline.</li>
-                <li>Tap the top-left arrow &rarr; <strong>My Songs</strong>, long-press your song &rarr; <strong>Share</strong> &rarr; <strong>Ringtone</strong> &rarr; <strong>Export</strong>!</li>
-            </ol>
-            <h3>🤖 Android Smartphones</h3>
-            <ol class="modal-steps">
-                <li>Tap <strong>Download MP3</strong> on any track bubble in the chat.</li>
-                <li>Open <strong>Settings</strong> &rarr; <strong>Sound &amp; vibration</strong> &rarr; <strong>Phone ringtone</strong>.</li>
-                <li>Tap <strong>+ Add Ringtone</strong> (or <strong>My Sounds</strong>) and choose your downloaded MP3!</li>
-            </ol>
+            <span class="rt-modal-eyebrow">📱 STEP-BY-STEP PHONE RINGTONE GUIDE</span>
+            <h2 id="ringtoneModalTitle" class="rt-modal-title">How to Install Custom Phone Ringtones</h2>
+            <p class="rt-modal-desc">
+                Create custom ringtones from any track generated on MP3aud.io. Follow the step-by-step directions below to install and set your audio as an incoming call ringtone, alarm, or text tone on Apple iPhone (iOS) and Android smartphones.
+            </p>
+
+            <!-- Platform Switcher Tabs -->
+            <div class="rt-platform-tabs" role="tablist">
+                <button type="button" class="rt-platform-tab active" id="rtTabIosModal" role="tab" aria-selected="true" onclick="switchGuidePlatform('ios')">
+                    <span class="rt-tab-ico">🍏</span>
+                    <span>Apple iPhone (iOS)</span>
+                </button>
+                <button type="button" class="rt-platform-tab" id="rtTabAndroidModal" role="tab" aria-selected="false" onclick="switchGuidePlatform('android')">
+                    <span class="rt-tab-ico">🤖</span>
+                    <span>Android</span>
+                </button>
+            </div>
+
+            <!-- iOS Guide Panel -->
+            <div id="rtGuidePanelIos" class="rt-panel active">
+                <div class="rt-method-switch">
+                    <button type="button" class="rt-method-btn active" id="rtBtnGbModal" onclick="switchGuideIosMethod('gb')">
+                        <span>✨ Direct on iPhone (GarageBand)</span>
+                    </button>
+                    <button type="button" class="rt-method-btn" id="rtBtnPcModal" onclick="switchGuideIosMethod('pc')">
+                        <span>💻 Via Mac / Windows PC</span>
+                    </button>
+                </div>
+
+                <!-- GarageBand View -->
+                <div id="rtGuideViewGb" class="rt-method-view active">
+                    <div class="rt-alert-banner">
+                        <span class="rt-alert-icon">💡</span>
+                        <p><strong>The Easiest On-Device iPhone Method!</strong> Apple requires custom ringtones to be under 40 seconds (MP3aud.io formats tracks under 30s). Using Apple's free <strong>GarageBand</strong> app, you can install custom ringtones directly on your phone without ever needing a computer.</p>
+                    </div>
+
+                    <div class="rt-steps-list">
+                        <div class="rt-step-card">
+                            <div class="rt-step-badge">1</div>
+                            <div class="rt-step-body">
+                                <strong>Download Ringtone File to Files App</strong>
+                                <p>Click <strong>📱 Ringtone</strong> on any song card in your chat thread to download the optimized <code>.m4r</code> file into your iPhone's <strong>Files</strong> app (under <code>Downloads</code>).</p>
+                            </div>
+                        </div>
+                        <div class="rt-step-card">
+                            <div class="rt-step-badge">2</div>
+                            <div class="rt-step-body">
+                                <strong>Open GarageBand &amp; Choose Audio Recorder</strong>
+                                <p>Launch Apple's free <strong>GarageBand</strong> app (pre-installed or free on the App Store). Swipe to <strong>Audio Recorder</strong> and tap it.</p>
+                            </div>
+                        </div>
+                        <div class="rt-step-card">
+                            <div class="rt-step-badge">3</div>
+                            <div class="rt-step-body">
+                                <strong>Switch to Multitrack Timeline View</strong>
+                                <p>Tap the <strong>Tracks View icon</strong> in the top-left toolbar (the 3rd icon from the left, looks like horizontal audio tracks) to enter timeline view.</p>
+                            </div>
+                        </div>
+                        <div class="rt-step-card">
+                            <div class="rt-step-badge">4</div>
+                            <div class="rt-step-body">
+                                <strong>Import Audio from Files</strong>
+                                <p>Tap the <strong>Loop Browser icon</strong> (top-right, near the gear) &rarr; tap the <strong>Files</strong> tab &rarr; tap <em>"Browse items from the Files app"</em> &rarr; touch and drag your downloaded audio file directly onto the timeline.</p>
+                            </div>
+                        </div>
+                        <div class="rt-step-card">
+                            <div class="rt-step-badge">5</div>
+                            <div class="rt-step-body">
+                                <strong>Trim &amp; Save to "My Songs"</strong>
+                                <p>Ensure the audio clip is under 30 seconds. Tap the <strong>downward navigation arrow</strong> in the top-left corner &rarr; select <strong>My Songs</strong> to save your project.</p>
+                            </div>
+                        </div>
+                        <div class="rt-step-card">
+                            <div class="rt-step-badge">6</div>
+                            <div class="rt-step-body">
+                                <strong>Share Project as Ringtone</strong>
+                                <p>Long-press (touch and hold) your saved song in the GarageBand project browser &rarr; tap <strong>Share</strong> &rarr; choose <strong>Ringtone</strong> &rarr; name your tone &rarr; tap <strong>Export</strong> in the top right.</p>
+                            </div>
+                        </div>
+                        <div class="rt-step-card">
+                            <div class="rt-step-badge">7</div>
+                            <div class="rt-step-body">
+                                <strong>Assign as Your Active Ringtone</strong>
+                                <p>When export completes, tap <em>"Use sound as..."</em> &rarr; choose <strong>Standard Ringtone</strong>, <strong>Standard Text Tone</strong>, or <strong>Assign to Contact</strong>!</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PC / Mac View -->
+                <div id="rtGuideViewPc" class="rt-method-view">
+                    <div class="rt-alert-banner">
+                        <span class="rt-alert-icon">💻</span>
+                        <p><strong>Fast Desktop Syncing:</strong> If you use a computer to back up or sync your phone, you can transfer your <code>.m4r</code> ringtone in seconds via Finder or iTunes.</p>
+                    </div>
+
+                    <div class="rt-steps-list">
+                        <div class="rt-step-card">
+                            <div class="rt-step-badge">1</div>
+                            <div class="rt-step-body">
+                                <strong>Download the .M4R File to Your Computer</strong>
+                                <p>Download your custom <code>.m4r</code> ringtone file from MP3aud.io to your Mac or Windows PC.</p>
+                            </div>
+                        </div>
+                        <div class="rt-step-card">
+                            <div class="rt-step-badge">2</div>
+                            <div class="rt-step-body">
+                                <strong>Connect iPhone via USB Cable</strong>
+                                <p>Plug your iPhone into your computer using a Lightning or USB-C cable and unlock your screen.</p>
+                            </div>
+                        </div>
+                        <div class="rt-step-card">
+                            <div class="rt-step-badge">3</div>
+                            <div class="rt-step-body">
+                                <strong>Open Finder (Mac) or iTunes (Windows)</strong>
+                                <p><strong>On macOS:</strong> Open <strong>Finder</strong> and click your iPhone under Locations.<br><strong>On Windows:</strong> Open <strong>iTunes</strong> and click the small phone device icon.</p>
+                            </div>
+                        </div>
+                        <div class="rt-step-card">
+                            <div class="rt-step-badge">4</div>
+                            <div class="rt-step-body">
+                                <strong>Drag &amp; Drop the .M4R Ringtone</strong>
+                                <p>Drag and drop the <code>.m4r</code> file directly onto your iPhone window in Finder, or onto the <strong>Tones</strong> section under your device in iTunes.</p>
+                            </div>
+                        </div>
+                        <div class="rt-step-card">
+                            <div class="rt-step-badge">5</div>
+                            <div class="rt-step-body">
+                                <strong>Activate in iPhone Settings</strong>
+                                <p>On your iPhone, go to <strong>Settings</strong> &rarr; <strong>Sounds &amp; Haptics</strong> &rarr; <strong>Ringtone</strong>. Your new ringtone is at the top of the list!</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Android Guide Panel -->
+            <div id="rtGuidePanelAndroid" class="rt-panel">
+                <div class="rt-alert-banner">
+                    <span class="rt-alert-icon">🤖</span>
+                    <p><strong>Native MP3 Support:</strong> Android natively supports custom MP3 files for ringtones, notifications, and alarms without needing any 3rd-party apps or computer syncing.</p>
+                </div>
+
+                <div class="rt-steps-list">
+                    <div class="rt-step-card">
+                        <div class="rt-step-badge">1</div>
+                        <div class="rt-step-body">
+                            <strong>Download the MP3 Ringtone</strong>
+                            <p>Tap <strong>📱 Ringtone</strong> on any song card to save the 320kbps MP3 directly to your phone's <code>Downloads</code> folder.</p>
+                        </div>
+                    </div>
+                    <div class="rt-step-card">
+                        <div class="rt-step-badge">2</div>
+                        <div class="rt-step-body">
+                            <strong>Open Sound &amp; Vibration Settings</strong>
+                            <p>Open your Android phone's <strong>Settings</strong> app &rarr; tap <strong>Sound &amp; vibration</strong> (or <em>Sounds and vibration</em> on Samsung Galaxy).</p>
+                        </div>
+                    </div>
+                    <div class="rt-step-card">
+                        <div class="rt-step-badge">3</div>
+                        <div class="rt-step-body">
+                            <strong>Tap Phone Ringtone</strong>
+                            <p>Select <strong>Phone ringtone</strong> (or SIM 1 / SIM 2 if you use a dual-SIM setup).</p>
+                        </div>
+                    </div>
+                    <div class="rt-step-card">
+                        <div class="rt-step-badge">4</div>
+                        <div class="rt-step-body">
+                            <strong>Tap the Plus (+) / Add Ringtone Button</strong>
+                            <p><strong>On Samsung Galaxy:</strong> Tap the <strong>+</strong> button in the top-right corner.<br><strong>On Google Pixel / Motorola / OnePlus:</strong> Tap <strong>My Sounds</strong> &rarr; tap <strong>+ Add Ringtone</strong>.</p>
+                        </div>
+                    </div>
+                    <div class="rt-step-card">
+                        <div class="rt-step-badge">5</div>
+                        <div class="rt-step-body">
+                            <strong>Select Your Audio Track &amp; Tap Done</strong>
+                            <p>Choose your downloaded MP3 file from your audio picker and tap <strong>Done</strong>. Your new custom ringtone is active immediately!</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Technical Format Specs Table -->
+            <div class="rt-specs-box">
+                <h4>iPhone vs Android Ringtone Technical Specifications</h4>
+                <table class="rt-specs-table">
+                    <thead>
+                        <tr>
+                            <th>Specification</th>
+                            <th>🍏 Apple iPhone (iOS)</th>
+                            <th>🤖 Android (Samsung, Pixel, etc.)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>File Format</td>
+                            <td><code>.m4r</code> (MPEG-4 AAC Audio)</td>
+                            <td><code>.mp3</code> (MPEG-1 Layer 3 Audio)</td>
+                        </tr>
+                        <tr>
+                            <td>Maximum Duration</td>
+                            <td>40s hard limit (30s recommended)</td>
+                            <td>No limit (loops seamlessly)</td>
+                        </tr>
+                        <tr>
+                            <td>Master Bitrate</td>
+                            <td>256kbps AAC (Crystal clarity on mobile speakers)</td>
+                            <td>320kbps MP3 (Studio master audio)</td>
+                        </tr>
+                        <tr>
+                            <td>Compatibility</td>
+                            <td>iOS 7 through iOS 18+</td>
+                            <td>Android 5.0 through Android 15+</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="rt-modal-footer">
+                <a href="video-to-ringtone.html" class="rt-full-guide-link" target="_blank">
+                    📖 Open Dedicated Full-Page Ringtone Guide &rarr;
+                </a>
+                <button type="button" class="header-action-pill" onclick="closeModal('ringtoneModal')">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- =====================================================
+         MODAL 3B: CREATE RINGTONE DOWNLOAD MODAL
+         ===================================================== -->
+    <div id="ringtoneDownloadModal" class="modal" role="dialog" aria-labelledby="ringtoneDownloadTitle" aria-hidden="true">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('ringtoneDownloadModal')" aria-label="Close modal">&times;</span>
+            <span class="rt-modal-eyebrow">📱 1-CLICK PHONE RINGTONE</span>
+            <h2 id="ringtoneDownloadTitle" class="rt-modal-title">Create Custom Ringtone</h2>
+            <p class="rt-modal-desc">Download tailored ringtones optimized for phone speakers (256kbps AAC for Apple iPhone, 320kbps MP3 for Android).</p>
+            
+            <div class="rt-download-card">
+                <div class="rt-track-preview-header">
+                    <img id="rtModalArt" src="favicon.png" alt="Cover" class="rt-track-art">
+                    <div class="rt-track-meta">
+                        <h4 id="rtModalTrackTitle">Track Title</h4>
+                        <p id="rtModalArtistName">Artist Name</p>
+                    </div>
+                </div>
+
+                <div class="rt-format-buttons-row">
+                    <button type="button" id="rtDownloadIosBtn" class="rt-dl-format-btn ios-btn">
+                        <span>🍏 Download iPhone (.M4R)</span>
+                        <span class="subtext">256k AAC &bull; Ready for GarageBand</span>
+                    </button>
+                    <button type="button" id="rtDownloadAndroidBtn" class="rt-dl-format-btn android-btn">
+                        <span>🤖 Download Android (.MP3)</span>
+                        <span class="subtext">320k Studio MP3 &bull; Universal</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="rt-modal-footer">
+                <a href="#" onclick="closeModal('ringtoneDownloadModal'); openModal('ringtoneModal'); return false;" class="rt-full-guide-link">
+                    📖 View Step-by-Step Installation Instructions &rarr;
+                </a>
+                <span style="font-size: 0.78rem; color: var(--text-muted);">Paid Feature &bull; 1 Credit / Track</span>
+            </div>
         </div>
     </div>
 
@@ -6251,6 +6922,145 @@ function initAssistantApp() {
         return row;
     }
 
+    // --- Ringtone Creation & Export Helpers (Paid Feature: 1 Credit/track) ---
+    async function downloadAudioAsFile(url, fileName, mimeType = 'audio/x-m4r') {
+        try {
+            const resp = await fetch(url);
+            const blob = await resp.blob();
+            const typedBlob = new Blob([blob], { type: mimeType });
+            const blobUrl = URL.createObjectURL(typedBlob);
+            const a = document.createElement('a');
+            a.href = blobUrl;
+            a.download = fileName;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            setTimeout(() => URL.revokeObjectURL(blobUrl), 10000);
+            return true;
+        } catch (e) {
+            const a = document.createElement('a');
+            a.href = url;
+            a.target = '_blank';
+            a.download = fileName;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            return true;
+        }
+    }
+
+    async function deductRingtoneCredit(track, format = 'm4r') {
+        const token = localStorage.getItem('session_token');
+        const headers = { 'Content-Type': 'application/json' };
+        if (token) headers['Authorization'] = `Bearer ${token}`;
+
+        try {
+            const resp = await fetch(`${BACKEND_URL}/api/ringtone/create`, {
+                method: 'POST',
+                headers,
+                body: JSON.stringify({
+                    title: track.title,
+                    artist: track.artist,
+                    preview_url: track.preview_url,
+                    format
+                })
+            });
+
+            const data = await resp.json().catch(() => null);
+            if (!resp.ok || !data || !data.success) {
+                if (data && data.requires_payment) {
+                    showToast('⚡ Custom phone ringtones require 1 credit. Top up below!', 'info');
+                    openModal('accountModal');
+                    return false;
+                }
+            } else {
+                if (data.credits_remaining !== undefined) {
+                    const paidEl = document.getElementById('paidCreditsDisplay');
+                    const hdrPaidEl = document.getElementById('headerPaidCreditsDisplay');
+                    const hdrBtnText = document.getElementById('headerAccountBtnText');
+                    if (paidEl) paidEl.textContent = data.credits_remaining;
+                    if (hdrPaidEl) hdrPaidEl.textContent = data.credits_remaining;
+                    if (hdrBtnText) hdrBtnText.textContent = `${data.credits_remaining} Credits`;
+                }
+                return true;
+            }
+        } catch (err) {
+            console.warn('Backend ringtone credit deduction offline, falling back to local credits:', err);
+        }
+
+        const paidEl = document.getElementById('paidCreditsDisplay');
+        const curCredits = parseInt(paidEl?.textContent || '0', 10);
+        if (curCredits < 1) {
+            showToast('⚡ Custom phone ringtones require 1 credit per track. Top up below!', 'info');
+            openModal('accountModal');
+            return false;
+        }
+        const newCredits = curCredits - 1;
+        if (paidEl) paidEl.textContent = newCredits;
+        const hdrPaidEl = document.getElementById('headerPaidCreditsDisplay');
+        if (hdrPaidEl) hdrPaidEl.textContent = newCredits;
+        const hdrBtnText = document.getElementById('headerAccountBtnText');
+        if (hdrBtnText) hdrBtnText.textContent = `${newCredits} Credits`;
+        return true;
+    }
+
+    async function handleCreateRingtoneForTrack(track) {
+        if (!track.preview_url) {
+            showToast(`Resolving audio for ${track.title}...`, 'info');
+            try {
+                const items = await searchItunesFast(`${track.artist || ''} ${track.title || ''}`.trim(), 1, 2000);
+                if (items && items[0] && items[0].previewUrl) {
+                    track.preview_url = items[0].previewUrl;
+                    if (items[0].artworkUrl100) {
+                        track.artwork_url = items[0].artworkUrl100.replace('100x100bb.jpg', '600x600bb.jpg');
+                    }
+                }
+            } catch (e) { }
+        }
+
+        if (!track.preview_url) {
+            showToast('Could not resolve audio preview stream for this track.', 'error');
+            return;
+        }
+
+        const titleEl = document.getElementById('rtModalTrackTitle');
+        const artistEl = document.getElementById('rtModalArtistName');
+        const artEl = document.getElementById('rtModalArt');
+        const iosBtn = document.getElementById('rtDownloadIosBtn');
+        const androidBtn = document.getElementById('rtDownloadAndroidBtn');
+
+        if (titleEl) titleEl.textContent = track.title || 'Custom Track';
+        if (artistEl) artistEl.textContent = track.artist || 'Featured Artist';
+        if (artEl) artEl.src = track.artwork_url || 'favicon.png';
+
+        const safeTitle = (track.title || 'Track').replace(/[/\\?%*:|"<>]/g, '_');
+        const safeArtist = (track.artist || 'Artist').replace(/[/\\?%*:|"<>]/g, '_');
+
+        if (iosBtn) {
+            iosBtn.onclick = async () => {
+                const hasPaid = await deductRingtoneCredit(track, 'm4r');
+                if (!hasPaid) return;
+                showToast(`Downloading Apple iPhone ringtone (.m4r) for ${track.title}...`, 'info');
+                await downloadAudioAsFile(track.preview_url, `${safeArtist} - ${safeTitle}.m4r`, 'audio/x-m4r');
+                closeModal('ringtoneDownloadModal');
+                showToast('🍏 iPhone ringtone saved! Check Ringtone Guide in header for setup instructions.', 'success');
+            };
+        }
+
+        if (androidBtn) {
+            androidBtn.onclick = async () => {
+                const hasPaid = await deductRingtoneCredit(track, 'mp3');
+                if (!hasPaid) return;
+                showToast(`Downloading Android ringtone (.mp3) for ${track.title}...`, 'info');
+                await downloadAudioAsFile(track.preview_url, `${safeArtist} - ${safeTitle}.mp3`, 'audio/mpeg');
+                closeModal('ringtoneDownloadModal');
+                showToast('🤖 Android ringtone saved! Check Ringtone Guide in header for setup instructions.', 'success');
+            };
+        }
+
+        openModal('ringtoneDownloadModal');
+    }
+
     function appendAssistantMusicBubble(payload) {
         const tracks = (payload.tracks || []).map((t, i) => ({
             ...t,
@@ -6329,6 +7139,7 @@ function initAssistantApp() {
                         </div>
                     </div>
                     <div class="track-dl-actions">
+                        <button type="button" class="track-ringtone-btn" title="Create iPhone (.M4R) & Android (.MP3) ringtone (1 Credit)">📱 <span class="rt-btn-label">Ringtone</span> <span class="rt-cost-pill">1⚡</span></button>
                         <button type="button" class="track-similar-btn" title="Curate 10 songs similar to ${escapeHtml(t.title)} by ${escapeHtml(t.artist)}">✨ <span class="sim-label">Similar</span></button>
                         <div class="track-streaming-btns">
                             <a href="${escapeHtml(amUrl)}" target="_blank" rel="noopener" class="track-stream-link" title="Open in Apple Music">🍎</a>
@@ -6402,6 +7213,14 @@ function initAssistantApp() {
                     if (t) {
                         sendUserMessage(`Send me a playlist of songs like ${t.title} by ${t.artist}`);
                     }
+                });
+            }
+            const rtBtn = trackEl.querySelector('.track-ringtone-btn');
+            if (rtBtn) {
+                rtBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const t = tracks[idx];
+                    if (t) handleCreateRingtoneForTrack(t);
                 });
             }
             if (scrubBar) {
@@ -7002,6 +7821,45 @@ function initAssistantApp() {
     initAiKeyConfig();
 }
 
+// Modal Ringtone Guide Platform & Method Switchers
+window.switchGuidePlatform = function(platform) {
+    const tabIos = document.getElementById('rtTabIosPage') || document.getElementById('rtTabIosModal');
+    const tabAndroid = document.getElementById('rtTabAndroidPage') || document.getElementById('rtTabAndroidModal');
+    const panelIos = document.getElementById('rtGuidePanelIos');
+    const panelAndroid = document.getElementById('rtGuidePanelAndroid');
+
+    if (platform === 'ios') {
+        if (tabIos) { tabIos.classList.add('active'); tabIos.setAttribute('aria-selected', 'true'); }
+        if (tabAndroid) { tabAndroid.classList.remove('active'); tabAndroid.setAttribute('aria-selected', 'false'); }
+        if (panelIos) panelIos.classList.add('active');
+        if (panelAndroid) panelAndroid.classList.remove('active');
+    } else {
+        if (tabAndroid) { tabAndroid.classList.add('active'); tabAndroid.setAttribute('aria-selected', 'true'); }
+        if (tabIos) { tabIos.classList.remove('active'); tabIos.setAttribute('aria-selected', 'false'); }
+        if (panelAndroid) panelAndroid.classList.add('active');
+        if (panelIos) panelIos.classList.remove('active');
+    }
+};
+
+window.switchGuideIosMethod = function(method) {
+    const btnGb = document.getElementById('rtBtnGbPage') || document.getElementById('rtBtnGbModal');
+    const btnPc = document.getElementById('rtBtnPcPage') || document.getElementById('rtBtnPcModal');
+    const viewGb = document.getElementById('rtGuideViewGb');
+    const viewPc = document.getElementById('rtGuideViewPc');
+
+    if (method === 'gb') {
+        if (btnGb) btnGb.classList.add('active');
+        if (btnPc) btnPc.classList.remove('active');
+        if (viewGb) viewGb.classList.add('active');
+        if (viewPc) viewPc.classList.remove('active');
+    } else {
+        if (btnPc) btnPc.classList.add('active');
+        if (btnGb) btnGb.classList.remove('active');
+        if (viewPc) viewPc.classList.add('active');
+        if (viewGb) viewGb.classList.remove('active');
+    }
+};
+
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initAssistantApp);
 } else {
@@ -7009,7 +7867,6 @@ if (document.readyState === 'loading') {
 }
 
 </script>
-    <script src="script.js?v=20261108_06"></script>
 </body>
 
 </html>

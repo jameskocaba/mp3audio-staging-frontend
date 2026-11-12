@@ -3121,6 +3121,145 @@ function initAssistantApp() {
         return row;
     }
 
+    // --- Ringtone Creation & Export Helpers (Paid Feature: 1 Credit/track) ---
+    async function downloadAudioAsFile(url, fileName, mimeType = 'audio/x-m4r') {
+        try {
+            const resp = await fetch(url);
+            const blob = await resp.blob();
+            const typedBlob = new Blob([blob], { type: mimeType });
+            const blobUrl = URL.createObjectURL(typedBlob);
+            const a = document.createElement('a');
+            a.href = blobUrl;
+            a.download = fileName;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            setTimeout(() => URL.revokeObjectURL(blobUrl), 10000);
+            return true;
+        } catch (e) {
+            const a = document.createElement('a');
+            a.href = url;
+            a.target = '_blank';
+            a.download = fileName;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            return true;
+        }
+    }
+
+    async function deductRingtoneCredit(track, format = 'm4r') {
+        const token = localStorage.getItem('session_token');
+        const headers = { 'Content-Type': 'application/json' };
+        if (token) headers['Authorization'] = `Bearer ${token}`;
+
+        try {
+            const resp = await fetch(`${BACKEND_URL}/api/ringtone/create`, {
+                method: 'POST',
+                headers,
+                body: JSON.stringify({
+                    title: track.title,
+                    artist: track.artist,
+                    preview_url: track.preview_url,
+                    format
+                })
+            });
+
+            const data = await resp.json().catch(() => null);
+            if (!resp.ok || !data || !data.success) {
+                if (data && data.requires_payment) {
+                    showToast('⚡ Custom phone ringtones require 1 credit. Top up below!', 'info');
+                    openModal('accountModal');
+                    return false;
+                }
+            } else {
+                if (data.credits_remaining !== undefined) {
+                    const paidEl = document.getElementById('paidCreditsDisplay');
+                    const hdrPaidEl = document.getElementById('headerPaidCreditsDisplay');
+                    const hdrBtnText = document.getElementById('headerAccountBtnText');
+                    if (paidEl) paidEl.textContent = data.credits_remaining;
+                    if (hdrPaidEl) hdrPaidEl.textContent = data.credits_remaining;
+                    if (hdrBtnText) hdrBtnText.textContent = `${data.credits_remaining} Credits`;
+                }
+                return true;
+            }
+        } catch (err) {
+            console.warn('Backend ringtone credit deduction offline, falling back to local credits:', err);
+        }
+
+        const paidEl = document.getElementById('paidCreditsDisplay');
+        const curCredits = parseInt(paidEl?.textContent || '0', 10);
+        if (curCredits < 1) {
+            showToast('⚡ Custom phone ringtones require 1 credit per track. Top up below!', 'info');
+            openModal('accountModal');
+            return false;
+        }
+        const newCredits = curCredits - 1;
+        if (paidEl) paidEl.textContent = newCredits;
+        const hdrPaidEl = document.getElementById('headerPaidCreditsDisplay');
+        if (hdrPaidEl) hdrPaidEl.textContent = newCredits;
+        const hdrBtnText = document.getElementById('headerAccountBtnText');
+        if (hdrBtnText) hdrBtnText.textContent = `${newCredits} Credits`;
+        return true;
+    }
+
+    async function handleCreateRingtoneForTrack(track) {
+        if (!track.preview_url) {
+            showToast(`Resolving audio for ${track.title}...`, 'info');
+            try {
+                const items = await searchItunesFast(`${track.artist || ''} ${track.title || ''}`.trim(), 1, 2000);
+                if (items && items[0] && items[0].previewUrl) {
+                    track.preview_url = items[0].previewUrl;
+                    if (items[0].artworkUrl100) {
+                        track.artwork_url = items[0].artworkUrl100.replace('100x100bb.jpg', '600x600bb.jpg');
+                    }
+                }
+            } catch (e) { }
+        }
+
+        if (!track.preview_url) {
+            showToast('Could not resolve audio preview stream for this track.', 'error');
+            return;
+        }
+
+        const titleEl = document.getElementById('rtModalTrackTitle');
+        const artistEl = document.getElementById('rtModalArtistName');
+        const artEl = document.getElementById('rtModalArt');
+        const iosBtn = document.getElementById('rtDownloadIosBtn');
+        const androidBtn = document.getElementById('rtDownloadAndroidBtn');
+
+        if (titleEl) titleEl.textContent = track.title || 'Custom Track';
+        if (artistEl) artistEl.textContent = track.artist || 'Featured Artist';
+        if (artEl) artEl.src = track.artwork_url || 'favicon.png';
+
+        const safeTitle = (track.title || 'Track').replace(/[/\\?%*:|"<>]/g, '_');
+        const safeArtist = (track.artist || 'Artist').replace(/[/\\?%*:|"<>]/g, '_');
+
+        if (iosBtn) {
+            iosBtn.onclick = async () => {
+                const hasPaid = await deductRingtoneCredit(track, 'm4r');
+                if (!hasPaid) return;
+                showToast(`Downloading Apple iPhone ringtone (.m4r) for ${track.title}...`, 'info');
+                await downloadAudioAsFile(track.preview_url, `${safeArtist} - ${safeTitle}.m4r`, 'audio/x-m4r');
+                closeModal('ringtoneDownloadModal');
+                showToast('🍏 iPhone ringtone saved! Check Ringtone Guide in header for setup instructions.', 'success');
+            };
+        }
+
+        if (androidBtn) {
+            androidBtn.onclick = async () => {
+                const hasPaid = await deductRingtoneCredit(track, 'mp3');
+                if (!hasPaid) return;
+                showToast(`Downloading Android ringtone (.mp3) for ${track.title}...`, 'info');
+                await downloadAudioAsFile(track.preview_url, `${safeArtist} - ${safeTitle}.mp3`, 'audio/mpeg');
+                closeModal('ringtoneDownloadModal');
+                showToast('🤖 Android ringtone saved! Check Ringtone Guide in header for setup instructions.', 'success');
+            };
+        }
+
+        openModal('ringtoneDownloadModal');
+    }
+
     function appendAssistantMusicBubble(payload) {
         const tracks = (payload.tracks || []).map((t, i) => ({
             ...t,
@@ -3199,6 +3338,7 @@ function initAssistantApp() {
                         </div>
                     </div>
                     <div class="track-dl-actions">
+                        <button type="button" class="track-ringtone-btn" title="Create iPhone (.M4R) & Android (.MP3) ringtone (1 Credit)">📱 <span class="rt-btn-label">Ringtone</span> <span class="rt-cost-pill">1⚡</span></button>
                         <button type="button" class="track-similar-btn" title="Curate 10 songs similar to ${escapeHtml(t.title)} by ${escapeHtml(t.artist)}">✨ <span class="sim-label">Similar</span></button>
                         <div class="track-streaming-btns">
                             <a href="${escapeHtml(amUrl)}" target="_blank" rel="noopener" class="track-stream-link" title="Open in Apple Music">🍎</a>
@@ -3272,6 +3412,14 @@ function initAssistantApp() {
                     if (t) {
                         sendUserMessage(`Send me a playlist of songs like ${t.title} by ${t.artist}`);
                     }
+                });
+            }
+            const rtBtn = trackEl.querySelector('.track-ringtone-btn');
+            if (rtBtn) {
+                rtBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const t = tracks[idx];
+                    if (t) handleCreateRingtoneForTrack(t);
                 });
             }
             if (scrubBar) {
@@ -3871,6 +4019,45 @@ function initAssistantApp() {
     initServerWakeGate();
     initAiKeyConfig();
 }
+
+// Modal Ringtone Guide Platform & Method Switchers
+window.switchGuidePlatform = function(platform) {
+    const tabIos = document.getElementById('rtTabIosPage') || document.getElementById('rtTabIosModal');
+    const tabAndroid = document.getElementById('rtTabAndroidPage') || document.getElementById('rtTabAndroidModal');
+    const panelIos = document.getElementById('rtGuidePanelIos');
+    const panelAndroid = document.getElementById('rtGuidePanelAndroid');
+
+    if (platform === 'ios') {
+        if (tabIos) { tabIos.classList.add('active'); tabIos.setAttribute('aria-selected', 'true'); }
+        if (tabAndroid) { tabAndroid.classList.remove('active'); tabAndroid.setAttribute('aria-selected', 'false'); }
+        if (panelIos) panelIos.classList.add('active');
+        if (panelAndroid) panelAndroid.classList.remove('active');
+    } else {
+        if (tabAndroid) { tabAndroid.classList.add('active'); tabAndroid.setAttribute('aria-selected', 'true'); }
+        if (tabIos) { tabIos.classList.remove('active'); tabIos.setAttribute('aria-selected', 'false'); }
+        if (panelAndroid) panelAndroid.classList.add('active');
+        if (panelIos) panelIos.classList.remove('active');
+    }
+};
+
+window.switchGuideIosMethod = function(method) {
+    const btnGb = document.getElementById('rtBtnGbPage') || document.getElementById('rtBtnGbModal');
+    const btnPc = document.getElementById('rtBtnPcPage') || document.getElementById('rtBtnPcModal');
+    const viewGb = document.getElementById('rtGuideViewGb');
+    const viewPc = document.getElementById('rtGuideViewPc');
+
+    if (method === 'gb') {
+        if (btnGb) btnGb.classList.add('active');
+        if (btnPc) btnPc.classList.remove('active');
+        if (viewGb) viewGb.classList.add('active');
+        if (viewPc) viewPc.classList.remove('active');
+    } else {
+        if (btnPc) btnPc.classList.add('active');
+        if (btnGb) btnGb.classList.remove('active');
+        if (viewPc) viewPc.classList.add('active');
+        if (viewGb) viewGb.classList.remove('active');
+    }
+};
 
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initAssistantApp);
