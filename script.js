@@ -277,20 +277,7 @@ function initAssistantApp() {
                 <div class="msg-bubble assistant-bubble welcome-bubble">
                     <div class="msg-sender-name">MP3aud.io Assistant <span class="msg-time">Just now</span></div>
                     <div class="msg-text">
-                        <p>Hey! 👋 How's your day going? Tap any vibe below to curate a <strong>10-track playlist</strong> right now, or type any mood, genre, song, or artist to get started:</p>
-                    </div>
-                    <div class="welcome-vibe-section">
-                        <span class="welcome-vibe-label">⚡ Pick a Mood or Genre to Start Playing</span>
-                        <div class="welcome-vibe-grid">
-                            <button type="button" class="welcome-vibe-pill" data-prompt="Send me a chill late-night synthwave playlist">🌙 Late-Night Synthwave</button>
-                            <button type="button" class="welcome-vibe-pill" data-prompt="Send me a rainy window lo-fi study beats playlist">☕ Lo-Fi Focus Beats</button>
-                            <button type="button" class="welcome-vibe-pill" data-prompt="Send me a warm indie and acoustic playlist">🎸 Indie &amp; Acoustic</button>
-                            <button type="button" class="welcome-vibe-pill" data-prompt="Make me a high-energy 90s hip hop playlist">🔥 90s Hip-Hop Classics</button>
-                            <button type="button" class="welcome-vibe-pill" data-prompt="Send me a smooth R&B slow jams playlist">✨ Silk &amp; Soul R&amp;B</button>
-                            <button type="button" class="welcome-vibe-pill" data-prompt="Send me a country storytelling playlist">🤠 Country Storytelling</button>
-                            <button type="button" class="welcome-vibe-pill" data-prompt="Make me a high-adrenaline workout playlist">🏋️ Workout Energy</button>
-                            <button type="button" class="welcome-vibe-pill" data-prompt="Surprise me with a fresh 10-track playlist">🎲 Surprise 10-Track Mix</button>
-                        </div>
+                        <p>Hey! 👋 How's your day going? We can chat about whatever's on your mind, talk about your favorite artists, or whenever you'd like me to put together a playlist or pull up a song, just let me know.</p>
                     </div>
                 </div>
             </div>
