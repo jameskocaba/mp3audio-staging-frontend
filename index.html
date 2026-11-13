@@ -3171,10 +3171,10 @@ body.messenger-body {
                             <span>⚡ 320kbps Master</span>
                         </label>
 
-                        <label class="chat-mode-chip" title="Include Apple iPhone .M4R &amp; Android .MP3 custom ringtones (1 Credit / track)">
+                        <label class="chat-mode-chip" title="Include Apple iPhone .M4R &amp; Android .MP3 custom ringtones (125 Credits / download)">
                             <input type="checkbox" id="videoToMp3">
                             <span class="chip-indicator"></span>
-                            <span>📱 Ringtone Mode (1 Credit)</span>
+                            <span>📱 Ringtone Mode (125 Credits)</span>
                         </label>
 
                         <label class="chat-mode-chip" title="Transcribe and embed AI lyrics into MP3 metadata (10 Credits / track)">
@@ -3324,28 +3324,6 @@ body.messenger-body {
             <span class="close" onclick="closeModal('accountModal')" aria-label="Close modal">&times;</span>
             <h2 id="accountModalTitle" style="margin-top:0; margin-bottom: 14px;">Account &amp; AI Music Credits</h2>
 
-            <!-- AI Engine & API Key Configuration -->
-            <div class="ai-key-config-box" style="margin-bottom: 20px; padding: 14px 16px; background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.28); border-radius: 10px;">
-                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
-                    <div style="display: flex; align-items: center; gap: 8px;">
-                        <span style="font-size: 1.15rem;">🧠</span>
-                        <strong style="color: #60a5fa; font-size: 0.92rem;">AI Engine Configuration</strong>
-                    </div>
-                    <span id="aiKeyStatusBadge" style="font-size: 0.75rem; padding: 3px 8px; border-radius: 999px; background: rgba(59, 130, 246, 0.2); color: #93c5fd;">Default Studio AI</span>
-                </div>
-                <p style="font-size: 0.8rem; color: var(--text-muted); margin: 0 0 10px; line-height: 1.45;">
-                    Connect a free <strong>Groq API Key</strong> (Llama 3.3 70B, ultra-fast 300ms inference) or OpenAI key for unlimited natural conversation and instant track curation. Get a free key at <a href="https://console.groq.com/keys" target="_blank" rel="noopener" style="color: #60a5fa; text-decoration: underline;">console.groq.com</a>.
-                </p>
-                <div style="display: flex; gap: 8px;">
-                    <input type="password" id="customAiKeyInput" placeholder="Paste Groq (gsk_...) or OpenAI (sk-...) API Key" style="flex: 1; padding: 8px 12px; font-size: 0.82rem; background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 6px; color: var(--text-main);" />
-                    <button type="button" id="saveAiKeyBtn" class="btn-primary" style="padding: 8px 16px; font-size: 0.82rem; white-space: nowrap;">Save Key</button>
-                    <button type="button" id="clearAiKeyBtn" class="btn-secondary hidden" style="padding: 8px 12px; font-size: 0.82rem;">Remove</button>
-                </div>
-                <div id="aiKeySuccessNotice" class="hidden" style="margin-top: 8px; font-size: 0.78rem; color: #34d399;">
-                    ✓ Key saved! All chat requests now use your high-speed Llama 3.3 70B / OpenAI engine.
-                </div>
-            </div>
-
             <!-- Logged In View -->
             <div id="userDashboard" class="pricing-cards-grid hidden">
                 <div class="pricing-plan-card user-dashboard-card auth-box">
@@ -3395,13 +3373,9 @@ body.messenger-body {
                             <strong>Instant credit top-up.</strong> Credits never expire and unlock custom AI playlist curations:
                         </p>
                         <ul class="plan-features-list payg-list">
-                            <li><strong>+350 Playlist Generations</strong> (~<ul class="plan-features-list payg-list">
-                            <li><strong>+350 Track Credits</strong> (~$0.011 per track)</li>
-                            <li><strong>Full Playlist ZIP Downloads</strong> (up to 350 tracks)</li>
-                            <li><strong>AI 320k Bitrate Enhancer</strong> (1 credit / track)</li>
-                            <li><strong>AI Lyrics Transcription</strong> (10 credits / track)</li>
-                            <li><strong>One-time purchase</strong> &middot; No monthly fees</li>
-                        </ul>.01 per playlist)</li>
+                            <li><strong>350 Track Credits</strong> (~$0.011 per track / playlist)</li>
+                            <li><strong>📱 Custom iPhone (.M4R) &amp; Android (.MP3) Ringtones</strong> (125 Credits / download)</li>
+                            <li><strong>AI 320k Bitrate Mastering</strong> (1 credit / track)</li>
                             <li><strong>1-Click Connect &amp; Stream</strong> to Apple Music, Spotify, YouTube Music</li>
                             <li><strong>Universal .M3U8 &amp; Tracklist Export</strong></li>
                             <li><strong>Credits never expire</strong> &middot; No monthly fees</li>
@@ -3457,7 +3431,7 @@ body.messenger-body {
                         </p>
                         <ul class="plan-features-list payg-list">
                             <li><strong>350 Track Credits</strong> (~$0.011 per track / playlist)</li>
-                            <li><strong>📱 Custom iPhone (.M4R) &amp; Android (.MP3) Ringtones</strong></li>
+                            <li><strong>📱 Custom iPhone (.M4R) &amp; Android (.MP3) Ringtones</strong> (125 Credits / download)</li>
                             <li><strong>AI 320k Bitrate Mastering</strong></li>
                             <li><strong>1-Click Connect &amp; Stream</strong> to Apple Music, Spotify, YouTube Music</li>
                             <li><strong>Universal .M3U8 &amp; Tracklist Export</strong></li>
@@ -3744,7 +3718,7 @@ body.messenger-body {
                 <a href="#" onclick="closeModal('ringtoneDownloadModal'); openModal('ringtoneModal'); return false;" class="rt-full-guide-link">
                     📖 View Step-by-Step Installation Instructions &rarr;
                 </a>
-                <span style="font-size: 0.78rem; color: var(--text-muted);">Paid Feature &bull; 1 Credit / Track</span>
+                <span style="font-size: 0.78rem; color: var(--text-muted);">Paid Feature &bull; 125 Credits / Download</span>
             </div>
         </div>
     </div>
@@ -6922,7 +6896,7 @@ function initAssistantApp() {
         return row;
     }
 
-    // --- Ringtone Creation & Export Helpers (Paid Feature: 1 Credit/track) ---
+    // --- Ringtone Creation & Export Helpers (Paid Feature: 125 Credits/download) ---
     async function downloadAudioAsFile(url, fileName, mimeType = 'audio/x-m4r') {
         try {
             const resp = await fetch(url);
@@ -6969,7 +6943,7 @@ function initAssistantApp() {
             const data = await resp.json().catch(() => null);
             if (!resp.ok || !data || !data.success) {
                 if (data && data.requires_payment) {
-                    showToast('⚡ Custom phone ringtones require 1 credit. Top up below!', 'info');
+                    showToast('⚡ Custom phone ringtones require 125 credits. Top up below!', 'info');
                     openModal('accountModal');
                     return false;
                 }
@@ -6990,12 +6964,12 @@ function initAssistantApp() {
 
         const paidEl = document.getElementById('paidCreditsDisplay');
         const curCredits = parseInt(paidEl?.textContent || '0', 10);
-        if (curCredits < 1) {
-            showToast('⚡ Custom phone ringtones require 1 credit per track. Top up below!', 'info');
+        if (curCredits < 125) {
+            showToast('⚡ Custom phone ringtones require 125 credits per download. Top up below!', 'info');
             openModal('accountModal');
             return false;
         }
-        const newCredits = curCredits - 1;
+        const newCredits = curCredits - 125;
         if (paidEl) paidEl.textContent = newCredits;
         const hdrPaidEl = document.getElementById('headerPaidCreditsDisplay');
         if (hdrPaidEl) hdrPaidEl.textContent = newCredits;
@@ -7139,7 +7113,7 @@ function initAssistantApp() {
                         </div>
                     </div>
                     <div class="track-dl-actions">
-                        <button type="button" class="track-ringtone-btn" title="Create iPhone (.M4R) & Android (.MP3) ringtone (1 Credit)">📱 <span class="rt-btn-label">Ringtone</span> <span class="rt-cost-pill">1⚡</span></button>
+                        <button type="button" class="track-ringtone-btn" title="Create iPhone (.M4R) & Android (.MP3) ringtone (125 Credits)">📱 <span class="rt-btn-label">Ringtone</span> <span class="rt-cost-pill">125⚡</span></button>
                         <button type="button" class="track-similar-btn" title="Curate 10 songs similar to ${escapeHtml(t.title)} by ${escapeHtml(t.artist)}">✨ <span class="sim-label">Similar</span></button>
                         <div class="track-streaming-btns">
                             <a href="${escapeHtml(amUrl)}" target="_blank" rel="noopener" class="track-stream-link" title="Open in Apple Music">🍎</a>
@@ -7866,7 +7840,7 @@ if (document.readyState === 'loading') {
     initAssistantApp();
 }
 
-</script>
+    </script>
 </body>
 
 </html>

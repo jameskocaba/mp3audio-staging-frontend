@@ -3121,7 +3121,7 @@ function initAssistantApp() {
         return row;
     }
 
-    // --- Ringtone Creation & Export Helpers (Paid Feature: 1 Credit/track) ---
+    // --- Ringtone Creation & Export Helpers (Paid Feature: 125 Credits/download) ---
     async function downloadAudioAsFile(url, fileName, mimeType = 'audio/x-m4r') {
         try {
             const resp = await fetch(url);
@@ -3168,7 +3168,7 @@ function initAssistantApp() {
             const data = await resp.json().catch(() => null);
             if (!resp.ok || !data || !data.success) {
                 if (data && data.requires_payment) {
-                    showToast('⚡ Custom phone ringtones require 1 credit. Top up below!', 'info');
+                    showToast('⚡ Custom phone ringtones require 125 credits. Top up below!', 'info');
                     openModal('accountModal');
                     return false;
                 }
@@ -3189,12 +3189,12 @@ function initAssistantApp() {
 
         const paidEl = document.getElementById('paidCreditsDisplay');
         const curCredits = parseInt(paidEl?.textContent || '0', 10);
-        if (curCredits < 1) {
-            showToast('⚡ Custom phone ringtones require 1 credit per track. Top up below!', 'info');
+        if (curCredits < 125) {
+            showToast('⚡ Custom phone ringtones require 125 credits per download. Top up below!', 'info');
             openModal('accountModal');
             return false;
         }
-        const newCredits = curCredits - 1;
+        const newCredits = curCredits - 125;
         if (paidEl) paidEl.textContent = newCredits;
         const hdrPaidEl = document.getElementById('headerPaidCreditsDisplay');
         if (hdrPaidEl) hdrPaidEl.textContent = newCredits;
@@ -3338,7 +3338,7 @@ function initAssistantApp() {
                         </div>
                     </div>
                     <div class="track-dl-actions">
-                        <button type="button" class="track-ringtone-btn" title="Create iPhone (.M4R) & Android (.MP3) ringtone (1 Credit)">📱 <span class="rt-btn-label">Ringtone</span> <span class="rt-cost-pill">1⚡</span></button>
+                        <button type="button" class="track-ringtone-btn" title="Create iPhone (.M4R) & Android (.MP3) ringtone (125 Credits)">📱 <span class="rt-btn-label">Ringtone</span> <span class="rt-cost-pill">125⚡</span></button>
                         <button type="button" class="track-similar-btn" title="Curate 10 songs similar to ${escapeHtml(t.title)} by ${escapeHtml(t.artist)}">✨ <span class="sim-label">Similar</span></button>
                         <div class="track-streaming-btns">
                             <a href="${escapeHtml(amUrl)}" target="_blank" rel="noopener" class="track-stream-link" title="Open in Apple Music">🍎</a>

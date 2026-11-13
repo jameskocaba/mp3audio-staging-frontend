@@ -2899,28 +2899,6 @@ body.messenger-body {
             <span class="close" onclick="closeModal('accountModal')" aria-label="Close modal">&times;</span>
             <h2 id="accountModalTitle" style="margin-top:0; margin-bottom: 14px;">Account &amp; AI Music Credits</h2>
 
-            <!-- AI Engine & API Key Configuration -->
-            <div class="ai-key-config-box" style="margin-bottom: 20px; padding: 14px 16px; background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.28); border-radius: 10px;">
-                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
-                    <div style="display: flex; align-items: center; gap: 8px;">
-                        <span style="font-size: 1.15rem;">🧠</span>
-                        <strong style="color: #60a5fa; font-size: 0.92rem;">AI Engine Configuration</strong>
-                    </div>
-                    <span id="aiKeyStatusBadge" style="font-size: 0.75rem; padding: 3px 8px; border-radius: 999px; background: rgba(59, 130, 246, 0.2); color: #93c5fd;">Default Studio AI</span>
-                </div>
-                <p style="font-size: 0.8rem; color: var(--text-muted); margin: 0 0 10px; line-height: 1.45;">
-                    Connect a free <strong>Groq API Key</strong> (Llama 3.3 70B, ultra-fast 300ms inference) or OpenAI key for unlimited natural conversation and instant track curation. Get a free key at <a href="https://console.groq.com/keys" target="_blank" rel="noopener" style="color: #60a5fa; text-decoration: underline;">console.groq.com</a>.
-                </p>
-                <div style="display: flex; gap: 8px;">
-                    <input type="password" id="customAiKeyInput" placeholder="Paste Groq (gsk_...) or OpenAI (sk-...) API Key" style="flex: 1; padding: 8px 12px; font-size: 0.82rem; background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 6px; color: var(--text-main);" />
-                    <button type="button" id="saveAiKeyBtn" class="btn-primary" style="padding: 8px 16px; font-size: 0.82rem; white-space: nowrap;">Save Key</button>
-                    <button type="button" id="clearAiKeyBtn" class="btn-secondary hidden" style="padding: 8px 12px; font-size: 0.82rem;">Remove</button>
-                </div>
-                <div id="aiKeySuccessNotice" class="hidden" style="margin-top: 8px; font-size: 0.78rem; color: #34d399;">
-                    ✓ Key saved! All chat requests now use your high-speed Llama 3.3 70B / OpenAI engine.
-                </div>
-            </div>
-
             <!-- Logged In View -->
             <div id="userDashboard" class="pricing-cards-grid hidden">
                 <div class="pricing-plan-card user-dashboard-card auth-box">
