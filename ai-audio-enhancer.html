@@ -2586,6 +2586,272 @@ body.messenger-body {
     }
 }
 
+
+/* ==========================================================================
+   STREAMING AFFILIATE LINKS, SIDEBAR TRIALS & TRIALS MODAL STYLES
+   ========================================================================== */
+
+.compact-stream-pill.amazon-pill {
+    border-color: rgba(255, 153, 0, 0.38);
+    background: rgba(255, 153, 0, 0.12);
+    color: #ffb84d;
+}
+
+.compact-stream-pill.amazon-pill:hover {
+    background: rgba(255, 153, 0, 0.24);
+    border-color: #ff9900;
+    color: #ffffff;
+}
+
+.compact-stream-pill.trials-pill {
+    border-color: rgba(16, 185, 129, 0.42);
+    background: rgba(16, 185, 129, 0.14);
+    color: #34d399;
+}
+
+.compact-stream-pill.trials-pill:hover {
+    background: rgba(16, 185, 129, 0.26);
+    border-color: var(--brand-emerald);
+    color: #ffffff;
+}
+
+.header-action-pill.trials-header-pill {
+    background: rgba(16, 185, 129, 0.14);
+    border-color: rgba(16, 185, 129, 0.4);
+    color: #6ee7b7;
+}
+
+.header-action-pill.trials-header-pill:hover {
+    background: rgba(16, 185, 129, 0.25);
+    border-color: var(--brand-emerald-hover);
+    color: #ffffff;
+}
+
+.sidebar-affiliate-section {
+    padding: 10px 14px;
+}
+
+.sidebar-affiliate-compare-btn {
+    background: none;
+    border: none;
+    color: var(--brand-emerald-hover);
+    font-size: 0.7rem;
+    font-weight: 700;
+    cursor: pointer;
+    text-decoration: underline;
+    padding: 0;
+}
+
+.sidebar-affiliate-compare-btn:hover {
+    color: #ffffff;
+}
+
+.sidebar-affiliate-list {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.sidebar-affiliate-item {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 7px 9px;
+    border-radius: var(--radius-sm);
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    color: var(--text-primary);
+    text-decoration: none;
+    transition: all 0.16s ease;
+}
+
+.sidebar-affiliate-item:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.16);
+    transform: translateY(-1px);
+}
+
+.aff-platform-ico {
+    width: 26px;
+    height: 26px;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.06);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.95rem;
+    flex-shrink: 0;
+}
+
+.aff-platform-text {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-width: 0;
+}
+
+.aff-platform-text strong {
+    font-size: 0.77rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.aff-platform-text span {
+    font-size: 0.67rem;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.aff-badge {
+    font-size: 0.62rem;
+    font-weight: 800;
+    letter-spacing: 0.03em;
+    padding: 2px 6px;
+    border-radius: 999px;
+    background: rgba(16, 185, 129, 0.18);
+    color: #34d399;
+    border: 1px solid rgba(16, 185, 129, 0.35);
+    flex-shrink: 0;
+}
+
+.aff-badge.amazon-badge {
+    background: rgba(255, 153, 0, 0.18);
+    color: #ffb84d;
+    border-color: rgba(255, 153, 0, 0.38);
+}
+
+.aff-badge.apple-badge {
+    background: rgba(250, 45, 72, 0.18);
+    color: #ff8596;
+    border-color: rgba(250, 45, 72, 0.38);
+}
+
+/* Streaming Trials Modal */
+.trials-modal-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    margin-top: 12px;
+}
+
+@media (max-width: 680px) {
+    .trials-modal-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.trial-partner-card {
+    background: var(--bg-track-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: 12px;
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 12px;
+    transition: border-color 0.16s ease, background-color 0.16s ease;
+}
+
+.trial-partner-card:hover {
+    border-color: rgba(255, 255, 255, 0.18);
+    background: var(--bg-track-card-hover);
+}
+
+.trial-card-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.trial-card-top h3 {
+    font-size: 0.94rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin: 0 0 4px 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.trial-card-top p {
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+    line-height: 1.4;
+    margin: 0;
+}
+
+.trial-card-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.btn-trial-primary,
+.btn-trial-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 0.77rem;
+    font-weight: 700;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.16s ease;
+    flex: 1;
+    min-width: 120px;
+    text-align: center;
+}
+
+.btn-trial-primary {
+    background: linear-gradient(135deg, var(--brand-emerald), #059669);
+    color: #ffffff;
+    border: 1px solid rgba(16, 185, 129, 0.5);
+}
+
+.btn-trial-primary:hover {
+    background: linear-gradient(135deg, var(--brand-emerald-hover), #10b981);
+    transform: translateY(-1px);
+}
+
+.btn-trial-primary.amazon-primary {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: #0b141a;
+    border-color: rgba(255, 153, 0, 0.6);
+}
+
+.btn-trial-primary.amazon-primary:hover {
+    background: linear-gradient(135deg, #fbbf24, #f59e0b);
+}
+
+.btn-trial-secondary {
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--text-primary);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.btn-trial-secondary:hover {
+    background: rgba(255, 255, 255, 0.14);
+    border-color: rgba(255, 255, 255, 0.25);
+}
+
+.affiliate-disclosure-note {
+    margin-top: 14px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border-subtle);
+    font-size: 0.73rem;
+    color: var(--text-secondary);
+    line-height: 1.45;
+}
 </style>
 
     <script type="application/ld+json">
@@ -2650,6 +2916,48 @@ body.messenger-body {
                 </button>
             </div>
 
+            <!-- Streaming Apps & Free Trials -->
+            <div class="sidebar-section sidebar-affiliate-section">
+                <div class="sidebar-section-header">
+                    <span>STREAMING FREE TRIALS</span>
+                    <button type="button" class="sidebar-affiliate-compare-btn" onclick="openModal('streamingTrialsModal')">Compare All</button>
+                </div>
+                <div class="sidebar-affiliate-list">
+                    <a href="https://www.amazon.com/music/unlimited?tag=mp3audio20-20" target="_blank" rel="noopener sponsored" class="sidebar-affiliate-item">
+                        <span class="aff-platform-ico">🛒</span>
+                        <div class="aff-platform-text">
+                            <strong>Amazon Music Unlimited</strong>
+                            <span>HD &amp; Spatial Audio</span>
+                        </div>
+                        <span class="aff-badge amazon-badge">30d FREE</span>
+                    </a>
+                    <a href="https://music.apple.com/subscribe?app=music&ct=mp3audio" target="_blank" rel="noopener sponsored" class="sidebar-affiliate-item">
+                        <span class="aff-platform-ico">🍎</span>
+                        <div class="aff-platform-text">
+                            <strong>Apple Music</strong>
+                            <span>Lossless &amp; Dolby Atmos</span>
+                        </div>
+                        <span class="aff-badge apple-badge">1mo FREE</span>
+                    </a>
+                    <a href="https://www.spotify.com/premium/" target="_blank" rel="noopener sponsored" class="sidebar-affiliate-item">
+                        <span class="aff-platform-ico">🟢</span>
+                        <div class="aff-platform-text">
+                            <strong>Spotify Premium</strong>
+                            <span>Ad-free offline playlists</span>
+                        </div>
+                        <span class="aff-badge">TRY FREE</span>
+                    </a>
+                    <a href="https://music.youtube.com/music_premium" target="_blank" rel="noopener sponsored" class="sidebar-affiliate-item">
+                        <span class="aff-platform-ico">🔴</span>
+                        <div class="aff-platform-text">
+                            <strong>YouTube Music</strong>
+                            <span>Official audio &amp; remixes</span>
+                        </div>
+                        <span class="aff-badge">TRY FREE</span>
+                    </a>
+                </div>
+            </div>
+
             <!-- Saved / Recent Music Chats -->
             <div class="sidebar-section sidebar-history-section">
                 <div class="sidebar-section-header">
@@ -2676,6 +2984,8 @@ body.messenger-body {
                     </div>
                 </div>
                 <div class="sidebar-legal-links">
+                    <a href="#" onclick="openModal('streamingTrialsModal'); return false;">Free Trials</a>
+                    <span>&middot;</span>
                     <a href="#" onclick="openModal('ringtoneModal'); return false;">Ringtone Guide</a>
                     <span>&middot;</span>
                     <a href="#" onclick="openModal('aboutModal'); return false;">About</a>
@@ -2727,6 +3037,10 @@ body.messenger-body {
                         <span>Surprise Mix</span>
                     </button>
 
+                    <button type="button" id="headerTrialsBtn" class="header-action-pill trials-header-pill" onclick="openModal('streamingTrialsModal')" title="Free Music Streaming Trials &amp; Perks">
+                        <span>🎁</span>
+                        <span>Free Trials</span>
+                    </button>
                     <button type="button" id="headerOptionsBtn" class="header-action-pill" title="Audio &amp; Metadata Options">
                         <span>⚙️</span>
                         <span>Options</span>
@@ -3080,6 +3394,80 @@ body.messenger-body {
             <span class="close" onclick="closeModal('disclaimerModal')" aria-label="Close modal">&times;</span>
             <h2 id="disclaimerTitle">Legal Disclaimer</h2>
             <p>MP3aud.io is intended for personal music discovery, previewing, and archival of authorized or user-provided media. Users are responsible for complying with applicable copyright laws and platform terms of service.</p>
+            <p class="affiliate-disclosure-note"><strong>Affiliate Disclosure:</strong> As an Amazon Associate (tag: <code>mp3audio20-20</code>) and streaming partner affiliate, MP3aud.io may earn a commission or referral bounty from qualifying free trial sign-ups, subscriptions, and gift card purchases at no additional cost to you.</p>
+        </div>
+    </div>
+
+    <!-- =====================================================
+         MODAL 5: STREAMING APPS & FREE TRIALS MODAL
+         ===================================================== -->
+    <div id="streamingTrialsModal" class="modal" role="dialog" aria-labelledby="streamingTrialsTitle" aria-hidden="true">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('streamingTrialsModal')" aria-label="Close modal">&times;</span>
+            <h2 id="streamingTrialsTitle">🎁 Stream Full Tracks &amp; Claim Free Trials</h2>
+            <p>Export your curated MP3aud.io playlists directly to your favorite streaming app. New subscribers can unlock free trial offers or pick up digital gift cards below:</p>
+
+            <div class="trials-modal-grid">
+                <div class="trial-partner-card">
+                    <div class="trial-card-top">
+                        <div>
+                            <h3>🛒 Amazon Music Unlimited</h3>
+                            <p>100M+ songs ad-free in HD, Ultra HD &amp; Spatial Audio with offline playback.</p>
+                        </div>
+                        <span class="aff-badge amazon-badge">30d FREE</span>
+                    </div>
+                    <div class="trial-card-actions">
+                        <a href="https://www.amazon.com/music/unlimited?tag=mp3audio20-20" target="_blank" rel="noopener sponsored" class="btn-trial-primary amazon-primary">Start 30-Day Free Trial</a>
+                        <a href="https://www.amazon.com/s?k=music+streaming+digital+music&i=digital-music&tag=mp3audio20-20" target="_blank" rel="noopener sponsored" class="btn-trial-secondary">Digital Music Store</a>
+                    </div>
+                </div>
+
+                <div class="trial-partner-card">
+                    <div class="trial-card-top">
+                        <div>
+                            <h3>🍎 Apple Music</h3>
+                            <p>Lossless studio audio, Spatial Audio with Dolby Atmos, and seamless iPhone sync.</p>
+                        </div>
+                        <span class="aff-badge apple-badge">1mo FREE</span>
+                    </div>
+                    <div class="trial-card-actions">
+                        <a href="https://music.apple.com/subscribe?app=music&ct=mp3audio" target="_blank" rel="noopener sponsored" class="btn-trial-primary">Try Apple Music Free</a>
+                        <a href="https://www.amazon.com/s?k=Apple+Gift+Card&tag=mp3audio20-20" target="_blank" rel="noopener sponsored" class="btn-trial-secondary">Apple Gift Cards</a>
+                    </div>
+                </div>
+
+                <div class="trial-partner-card">
+                    <div class="trial-card-top">
+                        <div>
+                            <h3>🟢 Spotify Premium</h3>
+                            <p>Ad-free listening, unlimited skips, and instant playlist sharing across devices.</p>
+                        </div>
+                        <span class="aff-badge">TRY FREE</span>
+                    </div>
+                    <div class="trial-card-actions">
+                        <a href="https://www.spotify.com/premium/" target="_blank" rel="noopener sponsored" class="btn-trial-primary">Try Spotify Premium</a>
+                        <a href="https://www.amazon.com/s?k=Spotify+Premium+Gift+Card&tag=mp3audio20-20" target="_blank" rel="noopener sponsored" class="btn-trial-secondary">Spotify Gift Cards</a>
+                    </div>
+                </div>
+
+                <div class="trial-partner-card">
+                    <div class="trial-card-top">
+                        <div>
+                            <h3>🔴 YouTube Music Premium</h3>
+                            <p>Official tracks, live performances, rare remixes, and background play on mobile.</p>
+                        </div>
+                        <span class="aff-badge">TRY FREE</span>
+                    </div>
+                    <div class="trial-card-actions">
+                        <a href="https://music.youtube.com/music_premium" target="_blank" rel="noopener sponsored" class="btn-trial-primary">Try YouTube Music</a>
+                        <a href="https://www.amazon.com/s?k=Google+Play+Gift+Card&tag=mp3audio20-20" target="_blank" rel="noopener sponsored" class="btn-trial-secondary">Google Play Cards</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="affiliate-disclosure-note">
+                <strong>Affiliate Disclosure:</strong> As an Amazon Associate (tag: <code>mp3audio20-20</code>) and streaming partner affiliate, MP3aud.io may earn a commission or referral bounty from qualifying free trial sign-ups, subscriptions, and gift card purchases at no extra cost to you.
+            </div>
         </div>
     </div>
 
@@ -4153,12 +4541,28 @@ function initAssistantApp() {
 
     const VIBE_KEYS_LIST = Object.keys(CLIENT_VIBE_SEEDS);
 
+    const AFFILIATE_CONFIG = {
+        amazonTag: 'mp3audio20-20',
+        appleAtToken: '', // Paste Apple Services Performance Partner token (at=...) once approved at performance-partners.apple.com
+        appleCampaign: 'mp3audio',
+        amazonTrialUrl: 'https://www.amazon.com/music/unlimited?tag=mp3audio20-20',
+        appleTrialUrl: 'https://music.apple.com/subscribe?app=music&ct=mp3audio',
+        spotifyTrialUrl: 'https://www.spotify.com/premium/',
+        spotifyGiftCardUrl: 'https://www.amazon.com/s?k=Spotify+Premium+Gift+Card&tag=mp3audio20-20',
+        youtubeTrialUrl: 'https://music.youtube.com/music_premium',
+        youtubeGiftCardUrl: 'https://www.amazon.com/s?k=Google+Play+Gift+Card&tag=mp3audio20-20'
+    };
+
     function makeStreamingUrls(title, artist = '') {
         const query = `${artist} ${title}`.trim() || title;
         const enc = encodeURIComponent(query);
+        const appleSuffix = AFFILIATE_CONFIG.appleAtToken
+            ? `&at=${encodeURIComponent(AFFILIATE_CONFIG.appleAtToken)}&ct=${encodeURIComponent(AFFILIATE_CONFIG.appleCampaign)}&app=music`
+            : `&ct=${encodeURIComponent(AFFILIATE_CONFIG.appleCampaign)}&app=music`;
         return {
-            apple_music: `https://music.apple.com/search?term=${enc}`,
+            apple_music: `https://music.apple.com/search?term=${enc}${appleSuffix}`,
             spotify: `https://open.spotify.com/search/${enc}`,
+            amazon_music: `https://www.amazon.com/s?k=${enc}&i=digital-music&tag=${AFFILIATE_CONFIG.amazonTag}`,
             youtube_music: `https://music.youtube.com/search?q=${enc}`
         };
     }
@@ -5020,21 +5424,23 @@ function initAssistantApp() {
             }
         }
 
-        // 6. Streaming Connection & Export Intent (Apple Music, Spotify, YouTube Music)
-        if (/\b(apple\s*music|spotify|youtube\s*music|streaming|stream in|connect|export|transfer|sync)\b/i.test(lower)) {
+        // 6. Streaming Connection & Export Intent (Apple Music, Spotify, Amazon Music, YouTube Music, Free Trials)
+        if (/\b(apple\s*music|spotify|amazon\s*music|youtube\s*music|free\s*trials?|streaming|stream in|connect|export|transfer|sync)\b/i.test(lower)) {
             const pTitle = assistantMemory.lastPlaylistTitle || 'Curated Selection';
             const plLinks = makeStreamingUrls(pTitle);
             const countStr = tracks.length > 0 ? `your **${tracks.length}-track** playlist (*${pTitle}*)` : 'your music';
             return {
                 success: true,
                 mode: 'chat',
-                reply: `Connecting ${countStr} to **Apple Music**, **Spotify**, or **YouTube Music** is instant! ⚡\n\n` +
-                    `Here are your direct options:\n\n` +
-                    `1. **🍎 Apple Music:** Tap [Open in Apple Music](${plLinks.apple_music}) to open the playlist directly in your Apple Music app.\n` +
-                    `2. **🟢 Spotify:** Tap [Open in Spotify](${plLinks.spotify}) to open and save this playlist directly in Spotify.\n` +
-                    `3. **🔴 YouTube Music:** Tap [Open in YouTube Music](${plLinks.youtube_music}) to stream the official tracks in YouTube Music.\n\n` +
+                reply: `Connecting ${countStr} to **Apple Music**, **Spotify**, **Amazon Music**, or **YouTube Music** is instant! ⚡\n\n` +
+                    `Here are your direct options & free-trial sign-ups:\n\n` +
+                    `1. **🛒 Amazon Music:** [Open in Amazon Music](${plLinks.amazon_music}) · [Start 30-Day Free Trial](${AFFILIATE_CONFIG.amazonTrialUrl})\n` +
+                    `2. **🍎 Apple Music:** [Open in Apple Music](${plLinks.apple_music}) · [Try Apple Music Free](${AFFILIATE_CONFIG.appleTrialUrl})\n` +
+                    `3. **🟢 Spotify:** [Open in Spotify](${plLinks.spotify}) · [Try Spotify Premium](${AFFILIATE_CONFIG.spotifyTrialUrl})\n` +
+                    `4. **🔴 YouTube Music:** [Open in YouTube Music](${plLinks.youtube_music}) · [Try YouTube Music Premium](${AFFILIATE_CONFIG.youtubeTrialUrl})\n\n` +
                     `💡 **Pro-Tip:** In the playlist card above, tap **📥 Export .M3U8** to download a universal file you can drag into Apple Music/iTunes, or tap **📋 Copy Tracklist** to paste into Spotify or SongShift!`,
                 suggestions: [
+                    `🎁 Claim Free Streaming Trials`,
                     `🍎 Open in Apple Music`,
                     `🟢 Open in Spotify`,
                     `🔴 Open in YouTube Music`,
@@ -6248,6 +6654,7 @@ function initAssistantApp() {
             const plLinks = makeStreamingUrls(playlistTitle);
             const amPl = (payload.streaming_links && payload.streaming_links.apple_music) || plLinks.apple_music;
             const spPl = (payload.streaming_links && payload.streaming_links.spotify) || plLinks.spotify;
+            const amzPl = (payload.streaming_links && payload.streaming_links.amazon_music) || plLinks.amazon_music;
             const ytPl = (payload.streaming_links && payload.streaming_links.youtube_music) || plLinks.youtube_music;
             playlistHeaderHtml = `
                 <div class="playlist-header-card">
@@ -6267,9 +6674,11 @@ function initAssistantApp() {
 
                     <div class="playlist-compact-stream-bar">
                         <span class="playlist-compact-stream-label">Open in:</span>
-                        <a href="${escapeHtml(amPl)}" target="_blank" rel="noopener" class="compact-stream-pill apple-pill" title="Open playlist in Apple Music">🍎 Apple Music</a>
+                        <a href="${escapeHtml(amPl)}" target="_blank" rel="noopener sponsored" class="compact-stream-pill apple-pill" title="Open playlist in Apple Music">🍎 Apple Music</a>
                         <a href="${escapeHtml(spPl)}" target="_blank" rel="noopener" class="compact-stream-pill spotify-pill" title="Open playlist in Spotify">🟢 Spotify</a>
+                        <a href="${escapeHtml(amzPl)}" target="_blank" rel="noopener sponsored" class="compact-stream-pill amazon-pill" title="Open playlist in Amazon Music">🛒 Amazon Music</a>
                         <a href="${escapeHtml(ytPl)}" target="_blank" rel="noopener" class="compact-stream-pill ytmusic-pill" title="Open playlist in YouTube Music">🔴 YouTube Music</a>
+                        <button type="button" class="compact-stream-pill trials-pill" onclick="openModal('streamingTrialsModal')" title="Get Free Streaming Trials (Amazon, Apple, Spotify, YouTube)">🎁 Free Trials</button>
                         <button type="button" class="compact-stream-pill copy-tracklist-btn" title="Copy tracklist to clipboard">📋 Copy List</button>
                         <button type="button" class="compact-stream-pill export-m3u-btn" title="Download .M3U8 playlist file">📥 .M3U8</button>
                     </div>
@@ -6280,10 +6689,6 @@ function initAssistantApp() {
         const tracksHtml = hasTracks ? tracks.map((t, idx) => {
             const art = t.artwork_url || 'favicon.png';
             const subMeta = [t.artist, t.album, t.year].filter(Boolean).join(' • ');
-            const tLinks = makeStreamingUrls(t.title, t.artist);
-            const amUrl = t.apple_music_url || tLinks.apple_music;
-            const spUrl = t.spotify_url || tLinks.spotify;
-            const ytUrl = t.youtube_music_url || tLinks.youtube_music;
             const numStr = (idx + 1) < 10 ? `0${idx + 1}` : `${idx + 1}`;
             return `
                 <div class="track-audio-bubble" data-bubble-id="${t.bubbleId}" data-track-idx="${idx}">
@@ -6308,11 +6713,6 @@ function initAssistantApp() {
                     </div>
                     <div class="track-dl-actions">
                         <button type="button" class="track-similar-btn" title="Curate 10 songs similar to ${escapeHtml(t.title)} by ${escapeHtml(t.artist)}">✨ <span class="sim-label">Similar</span></button>
-                        <div class="track-streaming-btns">
-                            <a href="${escapeHtml(amUrl)}" target="_blank" rel="noopener" class="track-stream-link" title="Open in Apple Music">🍎</a>
-                            <a href="${escapeHtml(spUrl)}" target="_blank" rel="noopener" class="track-stream-link" title="Open in Spotify">🟢</a>
-                            <a href="${escapeHtml(ytUrl)}" target="_blank" rel="noopener" class="track-stream-link" title="Open in YouTube Music">🔴</a>
-                        </div>
                     </div>
                 </div>
             `;
@@ -6407,6 +6807,10 @@ function initAssistantApp() {
                 const rawSuggest = chip.getAttribute('data-suggest') || chip.textContent || '';
                 if (/buy\s+350\s+credits/i.test(rawSuggest)) {
                     openModal('accountModal');
+                    return;
+                }
+                if (/free\s+streaming\s+trials/i.test(rawSuggest)) {
+                    openModal('streamingTrialsModal');
                     return;
                 }
                 const cleanPrompt = rawSuggest.replace(/^[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}💬🎵🔥⚡🌙🎲📅▶️⏭️🔄💳🍎📲💰]+\s*/u, '').trim();

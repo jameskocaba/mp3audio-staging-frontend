@@ -2951,3 +2951,270 @@ body.messenger-body {
     font-weight: 500;
     color: var(--text-muted);
 }
+
+/* ==========================================================================
+   STREAMING AFFILIATE LINKS, SIDEBAR TRIALS & TRIALS MODAL STYLES
+   ========================================================================== */
+
+.compact-stream-pill.amazon-pill {
+    border-color: rgba(255, 153, 0, 0.38);
+    background: rgba(255, 153, 0, 0.12);
+    color: #ffb84d;
+}
+
+.compact-stream-pill.amazon-pill:hover {
+    background: rgba(255, 153, 0, 0.24);
+    border-color: #ff9900;
+    color: #ffffff;
+}
+
+.compact-stream-pill.trials-pill {
+    border-color: rgba(16, 185, 129, 0.42);
+    background: rgba(16, 185, 129, 0.14);
+    color: #34d399;
+}
+
+.compact-stream-pill.trials-pill:hover {
+    background: rgba(16, 185, 129, 0.26);
+    border-color: var(--brand-emerald);
+    color: #ffffff;
+}
+
+.header-action-pill.trials-header-pill {
+    background: rgba(16, 185, 129, 0.14);
+    border-color: rgba(16, 185, 129, 0.4);
+    color: #6ee7b7;
+}
+
+.header-action-pill.trials-header-pill:hover {
+    background: rgba(16, 185, 129, 0.25);
+    border-color: var(--brand-emerald-hover);
+    color: #ffffff;
+}
+
+.sidebar-affiliate-section {
+    padding: 10px 14px;
+}
+
+.sidebar-affiliate-compare-btn {
+    background: none;
+    border: none;
+    color: var(--brand-emerald-hover);
+    font-size: 0.7rem;
+    font-weight: 700;
+    cursor: pointer;
+    text-decoration: underline;
+    padding: 0;
+}
+
+.sidebar-affiliate-compare-btn:hover {
+    color: #ffffff;
+}
+
+.sidebar-affiliate-list {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.sidebar-affiliate-item {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 7px 9px;
+    border-radius: var(--radius-sm);
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    color: var(--text-primary);
+    text-decoration: none;
+    transition: all 0.16s ease;
+}
+
+.sidebar-affiliate-item:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.16);
+    transform: translateY(-1px);
+}
+
+.aff-platform-ico {
+    width: 26px;
+    height: 26px;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.06);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.95rem;
+    flex-shrink: 0;
+}
+
+.aff-platform-text {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-width: 0;
+}
+
+.aff-platform-text strong {
+    font-size: 0.77rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.aff-platform-text span {
+    font-size: 0.67rem;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.aff-badge {
+    font-size: 0.62rem;
+    font-weight: 800;
+    letter-spacing: 0.03em;
+    padding: 2px 6px;
+    border-radius: 999px;
+    background: rgba(16, 185, 129, 0.18);
+    color: #34d399;
+    border: 1px solid rgba(16, 185, 129, 0.35);
+    flex-shrink: 0;
+}
+
+.aff-badge.amazon-badge {
+    background: rgba(255, 153, 0, 0.18);
+    color: #ffb84d;
+    border-color: rgba(255, 153, 0, 0.38);
+}
+
+.aff-badge.apple-badge {
+    background: rgba(250, 45, 72, 0.18);
+    color: #ff8596;
+    border-color: rgba(250, 45, 72, 0.38);
+}
+
+/* Streaming Trials Modal */
+.trials-modal-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    margin-top: 12px;
+}
+
+@media (max-width: 680px) {
+    .trials-modal-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.trial-partner-card {
+    background: var(--bg-track-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: 12px;
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 12px;
+    transition: border-color 0.16s ease, background-color 0.16s ease;
+}
+
+.trial-partner-card:hover {
+    border-color: rgba(255, 255, 255, 0.18);
+    background: var(--bg-track-card-hover);
+}
+
+.trial-card-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.trial-card-top h3 {
+    font-size: 0.94rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin: 0 0 4px 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.trial-card-top p {
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+    line-height: 1.4;
+    margin: 0;
+}
+
+.trial-card-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.btn-trial-primary,
+.btn-trial-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 0.77rem;
+    font-weight: 700;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.16s ease;
+    flex: 1;
+    min-width: 120px;
+    text-align: center;
+}
+
+.btn-trial-primary {
+    background: linear-gradient(135deg, var(--brand-emerald), #059669);
+    color: #ffffff;
+    border: 1px solid rgba(16, 185, 129, 0.5);
+}
+
+.btn-trial-primary:hover {
+    background: linear-gradient(135deg, var(--brand-emerald-hover), #10b981);
+    transform: translateY(-1px);
+}
+
+.btn-trial-primary.amazon-primary {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: #0b141a;
+    border-color: rgba(255, 153, 0, 0.6);
+}
+
+.btn-trial-primary.amazon-primary:hover {
+    background: linear-gradient(135deg, #fbbf24, #f59e0b);
+}
+
+.btn-trial-secondary {
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--text-primary);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.btn-trial-secondary:hover {
+    background: rgba(255, 255, 255, 0.14);
+    border-color: rgba(255, 255, 255, 0.25);
+}
+
+.affiliate-disclosure-note {
+    margin-top: 14px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border-subtle);
+    font-size: 0.73rem;
+    color: var(--text-secondary);
+    line-height: 1.45;
+}
+

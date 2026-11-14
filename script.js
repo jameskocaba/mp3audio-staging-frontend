@@ -1045,12 +1045,28 @@ function initAssistantApp() {
 
     const VIBE_KEYS_LIST = Object.keys(CLIENT_VIBE_SEEDS);
 
+    const AFFILIATE_CONFIG = {
+        amazonTag: 'mp3audio20-20',
+        appleAtToken: '', // Paste Apple Services Performance Partner token (at=...) once approved at performance-partners.apple.com
+        appleCampaign: 'mp3audio',
+        amazonTrialUrl: 'https://www.amazon.com/music/unlimited?tag=mp3audio20-20',
+        appleTrialUrl: 'https://music.apple.com/subscribe?app=music&ct=mp3audio',
+        spotifyTrialUrl: 'https://www.spotify.com/premium/',
+        spotifyGiftCardUrl: 'https://www.amazon.com/s?k=Spotify+Premium+Gift+Card&tag=mp3audio20-20',
+        youtubeTrialUrl: 'https://music.youtube.com/music_premium',
+        youtubeGiftCardUrl: 'https://www.amazon.com/s?k=Google+Play+Gift+Card&tag=mp3audio20-20'
+    };
+
     function makeStreamingUrls(title, artist = '') {
         const query = `${artist} ${title}`.trim() || title;
         const enc = encodeURIComponent(query);
+        const appleSuffix = AFFILIATE_CONFIG.appleAtToken
+            ? `&at=${encodeURIComponent(AFFILIATE_CONFIG.appleAtToken)}&ct=${encodeURIComponent(AFFILIATE_CONFIG.appleCampaign)}&app=music`
+            : `&ct=${encodeURIComponent(AFFILIATE_CONFIG.appleCampaign)}&app=music`;
         return {
-            apple_music: `https://music.apple.com/search?term=${enc}`,
+            apple_music: `https://music.apple.com/search?term=${enc}${appleSuffix}`,
             spotify: `https://open.spotify.com/search/${enc}`,
+            amazon_music: `https://www.amazon.com/s?k=${enc}&i=digital-music&tag=${AFFILIATE_CONFIG.amazonTag}`,
             youtube_music: `https://music.youtube.com/search?q=${enc}`
         };
     }
@@ -1912,21 +1928,23 @@ function initAssistantApp() {
             }
         }
 
-        // 6. Streaming Connection & Export Intent (Apple Music, Spotify, YouTube Music)
-        if (/\b(apple\s*music|spotify|youtube\s*music|streaming|stream in|connect|export|transfer|sync)\b/i.test(lower)) {
+        // 6. Streaming Connection & Export Intent (Apple Music, Spotify, Amazon Music, YouTube Music, Free Trials)
+        if (/\b(apple\s*music|spotify|amazon\s*music|youtube\s*music|free\s*trials?|streaming|stream in|connect|export|transfer|sync)\b/i.test(lower)) {
             const pTitle = assistantMemory.lastPlaylistTitle || 'Curated Selection';
             const plLinks = makeStreamingUrls(pTitle);
             const countStr = tracks.length > 0 ? `your **${tracks.length}-track** playlist (*${pTitle}*)` : 'your music';
             return {
                 success: true,
                 mode: 'chat',
-                reply: `Connecting ${countStr} to **Apple Music**, **Spotify**, or **YouTube Music** is instant! ⚡\n\n` +
-                    `Here are your direct options:\n\n` +
-                    `1. **🍎 Apple Music:** Tap [Open in Apple Music](${plLinks.apple_music}) to open the playlist directly in your Apple Music app.\n` +
-                    `2. **🟢 Spotify:** Tap [Open in Spotify](${plLinks.spotify}) to open and save this playlist directly in Spotify.\n` +
-                    `3. **🔴 YouTube Music:** Tap [Open in YouTube Music](${plLinks.youtube_music}) to stream the official tracks in YouTube Music.\n\n` +
+                reply: `Connecting ${countStr} to **Apple Music**, **Spotify**, **Amazon Music**, or **YouTube Music** is instant! ⚡\n\n` +
+                    `Here are your direct options & free-trial sign-ups:\n\n` +
+                    `1. **🛒 Amazon Music:** [Open in Amazon Music](${plLinks.amazon_music}) · [Start 30-Day Free Trial](${AFFILIATE_CONFIG.amazonTrialUrl})\n` +
+                    `2. **🍎 Apple Music:** [Open in Apple Music](${plLinks.apple_music}) · [Try Apple Music Free](${AFFILIATE_CONFIG.appleTrialUrl})\n` +
+                    `3. **🟢 Spotify:** [Open in Spotify](${plLinks.spotify}) · [Try Spotify Premium](${AFFILIATE_CONFIG.spotifyTrialUrl})\n` +
+                    `4. **🔴 YouTube Music:** [Open in YouTube Music](${plLinks.youtube_music}) · [Try YouTube Music Premium](${AFFILIATE_CONFIG.youtubeTrialUrl})\n\n` +
                     `💡 **Pro-Tip:** In the playlist card above, tap **📥 Export .M3U8** to download a universal file you can drag into Apple Music/iTunes, or tap **📋 Copy Tracklist** to paste into Spotify or SongShift!`,
                 suggestions: [
+                    `🎁 Claim Free Streaming Trials`,
                     `🍎 Open in Apple Music`,
                     `🟢 Open in Spotify`,
                     `🔴 Open in YouTube Music`,
@@ -3279,6 +3297,7 @@ function initAssistantApp() {
             const plLinks = makeStreamingUrls(playlistTitle);
             const amPl = (payload.streaming_links && payload.streaming_links.apple_music) || plLinks.apple_music;
             const spPl = (payload.streaming_links && payload.streaming_links.spotify) || plLinks.spotify;
+            const amzPl = (payload.streaming_links && payload.streaming_links.amazon_music) || plLinks.amazon_music;
             const ytPl = (payload.streaming_links && payload.streaming_links.youtube_music) || plLinks.youtube_music;
             playlistHeaderHtml = `
                 <div class="playlist-header-card">
@@ -3298,9 +3317,11 @@ function initAssistantApp() {
 
                     <div class="playlist-compact-stream-bar">
                         <span class="playlist-compact-stream-label">Open in:</span>
-                        <a href="${escapeHtml(amPl)}" target="_blank" rel="noopener" class="compact-stream-pill apple-pill" title="Open playlist in Apple Music">🍎 Apple Music</a>
+                        <a href="${escapeHtml(amPl)}" target="_blank" rel="noopener sponsored" class="compact-stream-pill apple-pill" title="Open playlist in Apple Music">🍎 Apple Music</a>
                         <a href="${escapeHtml(spPl)}" target="_blank" rel="noopener" class="compact-stream-pill spotify-pill" title="Open playlist in Spotify">🟢 Spotify</a>
+                        <a href="${escapeHtml(amzPl)}" target="_blank" rel="noopener sponsored" class="compact-stream-pill amazon-pill" title="Open playlist in Amazon Music">🛒 Amazon Music</a>
                         <a href="${escapeHtml(ytPl)}" target="_blank" rel="noopener" class="compact-stream-pill ytmusic-pill" title="Open playlist in YouTube Music">🔴 YouTube Music</a>
+                        <button type="button" class="compact-stream-pill trials-pill" onclick="openModal('streamingTrialsModal')" title="Get Free Streaming Trials (Amazon, Apple, Spotify, YouTube)">🎁 Free Trials</button>
                         <button type="button" class="compact-stream-pill copy-tracklist-btn" title="Copy tracklist to clipboard">📋 Copy List</button>
                         <button type="button" class="compact-stream-pill export-m3u-btn" title="Download .M3U8 playlist file">📥 .M3U8</button>
                     </div>
@@ -3311,10 +3332,6 @@ function initAssistantApp() {
         const tracksHtml = hasTracks ? tracks.map((t, idx) => {
             const art = t.artwork_url || 'favicon.png';
             const subMeta = [t.artist, t.album, t.year].filter(Boolean).join(' • ');
-            const tLinks = makeStreamingUrls(t.title, t.artist);
-            const amUrl = t.apple_music_url || tLinks.apple_music;
-            const spUrl = t.spotify_url || tLinks.spotify;
-            const ytUrl = t.youtube_music_url || tLinks.youtube_music;
             const numStr = (idx + 1) < 10 ? `0${idx + 1}` : `${idx + 1}`;
             return `
                 <div class="track-audio-bubble" data-bubble-id="${t.bubbleId}" data-track-idx="${idx}">
@@ -3340,11 +3357,6 @@ function initAssistantApp() {
                     <div class="track-dl-actions">
                         <button type="button" class="track-ringtone-btn" title="Create iPhone (.M4R) & Android (.MP3) ringtone (125 Credits)">📱 <span class="rt-btn-label">Ringtone</span> <span class="rt-cost-pill">125⚡</span></button>
                         <button type="button" class="track-similar-btn" title="Curate 10 songs similar to ${escapeHtml(t.title)} by ${escapeHtml(t.artist)}">✨ <span class="sim-label">Similar</span></button>
-                        <div class="track-streaming-btns">
-                            <a href="${escapeHtml(amUrl)}" target="_blank" rel="noopener" class="track-stream-link" title="Open in Apple Music">🍎</a>
-                            <a href="${escapeHtml(spUrl)}" target="_blank" rel="noopener" class="track-stream-link" title="Open in Spotify">🟢</a>
-                            <a href="${escapeHtml(ytUrl)}" target="_blank" rel="noopener" class="track-stream-link" title="Open in YouTube Music">🔴</a>
-                        </div>
                     </div>
                 </div>
             `;
@@ -3447,6 +3459,10 @@ function initAssistantApp() {
                 const rawSuggest = chip.getAttribute('data-suggest') || chip.textContent || '';
                 if (/buy\s+350\s+credits/i.test(rawSuggest)) {
                     openModal('accountModal');
+                    return;
+                }
+                if (/free\s+streaming\s+trials/i.test(rawSuggest)) {
+                    openModal('streamingTrialsModal');
                     return;
                 }
                 const cleanPrompt = rawSuggest.replace(/^[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}💬🎵🔥⚡🌙🎲📅▶️⏭️🔄💳🍎📲💰]+\s*/u, '').trim();
