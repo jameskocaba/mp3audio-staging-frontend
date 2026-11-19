@@ -3493,3 +3493,360 @@ body.messenger-body {
     }
 }
 
+/* ==========================================================================
+   24/7 CONTINUOUS AI-GENERATED DOWNTEMPO STREAM UI
+   ========================================================================== */
+
+@keyframes aiDtPulse {
+    0%, 100% {
+        transform: scale(1);
+        opacity: 0.95;
+        box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.55);
+    }
+    50% {
+        transform: scale(1.15);
+        opacity: 1;
+        box-shadow: 0 0 0 5px rgba(56, 189, 248, 0);
+    }
+}
+
+@keyframes aiDtEqBar {
+    0%, 100% {
+        height: 4px;
+    }
+    50% {
+        height: 15px;
+    }
+}
+
+/* Header Action Pill */
+.header-action-pill.ai-dt-header-pill {
+    background: linear-gradient(135deg, rgba(56, 189, 248, 0.14), rgba(0, 168, 132, 0.14));
+    border-color: rgba(56, 189, 248, 0.38);
+    color: #bae6fd;
+}
+
+.header-action-pill.ai-dt-header-pill:hover {
+    background: linear-gradient(135deg, rgba(56, 189, 248, 0.24), rgba(0, 168, 132, 0.24));
+    border-color: var(--accent-cyan);
+    color: #ffffff;
+}
+
+.header-action-pill.ai-dt-header-pill.is-live {
+    background: linear-gradient(135deg, rgba(0, 168, 132, 0.28), rgba(56, 189, 248, 0.24));
+    border-color: var(--brand-emerald-hover);
+    color: #ffffff;
+    box-shadow: 0 0 12px rgba(0, 168, 132, 0.25);
+}
+
+.ai-dt-pulse-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--accent-cyan);
+    display: inline-block;
+    flex-shrink: 0;
+}
+
+.ai-dt-header-pill.is-live .ai-dt-pulse-dot,
+.ai-dt-live-dot.is-live {
+    background: var(--online-green);
+    animation: aiDtPulse 1.6s infinite ease-in-out;
+}
+
+/* Sidebar AI Downtempo Stream Card */
+.sidebar-ai-downtempo-section {
+    padding: 10px 14px;
+}
+
+.ai-dt-header-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    color: #7dd3fc;
+}
+
+.ai-dt-live-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #64748b;
+    display: inline-block;
+}
+
+.ai-dt-bpm-pill {
+    font-size: 0.65rem;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 999px;
+    background: rgba(56, 189, 248, 0.14);
+    border: 1px solid rgba(56, 189, 248, 0.3);
+    color: #7dd3fc;
+    font-variant-numeric: tabular-nums;
+}
+
+.ai-dt-card {
+    background: linear-gradient(145deg, rgba(19, 29, 36, 0.96), rgba(14, 24, 34, 0.96));
+    border: 1px solid rgba(56, 189, 248, 0.22);
+    border-radius: var(--radius-md);
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.ai-dt-card.is-live {
+    border-color: rgba(0, 168, 132, 0.65);
+    box-shadow: 0 4px 16px rgba(0, 168, 132, 0.14);
+}
+
+.ai-dt-now-playing {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+}
+
+.ai-dt-eq {
+    width: 28px;
+    height: 24px;
+    border-radius: 6px;
+    background: rgba(56, 189, 248, 0.1);
+    border: 1px solid rgba(56, 189, 248, 0.22);
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 2.5px;
+    padding: 4px 4px;
+    flex-shrink: 0;
+}
+
+.ai-dt-eq span {
+    width: 3px;
+    height: 4px;
+    border-radius: 2px;
+    background: var(--accent-cyan);
+    transition: height 0.2s ease;
+}
+
+.ai-dt-card.is-live .ai-dt-eq span {
+    background: var(--brand-emerald-hover);
+    animation: aiDtEqBar 0.9s infinite ease-in-out;
+}
+
+.ai-dt-card.is-live .ai-dt-eq span:nth-child(2) {
+    animation-delay: 0.2s;
+    animation-duration: 0.75s;
+}
+
+.ai-dt-card.is-live .ai-dt-eq span:nth-child(3) {
+    animation-delay: 0.4s;
+    animation-duration: 1.05s;
+}
+
+.ai-dt-card.is-live .ai-dt-eq span:nth-child(4) {
+    animation-delay: 0.15s;
+    animation-duration: 0.85s;
+}
+
+.ai-dt-track-meta {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    flex: 1;
+}
+
+.ai-dt-track-meta strong {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #ffffff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.ai-dt-track-meta span {
+    font-size: 0.68rem;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.ai-dt-style-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.ai-dt-style-pill {
+    padding: 3px 7px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    color: var(--text-secondary);
+    font-size: 0.65rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.ai-dt-style-pill:hover {
+    background: rgba(56, 189, 248, 0.14);
+    border-color: rgba(56, 189, 248, 0.4);
+    color: #e0f2fe;
+}
+
+.ai-dt-style-pill.active {
+    background: rgba(0, 168, 132, 0.2);
+    border-color: rgba(0, 168, 132, 0.55);
+    color: #6ee7b7;
+}
+
+.ai-dt-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.ai-dt-play-btn {
+    flex: 1;
+    padding: 7px 10px;
+    border-radius: 8px;
+    border: 1px solid rgba(0, 168, 132, 0.5);
+    background: linear-gradient(135deg, var(--brand-emerald), #047857);
+    color: #ffffff;
+    font-size: 0.74rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.16s ease;
+    white-space: nowrap;
+}
+
+.ai-dt-play-btn:hover {
+    background: linear-gradient(135deg, var(--brand-emerald-hover), #059669);
+    transform: translateY(-1px);
+}
+
+.ai-dt-card.is-live .ai-dt-play-btn {
+    background: linear-gradient(135deg, rgba(56, 189, 248, 0.24), rgba(0, 168, 132, 0.3));
+    border-color: rgba(56, 189, 248, 0.55);
+}
+
+.ai-dt-icon-btn {
+    padding: 7px 9px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: var(--text-primary);
+    font-size: 0.72rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    white-space: nowrap;
+}
+
+.ai-dt-icon-btn:hover {
+    background: rgba(255, 255, 255, 0.14);
+    border-color: rgba(255, 255, 255, 0.25);
+}
+
+/* Welcome Screen AI Downtempo Stream Banner */
+.welcome-ai-dt-banner {
+    margin-top: 13px;
+    padding: 12px 14px;
+    border-radius: var(--radius-md);
+    background: linear-gradient(135deg, rgba(56, 189, 248, 0.12) 0%, rgba(0, 168, 132, 0.14) 100%);
+    border: 1px solid rgba(56, 189, 248, 0.28);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.welcome-ai-dt-info {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    flex: 1;
+    min-width: 210px;
+}
+
+.welcome-ai-dt-eyebrow {
+    font-size: 0.65rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #7dd3fc;
+}
+
+.welcome-ai-dt-info strong {
+    font-size: 0.9rem;
+    color: #ffffff;
+}
+
+.welcome-ai-dt-info span:last-child {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    line-height: 1.35;
+}
+
+.welcome-ai-dt-btns {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    flex-wrap: wrap;
+}
+
+.btn-welcome-ai-dt-stream,
+.btn-welcome-ai-dt-drop {
+    padding: 8px 13px;
+    border-radius: 999px;
+    font-size: 0.77rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.16s ease;
+    white-space: nowrap;
+}
+
+.btn-welcome-ai-dt-stream {
+    background: linear-gradient(135deg, var(--brand-emerald), #0284c7);
+    border: 1px solid rgba(56, 189, 248, 0.45);
+    color: #ffffff;
+}
+
+.btn-welcome-ai-dt-stream:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(2, 132, 199, 0.35);
+}
+
+.btn-welcome-ai-dt-drop {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    color: var(--text-primary);
+}
+
+.btn-welcome-ai-dt-drop:hover {
+    background: rgba(255, 255, 255, 0.16);
+    border-color: var(--accent-cyan);
+    color: #ffffff;
+}
+
+/* AI Synth Badge Inside Chat Track Bubbles */
+.track-ai-synth-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.62rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    padding: 1px 6px;
+    border-radius: 4px;
+    background: rgba(56, 189, 248, 0.14);
+    border: 1px solid rgba(56, 189, 248, 0.32);
+    color: #7dd3fc;
+    flex-shrink: 0;
+}
+
+

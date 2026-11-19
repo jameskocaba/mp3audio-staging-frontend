@@ -29,6 +29,7 @@ function initAssistantApp() {
 
     // --- DOM Elements ---
     const chatMessages = document.getElementById('chatMessages');
+    const assistantStatusText = document.getElementById('assistantStatusText');
     const chatInput = document.getElementById('chatInput');
     const chatComposerForm = document.getElementById('chatComposerForm');
     const attachFileBtn = document.getElementById('attachFileBtn');
@@ -97,6 +98,18 @@ function initAssistantApp() {
     const playSavedCrateBtn = document.getElementById('playSavedCrateBtn');
     const exportSavedCrateBtn = document.getElementById('exportSavedCrateBtn');
 
+    // 24/7 Continuous AI Downtempo Stream Elements
+    const aiDowntempoSidebarCard = document.getElementById('aiDowntempoSidebarCard');
+    const aiDtLiveDot = document.getElementById('aiDtLiveDot');
+    const aiDtBpmPill = document.getElementById('aiDtBpmPill');
+    const aiDtTrackTitle = document.getElementById('aiDtTrackTitle');
+    const aiDtTrackSub = document.getElementById('aiDtTrackSub');
+    const aiDtPlayBtn = document.getElementById('aiDtPlayBtn');
+    const aiDtNextBtn = document.getElementById('aiDtNextBtn');
+    const aiDtChatMixBtn = document.getElementById('aiDtChatMixBtn');
+    const aiDtStylePills = document.getElementById('aiDtStylePills');
+    const headerAiDowntempoBtn = document.getElementById('headerAiDowntempoBtn');
+
     // Immediate early wiring for composer send button and inputs (guarantees responsiveness)
     const earlySendBtn = document.getElementById('sendMessageBtn');
     if (earlySendBtn) {
@@ -157,6 +170,611 @@ function initAssistantApp() {
     let currentQueue = [];
     let currentQueueIndex = -1;
     let activeBubbleId = null;
+
+    // --- 24/7 Continuous AI-Generated Downtempo Synthesis & Streaming Engine ---
+    const AI_DOWNTEMPO_SR = 22050;
+    const AI_WT_SIZE = 4096;
+    const AI_SIN_WT = new Float32Array(AI_WT_SIZE);
+    const AI_PAD_WT = new Float32Array(AI_WT_SIZE);
+    const AI_RHODES_WT = new Float32Array(AI_WT_SIZE);
+    for (let i = 0; i < AI_WT_SIZE; i++) {
+        const th = (i / AI_WT_SIZE) * Math.PI * 2;
+        AI_SIN_WT[i] = Math.sin(th);
+        AI_PAD_WT[i] = (Math.sin(th) + 0.36 * Math.sin(th * 2) + 0.16 * Math.sin(th * 3) + 0.06 * Math.sin(th * 4)) * 0.65;
+        AI_RHODES_WT[i] = (Math.sin(th) + 0.34 * Math.sin(th * 2) + 0.22 * Math.sin(th * 3) + 0.10 * Math.sin(th * 4)) * 0.68;
+    }
+
+    const AI_DOWNTEMPO_STYLES = {
+        midnight_dub: {
+            key: 'midnight_dub',
+            label: 'Midnight Analog Dub',
+            shortLabel: 'Midnight Dub',
+            bpmMin: 72,
+            bpmMax: 76,
+            palette: ['#0b1324', '#0284c7', '#00a884'],
+            cutoffBase: 0.12,
+            cutoffMod: 0.05,
+            swingRatio: 0.12,
+            padMix: 0.072,
+            rhodesMix: 0.068,
+            subMix: 0.31,
+            kickMix: 0.44,
+            rimMix: 0.18,
+            hatMix: 0.075,
+            vinylMix: 0.012,
+            delayFb: 0.50,
+            rimDelaySend: 0.48
+        },
+        kyoto_lofi: {
+            key: 'kyoto_lofi',
+            label: 'Rainy Kyoto Lo-Fi',
+            shortLabel: 'Kyoto Lo-Fi',
+            bpmMin: 76,
+            bpmMax: 82,
+            palette: ['#1a1638', '#6366f1', '#14b8a6'],
+            cutoffBase: 0.14,
+            cutoffMod: 0.04,
+            swingRatio: 0.17,
+            padMix: 0.062,
+            rhodesMix: 0.082,
+            subMix: 0.26,
+            kickMix: 0.39,
+            rimMix: 0.16,
+            hatMix: 0.095,
+            vinylMix: 0.018,
+            delayFb: 0.40,
+            rimDelaySend: 0.22
+        },
+        cosmic_drift: {
+            key: 'cosmic_drift',
+            label: 'Cosmic Ambient Drift',
+            shortLabel: 'Cosmic Drift',
+            bpmMin: 66,
+            bpmMax: 72,
+            palette: ['#070b14', '#38bdf8', '#8b5cf6'],
+            cutoffBase: 0.16,
+            cutoffMod: 0.07,
+            swingRatio: 0.07,
+            padMix: 0.092,
+            rhodesMix: 0.064,
+            subMix: 0.24,
+            kickMix: 0.28,
+            rimMix: 0.09,
+            hatMix: 0.055,
+            vinylMix: 0.008,
+            delayFb: 0.56,
+            rimDelaySend: 0.35
+        },
+        balearic_sunset: {
+            key: 'balearic_sunset',
+            label: 'Balearic Sunset Chillout',
+            shortLabel: 'Balearic Sunset',
+            bpmMin: 82,
+            bpmMax: 86,
+            palette: ['#26120c', '#f97316', '#06b6d4'],
+            cutoffBase: 0.19,
+            cutoffMod: 0.06,
+            swingRatio: 0.10,
+            padMix: 0.068,
+            rhodesMix: 0.078,
+            subMix: 0.28,
+            kickMix: 0.38,
+            rimMix: 0.13,
+            hatMix: 0.105,
+            vinylMix: 0.009,
+            delayFb: 0.44,
+            rimDelaySend: 0.25
+        },
+        velvet_triphop: {
+            key: 'velvet_triphop',
+            label: 'Velvet Trip-Hop Shadow',
+            shortLabel: 'Trip-Hop',
+            bpmMin: 70,
+            bpmMax: 74,
+            palette: ['#140d1c', '#a855f7', '#ec4899'],
+            cutoffBase: 0.11,
+            cutoffMod: 0.045,
+            swingRatio: 0.16,
+            padMix: 0.075,
+            rhodesMix: 0.060,
+            subMix: 0.34,
+            kickMix: 0.46,
+            rimMix: 0.20,
+            hatMix: 0.085,
+            vinylMix: 0.016,
+            delayFb: 0.48,
+            rimDelaySend: 0.42
+        }
+    };
+
+    const AI_DOWNTEMPO_KEYS = [
+        { name: 'Dm', root: 50 },
+        { name: 'Am', root: 57 },
+        { name: 'F#m', root: 54 },
+        { name: 'Cm', root: 48 },
+        { name: 'Gm', root: 55 },
+        { name: 'Em', root: 52 }
+    ];
+
+    const AI_DOWNTEMPO_PROGRESSIONS = [
+        [[0, 3, 7, 10], [-5, -2, 2, 5], [-4, 0, 3, 7], [-7, -3, 0, 3]],
+        [[0, 3, 7, 14], [-2, 2, 5, 9], [-4, 0, 3, 10], [-5, -1, 2, 7]],
+        [[0, 3, 7, 10], [5, 8, 12, 15], [3, 7, 10, 14], [-2, 2, 5, 9]],
+        [[0, 3, 7, 10], [-4, 0, 3, 7], [5, 8, 12, 15], [7, 10, 14, 17]]
+    ];
+
+    const AI_DT_TITLE_PREFIXES = [
+        'Velvet', 'Midnight', 'Sub-Harmonic', 'Obsidian', 'Solaris', 'Amber',
+        'Drifting', 'Neon', 'Rainy', 'Solstice', 'Lunar', 'Distant',
+        'Satin', 'Nocturnal', 'Pacific', 'Hologram', 'Analog', 'Echoed'
+    ];
+    const AI_DT_TITLE_NOUNS = [
+        'Horizon', 'Over Shibuya', 'Rain', 'Tape Loop', 'Slow Wave', 'Echo',
+        'Mirage', 'Tide', 'Monolith', 'Avenue', 'Vapor', 'Reverie',
+        'Pulse', 'Static', 'Drift', 'Lagoon', 'Silhouette', 'Atmosphere'
+    ];
+    const AI_DT_TITLE_TAGS = [
+        '', '', '', ' // 03:00 AM', ' (Tape Dub)', ' (Slow Edit)', ' // Vol. II', ' (Late Cut)'
+    ];
+
+    const aiDowntempoBlobCache = new Map();
+    let currentAiDowntempoStyle = localStorage.getItem('mp3audio_ai_dt_style') || 'midnight_dub';
+    if (!AI_DOWNTEMPO_STYLES[currentAiDowntempoStyle]) currentAiDowntempoStyle = 'midnight_dub';
+    let aiDowntempoStreamActive = false;
+    let aiDowntempoTrackSeq = 1;
+    let lastAiDowntempoTrack = null;
+    let isPrebufferingNextAiTrack = false;
+
+    function mulberry32(seed) {
+        let a = seed >>> 0;
+        return function () {
+            a = (a + 0x6D2B79F5) | 0;
+            let t = Math.imul(a ^ (a >>> 15), 1 | a);
+            t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+            return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+        };
+    }
+
+    function buildAiDowntempoArtworkDataUri(meta) {
+        const style = AI_DOWNTEMPO_STYLES[meta.ai_style] || AI_DOWNTEMPO_STYLES.midnight_dub;
+        const [c0, c1, c2] = style.palette;
+        const r = mulberry32(meta.ai_seed || 101);
+        const cx = Math.round(90 + r() * 120);
+        const cy = Math.round(80 + r() * 120);
+        const radius = Math.round(65 + r() * 55);
+        const titleShort = escapeHtml((meta.title || 'Downtempo Stream').slice(0, 22));
+        const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300">`
+            + `<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1">`
+            + `<stop offset="0%" stop-color="${c0}"/><stop offset="55%" stop-color="${c1}" stop-opacity="0.72"/>`
+            + `<stop offset="100%" stop-color="${c2}" stop-opacity="0.88"/></linearGradient></defs>`
+            + `<rect width="300" height="300" fill="url(#g)"/>`
+            + `<circle cx="${cx}" cy="${cy}" r="${radius}" fill="none" stroke="rgba(255,255,255,0.22)" stroke-width="2"/>`
+            + `<circle cx="${cx}" cy="${cy}" r="${Math.round(radius * 0.62)}" fill="none" stroke="rgba(255,255,255,0.14)" stroke-width="1.5"/>`
+            + `<path d="M0 222 Q 75 ${195 + Math.round(r() * 35)} 150 220 T 300 214 L 300 300 L 0 300 Z" fill="rgba(11,20,26,0.52)"/>`
+            + `<text x="20" y="34" fill="rgba(255,255,255,0.85)" font-family="sans-serif" font-size="13" font-weight="800" letter-spacing="1.5">AI DOWNTEMPO</text>`
+            + `<text x="20" y="256" fill="#ffffff" font-family="sans-serif" font-size="17" font-weight="700">${titleShort}</text>`
+            + `<text x="20" y="278" fill="rgba(255,255,255,0.78)" font-family="sans-serif" font-size="12" font-weight="600">${meta.bpm} BPM &bull; ${meta.musical_key}</text>`
+            + `</svg>`;
+        return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+    }
+
+    function createAiDowntempoTrackMeta(index = 1, styleKey = currentAiDowntempoStyle, customSeed = null) {
+        const style = AI_DOWNTEMPO_STYLES[styleKey] || AI_DOWNTEMPO_STYLES.midnight_dub;
+        const seq = aiDowntempoTrackSeq++;
+        const seed = (typeof customSeed === 'number' && !isNaN(customSeed))
+            ? (customSeed >>> 0)
+            : (((Date.now() & 0x0FFFFFFF) ^ Math.imul(seq, 2654435761) ^ Math.floor(Math.random() * 1048576)) >>> 0);
+        const rng = mulberry32(seed);
+
+        const pIdx = Math.floor(rng() * AI_DT_TITLE_PREFIXES.length);
+        const nIdx = Math.floor(rng() * AI_DT_TITLE_NOUNS.length);
+        const tIdx = Math.floor(rng() * AI_DT_TITLE_TAGS.length);
+        const title = `${AI_DT_TITLE_PREFIXES[pIdx]} ${AI_DT_TITLE_NOUNS[nIdx]}${AI_DT_TITLE_TAGS[tIdx]}`;
+
+        const bpm = style.bpmMin + Math.floor(rng() * (style.bpmMax - style.bpmMin + 1));
+        const keyObj = AI_DOWNTEMPO_KEYS[Math.floor(rng() * AI_DOWNTEMPO_KEYS.length)];
+        const beatSec = 60 / bpm;
+        const stepBase = ((beatSec / 4) * AI_DOWNTEMPO_SR) | 0;
+
+        // Align track length to 4-bar phrases inside 72–92s
+        let bars = 24;
+        for (const candidateBars of [20, 24, 28, 32]) {
+            const sec = Math.round((candidateBars * 16 * stepBase) / AI_DOWNTEMPO_SR);
+            if (sec >= 72 && sec <= 92) {
+                bars = candidateBars;
+                if (rng() < 0.55) break;
+            }
+        }
+        const totalSamples = bars * 16 * stepBase;
+        const durationSec = Math.max(72, Math.min(92, Math.round(totalSamples / AI_DOWNTEMPO_SR)));
+        const artist = 'MP3aud.io Neural Synth';
+        const album = `24/7 AI Downtempo Stream • ${style.label}`;
+        const stLinks = makeStreamingUrls(`${style.label} downtempo`, 'downtempo chill');
+
+        const meta = {
+            index,
+            title,
+            artist,
+            album,
+            year: '2026',
+            genre: 'AI Downtempo',
+            duration: formatTime(durationSec),
+            duration_sec: durationSec,
+            bpm,
+            musical_key: keyObj.name,
+            ai_root_midi: keyObj.root,
+            ai_bars: bars,
+            ai_seed: seed,
+            ai_style: style.key,
+            is_ai_generated: true,
+            preview_url: '',
+            artwork_url: '',
+            search_query: `ytsearch1:${style.label} downtempo ambient mix`,
+            apple_music_url: stLinks.apple_music,
+            spotify_url: stLinks.spotify,
+            youtube_music_url: stLinks.youtube_music,
+            bubbleId: `ai_dt_${Date.now()}_${index}_${Math.random().toString(36).slice(2, 6)}`
+        };
+        meta.artwork_url = buildAiDowntempoArtworkDataUri(meta);
+        return meta;
+    }
+
+    function synthesizeAiDowntempoWavUrl(track) {
+        if (!track) return '';
+        const seed = (track.ai_seed || 104729) >>> 0;
+        if (aiDowntempoBlobCache.has(seed)) {
+            const cachedUrl = aiDowntempoBlobCache.get(seed);
+            aiDowntempoBlobCache.delete(seed);
+            aiDowntempoBlobCache.set(seed, cachedUrl);
+            track.preview_url = cachedUrl;
+            return cachedUrl;
+        }
+
+        const SR = AI_DOWNTEMPO_SR;
+        const style = AI_DOWNTEMPO_STYLES[track.ai_style] || AI_DOWNTEMPO_STYLES.midnight_dub;
+        const bpm = track.bpm || 74;
+        const rootMidi = track.ai_root_midi || 50;
+        const bars = track.ai_bars || 24;
+        const rng = mulberry32(seed);
+        const prog = AI_DOWNTEMPO_PROGRESSIONS[Math.floor(rng() * AI_DOWNTEMPO_PROGRESSIONS.length)];
+
+        const beatSec = 60 / bpm;
+        const stepBase = ((beatSec / 4) * SR) | 0;
+        const swingShift = (stepBase * style.swingRatio) | 0;
+        const totalSteps = bars * 16;
+        const totalSamples = totalSteps * stepBase;
+
+        const dLen = Math.max(1024, ((beatSec * 0.75) * SR) | 0);
+        const delayL = new Float32Array(dLen);
+        const delayR = new Float32Array(dLen);
+
+        const wavBytes = new ArrayBuffer(44 + totalSamples * 4);
+        const dv = new DataView(wavBytes);
+        const writeStr = (off, s) => { for (let k = 0; k < s.length; k++) dv.setUint8(off + k, s.charCodeAt(k)); };
+        writeStr(0, 'RIFF');
+        dv.setUint32(4, 36 + totalSamples * 4, true);
+        writeStr(8, 'WAVE');
+        writeStr(12, 'fmt ');
+        dv.setUint32(16, 16, true);
+        dv.setUint16(20, 1, true);
+        dv.setUint16(22, 2, true);
+        dv.setUint32(24, SR, true);
+        dv.setUint32(28, SR * 4, true);
+        dv.setUint16(32, 4, true);
+        dv.setUint16(34, 16, true);
+        writeStr(36, 'data');
+        dv.setUint32(40, totalSamples * 4, true);
+
+        const pcm = new Int16Array(wavBytes, 44);
+        const midiToFreq = (m) => 440 * Math.pow(2, (m - 69) / 12);
+        const freqToInc = (f) => ((f / SR) * 4294967296) | 0;
+
+        let pL0 = 0, pL1 = 0, pL2 = 0, pL3 = 0, pR0 = 0, pR1 = 0, pR2 = 0, pR3 = 0;
+        let iL0 = 0, iL1 = 0, iL2 = 0, iL3 = 0, iR0 = 0, iR1 = 0, iR2 = 0, iR3 = 0;
+        let r0 = 0, r1 = 0, r2 = 0, ri0 = 0, ri1 = 0, ri2 = 0, rhEnv = 0;
+        let bPh = 0, bInc = 0, mPh = 0, mInc = 0, mEnv = 0, mPan = 0.5;
+        let kEnv = 0, kPh = 0, rimEnv = 0, rimPh = 0, hEnv = 0, duck = 1.0;
+        let lfoPh = 0, lpL = 0, lpR = 0, dlpL = 0, dlpR = 0, dIdx = 0, vLp = 0;
+
+        const lfoInc = freqToInc(0.09 + rng() * 0.06);
+        const rimInc = freqToInc(360 + rng() * 80);
+        const fadeIn = (2.0 * SR) | 0;
+        const fadeOut = (3.0 * SR) | 0;
+        const fadeOutStart = totalSamples - fadeOut;
+        let s = (seed ^ 0xA5A5A5A5) | 0;
+        let pos = 0;
+
+        const padMix = style.padMix;
+        const rhodesMix = style.rhodesMix;
+        const subMix = style.subMix;
+        const kickMix = style.kickMix;
+        const rimMix = style.rimMix;
+        const hatMix = style.hatMix;
+        const vinylMix = style.vinylMix;
+        const delayFb = style.delayFb;
+        const rimDelaySend = style.rimDelaySend;
+        const cutoffBase = style.cutoffBase;
+        const cutoffMod = style.cutoffMod;
+
+        let curChord = prog[0];
+        for (let stIdx = 0; stIdx < totalSteps; stIdx++) {
+            const st = stIdx & 15;
+            if (st === 0) {
+                curChord = prog[(stIdx >> 4) & 3];
+                const f0 = midiToFreq(rootMidi + curChord[0]);
+                const f1 = midiToFreq(rootMidi + curChord[1]);
+                const f2 = midiToFreq(rootMidi + curChord[2]);
+                const f3 = midiToFreq(rootMidi + curChord[3]);
+                iL0 = freqToInc(f0 * 0.9977); iR0 = freqToInc(f0 * 1.0023);
+                iL1 = freqToInc(f1 * 0.9977); iR1 = freqToInc(f1 * 1.0023);
+                iL2 = freqToInc(f2 * 0.9977); iR2 = freqToInc(f2 * 1.0023);
+                iL3 = freqToInc(f3 * 0.9977); iR3 = freqToInc(f3 * 1.0023);
+                ri0 = freqToInc(f1); ri1 = freqToInc(f2); ri2 = freqToInc(f3);
+                bInc = freqToInc(midiToFreq(rootMidi + curChord[0] - 24));
+            } else if (st === 8 && rng() < 0.35) {
+                bInc = freqToInc(midiToFreq(rootMidi + curChord[0] - 17));
+            }
+
+            s = (Math.imul(s, 1664525) + 1013904223) | 0;
+            const r01 = (s >>> 0) / 4294967296;
+
+            if (st === 0 || st === 10 || (st === 6 && r01 < 0.42)) {
+                kEnv = 1.0; kPh = 0; duck = 0.20;
+            }
+            if (st === 4 || st === 12 || (st === 15 && r01 < 0.25)) {
+                rimEnv = (st === 15) ? 0.45 : 0.88; rimPh = 0;
+            }
+            if ((st & 1) === 0 || r01 < 0.55) {
+                hEnv = ((st & 3) === 2) ? 0.52 : 0.22;
+            }
+            if (st === 0 || st === 6 || (st === 11 && r01 < 0.65)) {
+                rhEnv = (st === 0) ? 0.92 : 0.58;
+            }
+            if (r01 < 0.34 && ((st & 1) === 0)) {
+                const noteOffset = curChord[(s >>> 16) & 3] + (r01 < 0.14 ? 24 : 12);
+                mInc = freqToInc(midiToFreq(rootMidi + noteOffset));
+                mEnv = 0.68;
+                mPan = 0.22 + r01 * 0.56;
+            }
+
+            const len = ((st & 1) === 0) ? (stepBase + swingShift) : (stepBase - swingShift);
+            const end = pos + len;
+            for (let i = pos; i < end; i++) {
+                s = (Math.imul(s, 1664525) + 1013904223) | 0;
+                const rn = (s >> 16) * 0.000030517578125;
+                vLp += 0.12 * (rn - vLp);
+                lfoPh = (lfoPh + lfoInc) | 0;
+                const lfo = AI_SIN_WT[lfoPh >>> 20];
+
+                pL0 = (pL0 + iL0) | 0; pL1 = (pL1 + iL1) | 0; pL2 = (pL2 + iL2) | 0; pL3 = (pL3 + iL3) | 0;
+                pR0 = (pR0 + iR0) | 0; pR1 = (pR1 + iR1) | 0; pR2 = (pR2 + iR2) | 0; pR3 = (pR3 + iR3) | 0;
+                const padL = (AI_PAD_WT[pL0 >>> 20] + AI_PAD_WT[pL1 >>> 20] + AI_PAD_WT[pL2 >>> 20] + AI_PAD_WT[pL3 >>> 20]) * padMix;
+                const padR = (AI_PAD_WT[pR0 >>> 20] + AI_PAD_WT[pR1 >>> 20] + AI_PAD_WT[pR2 >>> 20] + AI_PAD_WT[pR3 >>> 20]) * padMix;
+
+                let rhS = 0;
+                if (rhEnv > 0.004) {
+                    r0 = (r0 + ri0) | 0; r1 = (r1 + ri1) | 0; r2 = (r2 + ri2) | 0;
+                    rhS = (AI_RHODES_WT[r0 >>> 20] + AI_RHODES_WT[r1 >>> 20] + AI_RHODES_WT[r2 >>> 20]) * rhEnv * rhodesMix;
+                    rhEnv *= 0.99962;
+                }
+
+                let melS = 0;
+                if (mEnv > 0.004) {
+                    mPh = (mPh + mInc) | 0;
+                    melS = (AI_SIN_WT[mPh >>> 20] * 0.8 + AI_SIN_WT[(mPh * 2) >>> 20] * 0.2 * mEnv) * mEnv * 0.105;
+                    mEnv *= 0.99945;
+                }
+
+                bPh = (bPh + bInc) | 0;
+                duck += (1.0 - duck) * 0.00042;
+                const sub = (AI_SIN_WT[bPh >>> 20] + 0.18 * AI_SIN_WT[(bPh * 2) >>> 20]) * subMix * duck;
+
+                let kick = 0;
+                if (kEnv > 0.002) {
+                    kPh = (kPh + (((((44 + 90 * kEnv * kEnv) / SR) * 4294967296) | 0))) | 0;
+                    kick = AI_SIN_WT[kPh >>> 20] * kEnv * kickMix;
+                    kEnv *= 0.9986;
+                }
+                let rim = 0;
+                if (rimEnv > 0.002) {
+                    rimPh = (rimPh + rimInc) | 0;
+                    rim = (AI_SIN_WT[rimPh >>> 20] * 0.62 + rn * 0.38) * rimEnv * rimMix;
+                    rimEnv *= 0.9945;
+                }
+                let hat = 0;
+                if (hEnv > 0.002) {
+                    hat = (rn - vLp) * hEnv * hatMix;
+                    hEnv *= 0.989;
+                }
+
+                const dOutL = delayL[dIdx];
+                const dOutR = delayR[dIdx];
+                dlpL += 0.24 * (rhS + melS * (1 - mPan) + rim * rimDelaySend + dOutR * delayFb - dlpL);
+                dlpR += 0.24 * (rhS + melS * mPan + rim * (rimDelaySend * 0.55) + dOutL * delayFb - dlpR);
+                delayL[dIdx] = dlpL;
+                delayR[dIdx] = dlpR;
+                if (++dIdx === dLen) dIdx = 0;
+
+                const cutoff = cutoffBase + cutoffMod * lfo;
+                lpL += cutoff * (padL + dOutL * 0.44 + rhS * 0.78 + melS * (1 - mPan) - lpL);
+                lpR += cutoff * (padR + dOutR * 0.44 + rhS * 0.78 + melS * mPan - lpR);
+
+                let envM = 1.0;
+                if (i < fadeIn) envM = i / fadeIn;
+                else if (i > fadeOutStart) envM = (totalSamples - i) / fadeOut;
+
+                const mL = (lpL + sub + kick + rim * 0.72 + hat * 0.8 + vLp * vinylMix) * envM;
+                const mR = (lpR + sub + kick + rim * 0.80 + hat * 0.65 + vLp * vinylMix) * envM;
+                const j = i << 1;
+                pcm[j] = ((mL / (1 + 0.32 * (mL < 0 ? -mL : mL))) * 29500) | 0;
+                pcm[j + 1] = ((mR / (1 + 0.32 * (mR < 0 ? -mR : mR))) * 29500) | 0;
+            }
+            pos = end;
+        }
+
+        while (aiDowntempoBlobCache.size >= 16) {
+            const oldestKey = aiDowntempoBlobCache.keys().next().value;
+            const oldestUrl = aiDowntempoBlobCache.get(oldestKey);
+            aiDowntempoBlobCache.delete(oldestKey);
+            if (oldestUrl && oldestUrl !== globalAudio.src) {
+                try { URL.revokeObjectURL(oldestUrl); } catch (_) { }
+            }
+        }
+
+        const blob = new Blob([wavBytes], { type: 'audio/wav' });
+        const blobUrl = URL.createObjectURL(blob);
+        aiDowntempoBlobCache.set(seed, blobUrl);
+        track.preview_url = blobUrl;
+        return blobUrl;
+    }
+
+    function syncAiDowntempoUi() {
+        const activeStyleObj = AI_DOWNTEMPO_STYLES[currentAiDowntempoStyle] || AI_DOWNTEMPO_STYLES.midnight_dub;
+        const curTrack = (currentQueue && currentQueueIndex >= 0) ? currentQueue[currentQueueIndex] : null;
+        const isPlayingAi = Boolean(curTrack && curTrack.is_ai_generated && !globalAudio.paused && aiDowntempoStreamActive);
+        const displayTrack = (curTrack && curTrack.is_ai_generated) ? curTrack : lastAiDowntempoTrack;
+
+        if (aiDowntempoSidebarCard) {
+            aiDowntempoSidebarCard.classList.toggle('is-live', isPlayingAi);
+        }
+        if (aiDtLiveDot) {
+            aiDtLiveDot.classList.toggle('is-live', isPlayingAi);
+        }
+        if (headerAiDowntempoBtn) {
+            headerAiDowntempoBtn.classList.toggle('is-live', isPlayingAi);
+            const labelSpan = headerAiDowntempoBtn.querySelector('.ai-dt-header-label');
+            if (labelSpan) {
+                labelSpan.textContent = isPlayingAi ? 'AI Downtempo: LIVE' : 'AI Downtempo';
+            }
+        }
+        if (aiDtPlayBtn) {
+            aiDtPlayBtn.textContent = isPlayingAi ? '⏸ Streaming' : '▶ Stream Live';
+        }
+        if (aiDtTrackTitle) {
+            aiDtTrackTitle.textContent = displayTrack ? displayTrack.title : activeStyleObj.label;
+        }
+        if (aiDtTrackSub) {
+            aiDtTrackSub.textContent = isPlayingAi
+                ? `Live AI Synth • ${activeStyleObj.shortLabel}`
+                : (displayTrack ? `Paused • ${activeStyleObj.shortLabel}` : '24/7 Generative Web Audio Stream');
+        }
+        if (aiDtBpmPill) {
+            aiDtBpmPill.textContent = displayTrack
+                ? `${displayTrack.bpm || 74} BPM • ${displayTrack.musical_key || 'Dm'}`
+                : `${activeStyleObj.bpmMin}–${activeStyleObj.bpmMax} BPM`;
+        }
+        if (aiDtStylePills) {
+            aiDtStylePills.querySelectorAll('.ai-dt-style-pill[data-ai-style]').forEach(pill => {
+                pill.classList.toggle('active', pill.getAttribute('data-ai-style') === currentAiDowntempoStyle);
+            });
+        }
+    }
+
+    function startContinuousAiDowntempoStream(styleKey = currentAiDowntempoStyle, opts = {}) {
+        if (styleKey && AI_DOWNTEMPO_STYLES[styleKey]) {
+            currentAiDowntempoStyle = styleKey;
+            try { localStorage.setItem('mp3audio_ai_dt_style', currentAiDowntempoStyle); } catch (_) { }
+        }
+        const curTrack = (currentQueue && currentQueueIndex >= 0) ? currentQueue[currentQueueIndex] : null;
+        if (!opts.forceNew && curTrack && curTrack.is_ai_generated && curTrack.ai_style === currentAiDowntempoStyle && aiDowntempoStreamActive) {
+            if (globalAudio.paused) {
+                globalAudio.play().catch(() => { });
+            } else {
+                globalAudio.pause();
+            }
+            syncAiDowntempoUi();
+            return;
+        }
+
+        aiDowntempoStreamActive = true;
+        const batch = [];
+        for (let i = 0; i < 4; i++) {
+            batch.push(createAiDowntempoTrackMeta(i + 1, currentAiDowntempoStyle));
+        }
+        lastAiDowntempoTrack = batch[0];
+        playTrackFromQueue(batch, 0);
+        syncAiDowntempoUi();
+        const styleObj = AI_DOWNTEMPO_STYLES[currentAiDowntempoStyle] || AI_DOWNTEMPO_STYLES.midnight_dub;
+        showToast(`🌊 Streaming 24/7 AI Downtempo (${styleObj.label})`, 'success');
+    }
+
+    function generateAiDowntempoPlaylistPayload(styleKey = currentAiDowntempoStyle, customTitle = null) {
+        if (styleKey && AI_DOWNTEMPO_STYLES[styleKey]) {
+            currentAiDowntempoStyle = styleKey;
+            try { localStorage.setItem('mp3audio_ai_dt_style', currentAiDowntempoStyle); } catch (_) { }
+        }
+        const styleObj = AI_DOWNTEMPO_STYLES[currentAiDowntempoStyle] || AI_DOWNTEMPO_STYLES.midnight_dub;
+        const tracks = [];
+        for (let i = 0; i < 10; i++) {
+            tracks.push(createAiDowntempoTrackMeta(i + 1, currentAiDowntempoStyle));
+        }
+        lastAiDowntempoTrack = tracks[0];
+        assistantMemory.lastTracks = tracks;
+        assistantMemory.lastArtist = 'MP3aud.io Neural Synth';
+        assistantMemory.lastVibeKey = 'downtempo';
+        assistantMemory.lastPlaylistTitle = customTitle || `24/7 AI Downtempo: ${styleObj.label}`;
+        assistantMemory.turnCount++;
+
+        return {
+            success: true,
+            mode: 'playlist',
+            playlist_title: assistantMemory.lastPlaylistTitle,
+            playlist_vibe: `Live Generative Stereo Synth • ${styleObj.bpmMin}–${styleObj.bpmMax} BPM • Infinite Stream`,
+            reply: `🌊 **24/7 AI Downtempo Radio (${styleObj.label})** is locked in! I procedurally synthesized **10 original downtempo tracks** with warm analog pads, tape-delayed Rhodes chords, deep sub-bass, and swung drums. Hit **▶ Play** on any track or keep listening continuously:`,
+            follow_up_note: `Every track is generated on-demand in stereo right inside your browser and pre-buffers seamlessly into the next one forever.`,
+            suggestions: [
+                `🌊 Generate 10 More AI Downtempo Tracks`,
+                `🌙 Switch to Midnight Analog Dub`,
+                `🌧️ Switch to Rainy Kyoto Lo-Fi`,
+                `🪐 Switch to Cosmic Ambient Drift`
+            ],
+            tracks
+        };
+    }
+
+    if (aiDtPlayBtn) {
+        aiDtPlayBtn.addEventListener('click', () => {
+            startContinuousAiDowntempoStream(currentAiDowntempoStyle, { forceNew: false });
+        });
+    }
+    if (headerAiDowntempoBtn) {
+        headerAiDowntempoBtn.addEventListener('click', () => {
+            startContinuousAiDowntempoStream(currentAiDowntempoStyle, { forceNew: false });
+        });
+    }
+    if (aiDtNextBtn) {
+        aiDtNextBtn.addEventListener('click', () => {
+            if (aiDowntempoStreamActive && currentQueue && currentQueueIndex + 1 < currentQueue.length && currentQueue[currentQueueIndex + 1]?.is_ai_generated) {
+                playTrackFromQueue(currentQueue, currentQueueIndex + 1);
+            } else {
+                startContinuousAiDowntempoStream(currentAiDowntempoStyle, { forceNew: true });
+            }
+        });
+    }
+    if (aiDtChatMixBtn) {
+        aiDtChatMixBtn.addEventListener('click', () => {
+            toggleSidebar(false);
+            const styleObj = AI_DOWNTEMPO_STYLES[currentAiDowntempoStyle] || AI_DOWNTEMPO_STYLES.midnight_dub;
+            sendUserMessage(`Stream continuous AI generated downtempo (${styleObj.label})`);
+        });
+    }
+    if (aiDtStylePills) {
+        aiDtStylePills.querySelectorAll('.ai-dt-style-pill[data-ai-style]').forEach(pill => {
+            pill.addEventListener('click', () => {
+                const nextStyle = pill.getAttribute('data-ai-style');
+                if (!nextStyle || !AI_DOWNTEMPO_STYLES[nextStyle]) return;
+                currentAiDowntempoStyle = nextStyle;
+                try { localStorage.setItem('mp3audio_ai_dt_style', currentAiDowntempoStyle); } catch (_) { }
+                if (aiDowntempoStreamActive && !globalAudio.paused) {
+                    startContinuousAiDowntempoStream(currentAiDowntempoStyle, { forceNew: true });
+                } else {
+                    lastAiDowntempoTrack = null;
+                    syncAiDowntempoUi();
+                    showToast(`Selected AI Downtempo style: ${AI_DOWNTEMPO_STYLES[nextStyle].label}`, 'info');
+                }
+            });
+        });
+    }
 
     // --- Toast Notification Helper ---
     function showToast(message, type = 'info') {
@@ -378,8 +996,15 @@ function initAssistantApp() {
                 year: track.year || '',
                 duration: track.duration || '3:30',
                 duration_sec: track.duration_sec || 210,
-                preview_url: track.preview_url || '',
+                preview_url: track.is_ai_generated ? '' : (track.preview_url || ''),
                 artwork_url: track.artwork_url || 'favicon.png',
+                is_ai_generated: Boolean(track.is_ai_generated),
+                bpm: track.bpm || undefined,
+                musical_key: track.musical_key || undefined,
+                ai_seed: track.ai_seed || undefined,
+                ai_style: track.ai_style || undefined,
+                ai_root_midi: track.ai_root_midi || undefined,
+                ai_bars: track.ai_bars || undefined,
                 bubbleId: `crate_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`
             });
             savedCrateTracks = savedCrateTracks.slice(0, 100);
@@ -410,6 +1035,9 @@ function initAssistantApp() {
         const numStr = (idx + 1) < 10 ? `0${idx + 1}` : `${idx + 1}`;
         const crateKey = getCrateTrackId(t);
         const saved = isTrackInCrate(t);
+        const aiBadgeHtml = t.is_ai_generated
+            ? `<span class="track-ai-synth-badge">🌊 AI SYNTH &bull; ${escapeHtml(String(t.bpm || 74))} BPM &bull; ${escapeHtml(t.musical_key || 'Dm')}</span>`
+            : '';
         return `
             <div class="track-audio-bubble" data-bubble-id="${escapeHtml(t.bubbleId)}" data-track-idx="${idx}">
                 <span class="track-index-num">${numStr}</span>
@@ -423,6 +1051,7 @@ function initAssistantApp() {
                         <span class="track-duration-badge">${escapeHtml(t.duration || '3:30')}</span>
                     </div>
                     <div class="track-sub-line">
+                        ${aiBadgeHtml}
                         <span>${escapeHtml(subMeta)}</span>
                     </div>
                     <div class="track-waveform-row">
@@ -508,6 +1137,7 @@ function initAssistantApp() {
 
     function buildWelcomeScreenHtml() {
         const vibePrompts = [
+            { label: "🌊 24/7 AI Downtempo", prompt: "Stream continuous AI generated downtempo tracks" },
             { label: "🌙 Late-Night Synthwave", prompt: "Curate a 10-track late-night synthwave drive playlist" },
             { label: "🔥 90s Hip-Hop Classics", prompt: "Build a 90s hip-hop classics playlist" },
             { label: "🎸 70s Road-Trip Rock", prompt: "Give me a 70s classic rock road-trip mix" },
@@ -536,6 +1166,17 @@ function initAssistantApp() {
                         <span class="welcome-vibe-label">⚡ 1-Tap Vibe Starters</span>
                         <div class="welcome-vibe-grid">${pillsHtml}</div>
                     </div>
+                    <div class="welcome-ai-dt-banner">
+                        <div class="welcome-ai-dt-info">
+                            <span class="welcome-ai-dt-eyebrow">🌊 24/7 LIVE GENERATIVE RADIO</span>
+                            <strong>Continuous AI-Generated Downtempo Stream</strong>
+                            <span>Real-time stereo analog pads, Rhodes chords, sub-bass &amp; swung beats synthesized endlessly in your browser.</span>
+                        </div>
+                        <div class="welcome-ai-dt-btns">
+                            <button type="button" class="btn-welcome-ai-dt-stream">▶ Stream Downtempo Live</button>
+                            <button type="button" class="btn-welcome-ai-dt-drop">🎛️ Drop 10 AI Tracks</button>
+                        </div>
+                    </div>
                     <div class="welcome-starter-tracks-box">
                         <div class="welcome-starter-header">
                             <span class="welcome-vibe-label">🔥 Instant Featured Mix — Tap Play</span>
@@ -558,6 +1199,21 @@ function initAssistantApp() {
                 if (promptText) sendUserMessage(promptText);
             });
         });
+
+        const welcomeStreamBtn = rootEl.querySelector('.btn-welcome-ai-dt-stream');
+        if (welcomeStreamBtn && !welcomeStreamBtn.dataset.wired) {
+            welcomeStreamBtn.dataset.wired = '1';
+            welcomeStreamBtn.addEventListener('click', () => {
+                startContinuousAiDowntempoStream(currentAiDowntempoStyle, { forceNew: true });
+            });
+        }
+        const welcomeDropBtn = rootEl.querySelector('.btn-welcome-ai-dt-drop');
+        if (welcomeDropBtn && !welcomeDropBtn.dataset.wired) {
+            welcomeDropBtn.dataset.wired = '1';
+            welcomeDropBtn.addEventListener('click', () => {
+                sendUserMessage('Stream continuous AI generated downtempo tracks');
+            });
+        }
 
         const starterContainer = rootEl.querySelector('#welcomeStarterTracks');
         if (starterContainer) {
@@ -1211,6 +1867,26 @@ function initAssistantApp() {
                 { title: "Tek It", artist: "Cafune", album: "Running", year: "2022", duration: "3:12", duration_sec: 192 }
             ]
         },
+        downtempo: {
+            title: "Midnight Downtempo & Trip-Hop Frequencies",
+            altTitle: "Deep Velvet Drift: Downtempo Vol. 2",
+            vibe: "Sub-harmonic grooves, tape-delayed chords & nocturnal chill",
+            batchTerm: "downtempo trip hop ambient chillout",
+            seeds: [
+                { title: "Teardrop", artist: "Massive Attack", album: "Mezzanine", year: "1998", duration: "5:31", duration_sec: 331 },
+                { title: "Porcelain", artist: "Moby", album: "Play", year: "1999", duration: "4:01", duration_sec: 241 },
+                { title: "Kiara", artist: "Bonobo", album: "Black Sands", year: "2010", duration: "3:50", duration_sec: 230 },
+                { title: "A Walk", artist: "Tycho", album: "Dive", year: "2011", duration: "5:16", duration_sec: 316 },
+                { title: "Glory Box", artist: "Portishead", album: "Dummy", year: "1994", duration: "5:06", duration_sec: 306 },
+                { title: "Daysleeper", artist: "Boards of Canada", album: "Geogaddi", year: "2002", duration: "3:20", duration_sec: 200 },
+                { title: "Cirrus", artist: "Bonobo", album: "The North Borders", year: "2013", duration: "5:52", duration_sec: 352 },
+                { title: "Sun Models", artist: "ODESZA", album: "In Return", year: "2014", duration: "2:40", duration_sec: 160 },
+                { title: "At the River", artist: "Groove Armada", album: "Vertigo", year: "1999", duration: "6:33", duration_sec: 393 },
+                { title: "We Move Lightly", artist: "Dustin O'Halloran", album: "Like Crazy", year: "2011", duration: "3:14", duration_sec: 194 },
+                { title: "Roygbiv", artist: "Boards of Canada", album: "Music Has the Right to Children", year: "1998", duration: "2:31", duration_sec: 151 },
+                { title: "Breathe", artist: "Telepopmusik", album: "Genetic World", year: "2001", duration: "4:39", duration_sec: 279 }
+            ]
+        },
         showcase: {
             title: "Genre & Mood Spotlight: Curated Essentials",
             altTitle: "Eclectic DJ Showcase: Cross-Genre Wave Vol. 2",
@@ -1234,118 +1910,102 @@ function initAssistantApp() {
     };
 
     const ARTIST_SIMILAR_PRESETS = {
-        "fleetwood mac": {
-            vibeKey: "rock", title: "Songs Like Fleetwood Mac: 70s Melodic Rock", seeds: [
-                { title: "Dreams", artist: "Fleetwood Mac", album: "Rumours", year: "1977", duration: "4:17", duration_sec: 257 },
-                { title: "Hotel California", artist: "Eagles", album: "Hotel California", year: "1976", duration: "6:30", duration_sec: 390 },
-                { title: "Edge of Seventeen", artist: "Stevie Nicks", album: "Bella Donna", year: "1981", duration: "5:28", duration_sec: 328 },
-                { title: "Go Your Own Way", artist: "Fleetwood Mac", album: "Rumours", year: "1977", duration: "3:38", duration_sec: 218 },
-                { title: "Free Fallin'", artist: "Tom Petty", album: "Full Moon Fever", year: "1989", duration: "4:14", duration_sec: 254 },
-                { title: "It's Too Late", artist: "Carole King", album: "Tapestry", year: "1971", duration: "3:53", duration_sec: 233 },
-                { title: "Tiny Dancer", artist: "Elton John", album: "Madman Across the Water", year: "1971", duration: "6:17", duration_sec: 377 },
-                { title: "Heart of Gold", artist: "Neil Young", album: "Harvest", year: "1972", duration: "3:07", duration_sec: 187 },
-                { title: "Rhiannon", artist: "Fleetwood Mac", album: "Fleetwood Mac", year: "1975", duration: "4:12", duration_sec: 252 },
-                { title: "Barracuda", artist: "Heart", album: "Little Queen", year: "1977", duration: "4:21", duration_sec: 261 }
-            ]
-        },
-        "the weeknd": {
-            vibeKey: "r&b", title: "Songs Like The Weeknd: Dark R&B & Synthpop", seeds: [
-                { title: "Blinding Lights", artist: "The Weeknd", album: "After Hours", year: "2020", duration: "3:20", duration_sec: 200 },
-                { title: "Starboy", artist: "The Weeknd", album: "Starboy", year: "2016", duration: "3:50", duration_sec: 230 },
-                { title: "Redbone", artist: "Childish Gambino", album: "Awaken, My Love!", year: "2016", duration: "5:26", duration_sec: 326 },
-                { title: "One More Time", artist: "Daft Punk", album: "Discovery", year: "2001", duration: "5:20", duration_sec: 320 },
-                { title: "Snooze", artist: "SZA", album: "SOS", year: "2022", duration: "3:21", duration_sec: 201 },
-                { title: "Midnight City", artist: "M83", album: "Hurry Up, We're Dreaming", year: "2011", duration: "4:03", duration_sec: 243 },
-                { title: "Pink + White", artist: "Frank Ocean", album: "Blonde", year: "2016", duration: "3:04", duration_sec: 184 },
-                { title: "Nightcall", artist: "Kavinsky", album: "OutRun", year: "2010", duration: "4:18", duration_sec: 258 },
-                { title: "Passionfruit", artist: "Drake", album: "More Life", year: "2017", duration: "4:58", duration_sec: 298 },
-                { title: "Earned It", artist: "The Weeknd", album: "Beauty Behind the Madness", year: "2015", duration: "4:37", duration_sec: 277 }
-            ]
-        },
-        "taylor swift": {
-            vibeKey: "pop", title: "Songs Like Taylor Swift: Emotional Pop & Storytelling", seeds: [
-                { title: "Cruel Summer", artist: "Taylor Swift", album: "Lover", year: "2019", duration: "2:58", duration_sec: 178 },
-                { title: "drivers license", artist: "Olivia Rodrigo", album: "SOUR", year: "2021", duration: "4:02", duration_sec: 242 },
-                { title: "Motion Sickness", artist: "Phoebe Bridgers", album: "Stranger in the Alps", year: "2017", duration: "3:49", duration_sec: 229 },
-                { title: "Fast Car", artist: "Tracy Chapman", album: "Tracy Chapman", year: "1988", duration: "4:56", duration_sec: 296 },
-                { title: "Slow Burn", artist: "Kacey Musgraves", album: "Golden Hour", year: "2018", duration: "4:06", duration_sec: 246 },
-                { title: "Green Light", artist: "Lorde", album: "Melodrama", year: "2017", duration: "3:54", duration_sec: 234 },
-                { title: "Birds of a Feather", artist: "Billie Eilish", album: "HIT ME HARD AND SOFT", year: "2024", duration: "3:30", duration_sec: 210 },
-                { title: "Espresso", artist: "Sabrina Carpenter", album: "Short n' Sweet", year: "2024", duration: "2:55", duration_sec: 175 },
-                { title: "Royals", artist: "Lorde", album: "Pure Heroine", year: "2013", duration: "3:10", duration_sec: 190 },
-                { title: "Dreams", artist: "Fleetwood Mac", album: "Rumours", year: "1977", duration: "4:17", duration_sec: 257 }
-            ]
-        },
-        "kendrick lamar": {
-            vibeKey: "hip hop", title: "Songs Like Kendrick Lamar: Conscious Hip-Hop", seeds: [
-                { title: "HUMBLE.", artist: "Kendrick Lamar", album: "DAMN.", year: "2017", duration: "2:57", duration_sec: 177 },
-                { title: "Money Trees", artist: "Kendrick Lamar", album: "good kid, m.A.A.d city", year: "2012", duration: "6:26", duration_sec: 386 },
-                { title: "N.Y. State of Mind", artist: "Nas", album: "Illmatic", year: "1994", duration: "4:54", duration_sec: 294 },
-                { title: "No Role Modelz", artist: "J. Cole", album: "2014 Forest Hills Drive", year: "2014", duration: "4:52", duration_sec: 292 },
-                { title: "C.R.E.A.M.", artist: "Wu-Tang Clan", album: "Enter the Wu-Tang (36 Chambers)", year: "1993", duration: "4:12", duration_sec: 252 },
-                { title: "Shook Ones, Pt. II", artist: "Mobb Deep", album: "The Infamous", year: "1995", duration: "5:25", duration_sec: 325 },
-                { title: "Ms. Jackson", artist: "OutKast", album: "Stankonia", year: "2000", duration: "4:30", duration_sec: 270 },
-                { title: "Electric Relaxation", artist: "A Tribe Called Quest", album: "Midnight Marauders", year: "1993", duration: "3:46", duration_sec: 226 },
-                { title: "Doomsday", artist: "MF DOOM", album: "Operation: Doomsday", year: "1999", duration: "4:58", duration_sec: 298 },
-                { title: "93 'Til Infinity", artist: "Souls of Mischief", album: "93 'til Infinity", year: "1993", duration: "4:46", duration_sec: 286 }
-            ]
-        },
-        "radiohead": {
-            vibeKey: "rock", title: "Songs Like Radiohead: Atmospheric Alt-Rock", seeds: [
-                { title: "Creep", artist: "Radiohead", album: "Pablo Honey", year: "1993", duration: "3:58", duration_sec: 238 },
-                { title: "Skinny Love", artist: "Bon Iver", album: "For Emma, Forever Ago", year: "2007", duration: "3:58", duration_sec: 238 },
-                { title: "Teardrop", artist: "Massive Attack", album: "Mezzanine", year: "1998", duration: "5:31", duration_sec: 331 },
-                { title: "Space Song", artist: "Beach House", album: "Depression Cherry", year: "2015", duration: "5:20", duration_sec: 320 },
-                { title: "The Scientist", artist: "Coldplay", album: "A Rush of Blood to the Head", year: "2002", duration: "5:09", duration_sec: 309 },
-                { title: "Breezeblocks", artist: "alt-J", album: "An Awesome Wave", year: "2012", duration: "3:47", duration_sec: 227 },
-                { title: "Everlong", artist: "Foo Fighters", album: "The Colour and the Shape", year: "1997", duration: "4:10", duration_sec: 250 },
-                { title: "Smells Like Teen Spirit", artist: "Nirvana", album: "Nevermind", year: "1991", duration: "5:01", duration_sec: 301 },
-                { title: "Karma Police", artist: "Radiohead", album: "OK Computer", year: "1997", duration: "4:21", duration_sec: 261 },
-                { title: "Apocalypse", artist: "Cigarettes After Sex", album: "Cigarettes After Sex", year: "2017", duration: "4:50", duration_sec: 290 }
-            ]
-        },
-        "bon iver": {
-            vibeKey: "acoustic", title: "Songs Like Bon Iver: Ethereal Indie Folk", seeds: [
-                { title: "Skinny Love", artist: "Bon Iver", album: "For Emma, Forever Ago", year: "2007", duration: "3:58", duration_sec: 238 },
-                { title: "Fast Car", artist: "Tracy Chapman", album: "Tracy Chapman", year: "1988", duration: "4:56", duration_sec: 296 },
-                { title: "San Luis", artist: "Gregory Alan Isakov", album: "Evening Machines", year: "2018", duration: "3:11", duration_sec: 191 },
-                { title: "Chicago", artist: "Sufjan Stevens", album: "Illinois", year: "2005", duration: "6:04", duration_sec: 364 },
-                { title: "Motion Sickness", artist: "Phoebe Bridgers", album: "Stranger in the Alps", year: "2017", duration: "3:49", duration_sec: 229 },
-                { title: "White Winter Hymnal", artist: "Fleet Foxes", album: "Fleet Foxes", year: "2008", duration: "2:27", duration_sec: 147 },
-                { title: "The Night We Met", artist: "Lord Huron", album: "Strange Trails", year: "2015", duration: "3:28", duration_sec: 208 },
-                { title: "Cherry Wine", artist: "Hozier", album: "Hozier", year: "2014", duration: "4:00", duration_sec: 240 },
-                { title: "Holocene", artist: "Bon Iver", album: "Bon Iver", year: "2011", duration: "5:36", duration_sec: 336 },
-                { title: "505", artist: "Arctic Monkeys", album: "Favourite Worst Nightmare", year: "2007", duration: "4:13", duration_sec: 253 }
-            ]
-        },
-        "tame impala": {
-            vibeKey: "chill", title: "Songs Like Tame Impala: Psych-Pop & Groove", seeds: [
-                { title: "The Less I Know the Better", artist: "Tame Impala", album: "Currents", year: "2015", duration: "3:36", duration_sec: 216 },
-                { title: "Electric Feel", artist: "MGMT", album: "Oracular Spectacular", year: "2007", duration: "3:49", duration_sec: 229 },
-                { title: "Chamber Of Reflection", artist: "Mac DeMarco", album: "Salad Days", year: "2014", duration: "3:51", duration_sec: 231 },
-                { title: "Space Song", artist: "Beach House", album: "Depression Cherry", year: "2015", duration: "5:20", duration_sec: 320 },
-                { title: "Redbone", artist: "Childish Gambino", album: "Awaken, My Love!", year: "2016", duration: "5:26", duration_sec: 326 },
-                { title: "Midnight City", artist: "M83", album: "Hurry Up, We're Dreaming", year: "2011", duration: "4:03", duration_sec: 243 },
-                { title: "Show Me How", artist: "Men I Trust", album: "Show Me How", year: "2018", duration: "3:35", duration_sec: 215 },
-                { title: "Walking On A Dream", artist: "Empire of the Sun", album: "Walking on a Dream", year: "2008", duration: "3:16", duration_sec: 196 },
-                { title: "Feel It All Around", artist: "Washed Out", album: "Life of Leisure", year: "2009", duration: "3:12", duration_sec: 192 },
-                { title: "Let It Happen", artist: "Tame Impala", album: "Currents", year: "2015", duration: "7:47", duration_sec: 467 }
-            ]
-        },
-        "daft punk": {
-            vibeKey: "edm", title: "Songs Like Daft Punk: French Touch & Electronic Funk", seeds: [
-                { title: "Get Lucky", artist: "Daft Punk", album: "Random Access Memories", year: "2013", duration: "4:08", duration_sec: 248 },
-                { title: "One More Time", artist: "Daft Punk", album: "Discovery", year: "2001", duration: "5:20", duration_sec: 320 },
-                { title: "Midnight City", artist: "M83", album: "Hurry Up, We're Dreaming", year: "2011", duration: "4:03", duration_sec: 243 },
-                { title: "Nightcall", artist: "Kavinsky", album: "OutRun", year: "2010", duration: "4:18", duration_sec: 258 },
-                { title: "Levels", artist: "Avicii", album: "Levels", year: "2011", duration: "3:19", duration_sec: 199 },
-                { title: "Latch", artist: "Disclosure & Sam Smith", album: "Settle", year: "2012", duration: "4:16", duration_sec: 256 },
-                { title: "Innerbloom", artist: "RÜFÜS DU SOL", album: "Bloom", year: "2016", duration: "9:38", duration_sec: 578 },
-                { title: "D.A.N.C.E.", artist: "Justice", album: "Cross", year: "2007", duration: "4:02", duration_sec: 242 },
-                { title: "Instant Crush", artist: "Daft Punk", album: "Random Access Memories", year: "2013", duration: "5:37", duration_sec: 337 },
-                { title: "Strobe", artist: "deadmau5", album: "For Lack of a Better Name", year: "2009", duration: "10:37", duration_sec: 637 }
-            ]
-        }
+        "fleetwood mac": { vibeKey: "rock", title: "Songs Like Fleetwood Mac: 70s Melodic Rock", seeds: [
+            { title: "Dreams", artist: "Fleetwood Mac", album: "Rumours", year: "1977", duration: "4:17", duration_sec: 257 },
+            { title: "Hotel California", artist: "Eagles", album: "Hotel California", year: "1976", duration: "6:30", duration_sec: 390 },
+            { title: "Edge of Seventeen", artist: "Stevie Nicks", album: "Bella Donna", year: "1981", duration: "5:28", duration_sec: 328 },
+            { title: "Go Your Own Way", artist: "Fleetwood Mac", album: "Rumours", year: "1977", duration: "3:38", duration_sec: 218 },
+            { title: "Free Fallin'", artist: "Tom Petty", album: "Full Moon Fever", year: "1989", duration: "4:14", duration_sec: 254 },
+            { title: "It's Too Late", artist: "Carole King", album: "Tapestry", year: "1971", duration: "3:53", duration_sec: 233 },
+            { title: "Tiny Dancer", artist: "Elton John", album: "Madman Across the Water", year: "1971", duration: "6:17", duration_sec: 377 },
+            { title: "Heart of Gold", artist: "Neil Young", album: "Harvest", year: "1972", duration: "3:07", duration_sec: 187 },
+            { title: "Rhiannon", artist: "Fleetwood Mac", album: "Fleetwood Mac", year: "1975", duration: "4:12", duration_sec: 252 },
+            { title: "Barracuda", artist: "Heart", album: "Little Queen", year: "1977", duration: "4:21", duration_sec: 261 }
+        ]},
+        "the weeknd": { vibeKey: "r&b", title: "Songs Like The Weeknd: Dark R&B & Synthpop", seeds: [
+            { title: "Blinding Lights", artist: "The Weeknd", album: "After Hours", year: "2020", duration: "3:20", duration_sec: 200 },
+            { title: "Starboy", artist: "The Weeknd", album: "Starboy", year: "2016", duration: "3:50", duration_sec: 230 },
+            { title: "Redbone", artist: "Childish Gambino", album: "Awaken, My Love!", year: "2016", duration: "5:26", duration_sec: 326 },
+            { title: "One More Time", artist: "Daft Punk", album: "Discovery", year: "2001", duration: "5:20", duration_sec: 320 },
+            { title: "Snooze", artist: "SZA", album: "SOS", year: "2022", duration: "3:21", duration_sec: 201 },
+            { title: "Midnight City", artist: "M83", album: "Hurry Up, We're Dreaming", year: "2011", duration: "4:03", duration_sec: 243 },
+            { title: "Pink + White", artist: "Frank Ocean", album: "Blonde", year: "2016", duration: "3:04", duration_sec: 184 },
+            { title: "Nightcall", artist: "Kavinsky", album: "OutRun", year: "2010", duration: "4:18", duration_sec: 258 },
+            { title: "Passionfruit", artist: "Drake", album: "More Life", year: "2017", duration: "4:58", duration_sec: 298 },
+            { title: "Earned It", artist: "The Weeknd", album: "Beauty Behind the Madness", year: "2015", duration: "4:37", duration_sec: 277 }
+        ]},
+        "taylor swift": { vibeKey: "pop", title: "Songs Like Taylor Swift: Emotional Pop & Storytelling", seeds: [
+            { title: "Cruel Summer", artist: "Taylor Swift", album: "Lover", year: "2019", duration: "2:58", duration_sec: 178 },
+            { title: "drivers license", artist: "Olivia Rodrigo", album: "SOUR", year: "2021", duration: "4:02", duration_sec: 242 },
+            { title: "Motion Sickness", artist: "Phoebe Bridgers", album: "Stranger in the Alps", year: "2017", duration: "3:49", duration_sec: 229 },
+            { title: "Fast Car", artist: "Tracy Chapman", album: "Tracy Chapman", year: "1988", duration: "4:56", duration_sec: 296 },
+            { title: "Slow Burn", artist: "Kacey Musgraves", album: "Golden Hour", year: "2018", duration: "4:06", duration_sec: 246 },
+            { title: "Green Light", artist: "Lorde", album: "Melodrama", year: "2017", duration: "3:54", duration_sec: 234 },
+            { title: "Birds of a Feather", artist: "Billie Eilish", album: "HIT ME HARD AND SOFT", year: "2024", duration: "3:30", duration_sec: 210 },
+            { title: "Espresso", artist: "Sabrina Carpenter", album: "Short n' Sweet", year: "2024", duration: "2:55", duration_sec: 175 },
+            { title: "Royals", artist: "Lorde", album: "Pure Heroine", year: "2013", duration: "3:10", duration_sec: 190 },
+            { title: "Dreams", artist: "Fleetwood Mac", album: "Rumours", year: "1977", duration: "4:17", duration_sec: 257 }
+        ]},
+        "kendrick lamar": { vibeKey: "hip hop", title: "Songs Like Kendrick Lamar: Conscious Hip-Hop", seeds: [
+            { title: "HUMBLE.", artist: "Kendrick Lamar", album: "DAMN.", year: "2017", duration: "2:57", duration_sec: 177 },
+            { title: "Money Trees", artist: "Kendrick Lamar", album: "good kid, m.A.A.d city", year: "2012", duration: "6:26", duration_sec: 386 },
+            { title: "N.Y. State of Mind", artist: "Nas", album: "Illmatic", year: "1994", duration: "4:54", duration_sec: 294 },
+            { title: "No Role Modelz", artist: "J. Cole", album: "2014 Forest Hills Drive", year: "2014", duration: "4:52", duration_sec: 292 },
+            { title: "C.R.E.A.M.", artist: "Wu-Tang Clan", album: "Enter the Wu-Tang (36 Chambers)", year: "1993", duration: "4:12", duration_sec: 252 },
+            { title: "Shook Ones, Pt. II", artist: "Mobb Deep", album: "The Infamous", year: "1995", duration: "5:25", duration_sec: 325 },
+            { title: "Ms. Jackson", artist: "OutKast", album: "Stankonia", year: "2000", duration: "4:30", duration_sec: 270 },
+            { title: "Electric Relaxation", artist: "A Tribe Called Quest", album: "Midnight Marauders", year: "1993", duration: "3:46", duration_sec: 226 },
+            { title: "Doomsday", artist: "MF DOOM", album: "Operation: Doomsday", year: "1999", duration: "4:58", duration_sec: 298 },
+            { title: "93 'Til Infinity", artist: "Souls of Mischief", album: "93 'til Infinity", year: "1993", duration: "4:46", duration_sec: 286 }
+        ]},
+        "radiohead": { vibeKey: "rock", title: "Songs Like Radiohead: Atmospheric Alt-Rock", seeds: [
+            { title: "Creep", artist: "Radiohead", album: "Pablo Honey", year: "1993", duration: "3:58", duration_sec: 238 },
+            { title: "Skinny Love", artist: "Bon Iver", album: "For Emma, Forever Ago", year: "2007", duration: "3:58", duration_sec: 238 },
+            { title: "Teardrop", artist: "Massive Attack", album: "Mezzanine", year: "1998", duration: "5:31", duration_sec: 331 },
+            { title: "Space Song", artist: "Beach House", album: "Depression Cherry", year: "2015", duration: "5:20", duration_sec: 320 },
+            { title: "The Scientist", artist: "Coldplay", album: "A Rush of Blood to the Head", year: "2002", duration: "5:09", duration_sec: 309 },
+            { title: "Breezeblocks", artist: "alt-J", album: "An Awesome Wave", year: "2012", duration: "3:47", duration_sec: 227 },
+            { title: "Everlong", artist: "Foo Fighters", album: "The Colour and the Shape", year: "1997", duration: "4:10", duration_sec: 250 },
+            { title: "Smells Like Teen Spirit", artist: "Nirvana", album: "Nevermind", year: "1991", duration: "5:01", duration_sec: 301 },
+            { title: "Karma Police", artist: "Radiohead", album: "OK Computer", year: "1997", duration: "4:21", duration_sec: 261 },
+            { title: "Apocalypse", artist: "Cigarettes After Sex", album: "Cigarettes After Sex", year: "2017", duration: "4:50", duration_sec: 290 }
+        ]},
+        "bon iver": { vibeKey: "acoustic", title: "Songs Like Bon Iver: Ethereal Indie Folk", seeds: [
+            { title: "Skinny Love", artist: "Bon Iver", album: "For Emma, Forever Ago", year: "2007", duration: "3:58", duration_sec: 238 },
+            { title: "Fast Car", artist: "Tracy Chapman", album: "Tracy Chapman", year: "1988", duration: "4:56", duration_sec: 296 },
+            { title: "San Luis", artist: "Gregory Alan Isakov", album: "Evening Machines", year: "2018", duration: "3:11", duration_sec: 191 },
+            { title: "Chicago", artist: "Sufjan Stevens", album: "Illinois", year: "2005", duration: "6:04", duration_sec: 364 },
+            { title: "Motion Sickness", artist: "Phoebe Bridgers", album: "Stranger in the Alps", year: "2017", duration: "3:49", duration_sec: 229 },
+            { title: "White Winter Hymnal", artist: "Fleet Foxes", album: "Fleet Foxes", year: "2008", duration: "2:27", duration_sec: 147 },
+            { title: "The Night We Met", artist: "Lord Huron", album: "Strange Trails", year: "2015", duration: "3:28", duration_sec: 208 },
+            { title: "Cherry Wine", artist: "Hozier", album: "Hozier", year: "2014", duration: "4:00", duration_sec: 240 },
+            { title: "Holocene", artist: "Bon Iver", album: "Bon Iver", year: "2011", duration: "5:36", duration_sec: 336 },
+            { title: "505", artist: "Arctic Monkeys", album: "Favourite Worst Nightmare", year: "2007", duration: "4:13", duration_sec: 253 }
+        ]},
+        "tame impala": { vibeKey: "chill", title: "Songs Like Tame Impala: Psych-Pop & Groove", seeds: [
+            { title: "The Less I Know the Better", artist: "Tame Impala", album: "Currents", year: "2015", duration: "3:36", duration_sec: 216 },
+            { title: "Electric Feel", artist: "MGMT", album: "Oracular Spectacular", year: "2007", duration: "3:49", duration_sec: 229 },
+            { title: "Chamber Of Reflection", artist: "Mac DeMarco", album: "Salad Days", year: "2014", duration: "3:51", duration_sec: 231 },
+            { title: "Space Song", artist: "Beach House", album: "Depression Cherry", year: "2015", duration: "5:20", duration_sec: 320 },
+            { title: "Redbone", artist: "Childish Gambino", album: "Awaken, My Love!", year: "2016", duration: "5:26", duration_sec: 326 },
+            { title: "Midnight City", artist: "M83", album: "Hurry Up, We're Dreaming", year: "2011", duration: "4:03", duration_sec: 243 },
+            { title: "Show Me How", artist: "Men I Trust", album: "Show Me How", year: "2018", duration: "3:35", duration_sec: 215 },
+            { title: "Walking On A Dream", artist: "Empire of the Sun", album: "Walking on a Dream", year: "2008", duration: "3:16", duration_sec: 196 },
+            { title: "Feel It All Around", artist: "Washed Out", album: "Life of Leisure", year: "2009", duration: "3:12", duration_sec: 192 },
+            { title: "Let It Happen", artist: "Tame Impala", album: "Currents", year: "2015", duration: "7:47", duration_sec: 467 }
+        ]},
+        "daft punk": { vibeKey: "edm", title: "Songs Like Daft Punk: French Touch & Electronic Funk", seeds: [
+            { title: "Get Lucky", artist: "Daft Punk", album: "Random Access Memories", year: "2013", duration: "4:08", duration_sec: 248 },
+            { title: "One More Time", artist: "Daft Punk", album: "Discovery", year: "2001", duration: "5:20", duration_sec: 320 },
+            { title: "Midnight City", artist: "M83", album: "Hurry Up, We're Dreaming", year: "2011", duration: "4:03", duration_sec: 243 },
+            { title: "Nightcall", artist: "Kavinsky", album: "OutRun", year: "2010", duration: "4:18", duration_sec: 258 },
+            { title: "Levels", artist: "Avicii", album: "Levels", year: "2011", duration: "3:19", duration_sec: 199 },
+            { title: "Latch", artist: "Disclosure & Sam Smith", album: "Settle", year: "2012", duration: "4:16", duration_sec: 256 },
+            { title: "Innerbloom", artist: "RÜFÜS DU SOL", album: "Bloom", year: "2016", duration: "9:38", duration_sec: 578 },
+            { title: "D.A.N.C.E.", artist: "Justice", album: "Cross", year: "2007", duration: "4:02", duration_sec: 242 },
+            { title: "Instant Crush", artist: "Daft Punk", album: "Random Access Memories", year: "2013", duration: "5:37", duration_sec: 337 },
+            { title: "Strobe", artist: "deadmau5", album: "For Lack of a Better Name", year: "2009", duration: "10:37", duration_sec: 637 }
+        ]}
     };
 
     const VIBE_KEYS_LIST = Object.keys(CLIENT_VIBE_SEEDS);
@@ -1613,14 +2273,35 @@ function initAssistantApp() {
             "Ooh, love this sound. 🎸 Think hazy guitars, bittersweet melodies, and that sunset-on-a-rooftop feeling. Here are **10 standout indie tracks** for your rotation:",
             "Pure dream-pop & bedroom indie magic ✨ Here are **10 standout indie favorites**:"
         ],
+        downtempo: [
+            "Dim the lights and let the sub-bass breathe 🌊 Here are **10 deep downtempo & trip-hop essentials** built for late-night drift:",
+            "Slow-motion grooves and warm analog echoes incoming 🌙 Here are **10 hypnotic downtempo tracks**:"
+        ],
         showcase: [
             "You got it! 🎧 Music hits best when curated by sound, tempo, and feeling rather than just matching words in song titles. Here is a curated 10-track lineup selected purely for musical feel, blending soulful R&B, late-night synthwave, warm acoustic, and indie grooves:",
             "Curating strictly by genre, tempo, and mood! 🎶 Here are **10 standout masterpieces** that showcase groove, atmosphere, and authentic songwriting across genres:"
         ]
     };
 
+    function detectAiDowntempoStyleFromText(lower) {
+        if (/midnight.*dub|analog\s*dub|\bdub\b/.test(lower)) return 'midnight_dub';
+        if (/kyoto|rainy\s*kyoto|lo-?fi\s*downtempo/.test(lower)) return 'kyoto_lofi';
+        if (/cosmic|ambient\s*drift|space\s*drift/.test(lower)) return 'cosmic_drift';
+        if (/balearic|sunset\s*chillout|ibiza/.test(lower)) return 'balearic_sunset';
+        if (/trip-?hop|velvet\s*trip/.test(lower)) return 'velvet_triphop';
+        return currentAiDowntempoStyle;
+    }
+
+    function isAiDowntempoRequest(rawText, lower) {
+        const trimmed = (rawText || '').trim();
+        const isPureQuestion = /\?$/.test(trimmed) && /^(who|what|when|where|why|how)\b/i.test(lower) && !/\b(stream|play|generate|curate|make|create|send|give|start|drop|mix|playlist|tracks)\b/i.test(lower);
+        if (isPureQuestion) return false;
+        return /\b(ai\s*downtempo|continuous\s*(streaming\s*)?downtempo|downtempo\s*stream|stream\s*downtempo|ai[-\s]*generated\s*downtempo|generative\s*downtempo|downtempo\s*radio|downtempo|midnight\s*analog\s*dub|rainy\s*kyoto\s*lo-?fi|cosmic\s*ambient\s*drift|balearic\s*sunset\s*chillout|velvet\s*trip-?hop)\b/i.test(lower);
+    }
+
     function detectVibeKeyFromText(lower) {
         if (/genre\s+and\s+mood|genre\s*&\s*mood|mood\s+and\s+genre|mood\s*&\s*genre|based\s+(up)?on\s+genre|based\s+(up)?on\s+mood|cross\s*genre|eclectic/.test(lower)) return 'showcase';
+        if (/downtempo|trip-?hop|balearic|ambient\s*dub|chillout/.test(lower)) return 'downtempo';
         if (/sad|melancholy|heartbreak|breakup|crying|depressed|grief|lonely|gloomy|somber|hurting|broken heart|rainy|raining|in my feelings|tears/.test(lower)) return 'melancholy';
         if (/country|americana|southern|bluegrass|nashville|western|folk rock|honky tonk/.test(lower)) return 'country';
         if (/indie|indie pop|dream pop|shoegaze|bedroom pop|indie rock/.test(lower)) return 'indie';
@@ -2878,6 +3559,11 @@ function initAssistantApp() {
             );
         }
 
+        // 0.15 Handle Continuous AI-Generated Downtempo stream & style requests immediately
+        if (isAiDowntempoRequest(rawText, lower)) {
+            return generateAiDowntempoPlaylistPayload(detectAiDowntempoStyleFromText(lower));
+        }
+
         // 0.25 Check Follow-Up Questions (about tracks, release years, albums, artists, playback, swapping tracks, or how-to)
         const followUpAnswer = await answerFollowUpQuestion(rawText, lower);
         if (followUpAnswer) {
@@ -3138,6 +3824,7 @@ function initAssistantApp() {
         if (miniPlayIcon) {
             miniPlayIcon.textContent = globalAudio.paused ? '▶' : '⏸';
         }
+        syncAiDowntempoUi();
     }
 
     async function playTrackFromQueue(queue, index) {
@@ -3145,6 +3832,20 @@ function initAssistantApp() {
         currentQueue = queue;
         currentQueueIndex = index;
         const track = currentQueue[currentQueueIndex];
+        isPrebufferingNextAiTrack = false;
+
+        if (track.is_ai_generated) {
+            if (!track.preview_url || !track.preview_url.startsWith('blob:') || !aiDowntempoBlobCache.has(track.ai_seed)) {
+                synthesizeAiDowntempoWavUrl(track);
+            }
+            aiDowntempoStreamActive = true;
+            lastAiDowntempoTrack = track;
+            if (track.ai_style && AI_DOWNTEMPO_STYLES[track.ai_style]) {
+                currentAiDowntempoStyle = track.ai_style;
+            }
+        } else {
+            aiDowntempoStreamActive = false;
+        }
 
         // Lazy on-demand preview resolution if track was rendered via instant seed fallback
         if (!track.preview_url) {
@@ -3188,7 +3889,9 @@ function initAssistantApp() {
             miniPlayerBar.classList.remove('hidden');
             if (miniPlayerArt) miniPlayerArt.src = track.artwork_url || 'favicon.png';
             if (miniPlayerTitle) miniPlayerTitle.textContent = track.title || 'Track';
-            if (miniPlayerArtist) miniPlayerArtist.textContent = track.artist || 'Artist';
+            if (miniPlayerArtist) miniPlayerArtist.textContent = track.is_ai_generated
+                ? `${track.artist || 'MP3aud.io Neural Synth'} • ${track.bpm || 74} BPM`
+                : (track.artist || 'Artist');
             if (miniDownloadMp3Btn) miniDownloadMp3Btn.style.display = 'none';
         }
         updateAllBubblePlayStates();
@@ -3213,6 +3916,20 @@ function initAssistantApp() {
             const lastTrack = (currentQueue && currentQueue.length > 0)
                 ? currentQueue[currentQueue.length - 1]
                 : (assistantMemory.lastTracks && assistantMemory.lastTracks.length > 0 ? assistantMemory.lastTracks[0] : null);
+
+            if (aiDowntempoStreamActive || (lastTrack && lastTrack.is_ai_generated)) {
+                const nextAiPayload = generateAiDowntempoPlaylistPayload(
+                    currentAiDowntempoStyle,
+                    '♾️ Auto-DJ AI Downtempo • Continuous Stream'
+                );
+                const newAiTracks = appendAssistantMusicBubble(nextAiPayload);
+                if (newAiTracks && newAiTracks.length > 0) {
+                    showToast('🌊 Auto-DJ synthesized 10 fresh AI Downtempo tracks!', 'info');
+                    playTrackFromQueue(newAiTracks, 0);
+                }
+                return;
+            }
+
             const promptText = lastTrack
                 ? `More songs like ${lastTrack.title} by ${lastTrack.artist}`
                 : (assistantMemory.lastPlaylistTitle
@@ -3257,11 +3974,32 @@ function initAssistantApp() {
                 if (durBadge) durBadge.textContent = `${formatTime(cur)} / ${formatTime(dur)}`;
             }
         }
+
+        // Pre-buffer next AI-generated downtempo track past 65% progress for gapless continuity
+        if (dur > 0 && (cur / dur) > 0.65 && !isPrebufferingNextAiTrack) {
+            if (currentQueue && currentQueueIndex + 1 < currentQueue.length) {
+                const nextTrack = currentQueue[currentQueueIndex + 1];
+                if (nextTrack && nextTrack.is_ai_generated && !aiDowntempoBlobCache.has(nextTrack.ai_seed)) {
+                    isPrebufferingNextAiTrack = true;
+                    synthesizeAiDowntempoWavUrl(nextTrack);
+                }
+            } else if (aiDowntempoStreamActive && currentQueue && currentQueueIndex + 1 >= currentQueue.length) {
+                isPrebufferingNextAiTrack = true;
+                const nextAiTrack = createAiDowntempoTrackMeta(currentQueue.length + 1, currentAiDowntempoStyle);
+                synthesizeAiDowntempoWavUrl(nextAiTrack);
+                currentQueue.push(nextAiTrack);
+            }
+        }
     });
 
     globalAudio.addEventListener('ended', () => {
         if (currentQueue && currentQueueIndex + 1 < currentQueue.length) {
             playTrackFromQueue(currentQueue, currentQueueIndex + 1);
+        } else if (aiDowntempoStreamActive) {
+            if (!currentQueue) currentQueue = [];
+            const nextAiTrack = createAiDowntempoTrackMeta(currentQueue.length + 1, currentAiDowntempoStyle);
+            currentQueue.push(nextAiTrack);
+            playTrackFromQueue(currentQueue, currentQueue.length - 1);
         } else if (autoDjEnabled && currentQueue && currentQueue.length > 0) {
             triggerAutoDjContinuation();
         } else {
@@ -3316,6 +4054,11 @@ function initAssistantApp() {
         miniNextBtn.addEventListener('click', () => {
             if (currentQueue && currentQueueIndex + 1 < currentQueue.length) {
                 playTrackFromQueue(currentQueue, currentQueueIndex + 1);
+            } else if (aiDowntempoStreamActive) {
+                if (!currentQueue) currentQueue = [];
+                const nextAiTrack = createAiDowntempoTrackMeta(currentQueue.length + 1, currentAiDowntempoStyle);
+                currentQueue.push(nextAiTrack);
+                playTrackFromQueue(currentQueue, currentQueue.length - 1);
             }
         });
     }
@@ -3745,6 +4488,12 @@ function initAssistantApp() {
 
     async function resolveTrackPreviewIfNeeded(track) {
         if (!track) return false;
+        if (track.is_ai_generated) {
+            if (!track.preview_url || !track.preview_url.startsWith('blob:') || !aiDowntempoBlobCache.has(track.ai_seed)) {
+                synthesizeAiDowntempoWavUrl(track);
+            }
+            return Boolean(track.preview_url);
+        }
         if (track.preview_url) return true;
         try {
             const items = await searchItunesFast(`${track.artist || ''} ${track.title || ''}`.trim(), 1, 2000);
@@ -4086,7 +4835,9 @@ function initAssistantApp() {
                     follow_up_note: payload.follow_up_note,
                     suggestions: payload.suggestions,
                     streaming_links: payload.streaming_links,
-                    tracks: tracks.map(({ bubbleId, ...rest }) => rest)
+                    tracks: tracks.map(({ bubbleId, ...rest }) => (
+                        rest.is_ai_generated ? { ...rest, preview_url: '' } : rest
+                    ))
                 }
             });
         }
@@ -4121,6 +4872,26 @@ function initAssistantApp() {
 
         const typingRow = appendTypingBubble();
         const lowerText = text.toLowerCase();
+
+        // Handle Continuous AI-Generated Downtempo stream requests directly without remote wait
+        if (isAiDowntempoRequest(text, lowerText)) {
+            try {
+                const requestedStyle = detectAiDowntempoStyleFromText(lowerText);
+                const aiPayload = generateAiDowntempoPlaylistPayload(requestedStyle);
+                if (typingRow && typingRow.parentNode) typingRow.remove();
+                const renderedTracks = appendAssistantMusicBubble(aiPayload);
+                chatHistory.push({ role: 'assistant', content: aiPayload.reply || '' });
+                if (renderedTracks && renderedTracks.length > 0) {
+                    playTrackFromQueue(renderedTracks, 0);
+                }
+            } finally {
+                if (typingRow && typingRow.parentNode) typingRow.remove();
+                if (assistantStatusText) {
+                    assistantStatusText.innerHTML = 'Online &bull; AI Personal Assistant &amp; DJ';
+                }
+            }
+            return;
+        }
         const isAskingForNew = /\b(new|another|different|fresh|random|more|next|surprise|other|else|switch|change|again)\b/i.test(text);
         const isGenericMakePlaylist = /^(hey|hi|hello|yo|please|can you|could you|will you|would you|i want you to|i'd like you to)?\s*(make|build|create|curate|put together|give|send)\s+(me\s+)?(a\s+)?(good\s+|cool\s+|nice\s+)?(playlist|mix|mixtape)\s*[?.!]*$/i.test(lowerText);
         const isExplicitMusicReq = isExplicitPlaylistRequest(lowerText) || isExplicitSingleTrackRequest(text, lowerText);
@@ -4642,12 +5413,13 @@ function initAssistantApp() {
     renderSavedCrate();
     syncAllCrateHeartButtons();
     syncAutoDjButtonUi();
+    syncAiDowntempoUi();
     initServerWakeGate();
     initAiKeyConfig();
 }
 
 // Modal Ringtone Guide Platform & Method Switchers
-window.switchGuidePlatform = function (platform) {
+window.switchGuidePlatform = function(platform) {
     const tabIos = document.getElementById('rtTabIosPage') || document.getElementById('rtTabIosModal');
     const tabAndroid = document.getElementById('rtTabAndroidPage') || document.getElementById('rtTabAndroidModal');
     const panelIos = document.getElementById('rtGuidePanelIos');
@@ -4666,7 +5438,7 @@ window.switchGuidePlatform = function (platform) {
     }
 };
 
-window.switchGuideIosMethod = function (method) {
+window.switchGuideIosMethod = function(method) {
     const btnGb = document.getElementById('rtBtnGbPage') || document.getElementById('rtBtnGbModal');
     const btnPc = document.getElementById('rtBtnPcPage') || document.getElementById('rtBtnPcModal');
     const viewGb = document.getElementById('rtGuideViewGb');
