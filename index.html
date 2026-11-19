@@ -3988,63 +3988,6 @@ body.messenger-body {
     gap: 7px;
 }
 
-.drive-action-row {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-
-.drive-mount-btn {
-    flex: 1;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    padding: 7px 9px;
-    border-radius: 8px;
-    background: linear-gradient(135deg, rgba(245, 158, 11, 0.18), rgba(255, 85, 0, 0.16));
-    border: 1px solid rgba(245, 158, 11, 0.4);
-    color: #fde68a;
-    font-size: 0.74rem;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.16s ease;
-    min-width: 0;
-}
-
-.drive-mount-btn span:last-child {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.drive-mount-btn:hover {
-    background: linear-gradient(135deg, rgba(245, 158, 11, 0.3), rgba(255, 85, 0, 0.26));
-    border-color: #fbbf24;
-    color: #ffffff;
-}
-
-.drive-reconnect-btn {
-    padding: 7px 9px;
-    border-radius: 8px;
-    background: rgba(0, 168, 132, 0.16);
-    border: 1px solid rgba(0, 168, 132, 0.45);
-    color: #6ee7b7;
-    font-size: 0.72rem;
-    font-weight: 700;
-    cursor: pointer;
-    white-space: nowrap;
-    max-width: 135px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    transition: all 0.15s ease;
-}
-
-.drive-reconnect-btn:hover {
-    background: rgba(0, 168, 132, 0.28);
-    color: #ffffff;
-}
-
 .drive-status-sub {
     font-size: 0.67rem;
     color: var(--text-secondary);
@@ -4143,28 +4086,10 @@ body.messenger-body {
     flex-shrink: 0;
 }
 
-.drive-chat-mount-btn {
-    margin-top: 8px;
-    display: inline-flex;
-    align-items: center;
-    gap: 7px;
-    padding: 8px 14px;
-    border-radius: 999px;
-    background: linear-gradient(135deg, rgba(245, 158, 11, 0.22), rgba(255, 85, 0, 0.22));
-    border: 1px solid rgba(245, 158, 11, 0.5);
-    color: #fef3c7;
-    font-size: 0.8rem;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.16s ease;
-}
 
-.drive-chat-mount-btn:hover {
-    background: linear-gradient(135deg, rgba(245, 158, 11, 0.36), rgba(255, 85, 0, 0.34));
-    color: #ffffff;
-    transform: translateY(-1px);
-}
-</style>
+
+
+    </style>
 
     <script type="application/ld+json">
     {
@@ -4264,29 +4189,19 @@ body.messenger-body {
                 </div>
             </div>
 
-            <!-- External Hard Drive / Local Music Library Streamer -->
+            <!-- Studio External Hard Drive Music Library Streamer (Owner-hosted read-only stream) -->
             <div class="sidebar-section sidebar-drive-section" id="sidebarDriveSection">
                 <div class="sidebar-section-header">
-                    <span>💽 EXTERNAL DRIVE (<span id="driveLibraryCount">0</span>)</span>
+                    <span>💽 STUDIO DRIVE (<span id="driveLibraryCount">0</span>)</span>
                     <div class="crate-header-actions">
-                        <button type="button" id="playDriveBtn" class="clear-history-link crate-play-link hidden" title="Stream all tracks from external drive">▶ Play</button>
-                        <button type="button" id="shuffleDriveBtn" class="clear-history-link hidden" title="Shuffle entire external drive library">🔀 Shuffle</button>
-                        <button type="button" id="dropDriveChatBtn" class="clear-history-link hidden" title="Show external drive library in chat">💬 Chat</button>
+                        <button type="button" id="playDriveBtn" class="clear-history-link crate-play-link hidden" title="Stream all tracks from the Studio External Hard Drive">▶ Play</button>
+                        <button type="button" id="shuffleDriveBtn" class="clear-history-link hidden" title="Shuffle Studio External Hard Drive library">🔀 Shuffle</button>
+                        <button type="button" id="dropDriveChatBtn" class="clear-history-link hidden" title="Show Studio External Hard Drive tracks in chat">💬 Chat</button>
                     </div>
                 </div>
-                <input type="file" id="externalDriveInput" webkitdirectory directory multiple accept="audio/*,.mp3,.flac,.wav,.m4a,.aac,.ogg,.opus,.wma,.webm" class="hidden">
                 <div class="drive-mount-card">
-                    <div class="drive-action-row">
-                        <button type="button" id="mountDriveBtn" class="drive-mount-btn" title="Select a folder or dedicated external hard drive to stream your local music library with zero upload">
-                            <span>📂</span>
-                            <span id="mountDriveBtnText">Mount External Drive / Folder</span>
-                        </button>
-                        <button type="button" id="reconnectDriveBtn" class="drive-reconnect-btn hidden" title="Reconnect previously mounted external drive">
-                            🔄 Reconnect
-                        </button>
-                    </div>
-                    <span id="driveStatusSub" class="drive-status-sub">Direct local streaming • MP3, FLAC, WAV, M4A • 0 upload</span>
-                    <input type="search" id="driveSearchInput" class="drive-search-input hidden" placeholder="Filter drive songs, artists, albums..." aria-label="Search external drive library">
+                    <span id="driveStatusSub" class="drive-status-sub">Connecting to Studio External Drive...</span>
+                    <input type="search" id="driveSearchInput" class="drive-search-input hidden" placeholder="Filter drive songs, artists, albums..." aria-label="Search studio external drive library">
                     <div id="driveLibraryList" class="recent-history-list drive-track-list hidden"></div>
                 </div>
             </div>
@@ -4387,9 +4302,9 @@ body.messenger-body {
                         <span class="ai-dt-header-label">AI Downtempo</span>
                     </button>
 
-                    <button type="button" id="headerDriveBtn" class="header-action-pill drive-header-pill" title="Stream your own music library from an external hard drive or local folder">
+                    <button type="button" id="headerDriveBtn" class="header-action-pill drive-header-pill" title="Stream tracks from the dedicated Studio External Hard Drive">
                         <span>💽</span>
-                        <span id="headerDriveBtnText">Stream My Drive</span>
+                        <span id="headerDriveBtnText">Studio Drive</span>
                     </button>
                     <button type="button" id="headerClearChatBtn" class="header-action-pill clear-chat-header-pill" title="Clear conversation messages">
                         <span>🗑️</span>
@@ -5327,14 +5242,11 @@ function initAssistantApp() {
     const aiDtStylePills = document.getElementById('aiDtStylePills');
     const headerAiDowntempoBtn = document.getElementById('headerAiDowntempoBtn');
 
-    // Clear Chat & External Hard Drive Library Elements
+    // Clear Chat & Studio External Hard Drive Library Elements
     const sidebarClearChatBtn = document.getElementById('sidebarClearChatBtn');
     const headerClearChatBtn = document.getElementById('headerClearChatBtn');
     const headerDriveBtn = document.getElementById('headerDriveBtn');
     const headerDriveBtnText = document.getElementById('headerDriveBtnText');
-    const mountDriveBtn = document.getElementById('mountDriveBtn');
-    const mountDriveBtnText = document.getElementById('mountDriveBtnText');
-    const reconnectDriveBtn = document.getElementById('reconnectDriveBtn');
     const playDriveBtn = document.getElementById('playDriveBtn');
     const shuffleDriveBtn = document.getElementById('shuffleDriveBtn');
     const dropDriveChatBtn = document.getElementById('dropDriveChatBtn');
@@ -5342,7 +5254,6 @@ function initAssistantApp() {
     const driveLibraryList = document.getElementById('driveLibraryList');
     const driveLibraryCount = document.getElementById('driveLibraryCount');
     const driveStatusSub = document.getElementById('driveStatusSub');
-    const externalDriveInput = document.getElementById('externalDriveInput');
 
     // Immediate early wiring for composer send button and inputs (guarantees responsiveness)
     const earlySendBtn = document.getElementById('sendMessageBtn');
@@ -6230,11 +6141,10 @@ function initAssistantApp() {
                 year: track.year || '',
                 duration: track.duration || '3:30',
                 duration_sec: track.duration_sec || 210,
-                preview_url: (track.is_ai_generated || track.is_local_drive) ? '' : (track.preview_url || ''),
-                artwork_url: (track.is_local_drive && String(track.artwork_url || '').startsWith('blob:')) ? 'favicon.png' : (track.artwork_url || 'favicon.png'),
+                preview_url: (track.is_ai_generated || String(track.preview_url || '').startsWith('blob:')) ? '' : (track.preview_url || ''),
+                artwork_url: String(track.artwork_url || '').startsWith('blob:') ? 'favicon.png' : (track.artwork_url || 'favicon.png'),
                 is_ai_generated: Boolean(track.is_ai_generated),
                 is_local_drive: Boolean(track.is_local_drive),
-                rel_path: track.rel_path || undefined,
                 file_ext: track.file_ext || undefined,
                 bpm: track.bpm || undefined,
                 musical_key: track.musical_key || undefined,
@@ -6275,7 +6185,7 @@ function initAssistantApp() {
         const aiBadgeHtml = t.is_ai_generated
             ? `<span class="track-ai-synth-badge">🌊 AI SYNTH &bull; ${escapeHtml(String(t.bpm || 74))} BPM &bull; ${escapeHtml(t.musical_key || 'Dm')}</span>`
             : (t.is_local_drive
-                ? `<span class="track-local-drive-badge">💽 ${escapeHtml(t.file_ext || 'LOCAL')} &bull; DIRECT DRIVE</span>`
+                ? `<span class="track-local-drive-badge">💽 ${escapeHtml(t.file_ext || 'MP3')} &bull; STUDIO DRIVE</span>`
                 : '');
         return `
             <div class="track-audio-bubble" data-bubble-id="${escapeHtml(t.bubbleId)}" data-track-idx="${idx}">
@@ -6525,224 +6435,54 @@ function initAssistantApp() {
         });
     }
 
-    // --- External Hard Drive / Local Music Library Streaming Engine (0 Upload) ---
-    const AUDIO_DRIVE_EXT_RE = /\.(mp3|flac|wav|m4a|aac|ogg|opus|webm|wma)$/i;
-    const IMAGE_DRIVE_EXT_RE = /^(cover|folder|album|front|art|artwork).*\.(jpe?g|png|webp)$/i;
-    const ANY_IMAGE_EXT_RE = /\.(jpe?g|png|webp)$/i;
+    // --- Owner-Only Dedicated External Hard Drive Stream Client ---
     let externalDriveTracks = [];
-    let externalDriveName = '';
-    let savedDriveDirHandle = null;
-    const localDriveBlobUrls = new Map();
-    const localFolderArtBlobUrls = new Map();
-
-    function openDriveIdb() {
-        return new Promise((resolve) => {
-            if (typeof indexedDB === 'undefined') { resolve(null); return; }
-            try {
-                const req = indexedDB.open('mp3audio_drive_db', 1);
-                req.onupgradeneeded = () => {
-                    try {
-                        const db = req.result;
-                        if (!db.objectStoreNames.contains('handles')) {
-                            db.createObjectStore('handles');
-                        }
-                    } catch (_) { }
-                };
-                req.onsuccess = () => resolve(req.result);
-                req.onerror = () => resolve(null);
-            } catch (_) {
-                resolve(null);
-            }
-        });
-    }
-
-    async function saveDriveHandleToIdb(handle) {
-        if (!handle) return;
-        const db = await openDriveIdb();
-        if (!db) return;
-        try {
-            const tx = db.transaction('handles', 'readwrite');
-            tx.objectStore('handles').put(handle, 'lastDriveHandle');
-        } catch (_) { }
-    }
-
-    async function loadDriveHandleFromIdb() {
-        const db = await openDriveIdb();
-        if (!db) return;
-        try {
-            const handle = await new Promise((resolve) => {
-                const tx = db.transaction('handles', 'readonly');
-                const req = tx.objectStore('handles').get('lastDriveHandle');
-                req.onsuccess = () => resolve(req.result || null);
-                req.onerror = () => resolve(null);
-            });
-            if (handle && handle.name) {
-                savedDriveDirHandle = handle;
-                if (reconnectDriveBtn) {
-                    reconnectDriveBtn.classList.remove('hidden');
-                    reconnectDriveBtn.textContent = `🔄 Reconnect "${handle.name}"`;
-                    reconnectDriveBtn.title = `Reconnect saved folder/drive: ${handle.name}`;
-                }
-            }
-        } catch (_) { }
-    }
-
-    function getOrCreateLocalDriveBlobUrl(track) {
-        if (!track || !track.local_file) return '';
-        const key = track.bubbleId || `${track.rel_path || track.title}|${track.local_file.size}`;
-        if (localDriveBlobUrls.has(key)) {
-            const existing = localDriveBlobUrls.get(key);
-            localDriveBlobUrls.delete(key);
-            localDriveBlobUrls.set(key, existing);
-            track.preview_url = existing;
-            return existing;
-        }
-        while (localDriveBlobUrls.size >= 25) {
-            const oldestKey = localDriveBlobUrls.keys().next().value;
-            const oldestUrl = localDriveBlobUrls.get(oldestKey);
-            localDriveBlobUrls.delete(oldestKey);
-            if (oldestUrl && oldestUrl !== globalAudio.src) {
-                try { URL.revokeObjectURL(oldestUrl); } catch (_) { }
-            }
-        }
-        const blobUrl = URL.createObjectURL(track.local_file);
-        localDriveBlobUrls.set(key, blobUrl);
-        track.preview_url = blobUrl;
-        return blobUrl;
-    }
+    let externalDriveName = 'Studio External Drive';
+    let externalDriveLoading = false;
 
     function buildLocalDriveArtworkDataUri(title, artist, idx = 1) {
         const hue = (Math.abs((artist || title || '').split('').reduce((a, c) => ((a << 5) - a + c.charCodeAt(0)) | 0, idx * 31)) % 360);
         const hue2 = (hue + 48) % 360;
-        const shortT = escapeHtml((title || 'Local Audio').slice(0, 18));
+        const shortT = escapeHtml((title || 'Studio Track').slice(0, 18));
         const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240">`
             + `<defs><linearGradient id="d" x1="0" y1="0" x2="1" y2="1">`
             + `<stop offset="0%" stop-color="hsl(${hue},58%,22%)"/><stop offset="100%" stop-color="hsl(${hue2},68%,34%)"/></linearGradient></defs>`
             + `<rect width="240" height="240" fill="url(#d)"/>`
             + `<circle cx="120" cy="110" r="56" fill="none" stroke="rgba(255,255,255,0.22)" stroke-width="2"/>`
             + `<circle cx="120" cy="110" r="18" fill="rgba(11,20,26,0.55)" stroke="rgba(255,255,255,0.3)" stroke-width="2"/>`
-            + `<text x="16" y="28" fill="rgba(255,255,255,0.8)" font-family="sans-serif" font-size="11" font-weight="800">EXTERNAL DRIVE</text>`
+            + `<text x="16" y="28" fill="rgba(255,255,255,0.8)" font-family="sans-serif" font-size="11" font-weight="800">STUDIO DRIVE</text>`
             + `<text x="16" y="212" fill="#ffffff" font-family="sans-serif" font-size="14" font-weight="700">${shortT}</text>`
             + `</svg>`;
         return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
     }
 
-    function decodeId3TextBytes(bytes, encodingByte) {
-        if (!bytes || bytes.length === 0) return '';
-        try {
-            let label = 'iso-8859-1';
-            let slice = bytes;
-            if (encodingByte === 1) {
-                if (bytes.length >= 2 && bytes[0] === 0xFE && bytes[1] === 0xFF) {
-                    label = 'utf-16be';
-                    slice = bytes.subarray(2);
-                } else if (bytes.length >= 2 && bytes[0] === 0xFF && bytes[1] === 0xFE) {
-                    label = 'utf-16le';
-                    slice = bytes.subarray(2);
-                } else {
-                    label = 'utf-16le';
-                }
-            } else if (encodingByte === 2) {
-                label = 'utf-16be';
-            } else if (encodingByte === 3) {
-                label = 'utf-8';
-            }
-            return new TextDecoder(label).decode(slice).replace(/\0+/g, '').trim();
-        } catch (_) {
-            let out = '';
-            for (let i = 0; i < bytes.length; i++) {
-                if (bytes[i] >= 32 && bytes[i] < 127) out += String.fromCharCode(bytes[i]);
-            }
-            return out.trim();
-        }
-    }
-
-    function parseId3v2FramesFromBuffer(arrayBuffer) {
-        const meta = {};
-        if (!arrayBuffer || arrayBuffer.byteLength < 10) return meta;
-        const b = new Uint8Array(arrayBuffer);
-        if (b[0] !== 0x49 || b[1] !== 0x44 || b[2] !== 0x33) return meta; // 'ID3'
-        const ver = b[3];
-        if (ver < 3 || ver > 4) return meta;
-        const flags = b[5];
-        const tagSize = ((b[6] & 0x7F) << 21) | ((b[7] & 0x7F) << 14) | ((b[8] & 0x7F) << 7) | (b[9] & 0x7F);
-        let pos = 10;
-        const end = Math.min(b.length, 10 + tagSize);
-        if ((flags & 0x40) && pos + 4 <= end) {
-            const extSize = (ver >= 4)
-                ? (((b[pos] & 0x7F) << 21) | ((b[pos + 1] & 0x7F) << 14) | ((b[pos + 2] & 0x7F) << 7) | (b[pos + 3] & 0x7F))
-                : ((b[pos] << 24) | (b[pos + 1] << 16) | (b[pos + 2] << 8) | b[pos + 3]);
-            pos += Math.max(4, extSize);
-        }
-        while (pos + 10 <= end) {
-            if (b[pos] === 0) break;
-            const frameId = String.fromCharCode(b[pos], b[pos + 1], b[pos + 2], b[pos + 3]);
-            const fSize = (ver >= 4)
-                ? (((b[pos + 4] & 0x7F) << 21) | ((b[pos + 5] & 0x7F) << 14) | ((b[pos + 6] & 0x7F) << 7) | (b[pos + 7] & 0x7F))
-                : (((b[pos + 4] & 0xFF) << 24) | ((b[pos + 5] & 0xFF) << 16) | ((b[pos + 6] & 0xFF) << 8) | (b[pos + 7] & 0xFF));
-            pos += 10;
-            if (fSize <= 0 || pos + fSize > end) break;
-            if (frameId === 'TIT2' || frameId === 'TPE1' || frameId === 'TALB' || frameId === 'TYER' || frameId === 'TDRC') {
-                const textVal = decodeId3TextBytes(b.subarray(pos + 1, pos + fSize), b[pos]);
-                if (textVal) {
-                    if (frameId === 'TIT2') meta.title = textVal;
-                    else if (frameId === 'TPE1') meta.artist = textVal;
-                    else if (frameId === 'TALB') meta.album = textVal;
-                    else if (frameId === 'TYER' || frameId === 'TDRC') {
-                        const ym = textVal.match(/\b(19\d\d|20\d\d)\b/);
-                        if (ym) meta.year = ym[1];
-                    }
-                }
-            }
-            pos += fSize;
-        }
-        return meta;
-    }
-
-    async function ensureLocalTrackId3Parsed(track) {
-        if (!track || !track.is_local_drive || track.id3_parsed || !track.local_file) return;
-        track.id3_parsed = true;
-        if (!/\.mp3$/i.test(track.local_file.name || '') || typeof track.local_file.slice !== 'function') return;
-        try {
-            const buf = await track.local_file.slice(0, 98304).arrayBuffer();
-            const tags = parseId3v2FramesFromBuffer(buf);
-            if (tags.title) track.title = tags.title;
-            if (tags.artist) track.artist = tags.artist;
-            if (tags.album) track.album = tags.album;
-            if (tags.year) track.year = tags.year;
-        } catch (_) { }
-    }
-
-    function parseFallbackMetaFromPath(fileName, relPath, rootName) {
-        const cleanBase = String(fileName || 'Track')
-            .replace(/\.[^.]+$/, '')
-            .replace(/^\d{1,3}[\s._-]+/, '')
-            .replace(/_/g, ' ')
-            .trim();
-        const parts = String(relPath || '').split('/').filter(Boolean);
-        let artist = '';
-        let title = cleanBase || 'Local Track';
-        let album = rootName || 'External Drive';
-
-        const dashParts = cleanBase.split(/\s+[-–—]\s+/);
-        if (dashParts.length >= 2 && dashParts[0].trim() && dashParts[1].trim()) {
-            artist = dashParts[0].trim();
-            title = dashParts.slice(1).join(' - ').trim();
-        }
-        if (parts.length >= 3) {
-            album = parts[parts.length - 2] || album;
-            if (!artist && parts.length >= 4) {
-                artist = parts[parts.length - 3];
-            } else if (!artist) {
-                artist = parts[parts.length - 2];
-            }
-        } else if (parts.length === 2) {
-            album = parts[0];
-        }
+    function normalizeOwnerDriveTrack(item, idx, baseOrigin) {
+        const title = item.title || `Track ${idx + 1}`;
+        const artist = item.artist || externalDriveName || 'Studio External Drive';
+        const album = item.album || 'Studio External Drive';
+        const rawStreamUrl = item.stream_url || item.preview_url || '';
+        const streamUrl = rawStreamUrl.startsWith('/')
+            ? `${baseOrigin}${rawStreamUrl}`
+            : rawStreamUrl;
+        const stLinks = makeStreamingUrls(title, artist);
         return {
-            title: title || 'Local Track',
-            artist: artist || rootName || 'Local Library',
-            album: album || 'External Drive'
+            index: idx + 1,
+            id: item.id !== undefined ? item.id : idx,
+            title,
+            artist,
+            album,
+            year: item.year || '',
+            duration: item.duration || (item.duration_sec ? formatTime(item.duration_sec) : 'STREAM'),
+            duration_sec: item.duration_sec || 0,
+            artwork_url: item.artwork_url || buildLocalDriveArtworkDataUri(title, artist, idx + 1),
+            preview_url: streamUrl,
+            search_query: `ytsearch1:${artist} - ${title} official audio`,
+            apple_music_url: item.apple_music_url || stLinks.apple_music,
+            spotify_url: item.spotify_url || stLinks.spotify,
+            youtube_music_url: item.youtube_music_url || stLinks.youtube_music,
+            is_local_drive: true,
+            file_ext: (item.file_ext || 'MP3').toUpperCase(),
+            bubbleId: `drive_${idx}_${Math.random().toString(36).slice(2, 6)}`
         };
     }
 
@@ -6759,15 +6499,14 @@ function initAssistantApp() {
             headerDriveBtn.classList.toggle('is-mounted', total > 0);
         }
         if (headerDriveBtnText) {
-            headerDriveBtnText.textContent = total > 0 ? `Drive (${total})` : 'Stream My Drive';
-        }
-        if (mountDriveBtnText) {
-            mountDriveBtnText.textContent = total > 0 ? `Change Drive (${externalDriveName || 'Mounted'})` : 'Mount External Drive / Folder';
+            headerDriveBtnText.textContent = total > 0 ? `Drive (${total})` : 'Studio Drive';
         }
         if (driveStatusSub) {
-            driveStatusSub.textContent = total > 0
-                ? `Connected: ${externalDriveName || 'External Drive'} • ${total} tracks streaming locally`
-                : 'Direct local streaming • MP3, FLAC, WAV, M4A • 0 upload';
+            driveStatusSub.textContent = externalDriveLoading
+                ? 'Connecting to Studio External Drive...'
+                : (total > 0
+                    ? `Streaming from ${externalDriveName} • ${total} tracks online`
+                    : 'Studio external drive library offline (run external_drive_connector.py)');
         }
 
         if (!driveLibraryList || total === 0) return;
@@ -6775,13 +6514,13 @@ function initAssistantApp() {
         const q = (filterQuery || '').trim().toLowerCase();
         const matches = q
             ? externalDriveTracks.filter(t =>
-                `${t.title} ${t.artist} ${t.album} ${t.file_ext || ''} ${t.rel_path || ''}`.toLowerCase().includes(q)
+                `${t.title} ${t.artist} ${t.album} ${t.file_ext || ''}`.toLowerCase().includes(q)
             )
             : externalDriveTracks;
 
         driveLibraryList.innerHTML = '';
         if (matches.length === 0) {
-            driveLibraryList.innerHTML = `<div style="font-size:0.72rem; color:#8696a0; padding:6px;">No drive tracks matched "${escapeHtml(filterQuery)}".</div>`;
+            driveLibraryList.innerHTML = `<div style="font-size:0.72rem; color:#8696a0; padding:6px;">No studio drive tracks matched "${escapeHtml(filterQuery)}".</div>`;
             return;
         }
 
@@ -6814,150 +6553,52 @@ function initAssistantApp() {
         }
     }
 
-    async function scanFileListFromDrive(fileEntries, rootName) {
-        if (!Array.isArray(fileEntries) || fileEntries.length === 0) {
-            showToast('No audio files found in that folder or drive.', 'info');
-            return;
+    async function fetchOwnerExternalDriveCatalog(showFeedback = false) {
+        if (externalDriveLoading) return;
+        externalDriveLoading = true;
+        renderExternalDriveLibrary(driveSearchInput ? driveSearchInput.value : '');
+
+        const candidateOrigins = [BACKEND_URL];
+        const isLocalDev = typeof window !== 'undefined' && window.location && (
+            window.location.protocol === 'http:'
+            || window.location.hostname === 'localhost'
+            || window.location.hostname === '127.0.0.1'
+            || window.location.protocol === 'file:'
+        );
+        if (isLocalDev) {
+            candidateOrigins.push('http://127.0.0.1:8765');
         }
 
-        const folderArtFiles = new Map();
-        const audioEntries = [];
-        for (const item of fileEntries) {
-            const file = item.file || item;
-            const relPath = item.relPath || file.webkitRelativePath || file.name || '';
-            const name = file.name || '';
-            const lastSlash = relPath.lastIndexOf('/');
-            const folderPath = lastSlash >= 0 ? relPath.slice(0, lastSlash) : '';
-            if (AUDIO_DRIVE_EXT_RE.test(name)) {
-                audioEntries.push({ file, relPath, folderPath });
-            } else if (IMAGE_DRIVE_EXT_RE.test(name) || (!folderArtFiles.has(folderPath) && ANY_IMAGE_EXT_RE.test(name))) {
-                if (!folderArtFiles.has(folderPath) || IMAGE_DRIVE_EXT_RE.test(name)) {
-                    folderArtFiles.set(folderPath, file);
-                }
-            }
-        }
-
-        if (audioEntries.length === 0) {
-            showToast(`No supported audio files (MP3, FLAC, WAV, M4A, OGG) found in ${rootName || 'selected folder'}.`, 'info');
-            return;
-        }
-
-        audioEntries.sort((a, b) => a.relPath.localeCompare(b.relPath));
-
-        for (const oldArtUrl of localFolderArtBlobUrls.values()) {
-            try { URL.revokeObjectURL(oldArtUrl); } catch (_) { }
-        }
-        localFolderArtBlobUrls.clear();
-        for (const oldAudioUrl of localDriveBlobUrls.values()) {
-            if (oldAudioUrl !== globalAudio.src) {
-                try { URL.revokeObjectURL(oldAudioUrl); } catch (_) { }
-            }
-        }
-        localDriveBlobUrls.clear();
-
-        const getFolderArtUrl = (folderPath) => {
-            if (localFolderArtBlobUrls.has(folderPath)) return localFolderArtBlobUrls.get(folderPath);
-            const imgFile = folderArtFiles.get(folderPath);
-            if (!imgFile) return '';
-            const artUrl = URL.createObjectURL(imgFile);
-            localFolderArtBlobUrls.set(folderPath, artUrl);
-            return artUrl;
-        };
-
-        const builtTracks = audioEntries.map((entry, i) => {
-            const { file, relPath, folderPath } = entry;
-            const extMatch = (file.name || '').match(/\.([a-z0-9]+)$/i);
-            const ext = extMatch ? extMatch[1].toUpperCase() : 'MP3';
-            const parsed = parseFallbackMetaFromPath(file.name, relPath, rootName);
-            const folderArt = getFolderArtUrl(folderPath);
-            const stLinks = makeStreamingUrls(parsed.title, parsed.artist);
-            return {
-                index: i + 1,
-                title: parsed.title,
-                artist: parsed.artist,
-                album: parsed.album,
-                year: '',
-                duration: 'LOCAL',
-                duration_sec: 0,
-                artwork_url: folderArt || buildLocalDriveArtworkDataUri(parsed.title, parsed.artist, i + 1),
-                preview_url: '',
-                search_query: `ytsearch1:${parsed.artist} - ${parsed.title} official audio`,
-                apple_music_url: stLinks.apple_music,
-                spotify_url: stLinks.spotify,
-                youtube_music_url: stLinks.youtube_music,
-                is_local_drive: true,
-                local_file: file,
-                rel_path: relPath,
-                drive_folder: rootName || 'External Drive',
-                file_ext: ext,
-                id3_parsed: false,
-                bubbleId: `drive_${Date.now()}_${i}_${Math.random().toString(36).slice(2, 6)}`
-            };
-        });
-
-        // Parse ID3v2 tags on the first 250 MP3 tracks in parallel batches so scanning huge drives stays fast
-        const id3Candidates = builtTracks.slice(0, 250);
-        const batchSize = 15;
-        for (let b = 0; b < id3Candidates.length; b += batchSize) {
-            await Promise.all(id3Candidates.slice(b, b + batchSize).map(t => ensureLocalTrackId3Parsed(t)));
-        }
-
-        externalDriveName = rootName || 'External Drive';
-        externalDriveTracks = builtTracks;
-        if (driveSearchInput) driveSearchInput.value = '';
-        renderExternalDriveLibrary('');
-        showToast(`💽 Mounted ${externalDriveTracks.length} local tracks from "${externalDriveName}" (0 upload)!`, 'success');
-    }
-
-    async function scanDirectoryHandle(dirHandle) {
-        if (!dirHandle) return;
-        const collected = [];
-        const rootName = dirHandle.name || 'External Drive';
-        if (driveStatusSub) {
-            driveStatusSub.textContent = `Scanning "${rootName}"...`;
-        }
-        async function walk(handle, prefix, depth) {
-            if (depth > 8) return;
-            for await (const [name, child] of handle.entries()) {
-                const relPath = prefix ? `${prefix}/${name}` : `${rootName}/${name}`;
-                if (child.kind === 'file') {
-                    if (AUDIO_DRIVE_EXT_RE.test(name) || ANY_IMAGE_EXT_RE.test(name)) {
-                        try {
-                            const file = await child.getFile();
-                            collected.push({ file, relPath });
-                        } catch (_) { }
+        let loadedTracks = [];
+        let loadedDriveName = 'Studio External Drive';
+        try {
+            for (const origin of candidateOrigins) {
+                try {
+                    const resp = await fetchWithTimeout(`${origin}/api/library/tracks`, { cache: 'no-store' }, origin === BACKEND_URL ? 4500 : 1200);
+                    if (!resp || !resp.ok) continue;
+                    const data = await resp.json().catch(() => null);
+                    if (data && Array.isArray(data.tracks) && data.tracks.length > 0) {
+                        loadedDriveName = data.drive_name || loadedDriveName;
+                        const streamOrigin = (data.base_stream_url || origin || '').replace(/\/+$/, '');
+                        loadedTracks = data.tracks.map((item, idx) => normalizeOwnerDriveTrack(item, idx, streamOrigin));
+                        break;
                     }
-                } else if (child.kind === 'directory' && !name.startsWith('.') && name !== '$RECYCLE.BIN' && name !== 'System Volume Information') {
-                    await walk(child, relPath, depth + 1);
-                }
+                } catch (_) { }
             }
+        } finally {
+            externalDriveLoading = false;
         }
-        await walk(dirHandle, '', 0);
-        await scanFileListFromDrive(collected, rootName);
-    }
 
-    async function mountExternalDriveLibrary() {
-        if (typeof window.showDirectoryPicker === 'function') {
-            try {
-                const dirHandle = await window.showDirectoryPicker({ mode: 'read' });
-                savedDriveDirHandle = dirHandle;
-                await saveDriveHandleToIdb(dirHandle);
-                if (reconnectDriveBtn) {
-                    reconnectDriveBtn.classList.remove('hidden');
-                    reconnectDriveBtn.textContent = `🔄 Reconnect "${dirHandle.name}"`;
-                }
-                await scanDirectoryHandle(dirHandle);
-                return;
-            } catch (err) {
-                if (err && err.name === 'AbortError') return;
-                console.warn('Directory picker fallback to file input:', err);
+        externalDriveName = loadedDriveName;
+        externalDriveTracks = loadedTracks;
+        renderExternalDriveLibrary(driveSearchInput ? driveSearchInput.value : '');
+
+        if (showFeedback) {
+            if (externalDriveTracks.length > 0) {
+                showToast(`💽 Connected to ${externalDriveName} (${externalDriveTracks.length} tracks)!`, 'success');
+            } else {
+                showToast('Studio external drive catalog is currently offline.', 'info');
             }
-        }
-        if (externalDriveInput) {
-            externalDriveInput.value = '';
-            externalDriveInput.click();
-        } else {
-            showToast('Your browser does not support folder selection.', 'error');
         }
     }
 
@@ -6966,8 +6607,7 @@ function initAssistantApp() {
             return {
                 success: true,
                 mode: 'chat',
-                needs_drive_mount: true,
-                reply: `💽 **Yes — you can stream your own library straight from an external hard drive or local music folder!**\n\nNothing is uploaded to any server; audio streams directly from your drive inside the browser (MP3, FLAC, WAV, M4A, AAC, OGG, OPUS). Click the button below or use **💽 EXTERNAL DRIVE** in the left sidebar to choose your drive or folder:`,
+                reply: `💽 **Studio External Drive Stream** only plays tracks published from the site owner's dedicated external hard drive (visitors cannot mount or upload from their own hard drives).\n\nRight now, the studio external drive library is offline or empty. Once connected via \`external_drive_connector.py\` or \`EXTERNAL_DRIVE_PATH\`, all tracks will stream automatically in **💽 STUDIO DRIVE**!`,
                 suggestions: [
                     `🌊 Stream continuous AI generated downtempo`,
                     `🎲 Surprise me with a playlist`
@@ -6979,7 +6619,7 @@ function initAssistantApp() {
         const q = (filterQuery || '').trim().toLowerCase();
         let matched = q
             ? externalDriveTracks.filter(t =>
-                `${t.title} ${t.artist} ${t.album} ${t.file_ext || ''} ${t.rel_path || ''}`.toLowerCase().includes(q)
+                `${t.title} ${t.artist} ${t.album} ${t.file_ext || ''}`.toLowerCase().includes(q)
             )
             : [...externalDriveTracks];
 
@@ -6996,7 +6636,6 @@ function initAssistantApp() {
             bubbleId: `drv_chat_${Date.now()}_${idx}_${Math.random().toString(36).slice(2, 6)}`
         }));
 
-        // Keep full queue aligned with the displayed tracks at index 0..9 followed by remaining matched tracks
         const fullQueue = [
             ...displayTracks,
             ...matched.slice(10)
@@ -7012,15 +6651,15 @@ function initAssistantApp() {
             success: true,
             mode: 'playlist',
             playlist_title: assistantMemory.lastPlaylistTitle,
-            playlist_vibe: `Direct External Drive Streaming • ${matched.length} Tracks • 0 Upload`,
+            playlist_vibe: `Studio External Hard Drive Stream • ${matched.length} Tracks`,
             reply: q
-                ? `💽 Found **${matched.length} local tracks** matching **${filterQuery}** on **${externalDriveName}** (showing top ${displayTracks.length} in chat; **▶ Play All** queues all ${matched.length} tracks):`
-                : `💽 Loaded **${matched.length} local tracks** directly from **${externalDriveName}**! Tap ▶ on any track below, or hit **▶ Play All** / **🔀 Shuffle** to stream continuously from your drive:`,
-            follow_up_note: `Streaming directly from your drive with zero server upload or bandwidth limits.`,
+                ? `💽 Found **${matched.length} tracks** matching **${filterQuery}** on **${externalDriveName}** (showing top ${displayTracks.length} in chat; **▶ Play All** queues all ${matched.length} tracks):`
+                : `💽 Streaming **${matched.length} tracks** from **${externalDriveName}**! Tap ▶ on any track below, or hit **▶ Play All** / **🔀 Shuffle** to stream continuously:`,
+            follow_up_note: `Streaming exclusively from the dedicated studio external hard drive.`,
             suggestions: [
-                `🔀 Shuffle my external hard drive`,
-                `💬 What's on my drive?`,
-                `🌊 Stream continuous AI downtempo`
+                `🔀 Shuffle studio external drive`,
+                `🌊 Stream continuous AI downtempo`,
+                `🎲 Surprise me with a playlist`
             ],
             tracks: displayTracks,
             full_queue_tracks: fullQueue
@@ -7041,62 +6680,25 @@ function initAssistantApp() {
         const trimmed = (rawText || '').trim();
         const isPureNonDriveQuestion = /\?$/.test(trimmed)
             && /^(what is|who is|why)\b/i.test(lower)
-            && !/\b(stream|play|mount|drive|hard\s*drive|library|local\s*music|folder)\b/i.test(lower);
+            && !/\b(stream|play|drive|hard\s*drive|library)\b/i.test(lower);
         if (isPureNonDriveQuestion) return false;
-        return /\b(external\s*(hard\s*)?drive|hard\s*drive|harddrive|my\s*(own\s*)?(music\s*)?library|local\s*(music\s*)?library|local\s*folder|mount\s*(my\s*)?(drive|folder)|from\s*my\s*drive|stream\s*my\s*drive|my\s*drive\s*tracks|shuffle\s*my\s*(drive|library)|what'?s\s*on\s*my\s*drive)\b/i.test(lower);
+        return /\b(external\s*(hard\s*)?drive|hard\s*drive|harddrive|studio\s*drive|my\s*(own\s*)?(music\s*)?library|from\s*my\s*drive|stream\s*(my|studio)\s*drive|shuffle\s*(my|studio)\s*(drive|library)|what'?s\s*on\s*(my|the)\s*drive)\b/i.test(lower);
     }
 
     function extractDriveFilterFromPrompt(rawText) {
         const cleaned = String(rawText || '')
-            .replace(/\b(can i|could i|please|stream|play|shuffle|open|load|mount|show|my|own|music|songs|tracks|library|from|a|an|the|dedicated|external|hard\s*drive|harddrive|drive|folder|local|what'?s|on)\b/gi, ' ')
+            .replace(/\b(can i|could i|please|stream|play|shuffle|open|load|show|my|own|studio|music|songs|tracks|library|from|a|an|the|dedicated|external|hard\s*drive|harddrive|drive|what'?s|on)\b/gi, ' ')
             .replace(/\s+/g, ' ')
             .trim();
         return cleaned.length >= 2 ? cleaned : '';
     }
 
-    if (mountDriveBtn) {
-        mountDriveBtn.addEventListener('click', () => {
-            mountExternalDriveLibrary();
-        });
-    }
     if (headerDriveBtn) {
-        headerDriveBtn.addEventListener('click', () => {
+        headerDriveBtn.addEventListener('click', async () => {
             if (externalDriveTracks.length === 0) {
-                mountExternalDriveLibrary();
-            } else {
-                dropExternalDriveMixToChat('', true, false);
+                await fetchOwnerExternalDriveCatalog(true);
             }
-        });
-    }
-    if (reconnectDriveBtn) {
-        reconnectDriveBtn.addEventListener('click', async () => {
-            if (!savedDriveDirHandle) {
-                mountExternalDriveLibrary();
-                return;
-            }
-            try {
-                let perm = await savedDriveDirHandle.queryPermission({ mode: 'read' });
-                if (perm !== 'granted') {
-                    perm = await savedDriveDirHandle.requestPermission({ mode: 'read' });
-                }
-                if (perm === 'granted') {
-                    await scanDirectoryHandle(savedDriveDirHandle);
-                } else {
-                    showToast('Permission needed to read your external drive folder.', 'info');
-                }
-            } catch (err) {
-                console.warn('Reconnect external drive error:', err);
-                mountExternalDriveLibrary();
-            }
-        });
-    }
-    if (externalDriveInput) {
-        externalDriveInput.addEventListener('change', () => {
-            const files = Array.from(externalDriveInput.files || []);
-            if (files.length === 0) return;
-            const firstRel = files[0].webkitRelativePath || '';
-            const rootName = firstRel.includes('/') ? firstRel.split('/')[0] : 'Local Music Library';
-            scanFileListFromDrive(files.map(f => ({ file: f, relPath: f.webkitRelativePath || f.name })), rootName);
+            dropExternalDriveMixToChat('', externalDriveTracks.length > 0, false);
         });
     }
     if (driveSearchInput) {
@@ -9723,20 +9325,6 @@ function initAssistantApp() {
             aiDowntempoStreamActive = false;
         }
 
-        if (track.is_local_drive) {
-            if (!track.local_file && track.rel_path && externalDriveTracks.length > 0) {
-                const liveMatch = externalDriveTracks.find(d => d.rel_path === track.rel_path);
-                if (liveMatch && liveMatch.local_file) {
-                    track.local_file = liveMatch.local_file;
-                    track.artwork_url = liveMatch.artwork_url || track.artwork_url;
-                }
-            }
-            if (track.local_file) {
-                await ensureLocalTrackId3Parsed(track);
-                getOrCreateLocalDriveBlobUrl(track);
-            }
-        }
-
         // Lazy on-demand preview resolution if track was rendered via instant seed fallback
         if (!track.preview_url) {
             try {
@@ -10404,10 +9992,6 @@ function initAssistantApp() {
 
     async function resolveTrackPreviewIfNeeded(track) {
         if (!track) return false;
-        if (track.is_local_drive && track.local_file) {
-            getOrCreateLocalDriveBlobUrl(track);
-            return Boolean(track.preview_url);
-        }
         if (track.is_ai_generated) {
             if (!track.preview_url || !track.preview_url.startsWith('blob:') || !aiDowntempoBlobCache.has(track.ai_seed)) {
                 synthesizeAiDowntempoWavUrl(track);
@@ -10728,19 +10312,6 @@ function initAssistantApp() {
             });
         }
 
-        if (payload.needs_drive_mount) {
-            const mountWrap = document.createElement('div');
-            const mountBtnEl = document.createElement('button');
-            mountBtnEl.type = 'button';
-            mountBtnEl.className = 'drive-chat-mount-btn';
-            mountBtnEl.innerHTML = '<span>💽</span><span>Mount External Hard Drive / Music Folder</span>';
-            mountBtnEl.addEventListener('click', () => {
-                mountExternalDriveLibrary();
-            });
-            mountWrap.appendChild(mountBtnEl);
-            bubbleEl.appendChild(mountWrap);
-        }
-
         if (payload.requires_payment) {
             const paywallEl = document.createElement('div');
             paywallEl.className = 'chat-paywall-card';
@@ -10772,8 +10343,10 @@ function initAssistantApp() {
                     follow_up_note: payload.follow_up_note,
                     suggestions: payload.suggestions,
                     streaming_links: payload.streaming_links,
-                    tracks: tracks.map(({ bubbleId, local_file, ...rest }) => (
-                        (rest.is_ai_generated || rest.is_local_drive) ? { ...rest, preview_url: '' } : rest
+                    tracks: tracks.map(({ bubbleId, ...rest }) => (
+                        (rest.is_ai_generated || String(rest.preview_url || '').startsWith('blob:'))
+                            ? { ...rest, preview_url: '' }
+                            : rest
                     ))
                 }
             });
@@ -11375,7 +10948,7 @@ function initAssistantApp() {
     syncAutoDjButtonUi();
     syncAiDowntempoUi();
     renderExternalDriveLibrary('');
-    loadDriveHandleFromIdb();
+    fetchOwnerExternalDriveCatalog(false);
     initServerWakeGate();
     initAiKeyConfig();
 }
@@ -11424,7 +10997,8 @@ if (document.readyState === 'loading') {
 } else {
     initAssistantApp();
 }
-</script>
+
+    </script>
 </body>
 
 </html>

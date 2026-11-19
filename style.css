@@ -3934,63 +3934,6 @@ body.messenger-body {
     gap: 7px;
 }
 
-.drive-action-row {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-
-.drive-mount-btn {
-    flex: 1;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    padding: 7px 9px;
-    border-radius: 8px;
-    background: linear-gradient(135deg, rgba(245, 158, 11, 0.18), rgba(255, 85, 0, 0.16));
-    border: 1px solid rgba(245, 158, 11, 0.4);
-    color: #fde68a;
-    font-size: 0.74rem;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.16s ease;
-    min-width: 0;
-}
-
-.drive-mount-btn span:last-child {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.drive-mount-btn:hover {
-    background: linear-gradient(135deg, rgba(245, 158, 11, 0.3), rgba(255, 85, 0, 0.26));
-    border-color: #fbbf24;
-    color: #ffffff;
-}
-
-.drive-reconnect-btn {
-    padding: 7px 9px;
-    border-radius: 8px;
-    background: rgba(0, 168, 132, 0.16);
-    border: 1px solid rgba(0, 168, 132, 0.45);
-    color: #6ee7b7;
-    font-size: 0.72rem;
-    font-weight: 700;
-    cursor: pointer;
-    white-space: nowrap;
-    max-width: 135px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    transition: all 0.15s ease;
-}
-
-.drive-reconnect-btn:hover {
-    background: rgba(0, 168, 132, 0.28);
-    color: #ffffff;
-}
-
 .drive-status-sub {
     font-size: 0.67rem;
     color: var(--text-secondary);
@@ -4087,28 +4030,6 @@ body.messenger-body {
     border: 1px solid rgba(245, 158, 11, 0.35);
     color: #fcd34d;
     flex-shrink: 0;
-}
-
-.drive-chat-mount-btn {
-    margin-top: 8px;
-    display: inline-flex;
-    align-items: center;
-    gap: 7px;
-    padding: 8px 14px;
-    border-radius: 999px;
-    background: linear-gradient(135deg, rgba(245, 158, 11, 0.22), rgba(255, 85, 0, 0.22));
-    border: 1px solid rgba(245, 158, 11, 0.5);
-    color: #fef3c7;
-    font-size: 0.8rem;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.16s ease;
-}
-
-.drive-chat-mount-btn:hover {
-    background: linear-gradient(135deg, rgba(245, 158, 11, 0.36), rgba(255, 85, 0, 0.34));
-    color: #ffffff;
-    transform: translateY(-1px);
 }
 
 
