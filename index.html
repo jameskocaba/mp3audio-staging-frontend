@@ -50,7 +50,7 @@
         gtag('config', 'G-VGVP90K1M4');
     </script>
 
-    <link rel="stylesheet" href="style.css?v=20261108_06">
+    <link rel="stylesheet" href="style.css?v=20261119_01">
     <style id="inlined-main-style">
         /* ==========================================================================
    MP3AUD.IO — AI TEXT MESSAGING PERSONAL MUSIC ASSISTANT STYLESHEET
@@ -3014,7 +3014,6 @@
             color: var(--text-muted);
         }
 
-
         /* ==========================================================================
    STREAMING AFFILIATE LINKS, SIDEBAR TRIALS & TRIALS MODAL STYLES
    ========================================================================== */
@@ -3280,6 +3279,79 @@
             color: var(--text-secondary);
             line-height: 1.45;
         }
+
+        /* ==========================================================================
+   1-CLICK GUEST CHECKOUT & RINGTONE EXPRESS UNLOCK STYLES
+   ========================================================================== */
+
+        .guest-checkout-action-wrap {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .guest-checkout-action-wrap .buy-credits-btn {
+            padding: 11px 14px;
+            font-size: 0.88rem;
+            transition: background-color 0.16s ease, transform 0.16s ease;
+        }
+
+        .guest-checkout-action-wrap .buy-credits-btn:hover:not(:disabled),
+        .buy-credits-btn:hover:not(:disabled) {
+            background: var(--brand-orange-hover);
+            transform: translateY(-1px);
+        }
+
+        .buy-credits-btn:disabled {
+            opacity: 0.72;
+            cursor: wait;
+        }
+
+        .guest-signin-divider {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            margin: 2px 0;
+        }
+
+        .guest-signin-divider::before,
+        .guest-signin-divider::after {
+            content: "";
+            flex: 1;
+            height: 1px;
+            background: var(--border-subtle);
+        }
+
+        .rt-express-checkout-box {
+            margin-top: 12px;
+            padding: 12px 14px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, rgba(255, 85, 0, 0.14), rgba(16, 185, 129, 0.08));
+            border: 1px solid var(--border-accent);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .rt-express-text {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+
+        .rt-express-text strong {
+            font-size: 0.84rem;
+            color: #ffffff;
+        }
+
+        .rt-express-text span {
+            font-size: 0.76rem;
+            color: var(--text-secondary);
+            line-height: 1.4;
+        }
     </style>
 
     <script type="application/ld+json">
@@ -3343,6 +3415,20 @@
                     </svg>
                     <span>New Music Request</span>
                 </button>
+            </div>
+
+            <!-- My Saved Crate (Favorited Tracks) -->
+            <div class="sidebar-section sidebar-crate-section">
+                <div class="sidebar-section-header">
+                    <span>❤️ MY SAVED CRATE (<span id="savedCrateCount">0</span>)</span>
+                    <div class="crate-header-actions">
+                        <button type="button" id="playSavedCrateBtn" class="clear-history-link crate-play-link hidden" title="Play all saved tracks">▶ Play</button>
+                        <button type="button" id="exportSavedCrateBtn" class="clear-history-link hidden" title="Export saved crate as .M3U8">Export</button>
+                    </div>
+                </div>
+                <div id="savedCrateList" class="recent-history-list saved-crate-list">
+                    <!-- Populated dynamically -->
+                </div>
             </div>
 
             <!-- Saved / Recent Music Chats -->
@@ -3537,6 +3623,10 @@
                     <span id="miniTotalTime" class="mini-time">0:30</span>
                 </div>
                 <div class="mini-player-actions">
+                    <button type="button" id="miniSaveCrateBtn" class="mini-action-pill" title="Save current track to My Crate">🤍 <span class="mini-act-label">Save</span></button>
+                    <button type="button" id="miniRingtoneBtn" class="mini-action-pill mini-rt-pill" title="Create iPhone (.M4R) or Android (.MP3) Ringtone">📱 <span class="mini-act-label">Ringtone</span></button>
+                    <button type="button" id="miniSimilarBtn" class="mini-action-pill" title="Curate 10 songs similar to this track">✨ <span class="mini-act-label">Similar</span></button>
+                    <button type="button" id="miniAutoDjBtn" class="mini-action-pill active" title="Toggle Auto-DJ Continuous Radio Mode">♾️ <span class="mini-act-label">Auto-DJ: ON</span></button>
                     <button type="button" id="miniCloseBtn" class="mini-close-btn"
                         aria-label="Close player">&times;</button>
                 </div>
@@ -3736,7 +3826,7 @@
                             <span class="plan-price-period payg-period">/ 350 Playlist Credits</span>
                         </div>
                         <p class="plan-card-desc payg-desc">
-                            Enter your email to receive a passwordless login link and unlock 350 credits:
+                            <strong>Instant 1-click checkout — no account or password required:</strong>
                         </p>
                         <ul class="plan-features-list payg-list">
                             <li><strong>350 Track Credits</strong> (~$0.011 per track / playlist)</li>
@@ -3749,7 +3839,10 @@
                             <li><strong>Credits never expire</strong> &middot; No monthly fees</li>
                         </ul>
                     </div>
-                    <div>
+                    <div class="buy-credits-action-wrap guest-checkout-action-wrap">
+                        <button type="button" id="guestBuyCreditsBtn" class="premium-btn buy-credits-btn">⚡ 1-Click
+                            Guest Checkout ($3.99)</button>
+                        <div class="guest-signin-divider"><span>Already have credits? Sign in via email</span></div>
                         <div class="unified-search-bar payg-search-bar">
                             <input type="email" id="loginEmail" placeholder="you@example.com" autocomplete="email">
                             <button type="button" id="sendLinkBtn">Send Login Link</button>
@@ -4064,6 +4157,16 @@
                 </div>
             </div>
 
+            <div id="rtExpressCheckoutBox" class="rt-express-checkout-box hidden">
+                <div class="rt-express-text">
+                    <strong>⚡ Need Credits for This Ringtone?</strong>
+                    <span>Unlock 350 credits ($3.99) with 1-Click Guest Checkout. Your ringtone will download
+                        automatically as soon as checkout completes!</span>
+                </div>
+                <button type="button" id="rtExpressBuyBtn" class="premium-btn buy-credits-btn">⚡ 1-Click Unlock &amp;
+                    Download ($3.99)</button>
+            </div>
+
             <div class="rt-modal-footer">
                 <a href="#" onclick="closeModal('ringtoneDownloadModal'); openModal('ringtoneModal'); return false;"
                     class="rt-full-guide-link">
@@ -4293,6 +4396,9 @@
             const headerAccountBtnText = document.getElementById('headerAccountBtnText');
             const logoutBtn = document.getElementById('logoutBtn');
             const buyCreditsBtn = document.getElementById('buyCreditsBtn');
+            const guestBuyCreditsBtn = document.getElementById('guestBuyCreditsBtn');
+            const rtExpressCheckoutBox = document.getElementById('rtExpressCheckoutBox');
+            const rtExpressBuyBtn = document.getElementById('rtExpressBuyBtn');
 
             // Mini Player Elements
             const miniPlayerBar = document.getElementById('miniPlayerBar');
@@ -7381,30 +7487,144 @@
             }
 
             // --- Ringtone Creation & Export Helpers (Paid Feature: 125 Credits/download) ---
-            async function downloadAudioAsFile(url, fileName, mimeType = 'audio/x-m4r') {
+            const RINGTONE_UNLOCKED_KEY = 'mp3audio_unlocked_ringtones';
+            const RINGTONE_PENDING_CHECKOUT_KEY = 'mp3audio_pending_ringtone';
+            const RINGTONE_ACTIVE_DL_KEY = 'mp3audio_active_ringtone_download';
+            let currentAccountCredits = 0;
+            let currentSubscriptionActive = false;
+            let currentRingtoneTrack = null;
+            let currentRingtoneFormat = /android/i.test(navigator.userAgent || '') ? 'mp3' : 'm4r';
+            let isPageUnloading = false;
+
+            window.addEventListener('pagehide', () => { isPageUnloading = true; });
+            window.addEventListener('beforeunload', () => { isPageUnloading = true; });
+
+            function getRingtoneTrackKey(track) {
+                if (!track) return '';
+                const artist = String(track.artist || '').trim().toLowerCase();
+                const title = String(track.title || '').trim().toLowerCase();
+                if (artist || title) return `${artist}|${title}`;
+                return String(track.preview_url || '').trim();
+            }
+
+            function isRingtoneUnlocked(track) {
+                const key = getRingtoneTrackKey(track);
+                if (!key) return false;
                 try {
-                    const resp = await fetch(url);
-                    const blob = await resp.blob();
-                    const typedBlob = new Blob([blob], { type: mimeType });
-                    const blobUrl = URL.createObjectURL(typedBlob);
-                    const a = document.createElement('a');
-                    a.href = blobUrl;
-                    a.download = fileName;
-                    document.body.appendChild(a);
-                    a.click();
-                    document.body.removeChild(a);
-                    setTimeout(() => URL.revokeObjectURL(blobUrl), 10000);
-                    return true;
+                    const list = JSON.parse(localStorage.getItem(RINGTONE_UNLOCKED_KEY) || '[]');
+                    return Array.isArray(list) && list.includes(key);
                 } catch (e) {
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.target = '_blank';
-                    a.download = fileName;
-                    document.body.appendChild(a);
-                    a.click();
-                    document.body.removeChild(a);
-                    return true;
+                    return false;
                 }
+            }
+
+            function markRingtoneUnlocked(track) {
+                const key = getRingtoneTrackKey(track);
+                if (!key) return;
+                try {
+                    const list = JSON.parse(localStorage.getItem(RINGTONE_UNLOCKED_KEY) || '[]');
+                    const arr = Array.isArray(list) ? list : [];
+                    if (!arr.includes(key)) {
+                        arr.push(key);
+                        localStorage.setItem(RINGTONE_UNLOCKED_KEY, JSON.stringify(arr.slice(-200)));
+                    }
+                } catch (e) { }
+            }
+
+            function updateCreditDisplays(credits) {
+                currentAccountCredits = Math.max(0, parseInt(credits || 0, 10) || 0);
+                const paidEl = document.getElementById('paidCreditsDisplay');
+                const hdrPaidEl = document.getElementById('headerPaidCreditsDisplay');
+                const hdrBtnText = document.getElementById('headerAccountBtnText');
+                if (paidEl) paidEl.textContent = currentAccountCredits;
+                if (hdrPaidEl) hdrPaidEl.textContent = currentAccountCredits;
+                if (hdrBtnText) {
+                    hdrBtnText.textContent = currentAccountCredits > 0 ? `${currentAccountCredits} Credits` : 'Sign In / Credits';
+                }
+            }
+
+            async function startOneClickCheckout(triggerBtn, options = {}) {
+                const originalLabel = triggerBtn ? triggerBtn.textContent : '';
+                if (triggerBtn) {
+                    triggerBtn.disabled = true;
+                    triggerBtn.textContent = 'Redirecting to Stripe...';
+                }
+                try {
+                    if (options.pendingRingtone && options.pendingRingtone.track) {
+                        localStorage.setItem(RINGTONE_PENDING_CHECKOUT_KEY, JSON.stringify({
+                            track: options.pendingRingtone.track,
+                            format: options.pendingRingtone.format || 'm4r',
+                            timestamp: Date.now()
+                        }));
+                    }
+                    const typedEmail = loginEmail ? loginEmail.value.trim() : '';
+                    const res = await fetch(`${BACKEND_URL}/create-checkout-session`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(typedEmail ? { email: typedEmail } : {})
+                    });
+                    const data = await res.json();
+                    if (data.token) {
+                        localStorage.setItem('session_token', data.token);
+                    }
+                    if (data.url) {
+                        window.location.href = data.url;
+                        return;
+                    }
+                    showToast(data.error || 'Could not start Stripe checkout.', 'error');
+                } catch (e) {
+                    showToast('Could not reach payment server. Please try again.', 'error');
+                }
+                if (triggerBtn) {
+                    triggerBtn.disabled = false;
+                    triggerBtn.textContent = originalLabel;
+                }
+            }
+
+            function showRingtoneExpressCheckout(track, format) {
+                try {
+                    if (track) {
+                        localStorage.setItem(RINGTONE_PENDING_CHECKOUT_KEY, JSON.stringify({
+                            track,
+                            format: format || currentRingtoneFormat || 'm4r',
+                            timestamp: Date.now()
+                        }));
+                    }
+                } catch (e) { }
+                if (rtExpressCheckoutBox) {
+                    rtExpressCheckoutBox.classList.remove('hidden');
+                    openModal('ringtoneDownloadModal');
+                } else {
+                    openModal('accountModal');
+                }
+            }
+
+            async function fetchAudioBlobForRingtone(url, mimeType = 'audio/x-m4r') {
+                const resp = await fetch(url);
+                if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+                const blob = await resp.blob();
+                return new Blob([blob], { type: mimeType });
+            }
+
+            function triggerBlobDownload(blob, fileName) {
+                const blobUrl = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = blobUrl;
+                a.download = fileName;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                setTimeout(() => URL.revokeObjectURL(blobUrl), 10000);
+            }
+
+            function triggerDirectUrlDownload(url, fileName) {
+                const a = document.createElement('a');
+                a.href = url;
+                a.target = '_blank';
+                a.download = fileName;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
             }
 
             async function deductRingtoneCredit(track, format = 'm4r') {
@@ -7427,18 +7647,13 @@
                     const data = await resp.json().catch(() => null);
                     if (!resp.ok || !data || !data.success) {
                         if (data && data.requires_payment) {
-                            showToast('⚡ Custom phone ringtones require 125 credits. Top up below!', 'info');
-                            openModal('accountModal');
+                            showToast('⚡ Custom phone ringtones require 125 credits. Unlock below!', 'info');
+                            showRingtoneExpressCheckout(track, format);
                             return false;
                         }
                     } else {
                         if (data.credits_remaining !== undefined) {
-                            const paidEl = document.getElementById('paidCreditsDisplay');
-                            const hdrPaidEl = document.getElementById('headerPaidCreditsDisplay');
-                            const hdrBtnText = document.getElementById('headerAccountBtnText');
-                            if (paidEl) paidEl.textContent = data.credits_remaining;
-                            if (hdrPaidEl) hdrPaidEl.textContent = data.credits_remaining;
-                            if (hdrBtnText) hdrBtnText.textContent = `${data.credits_remaining} Credits`;
+                            updateCreditDisplays(data.credits_remaining);
                         }
                         return true;
                     }
@@ -7447,39 +7662,121 @@
                 }
 
                 const paidEl = document.getElementById('paidCreditsDisplay');
-                const curCredits = parseInt(paidEl?.textContent || '0', 10);
-                if (curCredits < 125) {
-                    showToast('⚡ Custom phone ringtones require 125 credits per download. Top up below!', 'info');
-                    openModal('accountModal');
+                const curCredits = Math.max(currentAccountCredits, parseInt(paidEl?.textContent || '0', 10) || 0);
+                if (!currentSubscriptionActive && curCredits < 125) {
+                    showToast('⚡ Custom phone ringtones require 125 credits. Unlock below!', 'info');
+                    showRingtoneExpressCheckout(track, format);
                     return false;
                 }
-                const newCredits = curCredits - 125;
-                if (paidEl) paidEl.textContent = newCredits;
-                const hdrPaidEl = document.getElementById('headerPaidCreditsDisplay');
-                if (hdrPaidEl) hdrPaidEl.textContent = newCredits;
-                const hdrBtnText = document.getElementById('headerAccountBtnText');
-                if (hdrBtnText) hdrBtnText.textContent = `${newCredits} Credits`;
+                if (!currentSubscriptionActive) {
+                    updateCreditDisplays(curCredits - 125);
+                }
+                return true;
+            }
+
+            async function resolveTrackPreviewIfNeeded(track) {
+                if (!track) return false;
+                if (track.preview_url) return true;
+                try {
+                    const items = await searchItunesFast(`${track.artist || ''} ${track.title || ''}`.trim(), 1, 2000);
+                    if (items && items[0] && items[0].previewUrl) {
+                        track.preview_url = items[0].previewUrl;
+                        if (items[0].artworkUrl100) {
+                            track.artwork_url = items[0].artworkUrl100.replace('100x100bb.jpg', '600x600bb.jpg');
+                        }
+                        return true;
+                    }
+                } catch (e) { }
+                return false;
+            }
+
+            async function executeRingtoneDownload(track, format = 'm4r') {
+                if (!track) return false;
+                currentRingtoneTrack = track;
+                currentRingtoneFormat = format;
+
+                if (!track.preview_url) {
+                    showToast(`Resolving audio for ${track.title || 'track'}...`, 'info');
+                    await resolveTrackPreviewIfNeeded(track);
+                }
+                if (!track.preview_url) {
+                    showToast('Could not resolve audio preview stream for this track.', 'error');
+                    return false;
+                }
+
+                const isIos = format === 'm4r';
+                const mimeType = isIos ? 'audio/x-m4r' : 'audio/mpeg';
+                const safeTitle = (track.title || 'Track').replace(/[/\\?%*:|"<>]/g, '_');
+                const safeArtist = (track.artist || 'Artist').replace(/[/\\?%*:|"<>]/g, '_');
+                const fileName = `${safeArtist} - ${safeTitle}.${isIos ? 'm4r' : 'mp3'}`;
+                const alreadyUnlocked = isRingtoneUnlocked(track);
+
+                // Pre-fetch audio blob before deducting any credits so leaving mid-fetch costs 0 credits
+                let audioBlob = null;
+                try {
+                    audioBlob = await fetchAudioBlobForRingtone(track.preview_url, mimeType);
+                } catch (err) {
+                    if (isPageUnloading || (err && err.name === 'AbortError') || (typeof navigator !== 'undefined' && navigator.onLine === false)) {
+                        return false;
+                    }
+                }
+
+                if (isPageUnloading) {
+                    return false;
+                }
+
+                try {
+                    localStorage.setItem(RINGTONE_ACTIVE_DL_KEY, JSON.stringify({
+                        track,
+                        format,
+                        timestamp: Date.now()
+                    }));
+                } catch (e) { }
+
+                if (!alreadyUnlocked) {
+                    const hasPaid = await deductRingtoneCredit(track, format);
+                    if (!hasPaid) {
+                        try { localStorage.removeItem(RINGTONE_ACTIVE_DL_KEY); } catch (e) { }
+                        return false;
+                    }
+                    markRingtoneUnlocked(track);
+                }
+
+                if (isPageUnloading) {
+                    return false;
+                }
+
+                showToast(`Downloading ${isIos ? 'Apple iPhone ringtone (.m4r)' : 'Android ringtone (.mp3)'} for ${track.title}...`, 'info');
+                if (audioBlob) {
+                    triggerBlobDownload(audioBlob, fileName);
+                } else {
+                    triggerDirectUrlDownload(track.preview_url, fileName);
+                }
+
+                try { localStorage.removeItem(RINGTONE_ACTIVE_DL_KEY); } catch (e) { }
+                closeModal('ringtoneDownloadModal');
+                showToast(
+                    isIos
+                        ? '🍏 iPhone ringtone saved! Check Ringtone Guide in header for setup instructions.'
+                        : '🤖 Android ringtone saved! Check Ringtone Guide in header for setup instructions.',
+                    'success'
+                );
                 return true;
             }
 
             async function handleCreateRingtoneForTrack(track) {
                 if (!track.preview_url) {
                     showToast(`Resolving audio for ${track.title}...`, 'info');
-                    try {
-                        const items = await searchItunesFast(`${track.artist || ''} ${track.title || ''}`.trim(), 1, 2000);
-                        if (items && items[0] && items[0].previewUrl) {
-                            track.preview_url = items[0].previewUrl;
-                            if (items[0].artworkUrl100) {
-                                track.artwork_url = items[0].artworkUrl100.replace('100x100bb.jpg', '600x600bb.jpg');
-                            }
-                        }
-                    } catch (e) { }
+                    await resolveTrackPreviewIfNeeded(track);
                 }
 
                 if (!track.preview_url) {
                     showToast('Could not resolve audio preview stream for this track.', 'error');
                     return;
                 }
+
+                currentRingtoneTrack = track;
+                currentRingtoneFormat = /android/i.test(navigator.userAgent || '') ? 'mp3' : 'm4r';
 
                 const titleEl = document.getElementById('rtModalTrackTitle');
                 const artistEl = document.getElementById('rtModalArtistName');
@@ -7491,28 +7788,36 @@
                 if (artistEl) artistEl.textContent = track.artist || 'Featured Artist';
                 if (artEl) artEl.src = track.artwork_url || 'favicon.png';
 
-                const safeTitle = (track.title || 'Track').replace(/[/\\?%*:|"<>]/g, '_');
-                const safeArtist = (track.artist || 'Artist').replace(/[/\\?%*:|"<>]/g, '_');
+                if (rtExpressCheckoutBox) {
+                    if (!isRingtoneUnlocked(track) && !currentSubscriptionActive && currentAccountCredits < 125) {
+                        rtExpressCheckoutBox.classList.remove('hidden');
+                    } else {
+                        rtExpressCheckoutBox.classList.add('hidden');
+                    }
+                }
+
+                if (rtExpressBuyBtn) {
+                    rtExpressBuyBtn.onclick = () => {
+                        startOneClickCheckout(rtExpressBuyBtn, {
+                            pendingRingtone: {
+                                track: currentRingtoneTrack,
+                                format: currentRingtoneFormat
+                            }
+                        });
+                    };
+                }
 
                 if (iosBtn) {
                     iosBtn.onclick = async () => {
-                        const hasPaid = await deductRingtoneCredit(track, 'm4r');
-                        if (!hasPaid) return;
-                        showToast(`Downloading Apple iPhone ringtone (.m4r) for ${track.title}...`, 'info');
-                        await downloadAudioAsFile(track.preview_url, `${safeArtist} - ${safeTitle}.m4r`, 'audio/x-m4r');
-                        closeModal('ringtoneDownloadModal');
-                        showToast('🍏 iPhone ringtone saved! Check Ringtone Guide in header for setup instructions.', 'success');
+                        currentRingtoneFormat = 'm4r';
+                        await executeRingtoneDownload(track, 'm4r');
                     };
                 }
 
                 if (androidBtn) {
                     androidBtn.onclick = async () => {
-                        const hasPaid = await deductRingtoneCredit(track, 'mp3');
-                        if (!hasPaid) return;
-                        showToast(`Downloading Android ringtone (.mp3) for ${track.title}...`, 'info');
-                        await downloadAudioAsFile(track.preview_url, `${safeArtist} - ${safeTitle}.mp3`, 'audio/mpeg');
-                        closeModal('ringtoneDownloadModal');
-                        showToast('🤖 Android ringtone saved! Check Ringtone Guide in header for setup instructions.', 'success');
+                        currentRingtoneFormat = 'mp3';
+                        await executeRingtoneDownload(track, 'mp3');
                     };
                 }
 
@@ -7771,7 +8076,7 @@
                     const buyBtn = paywallEl.querySelector('.btn-paywall-buy');
                     if (buyBtn) {
                         buyBtn.addEventListener('click', () => {
-                            openModal('accountModal');
+                            startOneClickCheckout(buyBtn);
                         });
                     }
                     bubbleEl.appendChild(paywallEl);
@@ -8148,8 +8453,8 @@
                     if (data.token) localStorage.setItem('session_token', data.token);
 
                     const credits = data.paid_track_credits || 0;
-                    if (paidCreditsDisplay) paidCreditsDisplay.textContent = credits;
-                    if (headerPaidCreditsDisplay) headerPaidCreditsDisplay.textContent = credits;
+                    currentSubscriptionActive = Boolean(data.subscription_active);
+                    updateCreditDisplays(credits);
 
                     const freePlsUsed = data.playlists_generated || 0;
                     const freePlsRemaining = Math.max(0, 5 - freePlsUsed);
@@ -8165,7 +8470,7 @@
                         if (userDashboard) userDashboard.classList.add('hidden');
                         if (guestPricingGrid) guestPricingGrid.classList.remove('hidden');
                         if (sidebarAccountLabel) sidebarAccountLabel.textContent = 'Free Pass';
-                        if (sidebarAccountSub) sidebarAccountSub.textContent = `${freePlsRemaining} Free Playlists Left • Tap for Credits`;
+                        if (sidebarAccountSub) sidebarAccountSub.textContent = credits > 0 ? `${credits} Credits Available` : `${freePlsRemaining} Free Playlists Left • Tap for Credits`;
                         if (headerAccountBtnText) headerAccountBtnText.textContent = credits > 0 ? `${credits} Credits` : 'Sign In / Credits';
                     }
                 } catch (e) { }
@@ -8173,41 +8478,87 @@
 
             const urlParams = new URLSearchParams(window.location.search);
             const magicToken = urlParams.get('token');
-            if (magicToken) {
-                fetch(`${BACKEND_URL}/auth/verify`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ token: magicToken })
-                })
-                    .then(r => r.json())
-                    .then(data => {
+            const isCheckoutSuccess = urlParams.get('success');
+            const checkoutSessionId = urlParams.get('session_id');
+            const isCheckoutCanceled = urlParams.get('canceled');
+            const initialQuery = urlParams.get('q') || urlParams.get('url');
+
+            if (magicToken || isCheckoutSuccess || isCheckoutCanceled || initialQuery) {
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+
+            (async function handleStartupAuthAndResume() {
+                if (magicToken) {
+                    try {
+                        const r = await fetch(`${BACKEND_URL}/auth/verify`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ token: magicToken })
+                        });
+                        const data = await r.json();
                         if (data.success && data.token) {
                             localStorage.setItem('session_token', data.token);
                             showToast('Logged in! Your credits are ready.', 'success');
-                            checkAuthStatus();
                         } else {
                             showToast(data.error || 'Login link expired.', 'error');
                         }
-                        window.history.replaceState({}, document.title, window.location.pathname);
-                    })
-                    .catch(() => { });
-            } else {
-                checkAuthStatus();
-            }
+                    } catch (e) { }
+                    await checkAuthStatus();
+                } else if (isCheckoutSuccess) {
+                    if (checkoutSessionId) {
+                        try {
+                            const verifyRes = await fetch(`${BACKEND_URL}/api/checkout/verify`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ session_id: checkoutSessionId })
+                            });
+                            const verifyData = await verifyRes.json().catch(() => null);
+                            if (verifyData && verifyData.token) {
+                                localStorage.setItem('session_token', verifyData.token);
+                            }
+                            if (verifyData && typeof verifyData.paid_track_credits === 'number') {
+                                updateCreditDisplays(verifyData.paid_track_credits);
+                            }
+                        } catch (e) { }
+                    }
+                    showToast('Payment successful! +350 Track Credits added.', 'success');
+                    await checkAuthStatus();
 
-            if (urlParams.get('success')) {
-                showToast('Payment successful! +350 Track Credits added.', 'success');
-                window.history.replaceState({}, document.title, window.location.pathname);
-                checkAuthStatus();
-            } else if (urlParams.get('canceled')) {
-                showToast('Checkout canceled.', 'info');
-                window.history.replaceState({}, document.title, window.location.pathname);
-            }
+                    try {
+                        const pendingRaw = localStorage.getItem(RINGTONE_PENDING_CHECKOUT_KEY);
+                        if (pendingRaw) {
+                            localStorage.removeItem(RINGTONE_PENDING_CHECKOUT_KEY);
+                            const pending = JSON.parse(pendingRaw);
+                            if (pending && pending.track && (Date.now() - (pending.timestamp || 0)) < 2 * 60 * 60 * 1000) {
+                                showToast('🎉 Credits unlocked! Auto-downloading your custom ringtone now...', 'success');
+                                await executeRingtoneDownload(pending.track, pending.format || 'm4r');
+                            }
+                        }
+                    } catch (e) { }
+                } else {
+                    if (isCheckoutCanceled) {
+                        try { localStorage.removeItem(RINGTONE_PENDING_CHECKOUT_KEY); } catch (e) { }
+                        showToast('Checkout canceled.', 'info');
+                    }
+                    await checkAuthStatus();
+                }
+
+                // Auto-resume an interrupted ringtone download only if credits were already unlocked for it
+                try {
+                    const activeRaw = localStorage.getItem(RINGTONE_ACTIVE_DL_KEY);
+                    if (activeRaw) {
+                        localStorage.removeItem(RINGTONE_ACTIVE_DL_KEY);
+                        const activeDl = JSON.parse(activeRaw);
+                        if (activeDl && activeDl.track && (Date.now() - (activeDl.timestamp || 0)) < 30 * 60 * 1000 && isRingtoneUnlocked(activeDl.track)) {
+                            showToast('📱 Resuming your interrupted ringtone download (0 extra credits)...', 'info');
+                            await executeRingtoneDownload(activeDl.track, activeDl.format || 'm4r');
+                        }
+                    }
+                } catch (e) { }
+            })();
 
             // Handle deep-linked query (?q= or ?url=) from QR / Mobile Web App / Share links
-            const initialQuery = urlParams.get('q') || urlParams.get('url');
             if (initialQuery) {
-                window.history.replaceState({}, document.title, window.location.pathname);
                 setTimeout(() => sendUserMessage(initialQuery), 300);
             }
 
@@ -8242,24 +8593,21 @@
             }
 
             if (buyCreditsBtn) {
-                buyCreditsBtn.addEventListener('click', async () => {
-                    buyCreditsBtn.disabled = true;
-                    buyCreditsBtn.textContent = 'Redirecting to Stripe...';
-                    try {
-                        const res = await fetch(`${BACKEND_URL}/create-checkout-session`, { method: 'POST' });
-                        const data = await res.json();
-                        if (data.url) {
-                            window.location.href = data.url;
-                        } else {
-                            showToast(data.error || 'Please sign in first.', 'error');
-                            buyCreditsBtn.disabled = false;
-                            buyCreditsBtn.textContent = 'Buy 350 Credits ($3.99)';
+                buyCreditsBtn.addEventListener('click', () => startOneClickCheckout(buyCreditsBtn));
+            }
+
+            if (guestBuyCreditsBtn) {
+                guestBuyCreditsBtn.addEventListener('click', () => startOneClickCheckout(guestBuyCreditsBtn));
+            }
+
+            if (rtExpressBuyBtn) {
+                rtExpressBuyBtn.addEventListener('click', () => {
+                    startOneClickCheckout(rtExpressBuyBtn, currentRingtoneTrack ? {
+                        pendingRingtone: {
+                            track: currentRingtoneTrack,
+                            format: currentRingtoneFormat
                         }
-                    } catch (e) {
-                        showToast('Could not start checkout.', 'error');
-                        buyCreditsBtn.disabled = false;
-                        buyCreditsBtn.textContent = 'Buy 350 Credits ($3.99)';
-                    }
+                    } : {});
                 });
             }
 
@@ -8321,7 +8669,6 @@
         } else {
             initAssistantApp();
         }
-
     </script>
 </body>
 

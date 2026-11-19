@@ -68,6 +68,9 @@ function initAssistantApp() {
     const headerAccountBtnText = document.getElementById('headerAccountBtnText');
     const logoutBtn = document.getElementById('logoutBtn');
     const buyCreditsBtn = document.getElementById('buyCreditsBtn');
+    const guestBuyCreditsBtn = document.getElementById('guestBuyCreditsBtn');
+    const rtExpressCheckoutBox = document.getElementById('rtExpressCheckoutBox');
+    const rtExpressBuyBtn = document.getElementById('rtExpressBuyBtn');
 
     // Mini Player Elements
     const miniPlayerBar = document.getElementById('miniPlayerBar');
@@ -83,6 +86,16 @@ function initAssistantApp() {
     const miniSeekSlider = document.getElementById('miniSeekSlider');
     const miniDownloadMp3Btn = document.getElementById('miniDownloadMp3Btn');
     const miniCloseBtn = document.getElementById('miniCloseBtn');
+    const miniSaveCrateBtn = document.getElementById('miniSaveCrateBtn');
+    const miniRingtoneBtn = document.getElementById('miniRingtoneBtn');
+    const miniSimilarBtn = document.getElementById('miniSimilarBtn');
+    const miniAutoDjBtn = document.getElementById('miniAutoDjBtn');
+
+    // Saved Crate Elements
+    const savedCrateCount = document.getElementById('savedCrateCount');
+    const savedCrateList = document.getElementById('savedCrateList');
+    const playSavedCrateBtn = document.getElementById('playSavedCrateBtn');
+    const exportSavedCrateBtn = document.getElementById('exportSavedCrateBtn');
 
     // Immediate early wiring for composer send button and inputs (guarantees responsiveness)
     const earlySendBtn = document.getElementById('sendMessageBtn');
@@ -124,9 +137,20 @@ function initAssistantApp() {
     }
 
     // State
+    const SAVED_CRATE_KEY = 'mp3audio_saved_crate';
+    const SAVED_THREAD_KEY = 'mp3audio_saved_chat_thread';
+    const AUTODJ_STORAGE_KEY = 'mp3audio_autodj_enabled';
     let chatHistory = [];
     let pendingFiles = [];
     let recentPrompts = JSON.parse(localStorage.getItem('mp3audio_recent_prompts') || '[]');
+    let savedCrateTracks = [];
+    try { savedCrateTracks = JSON.parse(localStorage.getItem(SAVED_CRATE_KEY) || '[]'); } catch (e) { savedCrateTracks = []; }
+    if (!Array.isArray(savedCrateTracks)) savedCrateTracks = [];
+    let savedThreadItems = [];
+    try { savedThreadItems = JSON.parse(localStorage.getItem(SAVED_THREAD_KEY) || '[]'); } catch (e) { savedThreadItems = []; }
+    if (!Array.isArray(savedThreadItems)) savedThreadItems = [];
+    let autoDjEnabled = localStorage.getItem(AUTODJ_STORAGE_KEY) !== 'false';
+    let isAutoDjFetching = false;
 
     // Audio Player Queue State
     const globalAudio = new Audio();
@@ -267,7 +291,236 @@ function initAssistantApp() {
         });
     }
 
+    // --- My Saved Crate & Rich Welcome Screen Helpers ---
+    function getCrateTrackId(track) {
+        if (!track) return '';
+        return `${String(track.artist || '').trim().toLowerCase()}|${String(track.title || '').trim().toLowerCase()}`;
+    }
+
+    function isTrackInCrate(track) {
+        const id = getCrateTrackId(track);
+        return Boolean(id) && savedCrateTracks.some(t => getCrateTrackId(t) === id);
+    }
+
+    function syncAllCrateHeartButtons() {
+        document.querySelectorAll('.track-save-crate-btn').forEach(btn => {
+            const key = btn.getAttribute('data-crate-key') || '';
+            const saved = Boolean(key) && savedCrateTracks.some(t => getCrateTrackId(t) === key);
+            btn.classList.toggle('saved', saved);
+            btn.textContent = saved ? '❤️' : '🤍';
+            btn.title = saved ? 'Remove from My Saved Crate' : 'Save to My Crate';
+        });
+        if (miniSaveCrateBtn) {
+            const curTrack = (currentQueue && currentQueueIndex >= 0) ? currentQueue[currentQueueIndex] : null;
+            const curSaved = Boolean(curTrack && isTrackInCrate(curTrack));
+            miniSaveCrateBtn.classList.toggle('saved', curSaved);
+            miniSaveCrateBtn.innerHTML = curSaved
+                ? '❤️ <span class="mini-act-label">Saved</span>'
+                : '🤍 <span class="mini-act-label">Save</span>';
+        }
+    }
+
+    function renderSavedCrate() {
+        if (savedCrateCount) savedCrateCount.textContent = String(savedCrateTracks.length);
+        if (playSavedCrateBtn) playSavedCrateBtn.classList.toggle('hidden', savedCrateTracks.length === 0);
+        if (exportSavedCrateBtn) exportSavedCrateBtn.classList.toggle('hidden', savedCrateTracks.length === 0);
+        if (!savedCrateList) return;
+
+        if (savedCrateTracks.length === 0) {
+            savedCrateList.innerHTML = `<div style="font-size:0.74rem; color:#667781; padding: 4px 6px;">Tap 🤍 on any song to build your personal music crate.</div>`;
+            return;
+        }
+
+        savedCrateList.innerHTML = '';
+        savedCrateTracks.forEach((t, idx) => {
+            const item = document.createElement('div');
+            item.className = 'saved-crate-item';
+            item.innerHTML = `
+                <button type="button" class="saved-crate-item-play" title="Play ${escapeHtml(t.title)}">
+                    <span>▶</span>
+                    <div class="saved-crate-item-meta">
+                        <strong>${escapeHtml(t.title || 'Track')}</strong>
+                        <span>${escapeHtml(t.artist || 'Artist')}</span>
+                    </div>
+                </button>
+                <button type="button" class="saved-crate-item-remove" title="Remove from crate" aria-label="Remove">&times;</button>
+            `;
+            const playBtn = item.querySelector('.saved-crate-item-play');
+            const rmBtn = item.querySelector('.saved-crate-item-remove');
+            if (playBtn) {
+                playBtn.addEventListener('click', () => {
+                    toggleSidebar(false);
+                    playTrackFromQueue(savedCrateTracks, idx);
+                });
+            }
+            if (rmBtn) {
+                rmBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    toggleTrackInCrate(t);
+                });
+            }
+            savedCrateList.appendChild(item);
+        });
+    }
+
+    function toggleTrackInCrate(track) {
+        const id = getCrateTrackId(track);
+        if (!id) return;
+        const existingIdx = savedCrateTracks.findIndex(t => getCrateTrackId(t) === id);
+        if (existingIdx >= 0) {
+            savedCrateTracks.splice(existingIdx, 1);
+            showToast(`Removed ${track.title || 'track'} from My Saved Crate`, 'info');
+        } else {
+            savedCrateTracks.unshift({
+                title: track.title || 'Track',
+                artist: track.artist || 'Artist',
+                album: track.album || 'Single',
+                year: track.year || '',
+                duration: track.duration || '3:30',
+                duration_sec: track.duration_sec || 210,
+                preview_url: track.preview_url || '',
+                artwork_url: track.artwork_url || 'favicon.png',
+                bubbleId: `crate_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`
+            });
+            savedCrateTracks = savedCrateTracks.slice(0, 100);
+            showToast(`❤️ Saved ${track.title || 'track'} to My Crate!`, 'success');
+        }
+        try { localStorage.setItem(SAVED_CRATE_KEY, JSON.stringify(savedCrateTracks)); } catch (e) { }
+        renderSavedCrate();
+        syncAllCrateHeartButtons();
+    }
+
+    if (playSavedCrateBtn) {
+        playSavedCrateBtn.addEventListener('click', () => {
+            if (savedCrateTracks.length === 0) return;
+            toggleSidebar(false);
+            playTrackFromQueue(savedCrateTracks, 0);
+        });
+    }
+    if (exportSavedCrateBtn) {
+        exportSavedCrateBtn.addEventListener('click', () => {
+            if (savedCrateTracks.length === 0) return;
+            downloadPlaylistM3U(savedCrateTracks, 'My MP3aud.io Saved Crate');
+        });
+    }
+
+    function renderTrackAudioBubbleHtml(t, idx) {
+        const art = t.artwork_url || 'favicon.png';
+        const subMeta = [t.artist, t.album, t.year].filter(Boolean).join(' • ');
+        const numStr = (idx + 1) < 10 ? `0${idx + 1}` : `${idx + 1}`;
+        const crateKey = getCrateTrackId(t);
+        const saved = isTrackInCrate(t);
+        return `
+            <div class="track-audio-bubble" data-bubble-id="${escapeHtml(t.bubbleId)}" data-track-idx="${idx}">
+                <span class="track-index-num">${numStr}</span>
+                <div class="track-cover-wrap">
+                    <img src="${escapeHtml(art)}" alt="${escapeHtml(t.title)}" class="track-cover-img" loading="lazy" onerror="this.src='favicon.png'">
+                </div>
+                <button type="button" class="track-play-btn" title="Play preview in chat" aria-label="Play ${escapeHtml(t.title)}">▶</button>
+                <div class="track-bubble-center">
+                    <div class="track-title-line">
+                        <span class="track-title-text">${escapeHtml(t.title)}</span>
+                        <span class="track-duration-badge">${escapeHtml(t.duration || '3:30')}</span>
+                    </div>
+                    <div class="track-sub-line">
+                        <span>${escapeHtml(subMeta)}</span>
+                    </div>
+                    <div class="track-waveform-row">
+                        <div class="track-scrub-bar" title="Click to seek">
+                            <div class="track-scrub-fill"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="track-dl-actions">
+                    <button type="button" class="track-save-crate-btn${saved ? ' saved' : ''}" data-crate-key="${escapeHtml(crateKey)}" title="${saved ? 'Remove from My Saved Crate' : 'Save to My Crate'}">${saved ? '❤️' : '🤍'}</button>
+                    <button type="button" class="track-ringtone-btn" title="Create iPhone (.M4R) & Android (.MP3) ringtone (125 Credits)">📱 <span class="rt-btn-label">Ringtone</span> <span class="rt-cost-pill">125⚡</span></button>
+                    <button type="button" class="track-similar-btn" title="Curate 10 songs similar to ${escapeHtml(t.title)} by ${escapeHtml(t.artist)}">✨ <span class="sim-label">Similar</span></button>
+                </div>
+            </div>
+        `;
+    }
+
+    function wireTrackBubbleList(rootEl, tracks) {
+        if (!rootEl || !Array.isArray(tracks)) return;
+        rootEl.querySelectorAll('.track-audio-bubble').forEach(trackEl => {
+            if (trackEl.dataset.wired) return;
+            trackEl.dataset.wired = '1';
+            const idx = parseInt(trackEl.getAttribute('data-track-idx'), 10);
+            const playBtn = trackEl.querySelector('.track-play-btn');
+            const scrubBar = trackEl.querySelector('.track-scrub-bar');
+            const simBtn = trackEl.querySelector('.track-similar-btn');
+            const rtBtn = trackEl.querySelector('.track-ringtone-btn');
+            const saveBtn = trackEl.querySelector('.track-save-crate-btn');
+
+            if (playBtn) {
+                playBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    playTrackFromQueue(tracks, idx);
+                });
+            }
+            if (saveBtn) {
+                saveBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const t = tracks[idx];
+                    if (t) toggleTrackInCrate(t);
+                });
+            }
+            if (simBtn) {
+                simBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const t = tracks[idx];
+                    if (t) {
+                        sendUserMessage(`Send me a playlist of songs like ${t.title} by ${t.artist}`);
+                    }
+                });
+            }
+            if (rtBtn) {
+                rtBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const t = tracks[idx];
+                    if (t) handleCreateRingtoneForTrack(t);
+                });
+            }
+            if (scrubBar) {
+                scrubBar.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const rect = scrubBar.getBoundingClientRect();
+                    const ratio = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+                    if (activeBubbleId !== tracks[idx].bubbleId) {
+                        playTrackFromQueue(tracks, idx);
+                    } else if (globalAudio.duration) {
+                        globalAudio.currentTime = ratio * globalAudio.duration;
+                    }
+                });
+            }
+            trackEl.addEventListener('click', (e) => {
+                if (e.target.closest('a, button, .track-scrub-bar')) return;
+                playTrackFromQueue(tracks, idx);
+            });
+        });
+    }
+
+    const WELCOME_STARTER_TRACKS = [
+        { title: "Midnight City", artist: "M83", album: "Hurry Up, We're Dreaming", year: "2011", duration: "4:03", duration_sec: 243, bubbleId: "welcome_t_0" },
+        { title: "Dreams", artist: "Fleetwood Mac", album: "Rumours", year: "1977", duration: "4:17", duration_sec: 257, bubbleId: "welcome_t_1" },
+        { title: "Get Lucky", artist: "Daft Punk", album: "Random Access Memories", year: "2013", duration: "4:08", duration_sec: 248, bubbleId: "welcome_t_2" }
+    ];
+
     function buildWelcomeScreenHtml() {
+        const vibePrompts = [
+            { label: "🌙 Late-Night Synthwave", prompt: "Curate a 10-track late-night synthwave drive playlist" },
+            { label: "🔥 90s Hip-Hop Classics", prompt: "Build a 90s hip-hop classics playlist" },
+            { label: "🎸 70s Road-Trip Rock", prompt: "Give me a 70s classic rock road-trip mix" },
+            { label: "⚡ High-Energy Workout", prompt: "High-energy workout and gym playlist" },
+            { label: "☕ Chill Lo-Fi & Study", prompt: "Chill lo-fi beats for focus and study" },
+            { label: "💃 2000s R&B Throwbacks", prompt: "2000s R&B throwback hits playlist" },
+            { label: "🏝️ Summer Sunset House", prompt: "Melodic summer sunset house music mix" },
+            { label: "🎲 Surprise Mix", prompt: "Surprise me with a fresh 10-track playlist" }
+        ];
+        const pillsHtml = vibePrompts.map(v =>
+            `<button type="button" class="welcome-vibe-pill" data-prompt="${escapeHtml(v.prompt)}">${escapeHtml(v.label)}</button>`
+        ).join('');
+        const starterTracksHtml = WELCOME_STARTER_TRACKS.map((t, idx) => renderTrackAudioBubbleHtml(t, idx)).join('');
         return `
             <div class="chat-date-divider">
                 <span>✨ AI MUSIC CONCIERGE &bull; CURATED BY GENRE &amp; MOOD</span>
@@ -277,7 +530,18 @@ function initAssistantApp() {
                 <div class="msg-bubble assistant-bubble welcome-bubble">
                     <div class="msg-sender-name">MP3aud.io Assistant <span class="msg-time">Just now</span></div>
                     <div class="msg-text">
-                        <p>Where should we start?</p>
+                        <p>Text me any song, artist, mood, or vibe — I'll build instant playlists with playable previews, streaming links, and custom iPhone/Android ringtones.</p>
+                    </div>
+                    <div class="welcome-vibe-section">
+                        <span class="welcome-vibe-label">⚡ 1-Tap Vibe Starters</span>
+                        <div class="welcome-vibe-grid">${pillsHtml}</div>
+                    </div>
+                    <div class="welcome-starter-tracks-box">
+                        <div class="welcome-starter-header">
+                            <span class="welcome-vibe-label">🔥 Instant Featured Mix — Tap Play</span>
+                            <button type="button" class="btn-play-all-chat btn-play-welcome-starter">▶ Play All</button>
+                        </div>
+                        <div id="welcomeStarterTracks" class="tracks-bubble-stack">${starterTracksHtml}</div>
                     </div>
                 </div>
             </div>
@@ -294,13 +558,31 @@ function initAssistantApp() {
                 if (promptText) sendUserMessage(promptText);
             });
         });
-    }
 
-    if (chatMessages) {
-        // Enhance initial welcome screen if no user messages yet
-        if (chatMessages.querySelectorAll('.user-row').length === 0) {
-            chatMessages.innerHTML = buildWelcomeScreenHtml();
-            wireWelcomePills(chatMessages);
+        const starterContainer = rootEl.querySelector('#welcomeStarterTracks');
+        if (starterContainer) {
+            wireTrackBubbleList(starterContainer, WELCOME_STARTER_TRACKS);
+            const playStarterBtn = rootEl.querySelector('.btn-play-welcome-starter');
+            if (playStarterBtn && !playStarterBtn.dataset.wired) {
+                playStarterBtn.dataset.wired = '1';
+                playStarterBtn.addEventListener('click', () => {
+                    playTrackFromQueue(WELCOME_STARTER_TRACKS, 0);
+                });
+            }
+            if (typeof enrichPresetSeedsNonBlocking === 'function') {
+                enrichPresetSeedsNonBlocking(WELCOME_STARTER_TRACKS).then(enriched => {
+                    if (!Array.isArray(enriched)) return;
+                    enriched.forEach((item, idx) => {
+                        if (!item || !WELCOME_STARTER_TRACKS[idx]) return;
+                        if (item.preview_url) WELCOME_STARTER_TRACKS[idx].preview_url = item.preview_url;
+                        if (item.artwork_url) {
+                            WELCOME_STARTER_TRACKS[idx].artwork_url = item.artwork_url;
+                            const imgEl = starterContainer.querySelector(`.track-audio-bubble[data-track-idx="${idx}"] .track-cover-img`);
+                            if (imgEl) imgEl.src = item.artwork_url;
+                        }
+                    });
+                }).catch(() => { });
+            }
         }
     }
 
@@ -308,6 +590,8 @@ function initAssistantApp() {
         newChatBtn.addEventListener('click', () => {
             toggleSidebar(false);
             chatHistory = [];
+            savedThreadItems = [];
+            try { localStorage.removeItem(SAVED_THREAD_KEY); } catch (e) { }
             assistantMemory.awaitingPlaylistVibe = false;
             assistantMemory.pendingVibeKey = '';
             assistantMemory.pendingTopic = '';
@@ -423,37 +707,9 @@ function initAssistantApp() {
             return false;
         };
 
-        // Check if server is already awake immediately with fast non-blocking probe
+        // Check if server is already awake silently in the background (never shows intimidating 60s countdown during normal chat)
         probeServer().then(awake => {
             if (awake) return;
-
-            // Only show bottom popup if server is actually sleeping
-            if (!isBackendAwake && wakePopup) {
-                wakePopup.style.display = 'block';
-                if (assistantStatusText) {
-                    assistantStatusText.innerHTML = '⏱️ Cloud server waking up... (~60s)';
-                }
-            }
-
-            serverWakeCountdownTimer = setInterval(() => {
-                if (serverWakeSecondsRemaining > 1) {
-                    serverWakeSecondsRemaining--;
-                    const secStr = `${serverWakeSecondsRemaining}s`;
-                    if (wakeCountdownEl) wakeCountdownEl.textContent = secStr;
-                    if (wakeCountdownInline) wakeCountdownInline.textContent = secStr;
-                    if (wakeProgressFill) {
-                        const pct = Math.min(100, Math.max(0, ((SERVER_WAKE_TOTAL_SECONDS - serverWakeSecondsRemaining) / SERVER_WAKE_TOTAL_SECONDS) * 100));
-                        wakeProgressFill.style.width = `${pct}%`;
-                    }
-                    if (assistantStatusText && !isBackendAwake) {
-                        assistantStatusText.innerHTML = `⏱️ Cloud server waking up... (~${serverWakeSecondsRemaining}s remaining)`;
-                    }
-                } else {
-                    if (wakeCountdownEl) wakeCountdownEl.textContent = 'connecting...';
-                    if (wakeCountdownInline) wakeCountdownInline.textContent = 'few seconds';
-                    if (wakeProgressFill) wakeProgressFill.style.width = '96%';
-                }
-            }, 1000);
 
             serverWakePollTimer = setInterval(async () => {
                 if (isBackendAwake) {
@@ -464,8 +720,41 @@ function initAssistantApp() {
                 if (ok) {
                     clearInterval(serverWakePollTimer);
                 }
-            }, 2500);
+            }, 3000);
         });
+    }
+
+    function showWakePopupForFileUpload() {
+        const wakePopup = document.getElementById('serverWakePopup') || document.getElementById('serverWakeCard');
+        const wakeCountdownEl = document.getElementById('serverWakeCountdown');
+        const wakeCountdownInline = document.getElementById('serverWakeCountdownInline');
+        const wakeProgressFill = document.getElementById('serverWakeProgressFill');
+        if (!isBackendAwake && wakePopup && wakePopup.style.display !== 'block') {
+            wakePopup.style.display = 'block';
+            if (!serverWakeCountdownTimer) {
+                serverWakeCountdownTimer = setInterval(() => {
+                    if (isBackendAwake) {
+                        clearInterval(serverWakeCountdownTimer);
+                        serverWakeCountdownTimer = null;
+                        return;
+                    }
+                    if (serverWakeSecondsRemaining > 1) {
+                        serverWakeSecondsRemaining--;
+                        const secStr = `${serverWakeSecondsRemaining}s`;
+                        if (wakeCountdownEl) wakeCountdownEl.textContent = secStr;
+                        if (wakeCountdownInline) wakeCountdownInline.textContent = secStr;
+                        if (wakeProgressFill) {
+                            const pct = Math.min(100, Math.max(0, ((SERVER_WAKE_TOTAL_SECONDS - serverWakeSecondsRemaining) / SERVER_WAKE_TOTAL_SECONDS) * 100));
+                            wakeProgressFill.style.width = `${pct}%`;
+                        }
+                    } else {
+                        if (wakeCountdownEl) wakeCountdownEl.textContent = 'connecting...';
+                        if (wakeCountdownInline) wakeCountdownInline.textContent = 'few seconds';
+                        if (wakeProgressFill) wakeProgressFill.style.width = '96%';
+                    }
+                }, 1000);
+            }
+        }
     }
 
     function initAiKeyConfig() {
@@ -2903,6 +3192,49 @@ function initAssistantApp() {
             if (miniDownloadMp3Btn) miniDownloadMp3Btn.style.display = 'none';
         }
         updateAllBubblePlayStates();
+        syncAllCrateHeartButtons();
+    }
+
+    function syncAutoDjButtonUi() {
+        if (!miniAutoDjBtn) return;
+        miniAutoDjBtn.classList.toggle('active', autoDjEnabled);
+        miniAutoDjBtn.innerHTML = autoDjEnabled
+            ? '♾️ <span class="mini-act-label">Auto-DJ: ON</span>'
+            : '♾️ <span class="mini-act-label">Auto-DJ: OFF</span>';
+        miniAutoDjBtn.title = autoDjEnabled
+            ? 'Auto-DJ Continuous Radio Mode is ON (click to disable)'
+            : 'Auto-DJ Continuous Radio Mode is OFF (click to enable)';
+    }
+
+    async function triggerAutoDjContinuation() {
+        if (!autoDjEnabled || isAutoDjFetching) return;
+        isAutoDjFetching = true;
+        try {
+            const lastTrack = (currentQueue && currentQueue.length > 0)
+                ? currentQueue[currentQueue.length - 1]
+                : (assistantMemory.lastTracks && assistantMemory.lastTracks.length > 0 ? assistantMemory.lastTracks[0] : null);
+            const promptText = lastTrack
+                ? `More songs like ${lastTrack.title} by ${lastTrack.artist}`
+                : (assistantMemory.lastPlaylistTitle
+                    ? `Another mix like ${assistantMemory.lastPlaylistTitle}`
+                    : 'Surprise me with a fresh 10-track playlist');
+
+            const nextPayload = await clientSideCurateFallback(promptText);
+            if (nextPayload && Array.isArray(nextPayload.tracks) && nextPayload.tracks.length > 0) {
+                nextPayload.playlist_title = `♾️ Auto-DJ Radio • ${nextPayload.playlist_title || 'Continuous Mix'}`;
+                nextPayload.reply = '♾️ **Auto-DJ Radio** queued 10 fresh tracks to keep your music going:';
+                const newTracks = appendAssistantMusicBubble(nextPayload);
+                if (newTracks && newTracks.length > 0) {
+                    showToast('♾️ Auto-DJ queued 10 fresh tracks to keep your music going!', 'info');
+                    playTrackFromQueue(newTracks, 0);
+                }
+            }
+        } catch (err) {
+            console.warn('Auto-DJ continuation failed:', err);
+            updateAllBubblePlayStates();
+        } finally {
+            isAutoDjFetching = false;
+        }
     }
 
     globalAudio.addEventListener('play', updateAllBubblePlayStates);
@@ -2930,10 +3262,42 @@ function initAssistantApp() {
     globalAudio.addEventListener('ended', () => {
         if (currentQueue && currentQueueIndex + 1 < currentQueue.length) {
             playTrackFromQueue(currentQueue, currentQueueIndex + 1);
+        } else if (autoDjEnabled && currentQueue && currentQueue.length > 0) {
+            triggerAutoDjContinuation();
         } else {
             updateAllBubblePlayStates();
         }
     });
+
+    if (miniSaveCrateBtn) {
+        miniSaveCrateBtn.addEventListener('click', () => {
+            const curTrack = (currentQueue && currentQueueIndex >= 0) ? currentQueue[currentQueueIndex] : null;
+            if (!curTrack) return;
+            toggleTrackInCrate(curTrack);
+        });
+    }
+    if (miniRingtoneBtn) {
+        miniRingtoneBtn.addEventListener('click', () => {
+            const curTrack = (currentQueue && currentQueueIndex >= 0) ? currentQueue[currentQueueIndex] : null;
+            if (!curTrack) return;
+            handleCreateRingtoneForTrack(curTrack);
+        });
+    }
+    if (miniSimilarBtn) {
+        miniSimilarBtn.addEventListener('click', () => {
+            const curTrack = (currentQueue && currentQueueIndex >= 0) ? currentQueue[currentQueueIndex] : null;
+            if (!curTrack) return;
+            sendUserMessage(`Send me a playlist of songs like ${curTrack.title} by ${curTrack.artist}`);
+        });
+    }
+    if (miniAutoDjBtn) {
+        miniAutoDjBtn.addEventListener('click', () => {
+            autoDjEnabled = !autoDjEnabled;
+            try { localStorage.setItem(AUTODJ_STORAGE_KEY, String(autoDjEnabled)); } catch (e) { }
+            syncAutoDjButtonUi();
+            showToast(autoDjEnabled ? '♾️ Auto-DJ Continuous Radio enabled!' : 'Auto-DJ paused after current queue.', 'info');
+        });
+    }
 
     if (miniPlayPauseBtn) {
         miniPlayPauseBtn.addEventListener('click', () => {
@@ -3121,24 +3485,60 @@ function initAssistantApp() {
         poll();
     }
 
-    // --- Render User & Assistant Message Bubbles ---
+    // --- Render User & Assistant Message Bubbles + Persistent Thread History ---
     function scrollToBottom() {
         if (!chatMessages) return;
         chatMessages.scrollTop = chatMessages.scrollHeight;
     }
 
-    function appendUserBubble(text) {
+    function saveThreadEntry(entry) {
+        if (!entry) return;
+        try {
+            savedThreadItems.push(entry);
+            if (savedThreadItems.length > 14) {
+                savedThreadItems = savedThreadItems.slice(-14);
+            }
+            localStorage.setItem(SAVED_THREAD_KEY, JSON.stringify(savedThreadItems));
+        } catch (e) { }
+    }
+
+    function restoreSavedThreadOnLoad() {
+        if (!chatMessages || !Array.isArray(savedThreadItems) || savedThreadItems.length === 0) return;
+        savedThreadItems.forEach(item => {
+            if (!item) return;
+            if (item.type === 'user' && item.text) {
+                appendUserBubble(item.text, { skipSave: true, timeStr: item.time });
+                chatHistory.push({ role: 'user', content: item.text });
+            } else if (item.type === 'assistant' && item.payload) {
+                const restoredTracks = appendAssistantMusicBubble(item.payload, { skipSave: true, timeStr: item.time });
+                chatHistory.push({ role: 'assistant', content: item.payload.reply || '' });
+                if (Array.isArray(restoredTracks) && restoredTracks.length > 0) {
+                    assistantMemory.lastTracks = restoredTracks;
+                    assistantMemory.lastPlaylistTitle = item.payload.playlist_title || assistantMemory.lastPlaylistTitle;
+                    if (restoredTracks[0].artist) assistantMemory.lastArtist = restoredTracks[0].artist;
+                    restoredTracks.forEach(t => {
+                        shownTrackKeys.add(`${(t.title || '').toLowerCase()}|${(t.artist || '').toLowerCase()}`);
+                    });
+                }
+            }
+        });
+    }
+
+    function appendUserBubble(text, opts = {}) {
         const row = document.createElement('div');
         row.className = 'msg-row user-row';
-        const nowStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        const nowStr = opts.timeStr || new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
         row.innerHTML = `
             <div class="msg-bubble user-bubble">
                 <div class="msg-text"><p>${escapeHtml(text)}</p></div>
-                <span class="msg-time">${nowStr} ✓✓</span>
+                <span class="msg-time">${escapeHtml(nowStr)} ✓✓</span>
             </div>
         `;
         chatMessages.appendChild(row);
         scrollToBottom();
+        if (!opts.skipSave) {
+            saveThreadEntry({ type: 'user', text, time: nowStr });
+        }
     }
 
     function appendTypingBubble() {
@@ -3156,30 +3556,144 @@ function initAssistantApp() {
     }
 
     // --- Ringtone Creation & Export Helpers (Paid Feature: 125 Credits/download) ---
-    async function downloadAudioAsFile(url, fileName, mimeType = 'audio/x-m4r') {
+    const RINGTONE_UNLOCKED_KEY = 'mp3audio_unlocked_ringtones';
+    const RINGTONE_PENDING_CHECKOUT_KEY = 'mp3audio_pending_ringtone';
+    const RINGTONE_ACTIVE_DL_KEY = 'mp3audio_active_ringtone_download';
+    let currentAccountCredits = 0;
+    let currentSubscriptionActive = false;
+    let currentRingtoneTrack = null;
+    let currentRingtoneFormat = /android/i.test(navigator.userAgent || '') ? 'mp3' : 'm4r';
+    let isPageUnloading = false;
+
+    window.addEventListener('pagehide', () => { isPageUnloading = true; });
+    window.addEventListener('beforeunload', () => { isPageUnloading = true; });
+
+    function getRingtoneTrackKey(track) {
+        if (!track) return '';
+        const artist = String(track.artist || '').trim().toLowerCase();
+        const title = String(track.title || '').trim().toLowerCase();
+        if (artist || title) return `${artist}|${title}`;
+        return String(track.preview_url || '').trim();
+    }
+
+    function isRingtoneUnlocked(track) {
+        const key = getRingtoneTrackKey(track);
+        if (!key) return false;
         try {
-            const resp = await fetch(url);
-            const blob = await resp.blob();
-            const typedBlob = new Blob([blob], { type: mimeType });
-            const blobUrl = URL.createObjectURL(typedBlob);
-            const a = document.createElement('a');
-            a.href = blobUrl;
-            a.download = fileName;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            setTimeout(() => URL.revokeObjectURL(blobUrl), 10000);
-            return true;
+            const list = JSON.parse(localStorage.getItem(RINGTONE_UNLOCKED_KEY) || '[]');
+            return Array.isArray(list) && list.includes(key);
         } catch (e) {
-            const a = document.createElement('a');
-            a.href = url;
-            a.target = '_blank';
-            a.download = fileName;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            return true;
+            return false;
         }
+    }
+
+    function markRingtoneUnlocked(track) {
+        const key = getRingtoneTrackKey(track);
+        if (!key) return;
+        try {
+            const list = JSON.parse(localStorage.getItem(RINGTONE_UNLOCKED_KEY) || '[]');
+            const arr = Array.isArray(list) ? list : [];
+            if (!arr.includes(key)) {
+                arr.push(key);
+                localStorage.setItem(RINGTONE_UNLOCKED_KEY, JSON.stringify(arr.slice(-200)));
+            }
+        } catch (e) { }
+    }
+
+    function updateCreditDisplays(credits) {
+        currentAccountCredits = Math.max(0, parseInt(credits || 0, 10) || 0);
+        const paidEl = document.getElementById('paidCreditsDisplay');
+        const hdrPaidEl = document.getElementById('headerPaidCreditsDisplay');
+        const hdrBtnText = document.getElementById('headerAccountBtnText');
+        if (paidEl) paidEl.textContent = currentAccountCredits;
+        if (hdrPaidEl) hdrPaidEl.textContent = currentAccountCredits;
+        if (hdrBtnText) {
+            hdrBtnText.textContent = currentAccountCredits > 0 ? `${currentAccountCredits} Credits` : 'Sign In / Credits';
+        }
+    }
+
+    async function startOneClickCheckout(triggerBtn, options = {}) {
+        const originalLabel = triggerBtn ? triggerBtn.textContent : '';
+        if (triggerBtn) {
+            triggerBtn.disabled = true;
+            triggerBtn.textContent = 'Redirecting to Stripe...';
+        }
+        try {
+            if (options.pendingRingtone && options.pendingRingtone.track) {
+                localStorage.setItem(RINGTONE_PENDING_CHECKOUT_KEY, JSON.stringify({
+                    track: options.pendingRingtone.track,
+                    format: options.pendingRingtone.format || 'm4r',
+                    timestamp: Date.now()
+                }));
+            }
+            const typedEmail = loginEmail ? loginEmail.value.trim() : '';
+            const res = await fetch(`${BACKEND_URL}/create-checkout-session`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(typedEmail ? { email: typedEmail } : {})
+            });
+            const data = await res.json();
+            if (data.token) {
+                localStorage.setItem('session_token', data.token);
+            }
+            if (data.url) {
+                window.location.href = data.url;
+                return;
+            }
+            showToast(data.error || 'Could not start Stripe checkout.', 'error');
+        } catch (e) {
+            showToast('Could not reach payment server. Please try again.', 'error');
+        }
+        if (triggerBtn) {
+            triggerBtn.disabled = false;
+            triggerBtn.textContent = originalLabel;
+        }
+    }
+
+    function showRingtoneExpressCheckout(track, format) {
+        try {
+            if (track) {
+                localStorage.setItem(RINGTONE_PENDING_CHECKOUT_KEY, JSON.stringify({
+                    track,
+                    format: format || currentRingtoneFormat || 'm4r',
+                    timestamp: Date.now()
+                }));
+            }
+        } catch (e) { }
+        if (rtExpressCheckoutBox) {
+            rtExpressCheckoutBox.classList.remove('hidden');
+            openModal('ringtoneDownloadModal');
+        } else {
+            openModal('accountModal');
+        }
+    }
+
+    async function fetchAudioBlobForRingtone(url, mimeType = 'audio/x-m4r') {
+        const resp = await fetch(url);
+        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+        const blob = await resp.blob();
+        return new Blob([blob], { type: mimeType });
+    }
+
+    function triggerBlobDownload(blob, fileName) {
+        const blobUrl = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = blobUrl;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(() => URL.revokeObjectURL(blobUrl), 10000);
+    }
+
+    function triggerDirectUrlDownload(url, fileName) {
+        const a = document.createElement('a');
+        a.href = url;
+        a.target = '_blank';
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
     }
 
     async function deductRingtoneCredit(track, format = 'm4r') {
@@ -3202,18 +3716,13 @@ function initAssistantApp() {
             const data = await resp.json().catch(() => null);
             if (!resp.ok || !data || !data.success) {
                 if (data && data.requires_payment) {
-                    showToast('⚡ Custom phone ringtones require 125 credits. Top up below!', 'info');
-                    openModal('accountModal');
+                    showToast('⚡ Custom phone ringtones require 125 credits. Unlock below!', 'info');
+                    showRingtoneExpressCheckout(track, format);
                     return false;
                 }
             } else {
                 if (data.credits_remaining !== undefined) {
-                    const paidEl = document.getElementById('paidCreditsDisplay');
-                    const hdrPaidEl = document.getElementById('headerPaidCreditsDisplay');
-                    const hdrBtnText = document.getElementById('headerAccountBtnText');
-                    if (paidEl) paidEl.textContent = data.credits_remaining;
-                    if (hdrPaidEl) hdrPaidEl.textContent = data.credits_remaining;
-                    if (hdrBtnText) hdrBtnText.textContent = `${data.credits_remaining} Credits`;
+                    updateCreditDisplays(data.credits_remaining);
                 }
                 return true;
             }
@@ -3222,39 +3731,121 @@ function initAssistantApp() {
         }
 
         const paidEl = document.getElementById('paidCreditsDisplay');
-        const curCredits = parseInt(paidEl?.textContent || '0', 10);
-        if (curCredits < 125) {
-            showToast('⚡ Custom phone ringtones require 125 credits per download. Top up below!', 'info');
-            openModal('accountModal');
+        const curCredits = Math.max(currentAccountCredits, parseInt(paidEl?.textContent || '0', 10) || 0);
+        if (!currentSubscriptionActive && curCredits < 125) {
+            showToast('⚡ Custom phone ringtones require 125 credits. Unlock below!', 'info');
+            showRingtoneExpressCheckout(track, format);
             return false;
         }
-        const newCredits = curCredits - 125;
-        if (paidEl) paidEl.textContent = newCredits;
-        const hdrPaidEl = document.getElementById('headerPaidCreditsDisplay');
-        if (hdrPaidEl) hdrPaidEl.textContent = newCredits;
-        const hdrBtnText = document.getElementById('headerAccountBtnText');
-        if (hdrBtnText) hdrBtnText.textContent = `${newCredits} Credits`;
+        if (!currentSubscriptionActive) {
+            updateCreditDisplays(curCredits - 125);
+        }
+        return true;
+    }
+
+    async function resolveTrackPreviewIfNeeded(track) {
+        if (!track) return false;
+        if (track.preview_url) return true;
+        try {
+            const items = await searchItunesFast(`${track.artist || ''} ${track.title || ''}`.trim(), 1, 2000);
+            if (items && items[0] && items[0].previewUrl) {
+                track.preview_url = items[0].previewUrl;
+                if (items[0].artworkUrl100) {
+                    track.artwork_url = items[0].artworkUrl100.replace('100x100bb.jpg', '600x600bb.jpg');
+                }
+                return true;
+            }
+        } catch (e) { }
+        return false;
+    }
+
+    async function executeRingtoneDownload(track, format = 'm4r') {
+        if (!track) return false;
+        currentRingtoneTrack = track;
+        currentRingtoneFormat = format;
+
+        if (!track.preview_url) {
+            showToast(`Resolving audio for ${track.title || 'track'}...`, 'info');
+            await resolveTrackPreviewIfNeeded(track);
+        }
+        if (!track.preview_url) {
+            showToast('Could not resolve audio preview stream for this track.', 'error');
+            return false;
+        }
+
+        const isIos = format === 'm4r';
+        const mimeType = isIos ? 'audio/x-m4r' : 'audio/mpeg';
+        const safeTitle = (track.title || 'Track').replace(/[/\\?%*:|"<>]/g, '_');
+        const safeArtist = (track.artist || 'Artist').replace(/[/\\?%*:|"<>]/g, '_');
+        const fileName = `${safeArtist} - ${safeTitle}.${isIos ? 'm4r' : 'mp3'}`;
+        const alreadyUnlocked = isRingtoneUnlocked(track);
+
+        // Pre-fetch audio blob before deducting any credits so leaving mid-fetch costs 0 credits
+        let audioBlob = null;
+        try {
+            audioBlob = await fetchAudioBlobForRingtone(track.preview_url, mimeType);
+        } catch (err) {
+            if (isPageUnloading || (err && err.name === 'AbortError') || (typeof navigator !== 'undefined' && navigator.onLine === false)) {
+                return false;
+            }
+        }
+
+        if (isPageUnloading) {
+            return false;
+        }
+
+        try {
+            localStorage.setItem(RINGTONE_ACTIVE_DL_KEY, JSON.stringify({
+                track,
+                format,
+                timestamp: Date.now()
+            }));
+        } catch (e) { }
+
+        if (!alreadyUnlocked) {
+            const hasPaid = await deductRingtoneCredit(track, format);
+            if (!hasPaid) {
+                try { localStorage.removeItem(RINGTONE_ACTIVE_DL_KEY); } catch (e) { }
+                return false;
+            }
+            markRingtoneUnlocked(track);
+        }
+
+        if (isPageUnloading) {
+            return false;
+        }
+
+        showToast(`Downloading ${isIos ? 'Apple iPhone ringtone (.m4r)' : 'Android ringtone (.mp3)'} for ${track.title}...`, 'info');
+        if (audioBlob) {
+            triggerBlobDownload(audioBlob, fileName);
+        } else {
+            triggerDirectUrlDownload(track.preview_url, fileName);
+        }
+
+        try { localStorage.removeItem(RINGTONE_ACTIVE_DL_KEY); } catch (e) { }
+        closeModal('ringtoneDownloadModal');
+        showToast(
+            isIos
+                ? '🍏 iPhone ringtone saved! Check Ringtone Guide in header for setup instructions.'
+                : '🤖 Android ringtone saved! Check Ringtone Guide in header for setup instructions.',
+            'success'
+        );
         return true;
     }
 
     async function handleCreateRingtoneForTrack(track) {
         if (!track.preview_url) {
             showToast(`Resolving audio for ${track.title}...`, 'info');
-            try {
-                const items = await searchItunesFast(`${track.artist || ''} ${track.title || ''}`.trim(), 1, 2000);
-                if (items && items[0] && items[0].previewUrl) {
-                    track.preview_url = items[0].previewUrl;
-                    if (items[0].artworkUrl100) {
-                        track.artwork_url = items[0].artworkUrl100.replace('100x100bb.jpg', '600x600bb.jpg');
-                    }
-                }
-            } catch (e) { }
+            await resolveTrackPreviewIfNeeded(track);
         }
 
         if (!track.preview_url) {
             showToast('Could not resolve audio preview stream for this track.', 'error');
             return;
         }
+
+        currentRingtoneTrack = track;
+        currentRingtoneFormat = /android/i.test(navigator.userAgent || '') ? 'mp3' : 'm4r';
 
         const titleEl = document.getElementById('rtModalTrackTitle');
         const artistEl = document.getElementById('rtModalArtistName');
@@ -3266,35 +3857,43 @@ function initAssistantApp() {
         if (artistEl) artistEl.textContent = track.artist || 'Featured Artist';
         if (artEl) artEl.src = track.artwork_url || 'favicon.png';
 
-        const safeTitle = (track.title || 'Track').replace(/[/\\?%*:|"<>]/g, '_');
-        const safeArtist = (track.artist || 'Artist').replace(/[/\\?%*:|"<>]/g, '_');
+        if (rtExpressCheckoutBox) {
+            if (!isRingtoneUnlocked(track) && !currentSubscriptionActive && currentAccountCredits < 125) {
+                rtExpressCheckoutBox.classList.remove('hidden');
+            } else {
+                rtExpressCheckoutBox.classList.add('hidden');
+            }
+        }
+
+        if (rtExpressBuyBtn) {
+            rtExpressBuyBtn.onclick = () => {
+                startOneClickCheckout(rtExpressBuyBtn, {
+                    pendingRingtone: {
+                        track: currentRingtoneTrack,
+                        format: currentRingtoneFormat
+                    }
+                });
+            };
+        }
 
         if (iosBtn) {
             iosBtn.onclick = async () => {
-                const hasPaid = await deductRingtoneCredit(track, 'm4r');
-                if (!hasPaid) return;
-                showToast(`Downloading Apple iPhone ringtone (.m4r) for ${track.title}...`, 'info');
-                await downloadAudioAsFile(track.preview_url, `${safeArtist} - ${safeTitle}.m4r`, 'audio/x-m4r');
-                closeModal('ringtoneDownloadModal');
-                showToast('🍏 iPhone ringtone saved! Check Ringtone Guide in header for setup instructions.', 'success');
+                currentRingtoneFormat = 'm4r';
+                await executeRingtoneDownload(track, 'm4r');
             };
         }
 
         if (androidBtn) {
             androidBtn.onclick = async () => {
-                const hasPaid = await deductRingtoneCredit(track, 'mp3');
-                if (!hasPaid) return;
-                showToast(`Downloading Android ringtone (.mp3) for ${track.title}...`, 'info');
-                await downloadAudioAsFile(track.preview_url, `${safeArtist} - ${safeTitle}.mp3`, 'audio/mpeg');
-                closeModal('ringtoneDownloadModal');
-                showToast('🤖 Android ringtone saved! Check Ringtone Guide in header for setup instructions.', 'success');
+                currentRingtoneFormat = 'mp3';
+                await executeRingtoneDownload(track, 'mp3');
             };
         }
 
         openModal('ringtoneDownloadModal');
     }
 
-    function appendAssistantMusicBubble(payload) {
+    function appendAssistantMusicBubble(payload, opts = {}) {
         const tracks = (payload.tracks || []).map((t, i) => ({
             ...t,
             bubbleId: `b_${Date.now()}_${i}_${Math.random().toString(36).slice(2, 6)}`
@@ -3303,7 +3902,7 @@ function initAssistantApp() {
         const isPlaylist = (tracks.length > 1) || (payload.mode === 'playlist');
         const playlistTitle = payload.playlist_title || 'Curated Selection';
         const playlistVibe = payload.playlist_vibe || '320kbps Studio Audio • Auto ID3 Tagged';
-        const nowStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        const nowStr = opts.timeStr || new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
         const row = document.createElement('div');
         row.className = 'msg-row assistant-row';
@@ -3345,38 +3944,7 @@ function initAssistantApp() {
             `;
         }
 
-        const tracksHtml = hasTracks ? tracks.map((t, idx) => {
-            const art = t.artwork_url || 'favicon.png';
-            const subMeta = [t.artist, t.album, t.year].filter(Boolean).join(' • ');
-            const numStr = (idx + 1) < 10 ? `0${idx + 1}` : `${idx + 1}`;
-            return `
-                <div class="track-audio-bubble" data-bubble-id="${t.bubbleId}" data-track-idx="${idx}">
-                    <span class="track-index-num">${numStr}</span>
-                    <div class="track-cover-wrap">
-                        <img src="${escapeHtml(art)}" alt="${escapeHtml(t.title)}" class="track-cover-img" loading="lazy" onerror="this.src='favicon.png'">
-                    </div>
-                    <button type="button" class="track-play-btn" title="Play preview in chat" aria-label="Play ${escapeHtml(t.title)}">▶</button>
-                    <div class="track-bubble-center">
-                        <div class="track-title-line">
-                            <span class="track-title-text">${escapeHtml(t.title)}</span>
-                            <span class="track-duration-badge">${escapeHtml(t.duration || '3:30')}</span>
-                        </div>
-                        <div class="track-sub-line">
-                            <span>${escapeHtml(subMeta)}</span>
-                        </div>
-                        <div class="track-waveform-row">
-                            <div class="track-scrub-bar" title="Click to seek">
-                                <div class="track-scrub-fill"></div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="track-dl-actions">
-                        <button type="button" class="track-ringtone-btn" title="Create iPhone (.M4R) & Android (.MP3) ringtone (125 Credits)">📱 <span class="rt-btn-label">Ringtone</span> <span class="rt-cost-pill">125⚡</span></button>
-                        <button type="button" class="track-similar-btn" title="Curate 10 songs similar to ${escapeHtml(t.title)} by ${escapeHtml(t.artist)}">✨ <span class="sim-label">Similar</span></button>
-                    </div>
-                </div>
-            `;
-        }).join('') : '';
+        const tracksHtml = hasTracks ? tracks.map((t, idx) => renderTrackAudioBubbleHtml(t, idx)).join('') : '';
 
         const followUpHtml = payload.follow_up_note
             ? `<div class="msg-text" style="margin-top: 10px; font-size: 0.85rem; color: #cbd5e1;"><p>${formatMarkdownBold(payload.follow_up_note)}</p></div>`
@@ -3402,7 +3970,7 @@ function initAssistantApp() {
             <div class="msg-bubble assistant-bubble">
                 <div class="msg-sender-name">
                     <span>MP3aud.io Assistant</span>
-                    <span class="msg-time">${nowStr}</span>
+                    <span class="msg-time">${escapeHtml(nowStr)}</span>
                 </div>
                 <div class="msg-text">
                     <p>${formatMarkdownBold(payload.reply || 'Here are your tracks!')}</p>
@@ -3420,54 +3988,8 @@ function initAssistantApp() {
 
         const bubbleEl = row.querySelector('.assistant-bubble');
 
-        // Wire up Play buttons, row clicks, Similar track buttons & Scrubbing on each track bubble
-        bubbleEl.querySelectorAll('.track-audio-bubble').forEach(trackEl => {
-            const idx = parseInt(trackEl.getAttribute('data-track-idx'), 10);
-            const playBtn = trackEl.querySelector('.track-play-btn');
-            const scrubBar = trackEl.querySelector('.track-scrub-bar');
-            const simBtn = trackEl.querySelector('.track-similar-btn');
-
-            if (playBtn) {
-                playBtn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    playTrackFromQueue(tracks, idx);
-                });
-            }
-            if (simBtn) {
-                simBtn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    const t = tracks[idx];
-                    if (t) {
-                        sendUserMessage(`Send me a playlist of songs like ${t.title} by ${t.artist}`);
-                    }
-                });
-            }
-            const rtBtn = trackEl.querySelector('.track-ringtone-btn');
-            if (rtBtn) {
-                rtBtn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    const t = tracks[idx];
-                    if (t) handleCreateRingtoneForTrack(t);
-                });
-            }
-            if (scrubBar) {
-                scrubBar.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    const rect = scrubBar.getBoundingClientRect();
-                    const ratio = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
-                    if (activeBubbleId !== tracks[idx].bubbleId) {
-                        playTrackFromQueue(tracks, idx);
-                    } else if (globalAudio.duration) {
-                        globalAudio.currentTime = ratio * globalAudio.duration;
-                    }
-                });
-            }
-            // Clicking anywhere on the track card (outside external links or buttons) toggles playback
-            trackEl.addEventListener('click', (e) => {
-                if (e.target.closest('a, button, .track-scrub-bar')) return;
-                playTrackFromQueue(tracks, idx);
-            });
-        });
+        // Wire up Play, Save Heart, Ringtone, Similar & Scrubbing on each track bubble
+        wireTrackBubbleList(bubbleEl, tracks);
 
         // Wire up interactive suggestion chips
         bubbleEl.querySelectorAll('.reply-suggestion-chip').forEach(chip => {
@@ -3546,11 +4068,29 @@ function initAssistantApp() {
             const buyBtn = paywallEl.querySelector('.btn-paywall-buy');
             if (buyBtn) {
                 buyBtn.addEventListener('click', () => {
-                    openModal('accountModal');
+                    startOneClickCheckout(buyBtn);
                 });
             }
             bubbleEl.appendChild(paywallEl);
         }
+
+        if (!opts.skipSave && !payload.requires_payment) {
+            saveThreadEntry({
+                type: 'assistant',
+                time: nowStr,
+                payload: {
+                    mode: payload.mode,
+                    reply: payload.reply,
+                    playlist_title: payload.playlist_title,
+                    playlist_vibe: payload.playlist_vibe,
+                    follow_up_note: payload.follow_up_note,
+                    suggestions: payload.suggestions,
+                    streaming_links: payload.streaming_links,
+                    tracks: tracks.map(({ bubbleId, ...rest }) => rest)
+                }
+            });
+        }
+        return tracks;
     }
 
     // --- Send Message Handler (Text Request or Attached Local Files) ---
@@ -3736,7 +4276,10 @@ function initAssistantApp() {
             : `Enhance & tag ${files.length === 1 ? files[0].name : `${files.length} media files`}`;
         if (chatInput) chatInput.value = '';
 
-        appendUserBubble(`📎 ${userText}`);
+        appendUserBubble(`📎 ${userText}`, { skipSave: true });
+        if (!isBackendAwake) {
+            showWakePopupForFileUpload();
+        }
 
         const nowStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
         const row = document.createElement('div');
@@ -3923,8 +4466,8 @@ function initAssistantApp() {
             if (data.token) localStorage.setItem('session_token', data.token);
 
             const credits = data.paid_track_credits || 0;
-            if (paidCreditsDisplay) paidCreditsDisplay.textContent = credits;
-            if (headerPaidCreditsDisplay) headerPaidCreditsDisplay.textContent = credits;
+            currentSubscriptionActive = Boolean(data.subscription_active);
+            updateCreditDisplays(credits);
 
             const freePlsUsed = data.playlists_generated || 0;
             const freePlsRemaining = Math.max(0, 5 - freePlsUsed);
@@ -3940,7 +4483,7 @@ function initAssistantApp() {
                 if (userDashboard) userDashboard.classList.add('hidden');
                 if (guestPricingGrid) guestPricingGrid.classList.remove('hidden');
                 if (sidebarAccountLabel) sidebarAccountLabel.textContent = 'Free Pass';
-                if (sidebarAccountSub) sidebarAccountSub.textContent = `${freePlsRemaining} Free Playlists Left • Tap for Credits`;
+                if (sidebarAccountSub) sidebarAccountSub.textContent = credits > 0 ? `${credits} Credits Available` : `${freePlsRemaining} Free Playlists Left • Tap for Credits`;
                 if (headerAccountBtnText) headerAccountBtnText.textContent = credits > 0 ? `${credits} Credits` : 'Sign In / Credits';
             }
         } catch (e) { }
@@ -3948,41 +4491,87 @@ function initAssistantApp() {
 
     const urlParams = new URLSearchParams(window.location.search);
     const magicToken = urlParams.get('token');
-    if (magicToken) {
-        fetch(`${BACKEND_URL}/auth/verify`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ token: magicToken })
-        })
-            .then(r => r.json())
-            .then(data => {
+    const isCheckoutSuccess = urlParams.get('success');
+    const checkoutSessionId = urlParams.get('session_id');
+    const isCheckoutCanceled = urlParams.get('canceled');
+    const initialQuery = urlParams.get('q') || urlParams.get('url');
+
+    if (magicToken || isCheckoutSuccess || isCheckoutCanceled || initialQuery) {
+        window.history.replaceState({}, document.title, window.location.pathname);
+    }
+
+    (async function handleStartupAuthAndResume() {
+        if (magicToken) {
+            try {
+                const r = await fetch(`${BACKEND_URL}/auth/verify`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ token: magicToken })
+                });
+                const data = await r.json();
                 if (data.success && data.token) {
                     localStorage.setItem('session_token', data.token);
                     showToast('Logged in! Your credits are ready.', 'success');
-                    checkAuthStatus();
                 } else {
                     showToast(data.error || 'Login link expired.', 'error');
                 }
-                window.history.replaceState({}, document.title, window.location.pathname);
-            })
-            .catch(() => { });
-    } else {
-        checkAuthStatus();
-    }
+            } catch (e) { }
+            await checkAuthStatus();
+        } else if (isCheckoutSuccess) {
+            if (checkoutSessionId) {
+                try {
+                    const verifyRes = await fetch(`${BACKEND_URL}/api/checkout/verify`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ session_id: checkoutSessionId })
+                    });
+                    const verifyData = await verifyRes.json().catch(() => null);
+                    if (verifyData && verifyData.token) {
+                        localStorage.setItem('session_token', verifyData.token);
+                    }
+                    if (verifyData && typeof verifyData.paid_track_credits === 'number') {
+                        updateCreditDisplays(verifyData.paid_track_credits);
+                    }
+                } catch (e) { }
+            }
+            showToast('Payment successful! +350 Track Credits added.', 'success');
+            await checkAuthStatus();
 
-    if (urlParams.get('success')) {
-        showToast('Payment successful! +350 Track Credits added.', 'success');
-        window.history.replaceState({}, document.title, window.location.pathname);
-        checkAuthStatus();
-    } else if (urlParams.get('canceled')) {
-        showToast('Checkout canceled.', 'info');
-        window.history.replaceState({}, document.title, window.location.pathname);
-    }
+            try {
+                const pendingRaw = localStorage.getItem(RINGTONE_PENDING_CHECKOUT_KEY);
+                if (pendingRaw) {
+                    localStorage.removeItem(RINGTONE_PENDING_CHECKOUT_KEY);
+                    const pending = JSON.parse(pendingRaw);
+                    if (pending && pending.track && (Date.now() - (pending.timestamp || 0)) < 2 * 60 * 60 * 1000) {
+                        showToast('🎉 Credits unlocked! Auto-downloading your custom ringtone now...', 'success');
+                        await executeRingtoneDownload(pending.track, pending.format || 'm4r');
+                    }
+                }
+            } catch (e) { }
+        } else {
+            if (isCheckoutCanceled) {
+                try { localStorage.removeItem(RINGTONE_PENDING_CHECKOUT_KEY); } catch (e) { }
+                showToast('Checkout canceled.', 'info');
+            }
+            await checkAuthStatus();
+        }
+
+        // Auto-resume an interrupted ringtone download only if credits were already unlocked for it
+        try {
+            const activeRaw = localStorage.getItem(RINGTONE_ACTIVE_DL_KEY);
+            if (activeRaw) {
+                localStorage.removeItem(RINGTONE_ACTIVE_DL_KEY);
+                const activeDl = JSON.parse(activeRaw);
+                if (activeDl && activeDl.track && (Date.now() - (activeDl.timestamp || 0)) < 30 * 60 * 1000 && isRingtoneUnlocked(activeDl.track)) {
+                    showToast('📱 Resuming your interrupted ringtone download (0 extra credits)...', 'info');
+                    await executeRingtoneDownload(activeDl.track, activeDl.format || 'm4r');
+                }
+            }
+        } catch (e) { }
+    })();
 
     // Handle deep-linked query (?q= or ?url=) from QR / Mobile Web App / Share links
-    const initialQuery = urlParams.get('q') || urlParams.get('url');
     if (initialQuery) {
-        window.history.replaceState({}, document.title, window.location.pathname);
         setTimeout(() => sendUserMessage(initialQuery), 300);
     }
 
@@ -4017,24 +4606,21 @@ function initAssistantApp() {
     }
 
     if (buyCreditsBtn) {
-        buyCreditsBtn.addEventListener('click', async () => {
-            buyCreditsBtn.disabled = true;
-            buyCreditsBtn.textContent = 'Redirecting to Stripe...';
-            try {
-                const res = await fetch(`${BACKEND_URL}/create-checkout-session`, { method: 'POST' });
-                const data = await res.json();
-                if (data.url) {
-                    window.location.href = data.url;
-                } else {
-                    showToast(data.error || 'Please sign in first.', 'error');
-                    buyCreditsBtn.disabled = false;
-                    buyCreditsBtn.textContent = 'Buy 350 Credits ($3.99)';
+        buyCreditsBtn.addEventListener('click', () => startOneClickCheckout(buyCreditsBtn));
+    }
+
+    if (guestBuyCreditsBtn) {
+        guestBuyCreditsBtn.addEventListener('click', () => startOneClickCheckout(guestBuyCreditsBtn));
+    }
+
+    if (rtExpressBuyBtn) {
+        rtExpressBuyBtn.addEventListener('click', () => {
+            startOneClickCheckout(rtExpressBuyBtn, currentRingtoneTrack ? {
+                pendingRingtone: {
+                    track: currentRingtoneTrack,
+                    format: currentRingtoneFormat
                 }
-            } catch (e) {
-                showToast('Could not start checkout.', 'error');
-                buyCreditsBtn.disabled = false;
-                buyCreditsBtn.textContent = 'Buy 350 Credits ($3.99)';
-            }
+            } : {});
         });
     }
 
@@ -4047,7 +4633,15 @@ function initAssistantApp() {
         });
     }
 
-    // Initialize Server Wake Gating and AI Key Configuration
+    // Initialize Welcome Screen, Saved Crate, Persistent Chat Thread, Wake Gate & AI Key Config
+    if (chatMessages && chatMessages.querySelectorAll('.user-row').length === 0) {
+        chatMessages.innerHTML = buildWelcomeScreenHtml();
+        wireWelcomePills(chatMessages);
+    }
+    restoreSavedThreadOnLoad();
+    renderSavedCrate();
+    syncAllCrateHeartButtons();
+    syncAutoDjButtonUi();
     initServerWakeGate();
     initAiKeyConfig();
 }
