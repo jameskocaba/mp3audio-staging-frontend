@@ -110,6 +110,23 @@ function initAssistantApp() {
     const aiDtStylePills = document.getElementById('aiDtStylePills');
     const headerAiDowntempoBtn = document.getElementById('headerAiDowntempoBtn');
 
+    // Clear Chat & External Hard Drive Library Elements
+    const sidebarClearChatBtn = document.getElementById('sidebarClearChatBtn');
+    const headerClearChatBtn = document.getElementById('headerClearChatBtn');
+    const headerDriveBtn = document.getElementById('headerDriveBtn');
+    const headerDriveBtnText = document.getElementById('headerDriveBtnText');
+    const mountDriveBtn = document.getElementById('mountDriveBtn');
+    const mountDriveBtnText = document.getElementById('mountDriveBtnText');
+    const reconnectDriveBtn = document.getElementById('reconnectDriveBtn');
+    const playDriveBtn = document.getElementById('playDriveBtn');
+    const shuffleDriveBtn = document.getElementById('shuffleDriveBtn');
+    const dropDriveChatBtn = document.getElementById('dropDriveChatBtn');
+    const driveSearchInput = document.getElementById('driveSearchInput');
+    const driveLibraryList = document.getElementById('driveLibraryList');
+    const driveLibraryCount = document.getElementById('driveLibraryCount');
+    const driveStatusSub = document.getElementById('driveStatusSub');
+    const externalDriveInput = document.getElementById('externalDriveInput');
+
     // Immediate early wiring for composer send button and inputs (guarantees responsiveness)
     const earlySendBtn = document.getElementById('sendMessageBtn');
     if (earlySendBtn) {
@@ -996,9 +1013,12 @@ function initAssistantApp() {
                 year: track.year || '',
                 duration: track.duration || '3:30',
                 duration_sec: track.duration_sec || 210,
-                preview_url: track.is_ai_generated ? '' : (track.preview_url || ''),
-                artwork_url: track.artwork_url || 'favicon.png',
+                preview_url: (track.is_ai_generated || track.is_local_drive) ? '' : (track.preview_url || ''),
+                artwork_url: (track.is_local_drive && String(track.artwork_url || '').startsWith('blob:')) ? 'favicon.png' : (track.artwork_url || 'favicon.png'),
                 is_ai_generated: Boolean(track.is_ai_generated),
+                is_local_drive: Boolean(track.is_local_drive),
+                rel_path: track.rel_path || undefined,
+                file_ext: track.file_ext || undefined,
                 bpm: track.bpm || undefined,
                 musical_key: track.musical_key || undefined,
                 ai_seed: track.ai_seed || undefined,
@@ -1037,7 +1057,9 @@ function initAssistantApp() {
         const saved = isTrackInCrate(t);
         const aiBadgeHtml = t.is_ai_generated
             ? `<span class="track-ai-synth-badge">🌊 AI SYNTH &bull; ${escapeHtml(String(t.bpm || 74))} BPM &bull; ${escapeHtml(t.musical_key || 'Dm')}</span>`
-            : '';
+            : (t.is_local_drive
+                ? `<span class="track-local-drive-badge">💽 ${escapeHtml(t.file_ext || 'LOCAL')} &bull; DIRECT DRIVE</span>`
+                : '');
         return `
             <div class="track-audio-bubble" data-bubble-id="${escapeHtml(t.bubbleId)}" data-track-idx="${idx}">
                 <span class="track-index-num">${numStr}</span>
@@ -1242,23 +1264,653 @@ function initAssistantApp() {
         }
     }
 
+    function clearConversationThread(showFeedback = true) {
+        chatHistory = [];
+        savedThreadItems = [];
+        try { localStorage.removeItem(SAVED_THREAD_KEY); } catch (e) { }
+        assistantMemory.awaitingPlaylistVibe = false;
+        assistantMemory.pendingVibeKey = '';
+        assistantMemory.pendingTopic = '';
+        assistantMemory.lastTracks = [];
+        assistantMemory.lastPlaylistTitle = '';
+        if (chatMessages) {
+            chatMessages.innerHTML = buildWelcomeScreenHtml();
+            wireWelcomePills(chatMessages);
+            chatMessages.scrollTop = 0;
+        }
+        if (chatInput) {
+            chatInput.value = '';
+            chatInput.style.height = 'auto';
+            if (window.innerWidth > 900) {
+                try { chatInput.focus(); } catch (_) { }
+            }
+        }
+        if (showFeedback) {
+            showToast('🗑️ Conversation cleared!', 'info');
+        }
+    }
+
     if (newChatBtn) {
         newChatBtn.addEventListener('click', () => {
             toggleSidebar(false);
-            chatHistory = [];
-            savedThreadItems = [];
-            try { localStorage.removeItem(SAVED_THREAD_KEY); } catch (e) { }
-            assistantMemory.awaitingPlaylistVibe = false;
-            assistantMemory.pendingVibeKey = '';
-            assistantMemory.pendingTopic = '';
-            if (chatMessages) {
-                chatMessages.innerHTML = buildWelcomeScreenHtml();
-                wireWelcomePills(chatMessages);
+            clearConversationThread(true);
+        });
+    }
+    if (sidebarClearChatBtn) {
+        sidebarClearChatBtn.addEventListener('click', () => {
+            toggleSidebar(false);
+            clearConversationThread(true);
+        });
+    }
+    if (headerClearChatBtn) {
+        headerClearChatBtn.addEventListener('click', () => {
+            clearConversationThread(true);
+        });
+    }
+
+    // --- External Hard Drive / Local Music Library Streaming Engine (0 Upload) ---
+    const AUDIO_DRIVE_EXT_RE = /\.(mp3|flac|wav|m4a|aac|ogg|opus|webm|wma)$/i;
+    const IMAGE_DRIVE_EXT_RE = /^(cover|folder|album|front|art|artwork).*\.(jpe?g|png|webp)$/i;
+    const ANY_IMAGE_EXT_RE = /\.(jpe?g|png|webp)$/i;
+    let externalDriveTracks = [];
+    let externalDriveName = '';
+    let savedDriveDirHandle = null;
+    const localDriveBlobUrls = new Map();
+    const localFolderArtBlobUrls = new Map();
+
+    function openDriveIdb() {
+        return new Promise((resolve) => {
+            if (typeof indexedDB === 'undefined') { resolve(null); return; }
+            try {
+                const req = indexedDB.open('mp3audio_drive_db', 1);
+                req.onupgradeneeded = () => {
+                    try {
+                        const db = req.result;
+                        if (!db.objectStoreNames.contains('handles')) {
+                            db.createObjectStore('handles');
+                        }
+                    } catch (_) { }
+                };
+                req.onsuccess = () => resolve(req.result);
+                req.onerror = () => resolve(null);
+            } catch (_) {
+                resolve(null);
             }
-            if (chatInput) {
-                chatInput.value = '';
-                chatInput.focus();
+        });
+    }
+
+    async function saveDriveHandleToIdb(handle) {
+        if (!handle) return;
+        const db = await openDriveIdb();
+        if (!db) return;
+        try {
+            const tx = db.transaction('handles', 'readwrite');
+            tx.objectStore('handles').put(handle, 'lastDriveHandle');
+        } catch (_) { }
+    }
+
+    async function loadDriveHandleFromIdb() {
+        const db = await openDriveIdb();
+        if (!db) return;
+        try {
+            const handle = await new Promise((resolve) => {
+                const tx = db.transaction('handles', 'readonly');
+                const req = tx.objectStore('handles').get('lastDriveHandle');
+                req.onsuccess = () => resolve(req.result || null);
+                req.onerror = () => resolve(null);
+            });
+            if (handle && handle.name) {
+                savedDriveDirHandle = handle;
+                if (reconnectDriveBtn) {
+                    reconnectDriveBtn.classList.remove('hidden');
+                    reconnectDriveBtn.textContent = `🔄 Reconnect "${handle.name}"`;
+                    reconnectDriveBtn.title = `Reconnect saved folder/drive: ${handle.name}`;
+                }
             }
+        } catch (_) { }
+    }
+
+    function getOrCreateLocalDriveBlobUrl(track) {
+        if (!track || !track.local_file) return '';
+        const key = track.bubbleId || `${track.rel_path || track.title}|${track.local_file.size}`;
+        if (localDriveBlobUrls.has(key)) {
+            const existing = localDriveBlobUrls.get(key);
+            localDriveBlobUrls.delete(key);
+            localDriveBlobUrls.set(key, existing);
+            track.preview_url = existing;
+            return existing;
+        }
+        while (localDriveBlobUrls.size >= 25) {
+            const oldestKey = localDriveBlobUrls.keys().next().value;
+            const oldestUrl = localDriveBlobUrls.get(oldestKey);
+            localDriveBlobUrls.delete(oldestKey);
+            if (oldestUrl && oldestUrl !== globalAudio.src) {
+                try { URL.revokeObjectURL(oldestUrl); } catch (_) { }
+            }
+        }
+        const blobUrl = URL.createObjectURL(track.local_file);
+        localDriveBlobUrls.set(key, blobUrl);
+        track.preview_url = blobUrl;
+        return blobUrl;
+    }
+
+    function buildLocalDriveArtworkDataUri(title, artist, idx = 1) {
+        const hue = (Math.abs((artist || title || '').split('').reduce((a, c) => ((a << 5) - a + c.charCodeAt(0)) | 0, idx * 31)) % 360);
+        const hue2 = (hue + 48) % 360;
+        const shortT = escapeHtml((title || 'Local Audio').slice(0, 18));
+        const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240">`
+            + `<defs><linearGradient id="d" x1="0" y1="0" x2="1" y2="1">`
+            + `<stop offset="0%" stop-color="hsl(${hue},58%,22%)"/><stop offset="100%" stop-color="hsl(${hue2},68%,34%)"/></linearGradient></defs>`
+            + `<rect width="240" height="240" fill="url(#d)"/>`
+            + `<circle cx="120" cy="110" r="56" fill="none" stroke="rgba(255,255,255,0.22)" stroke-width="2"/>`
+            + `<circle cx="120" cy="110" r="18" fill="rgba(11,20,26,0.55)" stroke="rgba(255,255,255,0.3)" stroke-width="2"/>`
+            + `<text x="16" y="28" fill="rgba(255,255,255,0.8)" font-family="sans-serif" font-size="11" font-weight="800">EXTERNAL DRIVE</text>`
+            + `<text x="16" y="212" fill="#ffffff" font-family="sans-serif" font-size="14" font-weight="700">${shortT}</text>`
+            + `</svg>`;
+        return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+    }
+
+    function decodeId3TextBytes(bytes, encodingByte) {
+        if (!bytes || bytes.length === 0) return '';
+        try {
+            let label = 'iso-8859-1';
+            let slice = bytes;
+            if (encodingByte === 1) {
+                if (bytes.length >= 2 && bytes[0] === 0xFE && bytes[1] === 0xFF) {
+                    label = 'utf-16be';
+                    slice = bytes.subarray(2);
+                } else if (bytes.length >= 2 && bytes[0] === 0xFF && bytes[1] === 0xFE) {
+                    label = 'utf-16le';
+                    slice = bytes.subarray(2);
+                } else {
+                    label = 'utf-16le';
+                }
+            } else if (encodingByte === 2) {
+                label = 'utf-16be';
+            } else if (encodingByte === 3) {
+                label = 'utf-8';
+            }
+            return new TextDecoder(label).decode(slice).replace(/\0+/g, '').trim();
+        } catch (_) {
+            let out = '';
+            for (let i = 0; i < bytes.length; i++) {
+                if (bytes[i] >= 32 && bytes[i] < 127) out += String.fromCharCode(bytes[i]);
+            }
+            return out.trim();
+        }
+    }
+
+    function parseId3v2FramesFromBuffer(arrayBuffer) {
+        const meta = {};
+        if (!arrayBuffer || arrayBuffer.byteLength < 10) return meta;
+        const b = new Uint8Array(arrayBuffer);
+        if (b[0] !== 0x49 || b[1] !== 0x44 || b[2] !== 0x33) return meta; // 'ID3'
+        const ver = b[3];
+        if (ver < 3 || ver > 4) return meta;
+        const flags = b[5];
+        const tagSize = ((b[6] & 0x7F) << 21) | ((b[7] & 0x7F) << 14) | ((b[8] & 0x7F) << 7) | (b[9] & 0x7F);
+        let pos = 10;
+        const end = Math.min(b.length, 10 + tagSize);
+        if ((flags & 0x40) && pos + 4 <= end) {
+            const extSize = (ver >= 4)
+                ? (((b[pos] & 0x7F) << 21) | ((b[pos + 1] & 0x7F) << 14) | ((b[pos + 2] & 0x7F) << 7) | (b[pos + 3] & 0x7F))
+                : ((b[pos] << 24) | (b[pos + 1] << 16) | (b[pos + 2] << 8) | b[pos + 3]);
+            pos += Math.max(4, extSize);
+        }
+        while (pos + 10 <= end) {
+            if (b[pos] === 0) break;
+            const frameId = String.fromCharCode(b[pos], b[pos + 1], b[pos + 2], b[pos + 3]);
+            const fSize = (ver >= 4)
+                ? (((b[pos + 4] & 0x7F) << 21) | ((b[pos + 5] & 0x7F) << 14) | ((b[pos + 6] & 0x7F) << 7) | (b[pos + 7] & 0x7F))
+                : (((b[pos + 4] & 0xFF) << 24) | ((b[pos + 5] & 0xFF) << 16) | ((b[pos + 6] & 0xFF) << 8) | (b[pos + 7] & 0xFF));
+            pos += 10;
+            if (fSize <= 0 || pos + fSize > end) break;
+            if (frameId === 'TIT2' || frameId === 'TPE1' || frameId === 'TALB' || frameId === 'TYER' || frameId === 'TDRC') {
+                const textVal = decodeId3TextBytes(b.subarray(pos + 1, pos + fSize), b[pos]);
+                if (textVal) {
+                    if (frameId === 'TIT2') meta.title = textVal;
+                    else if (frameId === 'TPE1') meta.artist = textVal;
+                    else if (frameId === 'TALB') meta.album = textVal;
+                    else if (frameId === 'TYER' || frameId === 'TDRC') {
+                        const ym = textVal.match(/\b(19\d\d|20\d\d)\b/);
+                        if (ym) meta.year = ym[1];
+                    }
+                }
+            }
+            pos += fSize;
+        }
+        return meta;
+    }
+
+    async function ensureLocalTrackId3Parsed(track) {
+        if (!track || !track.is_local_drive || track.id3_parsed || !track.local_file) return;
+        track.id3_parsed = true;
+        if (!/\.mp3$/i.test(track.local_file.name || '') || typeof track.local_file.slice !== 'function') return;
+        try {
+            const buf = await track.local_file.slice(0, 98304).arrayBuffer();
+            const tags = parseId3v2FramesFromBuffer(buf);
+            if (tags.title) track.title = tags.title;
+            if (tags.artist) track.artist = tags.artist;
+            if (tags.album) track.album = tags.album;
+            if (tags.year) track.year = tags.year;
+        } catch (_) { }
+    }
+
+    function parseFallbackMetaFromPath(fileName, relPath, rootName) {
+        const cleanBase = String(fileName || 'Track')
+            .replace(/\.[^.]+$/, '')
+            .replace(/^\d{1,3}[\s._-]+/, '')
+            .replace(/_/g, ' ')
+            .trim();
+        const parts = String(relPath || '').split('/').filter(Boolean);
+        let artist = '';
+        let title = cleanBase || 'Local Track';
+        let album = rootName || 'External Drive';
+
+        const dashParts = cleanBase.split(/\s+[-–—]\s+/);
+        if (dashParts.length >= 2 && dashParts[0].trim() && dashParts[1].trim()) {
+            artist = dashParts[0].trim();
+            title = dashParts.slice(1).join(' - ').trim();
+        }
+        if (parts.length >= 3) {
+            album = parts[parts.length - 2] || album;
+            if (!artist && parts.length >= 4) {
+                artist = parts[parts.length - 3];
+            } else if (!artist) {
+                artist = parts[parts.length - 2];
+            }
+        } else if (parts.length === 2) {
+            album = parts[0];
+        }
+        return {
+            title: title || 'Local Track',
+            artist: artist || rootName || 'Local Library',
+            album: album || 'External Drive'
+        };
+    }
+
+    function renderExternalDriveLibrary(filterQuery = '') {
+        const total = externalDriveTracks.length;
+        if (driveLibraryCount) driveLibraryCount.textContent = String(total);
+        if (playDriveBtn) playDriveBtn.classList.toggle('hidden', total === 0);
+        if (shuffleDriveBtn) shuffleDriveBtn.classList.toggle('hidden', total === 0);
+        if (dropDriveChatBtn) dropDriveChatBtn.classList.toggle('hidden', total === 0);
+        if (driveSearchInput) driveSearchInput.classList.toggle('hidden', total === 0);
+        if (driveLibraryList) driveLibraryList.classList.toggle('hidden', total === 0);
+
+        if (headerDriveBtn) {
+            headerDriveBtn.classList.toggle('is-mounted', total > 0);
+        }
+        if (headerDriveBtnText) {
+            headerDriveBtnText.textContent = total > 0 ? `Drive (${total})` : 'Stream My Drive';
+        }
+        if (mountDriveBtnText) {
+            mountDriveBtnText.textContent = total > 0 ? `Change Drive (${externalDriveName || 'Mounted'})` : 'Mount External Drive / Folder';
+        }
+        if (driveStatusSub) {
+            driveStatusSub.textContent = total > 0
+                ? `Connected: ${externalDriveName || 'External Drive'} • ${total} tracks streaming locally`
+                : 'Direct local streaming • MP3, FLAC, WAV, M4A • 0 upload';
+        }
+
+        if (!driveLibraryList || total === 0) return;
+
+        const q = (filterQuery || '').trim().toLowerCase();
+        const matches = q
+            ? externalDriveTracks.filter(t =>
+                `${t.title} ${t.artist} ${t.album} ${t.file_ext || ''} ${t.rel_path || ''}`.toLowerCase().includes(q)
+            )
+            : externalDriveTracks;
+
+        driveLibraryList.innerHTML = '';
+        if (matches.length === 0) {
+            driveLibraryList.innerHTML = `<div style="font-size:0.72rem; color:#8696a0; padding:6px;">No drive tracks matched "${escapeHtml(filterQuery)}".</div>`;
+            return;
+        }
+
+        const shown = matches.slice(0, 150);
+        shown.forEach((t, idx) => {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'drive-track-item';
+            btn.title = `Stream ${t.title} — ${t.artist}`;
+            btn.innerHTML = `
+                <span>▶</span>
+                <div class="drive-track-item-meta">
+                    <strong>${escapeHtml(t.title)}</strong>
+                    <span>${escapeHtml(t.artist)} &bull; ${escapeHtml(t.album)}</span>
+                </div>
+                <span class="drive-track-ext">${escapeHtml(t.file_ext || 'MP3')}</span>
+            `;
+            btn.addEventListener('click', () => {
+                toggleSidebar(false);
+                playTrackFromQueue(matches, idx);
+            });
+            driveLibraryList.appendChild(btn);
+        });
+
+        if (matches.length > shown.length) {
+            const moreNote = document.createElement('div');
+            moreNote.style.cssText = 'font-size:0.68rem; color:#8696a0; padding:4px 6px; text-align:center;';
+            moreNote.textContent = `Showing ${shown.length} of ${matches.length} tracks • Search above or Play/Shuffle All`;
+            driveLibraryList.appendChild(moreNote);
+        }
+    }
+
+    async function scanFileListFromDrive(fileEntries, rootName) {
+        if (!Array.isArray(fileEntries) || fileEntries.length === 0) {
+            showToast('No audio files found in that folder or drive.', 'info');
+            return;
+        }
+
+        const folderArtFiles = new Map();
+        const audioEntries = [];
+        for (const item of fileEntries) {
+            const file = item.file || item;
+            const relPath = item.relPath || file.webkitRelativePath || file.name || '';
+            const name = file.name || '';
+            const lastSlash = relPath.lastIndexOf('/');
+            const folderPath = lastSlash >= 0 ? relPath.slice(0, lastSlash) : '';
+            if (AUDIO_DRIVE_EXT_RE.test(name)) {
+                audioEntries.push({ file, relPath, folderPath });
+            } else if (IMAGE_DRIVE_EXT_RE.test(name) || (!folderArtFiles.has(folderPath) && ANY_IMAGE_EXT_RE.test(name))) {
+                if (!folderArtFiles.has(folderPath) || IMAGE_DRIVE_EXT_RE.test(name)) {
+                    folderArtFiles.set(folderPath, file);
+                }
+            }
+        }
+
+        if (audioEntries.length === 0) {
+            showToast(`No supported audio files (MP3, FLAC, WAV, M4A, OGG) found in ${rootName || 'selected folder'}.`, 'info');
+            return;
+        }
+
+        audioEntries.sort((a, b) => a.relPath.localeCompare(b.relPath));
+
+        for (const oldArtUrl of localFolderArtBlobUrls.values()) {
+            try { URL.revokeObjectURL(oldArtUrl); } catch (_) { }
+        }
+        localFolderArtBlobUrls.clear();
+        for (const oldAudioUrl of localDriveBlobUrls.values()) {
+            if (oldAudioUrl !== globalAudio.src) {
+                try { URL.revokeObjectURL(oldAudioUrl); } catch (_) { }
+            }
+        }
+        localDriveBlobUrls.clear();
+
+        const getFolderArtUrl = (folderPath) => {
+            if (localFolderArtBlobUrls.has(folderPath)) return localFolderArtBlobUrls.get(folderPath);
+            const imgFile = folderArtFiles.get(folderPath);
+            if (!imgFile) return '';
+            const artUrl = URL.createObjectURL(imgFile);
+            localFolderArtBlobUrls.set(folderPath, artUrl);
+            return artUrl;
+        };
+
+        const builtTracks = audioEntries.map((entry, i) => {
+            const { file, relPath, folderPath } = entry;
+            const extMatch = (file.name || '').match(/\.([a-z0-9]+)$/i);
+            const ext = extMatch ? extMatch[1].toUpperCase() : 'MP3';
+            const parsed = parseFallbackMetaFromPath(file.name, relPath, rootName);
+            const folderArt = getFolderArtUrl(folderPath);
+            const stLinks = makeStreamingUrls(parsed.title, parsed.artist);
+            return {
+                index: i + 1,
+                title: parsed.title,
+                artist: parsed.artist,
+                album: parsed.album,
+                year: '',
+                duration: 'LOCAL',
+                duration_sec: 0,
+                artwork_url: folderArt || buildLocalDriveArtworkDataUri(parsed.title, parsed.artist, i + 1),
+                preview_url: '',
+                search_query: `ytsearch1:${parsed.artist} - ${parsed.title} official audio`,
+                apple_music_url: stLinks.apple_music,
+                spotify_url: stLinks.spotify,
+                youtube_music_url: stLinks.youtube_music,
+                is_local_drive: true,
+                local_file: file,
+                rel_path: relPath,
+                drive_folder: rootName || 'External Drive',
+                file_ext: ext,
+                id3_parsed: false,
+                bubbleId: `drive_${Date.now()}_${i}_${Math.random().toString(36).slice(2, 6)}`
+            };
+        });
+
+        // Parse ID3v2 tags on the first 250 MP3 tracks in parallel batches so scanning huge drives stays fast
+        const id3Candidates = builtTracks.slice(0, 250);
+        const batchSize = 15;
+        for (let b = 0; b < id3Candidates.length; b += batchSize) {
+            await Promise.all(id3Candidates.slice(b, b + batchSize).map(t => ensureLocalTrackId3Parsed(t)));
+        }
+
+        externalDriveName = rootName || 'External Drive';
+        externalDriveTracks = builtTracks;
+        if (driveSearchInput) driveSearchInput.value = '';
+        renderExternalDriveLibrary('');
+        showToast(`💽 Mounted ${externalDriveTracks.length} local tracks from "${externalDriveName}" (0 upload)!`, 'success');
+    }
+
+    async function scanDirectoryHandle(dirHandle) {
+        if (!dirHandle) return;
+        const collected = [];
+        const rootName = dirHandle.name || 'External Drive';
+        if (driveStatusSub) {
+            driveStatusSub.textContent = `Scanning "${rootName}"...`;
+        }
+        async function walk(handle, prefix, depth) {
+            if (depth > 8) return;
+            for await (const [name, child] of handle.entries()) {
+                const relPath = prefix ? `${prefix}/${name}` : `${rootName}/${name}`;
+                if (child.kind === 'file') {
+                    if (AUDIO_DRIVE_EXT_RE.test(name) || ANY_IMAGE_EXT_RE.test(name)) {
+                        try {
+                            const file = await child.getFile();
+                            collected.push({ file, relPath });
+                        } catch (_) { }
+                    }
+                } else if (child.kind === 'directory' && !name.startsWith('.') && name !== '$RECYCLE.BIN' && name !== 'System Volume Information') {
+                    await walk(child, relPath, depth + 1);
+                }
+            }
+        }
+        await walk(dirHandle, '', 0);
+        await scanFileListFromDrive(collected, rootName);
+    }
+
+    async function mountExternalDriveLibrary() {
+        if (typeof window.showDirectoryPicker === 'function') {
+            try {
+                const dirHandle = await window.showDirectoryPicker({ mode: 'read' });
+                savedDriveDirHandle = dirHandle;
+                await saveDriveHandleToIdb(dirHandle);
+                if (reconnectDriveBtn) {
+                    reconnectDriveBtn.classList.remove('hidden');
+                    reconnectDriveBtn.textContent = `🔄 Reconnect "${dirHandle.name}"`;
+                }
+                await scanDirectoryHandle(dirHandle);
+                return;
+            } catch (err) {
+                if (err && err.name === 'AbortError') return;
+                console.warn('Directory picker fallback to file input:', err);
+            }
+        }
+        if (externalDriveInput) {
+            externalDriveInput.value = '';
+            externalDriveInput.click();
+        } else {
+            showToast('Your browser does not support folder selection.', 'error');
+        }
+    }
+
+    function buildExternalDrivePlaylistPayload(filterQuery = '', shuffleList = false) {
+        if (externalDriveTracks.length === 0) {
+            return {
+                success: true,
+                mode: 'chat',
+                needs_drive_mount: true,
+                reply: `💽 **Yes — you can stream your own library straight from an external hard drive or local music folder!**\n\nNothing is uploaded to any server; audio streams directly from your drive inside the browser (MP3, FLAC, WAV, M4A, AAC, OGG, OPUS). Click the button below or use **💽 EXTERNAL DRIVE** in the left sidebar to choose your drive or folder:`,
+                suggestions: [
+                    `🌊 Stream continuous AI generated downtempo`,
+                    `🎲 Surprise me with a playlist`
+                ],
+                tracks: []
+            };
+        }
+
+        const q = (filterQuery || '').trim().toLowerCase();
+        let matched = q
+            ? externalDriveTracks.filter(t =>
+                `${t.title} ${t.artist} ${t.album} ${t.file_ext || ''} ${t.rel_path || ''}`.toLowerCase().includes(q)
+            )
+            : [...externalDriveTracks];
+
+        if (matched.length === 0) {
+            matched = [...externalDriveTracks];
+        }
+        if (shuffleList) {
+            matched = [...matched].sort(() => Math.random() - 0.5);
+        }
+
+        const displayTracks = matched.slice(0, 10).map((t, idx) => ({
+            ...t,
+            index: idx + 1,
+            bubbleId: `drv_chat_${Date.now()}_${idx}_${Math.random().toString(36).slice(2, 6)}`
+        }));
+
+        // Keep full queue aligned with the displayed tracks at index 0..9 followed by remaining matched tracks
+        const fullQueue = [
+            ...displayTracks,
+            ...matched.slice(10)
+        ];
+
+        assistantMemory.lastTracks = displayTracks;
+        assistantMemory.lastArtist = displayTracks[0] ? displayTracks[0].artist : externalDriveName;
+        assistantMemory.lastPlaylistTitle = q
+            ? `💽 ${externalDriveName} — "${filterQuery}"`
+            : `💽 ${externalDriveName} (${matched.length} Tracks)`;
+
+        return {
+            success: true,
+            mode: 'playlist',
+            playlist_title: assistantMemory.lastPlaylistTitle,
+            playlist_vibe: `Direct External Drive Streaming • ${matched.length} Tracks • 0 Upload`,
+            reply: q
+                ? `💽 Found **${matched.length} local tracks** matching **${filterQuery}** on **${externalDriveName}** (showing top ${displayTracks.length} in chat; **▶ Play All** queues all ${matched.length} tracks):`
+                : `💽 Loaded **${matched.length} local tracks** directly from **${externalDriveName}**! Tap ▶ on any track below, or hit **▶ Play All** / **🔀 Shuffle** to stream continuously from your drive:`,
+            follow_up_note: `Streaming directly from your drive with zero server upload or bandwidth limits.`,
+            suggestions: [
+                `🔀 Shuffle my external hard drive`,
+                `💬 What's on my drive?`,
+                `🌊 Stream continuous AI downtempo`
+            ],
+            tracks: displayTracks,
+            full_queue_tracks: fullQueue
+        };
+    }
+
+    function dropExternalDriveMixToChat(customFilter = '', autoPlay = false, shuffleMode = false) {
+        const payload = buildExternalDrivePlaylistPayload(customFilter, shuffleMode);
+        const rendered = appendAssistantMusicBubble(payload);
+        if (autoPlay && payload.full_queue_tracks && payload.full_queue_tracks.length > 0) {
+            playTrackFromQueue(payload.full_queue_tracks, 0);
+        } else if (autoPlay && rendered && rendered.length > 0) {
+            playTrackFromQueue(rendered, 0);
+        }
+    }
+
+    function isExternalDriveRequest(rawText, lower) {
+        const trimmed = (rawText || '').trim();
+        const isPureNonDriveQuestion = /\?$/.test(trimmed)
+            && /^(what is|who is|why)\b/i.test(lower)
+            && !/\b(stream|play|mount|drive|hard\s*drive|library|local\s*music|folder)\b/i.test(lower);
+        if (isPureNonDriveQuestion) return false;
+        return /\b(external\s*(hard\s*)?drive|hard\s*drive|harddrive|my\s*(own\s*)?(music\s*)?library|local\s*(music\s*)?library|local\s*folder|mount\s*(my\s*)?(drive|folder)|from\s*my\s*drive|stream\s*my\s*drive|my\s*drive\s*tracks|shuffle\s*my\s*(drive|library)|what'?s\s*on\s*my\s*drive)\b/i.test(lower);
+    }
+
+    function extractDriveFilterFromPrompt(rawText) {
+        const cleaned = String(rawText || '')
+            .replace(/\b(can i|could i|please|stream|play|shuffle|open|load|mount|show|my|own|music|songs|tracks|library|from|a|an|the|dedicated|external|hard\s*drive|harddrive|drive|folder|local|what'?s|on)\b/gi, ' ')
+            .replace(/\s+/g, ' ')
+            .trim();
+        return cleaned.length >= 2 ? cleaned : '';
+    }
+
+    if (mountDriveBtn) {
+        mountDriveBtn.addEventListener('click', () => {
+            mountExternalDriveLibrary();
+        });
+    }
+    if (headerDriveBtn) {
+        headerDriveBtn.addEventListener('click', () => {
+            if (externalDriveTracks.length === 0) {
+                mountExternalDriveLibrary();
+            } else {
+                dropExternalDriveMixToChat('', true, false);
+            }
+        });
+    }
+    if (reconnectDriveBtn) {
+        reconnectDriveBtn.addEventListener('click', async () => {
+            if (!savedDriveDirHandle) {
+                mountExternalDriveLibrary();
+                return;
+            }
+            try {
+                let perm = await savedDriveDirHandle.queryPermission({ mode: 'read' });
+                if (perm !== 'granted') {
+                    perm = await savedDriveDirHandle.requestPermission({ mode: 'read' });
+                }
+                if (perm === 'granted') {
+                    await scanDirectoryHandle(savedDriveDirHandle);
+                } else {
+                    showToast('Permission needed to read your external drive folder.', 'info');
+                }
+            } catch (err) {
+                console.warn('Reconnect external drive error:', err);
+                mountExternalDriveLibrary();
+            }
+        });
+    }
+    if (externalDriveInput) {
+        externalDriveInput.addEventListener('change', () => {
+            const files = Array.from(externalDriveInput.files || []);
+            if (files.length === 0) return;
+            const firstRel = files[0].webkitRelativePath || '';
+            const rootName = firstRel.includes('/') ? firstRel.split('/')[0] : 'Local Music Library';
+            scanFileListFromDrive(files.map(f => ({ file: f, relPath: f.webkitRelativePath || f.name })), rootName);
+        });
+    }
+    if (driveSearchInput) {
+        driveSearchInput.addEventListener('input', () => {
+            renderExternalDriveLibrary(driveSearchInput.value || '');
+        });
+    }
+    if (playDriveBtn) {
+        playDriveBtn.addEventListener('click', () => {
+            if (externalDriveTracks.length === 0) return;
+            toggleSidebar(false);
+            const q = (driveSearchInput && driveSearchInput.value || '').trim().toLowerCase();
+            const list = q
+                ? externalDriveTracks.filter(t => `${t.title} ${t.artist} ${t.album} ${t.file_ext || ''}`.toLowerCase().includes(q))
+                : externalDriveTracks;
+            playTrackFromQueue(list.length > 0 ? list : externalDriveTracks, 0);
+        });
+    }
+    if (shuffleDriveBtn) {
+        shuffleDriveBtn.addEventListener('click', () => {
+            if (externalDriveTracks.length === 0) return;
+            toggleSidebar(false);
+            const shuffled = [...externalDriveTracks].sort(() => Math.random() - 0.5);
+            showToast(`🔀 Shuffling all ${shuffled.length} tracks from ${externalDriveName}!`, 'info');
+            playTrackFromQueue(shuffled, 0);
+        });
+    }
+    if (dropDriveChatBtn) {
+        dropDriveChatBtn.addEventListener('click', () => {
+            toggleSidebar(false);
+            dropExternalDriveMixToChat(driveSearchInput ? driveSearchInput.value : '', false, false);
         });
     }
 
@@ -3564,6 +4216,13 @@ function initAssistantApp() {
             return generateAiDowntempoPlaylistPayload(detectAiDowntempoStyleFromText(lower));
         }
 
+        // 0.20 Handle External Hard Drive / Local Music Library streaming requests
+        if (isExternalDriveRequest(rawText, lower)) {
+            const wantsShuffle = /\b(shuffle|random|mix up)\b/i.test(lower);
+            const filterTerm = extractDriveFilterFromPrompt(rawText);
+            return buildExternalDrivePlaylistPayload(filterTerm, wantsShuffle);
+        }
+
         // 0.25 Check Follow-Up Questions (about tracks, release years, albums, artists, playback, swapping tracks, or how-to)
         const followUpAnswer = await answerFollowUpQuestion(rawText, lower);
         if (followUpAnswer) {
@@ -3847,6 +4506,20 @@ function initAssistantApp() {
             aiDowntempoStreamActive = false;
         }
 
+        if (track.is_local_drive) {
+            if (!track.local_file && track.rel_path && externalDriveTracks.length > 0) {
+                const liveMatch = externalDriveTracks.find(d => d.rel_path === track.rel_path);
+                if (liveMatch && liveMatch.local_file) {
+                    track.local_file = liveMatch.local_file;
+                    track.artwork_url = liveMatch.artwork_url || track.artwork_url;
+                }
+            }
+            if (track.local_file) {
+                await ensureLocalTrackId3Parsed(track);
+                getOrCreateLocalDriveBlobUrl(track);
+            }
+        }
+
         // Lazy on-demand preview resolution if track was rendered via instant seed fallback
         if (!track.preview_url) {
             try {
@@ -3891,7 +4564,7 @@ function initAssistantApp() {
             if (miniPlayerTitle) miniPlayerTitle.textContent = track.title || 'Track';
             if (miniPlayerArtist) miniPlayerArtist.textContent = track.is_ai_generated
                 ? `${track.artist || 'MP3aud.io Neural Synth'} • ${track.bpm || 74} BPM`
-                : (track.artist || 'Artist');
+                : (track.is_local_drive ? `${track.artist || 'Local Library'} • ${track.file_ext || 'DRIVE'}` : (track.artist || 'Artist'));
             if (miniDownloadMp3Btn) miniDownloadMp3Btn.style.display = 'none';
         }
         updateAllBubblePlayStates();
@@ -3930,6 +4603,19 @@ function initAssistantApp() {
                 return;
             }
 
+            if (lastTrack && lastTrack.is_local_drive && externalDriveTracks.length > 0) {
+                const nextDrivePayload = buildExternalDrivePlaylistPayload('', true);
+                nextDrivePayload.playlist_title = `♾️ Auto-DJ Drive • ${externalDriveName || 'External Drive'}`;
+                const renderedDrive = appendAssistantMusicBubble(nextDrivePayload);
+                if (nextDrivePayload.full_queue_tracks && nextDrivePayload.full_queue_tracks.length > 0) {
+                    showToast('💽 Auto-DJ queued fresh tracks from your external hard drive!', 'info');
+                    playTrackFromQueue(nextDrivePayload.full_queue_tracks, 0);
+                } else if (renderedDrive && renderedDrive.length > 0) {
+                    playTrackFromQueue(renderedDrive, 0);
+                }
+                return;
+            }
+
             const promptText = lastTrack
                 ? `More songs like ${lastTrack.title} by ${lastTrack.artist}`
                 : (assistantMemory.lastPlaylistTitle
@@ -3956,6 +4642,19 @@ function initAssistantApp() {
 
     globalAudio.addEventListener('play', updateAllBubblePlayStates);
     globalAudio.addEventListener('pause', updateAllBubblePlayStates);
+    globalAudio.addEventListener('loadedmetadata', () => {
+        const curTrack = (currentQueue && currentQueueIndex >= 0) ? currentQueue[currentQueueIndex] : null;
+        if (curTrack && curTrack.is_local_drive && isFinite(globalAudio.duration) && globalAudio.duration > 0) {
+            curTrack.duration_sec = Math.round(globalAudio.duration);
+            curTrack.duration = formatTime(globalAudio.duration);
+            if (miniTotalTime) miniTotalTime.textContent = curTrack.duration;
+            if (activeBubbleId) {
+                const activeEl = document.querySelector(`.track-audio-bubble[data-bubble-id="${activeBubbleId}"]`);
+                const durBadge = activeEl ? activeEl.querySelector('.track-duration-badge') : null;
+                if (durBadge) durBadge.textContent = curTrack.duration;
+            }
+        }
+    });
     globalAudio.addEventListener('timeupdate', () => {
         const dur = globalAudio.duration || 30;
         const cur = globalAudio.currentTime || 0;
@@ -4488,6 +5187,10 @@ function initAssistantApp() {
 
     async function resolveTrackPreviewIfNeeded(track) {
         if (!track) return false;
+        if (track.is_local_drive && track.local_file) {
+            getOrCreateLocalDriveBlobUrl(track);
+            return Boolean(track.preview_url);
+        }
         if (track.is_ai_generated) {
             if (!track.preview_url || !track.preview_url.startsWith('blob:') || !aiDowntempoBlobCache.has(track.ai_seed)) {
                 synthesizeAiDowntempoWavUrl(track);
@@ -4758,18 +5461,22 @@ function initAssistantApp() {
         });
 
         // Wire up Playlist-level Play All, Shuffle, Collapse/Expand, New Playlist & Streaming Export buttons
+        const fullQueueRef = (Array.isArray(payload.full_queue_tracks) && payload.full_queue_tracks.length > 0)
+            ? payload.full_queue_tracks
+            : tracks;
+
         const playAllBtn = bubbleEl.querySelector('.btn-play-all-chat');
         if (playAllBtn) {
             playAllBtn.addEventListener('click', () => {
-                playTrackFromQueue(tracks, 0);
+                playTrackFromQueue(fullQueueRef, 0);
             });
         }
 
         const shuffleBtn = bubbleEl.querySelector('.btn-shuffle-chat');
         if (shuffleBtn) {
             shuffleBtn.addEventListener('click', () => {
-                const shuffled = [...tracks].sort(() => Math.random() - 0.5);
-                showToast(`🔀 Shuffling ${tracks.length} tracks from ${playlistTitle}!`, 'info');
+                const shuffled = [...fullQueueRef].sort(() => Math.random() - 0.5);
+                showToast(`🔀 Shuffling ${fullQueueRef.length} tracks from ${playlistTitle}!`, 'info');
                 playTrackFromQueue(shuffled, 0);
             });
         }
@@ -4804,6 +5511,19 @@ function initAssistantApp() {
             });
         }
 
+        if (payload.needs_drive_mount) {
+            const mountWrap = document.createElement('div');
+            const mountBtnEl = document.createElement('button');
+            mountBtnEl.type = 'button';
+            mountBtnEl.className = 'drive-chat-mount-btn';
+            mountBtnEl.innerHTML = '<span>💽</span><span>Mount External Hard Drive / Music Folder</span>';
+            mountBtnEl.addEventListener('click', () => {
+                mountExternalDriveLibrary();
+            });
+            mountWrap.appendChild(mountBtnEl);
+            bubbleEl.appendChild(mountWrap);
+        }
+
         if (payload.requires_payment) {
             const paywallEl = document.createElement('div');
             paywallEl.className = 'chat-paywall-card';
@@ -4835,8 +5555,8 @@ function initAssistantApp() {
                     follow_up_note: payload.follow_up_note,
                     suggestions: payload.suggestions,
                     streaming_links: payload.streaming_links,
-                    tracks: tracks.map(({ bubbleId, ...rest }) => (
-                        rest.is_ai_generated ? { ...rest, preview_url: '' } : rest
+                    tracks: tracks.map(({ bubbleId, local_file, ...rest }) => (
+                        (rest.is_ai_generated || rest.is_local_drive) ? { ...rest, preview_url: '' } : rest
                     ))
                 }
             });
@@ -4883,6 +5603,29 @@ function initAssistantApp() {
                 chatHistory.push({ role: 'assistant', content: aiPayload.reply || '' });
                 if (renderedTracks && renderedTracks.length > 0) {
                     playTrackFromQueue(renderedTracks, 0);
+                }
+            } finally {
+                if (typingRow && typingRow.parentNode) typingRow.remove();
+                if (assistantStatusText) {
+                    assistantStatusText.innerHTML = 'Online &bull; AI Personal Assistant &amp; DJ';
+                }
+            }
+            return;
+        }
+
+        // Handle External Hard Drive / Local Library streaming requests directly without remote wait
+        if (isExternalDriveRequest(text, lowerText)) {
+            try {
+                const wantsShuffle = /\b(shuffle|random|mix up)\b/i.test(lowerText);
+                const filterTerm = extractDriveFilterFromPrompt(text);
+                const drvPayload = buildExternalDrivePlaylistPayload(filterTerm, wantsShuffle);
+                if (typingRow && typingRow.parentNode) typingRow.remove();
+                const renderedDrv = appendAssistantMusicBubble(drvPayload);
+                chatHistory.push({ role: 'assistant', content: drvPayload.reply || '' });
+                if (drvPayload.full_queue_tracks && drvPayload.full_queue_tracks.length > 0) {
+                    playTrackFromQueue(drvPayload.full_queue_tracks, 0);
+                } else if (renderedDrv && renderedDrv.length > 0) {
+                    playTrackFromQueue(renderedDrv, 0);
                 }
             } finally {
                 if (typingRow && typingRow.parentNode) typingRow.remove();
@@ -5414,6 +6157,8 @@ function initAssistantApp() {
     syncAllCrateHeartButtons();
     syncAutoDjButtonUi();
     syncAiDowntempoUi();
+    renderExternalDriveLibrary('');
+    loadDriveHandleFromIdb();
     initServerWakeGate();
     initAiKeyConfig();
 }
