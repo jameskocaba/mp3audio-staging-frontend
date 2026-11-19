@@ -945,102 +945,118 @@ function initAssistantApp() {
     };
 
     const ARTIST_SIMILAR_PRESETS = {
-        "fleetwood mac": { vibeKey: "rock", title: "Songs Like Fleetwood Mac: 70s Melodic Rock", seeds: [
-            { title: "Dreams", artist: "Fleetwood Mac", album: "Rumours", year: "1977", duration: "4:17", duration_sec: 257 },
-            { title: "Hotel California", artist: "Eagles", album: "Hotel California", year: "1976", duration: "6:30", duration_sec: 390 },
-            { title: "Edge of Seventeen", artist: "Stevie Nicks", album: "Bella Donna", year: "1981", duration: "5:28", duration_sec: 328 },
-            { title: "Go Your Own Way", artist: "Fleetwood Mac", album: "Rumours", year: "1977", duration: "3:38", duration_sec: 218 },
-            { title: "Free Fallin'", artist: "Tom Petty", album: "Full Moon Fever", year: "1989", duration: "4:14", duration_sec: 254 },
-            { title: "It's Too Late", artist: "Carole King", album: "Tapestry", year: "1971", duration: "3:53", duration_sec: 233 },
-            { title: "Tiny Dancer", artist: "Elton John", album: "Madman Across the Water", year: "1971", duration: "6:17", duration_sec: 377 },
-            { title: "Heart of Gold", artist: "Neil Young", album: "Harvest", year: "1972", duration: "3:07", duration_sec: 187 },
-            { title: "Rhiannon", artist: "Fleetwood Mac", album: "Fleetwood Mac", year: "1975", duration: "4:12", duration_sec: 252 },
-            { title: "Barracuda", artist: "Heart", album: "Little Queen", year: "1977", duration: "4:21", duration_sec: 261 }
-        ]},
-        "the weeknd": { vibeKey: "r&b", title: "Songs Like The Weeknd: Dark R&B & Synthpop", seeds: [
-            { title: "Blinding Lights", artist: "The Weeknd", album: "After Hours", year: "2020", duration: "3:20", duration_sec: 200 },
-            { title: "Starboy", artist: "The Weeknd", album: "Starboy", year: "2016", duration: "3:50", duration_sec: 230 },
-            { title: "Redbone", artist: "Childish Gambino", album: "Awaken, My Love!", year: "2016", duration: "5:26", duration_sec: 326 },
-            { title: "One More Time", artist: "Daft Punk", album: "Discovery", year: "2001", duration: "5:20", duration_sec: 320 },
-            { title: "Snooze", artist: "SZA", album: "SOS", year: "2022", duration: "3:21", duration_sec: 201 },
-            { title: "Midnight City", artist: "M83", album: "Hurry Up, We're Dreaming", year: "2011", duration: "4:03", duration_sec: 243 },
-            { title: "Pink + White", artist: "Frank Ocean", album: "Blonde", year: "2016", duration: "3:04", duration_sec: 184 },
-            { title: "Nightcall", artist: "Kavinsky", album: "OutRun", year: "2010", duration: "4:18", duration_sec: 258 },
-            { title: "Passionfruit", artist: "Drake", album: "More Life", year: "2017", duration: "4:58", duration_sec: 298 },
-            { title: "Earned It", artist: "The Weeknd", album: "Beauty Behind the Madness", year: "2015", duration: "4:37", duration_sec: 277 }
-        ]},
-        "taylor swift": { vibeKey: "pop", title: "Songs Like Taylor Swift: Emotional Pop & Storytelling", seeds: [
-            { title: "Cruel Summer", artist: "Taylor Swift", album: "Lover", year: "2019", duration: "2:58", duration_sec: 178 },
-            { title: "drivers license", artist: "Olivia Rodrigo", album: "SOUR", year: "2021", duration: "4:02", duration_sec: 242 },
-            { title: "Motion Sickness", artist: "Phoebe Bridgers", album: "Stranger in the Alps", year: "2017", duration: "3:49", duration_sec: 229 },
-            { title: "Fast Car", artist: "Tracy Chapman", album: "Tracy Chapman", year: "1988", duration: "4:56", duration_sec: 296 },
-            { title: "Slow Burn", artist: "Kacey Musgraves", album: "Golden Hour", year: "2018", duration: "4:06", duration_sec: 246 },
-            { title: "Green Light", artist: "Lorde", album: "Melodrama", year: "2017", duration: "3:54", duration_sec: 234 },
-            { title: "Birds of a Feather", artist: "Billie Eilish", album: "HIT ME HARD AND SOFT", year: "2024", duration: "3:30", duration_sec: 210 },
-            { title: "Espresso", artist: "Sabrina Carpenter", album: "Short n' Sweet", year: "2024", duration: "2:55", duration_sec: 175 },
-            { title: "Royals", artist: "Lorde", album: "Pure Heroine", year: "2013", duration: "3:10", duration_sec: 190 },
-            { title: "Dreams", artist: "Fleetwood Mac", album: "Rumours", year: "1977", duration: "4:17", duration_sec: 257 }
-        ]},
-        "kendrick lamar": { vibeKey: "hip hop", title: "Songs Like Kendrick Lamar: Conscious Hip-Hop", seeds: [
-            { title: "HUMBLE.", artist: "Kendrick Lamar", album: "DAMN.", year: "2017", duration: "2:57", duration_sec: 177 },
-            { title: "Money Trees", artist: "Kendrick Lamar", album: "good kid, m.A.A.d city", year: "2012", duration: "6:26", duration_sec: 386 },
-            { title: "N.Y. State of Mind", artist: "Nas", album: "Illmatic", year: "1994", duration: "4:54", duration_sec: 294 },
-            { title: "No Role Modelz", artist: "J. Cole", album: "2014 Forest Hills Drive", year: "2014", duration: "4:52", duration_sec: 292 },
-            { title: "C.R.E.A.M.", artist: "Wu-Tang Clan", album: "Enter the Wu-Tang (36 Chambers)", year: "1993", duration: "4:12", duration_sec: 252 },
-            { title: "Shook Ones, Pt. II", artist: "Mobb Deep", album: "The Infamous", year: "1995", duration: "5:25", duration_sec: 325 },
-            { title: "Ms. Jackson", artist: "OutKast", album: "Stankonia", year: "2000", duration: "4:30", duration_sec: 270 },
-            { title: "Electric Relaxation", artist: "A Tribe Called Quest", album: "Midnight Marauders", year: "1993", duration: "3:46", duration_sec: 226 },
-            { title: "Doomsday", artist: "MF DOOM", album: "Operation: Doomsday", year: "1999", duration: "4:58", duration_sec: 298 },
-            { title: "93 'Til Infinity", artist: "Souls of Mischief", album: "93 'til Infinity", year: "1993", duration: "4:46", duration_sec: 286 }
-        ]},
-        "radiohead": { vibeKey: "rock", title: "Songs Like Radiohead: Atmospheric Alt-Rock", seeds: [
-            { title: "Creep", artist: "Radiohead", album: "Pablo Honey", year: "1993", duration: "3:58", duration_sec: 238 },
-            { title: "Skinny Love", artist: "Bon Iver", album: "For Emma, Forever Ago", year: "2007", duration: "3:58", duration_sec: 238 },
-            { title: "Teardrop", artist: "Massive Attack", album: "Mezzanine", year: "1998", duration: "5:31", duration_sec: 331 },
-            { title: "Space Song", artist: "Beach House", album: "Depression Cherry", year: "2015", duration: "5:20", duration_sec: 320 },
-            { title: "The Scientist", artist: "Coldplay", album: "A Rush of Blood to the Head", year: "2002", duration: "5:09", duration_sec: 309 },
-            { title: "Breezeblocks", artist: "alt-J", album: "An Awesome Wave", year: "2012", duration: "3:47", duration_sec: 227 },
-            { title: "Everlong", artist: "Foo Fighters", album: "The Colour and the Shape", year: "1997", duration: "4:10", duration_sec: 250 },
-            { title: "Smells Like Teen Spirit", artist: "Nirvana", album: "Nevermind", year: "1991", duration: "5:01", duration_sec: 301 },
-            { title: "Karma Police", artist: "Radiohead", album: "OK Computer", year: "1997", duration: "4:21", duration_sec: 261 },
-            { title: "Apocalypse", artist: "Cigarettes After Sex", album: "Cigarettes After Sex", year: "2017", duration: "4:50", duration_sec: 290 }
-        ]},
-        "bon iver": { vibeKey: "acoustic", title: "Songs Like Bon Iver: Ethereal Indie Folk", seeds: [
-            { title: "Skinny Love", artist: "Bon Iver", album: "For Emma, Forever Ago", year: "2007", duration: "3:58", duration_sec: 238 },
-            { title: "Fast Car", artist: "Tracy Chapman", album: "Tracy Chapman", year: "1988", duration: "4:56", duration_sec: 296 },
-            { title: "San Luis", artist: "Gregory Alan Isakov", album: "Evening Machines", year: "2018", duration: "3:11", duration_sec: 191 },
-            { title: "Chicago", artist: "Sufjan Stevens", album: "Illinois", year: "2005", duration: "6:04", duration_sec: 364 },
-            { title: "Motion Sickness", artist: "Phoebe Bridgers", album: "Stranger in the Alps", year: "2017", duration: "3:49", duration_sec: 229 },
-            { title: "White Winter Hymnal", artist: "Fleet Foxes", album: "Fleet Foxes", year: "2008", duration: "2:27", duration_sec: 147 },
-            { title: "The Night We Met", artist: "Lord Huron", album: "Strange Trails", year: "2015", duration: "3:28", duration_sec: 208 },
-            { title: "Cherry Wine", artist: "Hozier", album: "Hozier", year: "2014", duration: "4:00", duration_sec: 240 },
-            { title: "Holocene", artist: "Bon Iver", album: "Bon Iver", year: "2011", duration: "5:36", duration_sec: 336 },
-            { title: "505", artist: "Arctic Monkeys", album: "Favourite Worst Nightmare", year: "2007", duration: "4:13", duration_sec: 253 }
-        ]},
-        "tame impala": { vibeKey: "chill", title: "Songs Like Tame Impala: Psych-Pop & Groove", seeds: [
-            { title: "The Less I Know the Better", artist: "Tame Impala", album: "Currents", year: "2015", duration: "3:36", duration_sec: 216 },
-            { title: "Electric Feel", artist: "MGMT", album: "Oracular Spectacular", year: "2007", duration: "3:49", duration_sec: 229 },
-            { title: "Chamber Of Reflection", artist: "Mac DeMarco", album: "Salad Days", year: "2014", duration: "3:51", duration_sec: 231 },
-            { title: "Space Song", artist: "Beach House", album: "Depression Cherry", year: "2015", duration: "5:20", duration_sec: 320 },
-            { title: "Redbone", artist: "Childish Gambino", album: "Awaken, My Love!", year: "2016", duration: "5:26", duration_sec: 326 },
-            { title: "Midnight City", artist: "M83", album: "Hurry Up, We're Dreaming", year: "2011", duration: "4:03", duration_sec: 243 },
-            { title: "Show Me How", artist: "Men I Trust", album: "Show Me How", year: "2018", duration: "3:35", duration_sec: 215 },
-            { title: "Walking On A Dream", artist: "Empire of the Sun", album: "Walking on a Dream", year: "2008", duration: "3:16", duration_sec: 196 },
-            { title: "Feel It All Around", artist: "Washed Out", album: "Life of Leisure", year: "2009", duration: "3:12", duration_sec: 192 },
-            { title: "Let It Happen", artist: "Tame Impala", album: "Currents", year: "2015", duration: "7:47", duration_sec: 467 }
-        ]},
-        "daft punk": { vibeKey: "edm", title: "Songs Like Daft Punk: French Touch & Electronic Funk", seeds: [
-            { title: "Get Lucky", artist: "Daft Punk", album: "Random Access Memories", year: "2013", duration: "4:08", duration_sec: 248 },
-            { title: "One More Time", artist: "Daft Punk", album: "Discovery", year: "2001", duration: "5:20", duration_sec: 320 },
-            { title: "Midnight City", artist: "M83", album: "Hurry Up, We're Dreaming", year: "2011", duration: "4:03", duration_sec: 243 },
-            { title: "Nightcall", artist: "Kavinsky", album: "OutRun", year: "2010", duration: "4:18", duration_sec: 258 },
-            { title: "Levels", artist: "Avicii", album: "Levels", year: "2011", duration: "3:19", duration_sec: 199 },
-            { title: "Latch", artist: "Disclosure & Sam Smith", album: "Settle", year: "2012", duration: "4:16", duration_sec: 256 },
-            { title: "Innerbloom", artist: "RÜFÜS DU SOL", album: "Bloom", year: "2016", duration: "9:38", duration_sec: 578 },
-            { title: "D.A.N.C.E.", artist: "Justice", album: "Cross", year: "2007", duration: "4:02", duration_sec: 242 },
-            { title: "Instant Crush", artist: "Daft Punk", album: "Random Access Memories", year: "2013", duration: "5:37", duration_sec: 337 },
-            { title: "Strobe", artist: "deadmau5", album: "For Lack of a Better Name", year: "2009", duration: "10:37", duration_sec: 637 }
-        ]}
+        "fleetwood mac": {
+            vibeKey: "rock", title: "Songs Like Fleetwood Mac: 70s Melodic Rock", seeds: [
+                { title: "Dreams", artist: "Fleetwood Mac", album: "Rumours", year: "1977", duration: "4:17", duration_sec: 257 },
+                { title: "Hotel California", artist: "Eagles", album: "Hotel California", year: "1976", duration: "6:30", duration_sec: 390 },
+                { title: "Edge of Seventeen", artist: "Stevie Nicks", album: "Bella Donna", year: "1981", duration: "5:28", duration_sec: 328 },
+                { title: "Go Your Own Way", artist: "Fleetwood Mac", album: "Rumours", year: "1977", duration: "3:38", duration_sec: 218 },
+                { title: "Free Fallin'", artist: "Tom Petty", album: "Full Moon Fever", year: "1989", duration: "4:14", duration_sec: 254 },
+                { title: "It's Too Late", artist: "Carole King", album: "Tapestry", year: "1971", duration: "3:53", duration_sec: 233 },
+                { title: "Tiny Dancer", artist: "Elton John", album: "Madman Across the Water", year: "1971", duration: "6:17", duration_sec: 377 },
+                { title: "Heart of Gold", artist: "Neil Young", album: "Harvest", year: "1972", duration: "3:07", duration_sec: 187 },
+                { title: "Rhiannon", artist: "Fleetwood Mac", album: "Fleetwood Mac", year: "1975", duration: "4:12", duration_sec: 252 },
+                { title: "Barracuda", artist: "Heart", album: "Little Queen", year: "1977", duration: "4:21", duration_sec: 261 }
+            ]
+        },
+        "the weeknd": {
+            vibeKey: "r&b", title: "Songs Like The Weeknd: Dark R&B & Synthpop", seeds: [
+                { title: "Blinding Lights", artist: "The Weeknd", album: "After Hours", year: "2020", duration: "3:20", duration_sec: 200 },
+                { title: "Starboy", artist: "The Weeknd", album: "Starboy", year: "2016", duration: "3:50", duration_sec: 230 },
+                { title: "Redbone", artist: "Childish Gambino", album: "Awaken, My Love!", year: "2016", duration: "5:26", duration_sec: 326 },
+                { title: "One More Time", artist: "Daft Punk", album: "Discovery", year: "2001", duration: "5:20", duration_sec: 320 },
+                { title: "Snooze", artist: "SZA", album: "SOS", year: "2022", duration: "3:21", duration_sec: 201 },
+                { title: "Midnight City", artist: "M83", album: "Hurry Up, We're Dreaming", year: "2011", duration: "4:03", duration_sec: 243 },
+                { title: "Pink + White", artist: "Frank Ocean", album: "Blonde", year: "2016", duration: "3:04", duration_sec: 184 },
+                { title: "Nightcall", artist: "Kavinsky", album: "OutRun", year: "2010", duration: "4:18", duration_sec: 258 },
+                { title: "Passionfruit", artist: "Drake", album: "More Life", year: "2017", duration: "4:58", duration_sec: 298 },
+                { title: "Earned It", artist: "The Weeknd", album: "Beauty Behind the Madness", year: "2015", duration: "4:37", duration_sec: 277 }
+            ]
+        },
+        "taylor swift": {
+            vibeKey: "pop", title: "Songs Like Taylor Swift: Emotional Pop & Storytelling", seeds: [
+                { title: "Cruel Summer", artist: "Taylor Swift", album: "Lover", year: "2019", duration: "2:58", duration_sec: 178 },
+                { title: "drivers license", artist: "Olivia Rodrigo", album: "SOUR", year: "2021", duration: "4:02", duration_sec: 242 },
+                { title: "Motion Sickness", artist: "Phoebe Bridgers", album: "Stranger in the Alps", year: "2017", duration: "3:49", duration_sec: 229 },
+                { title: "Fast Car", artist: "Tracy Chapman", album: "Tracy Chapman", year: "1988", duration: "4:56", duration_sec: 296 },
+                { title: "Slow Burn", artist: "Kacey Musgraves", album: "Golden Hour", year: "2018", duration: "4:06", duration_sec: 246 },
+                { title: "Green Light", artist: "Lorde", album: "Melodrama", year: "2017", duration: "3:54", duration_sec: 234 },
+                { title: "Birds of a Feather", artist: "Billie Eilish", album: "HIT ME HARD AND SOFT", year: "2024", duration: "3:30", duration_sec: 210 },
+                { title: "Espresso", artist: "Sabrina Carpenter", album: "Short n' Sweet", year: "2024", duration: "2:55", duration_sec: 175 },
+                { title: "Royals", artist: "Lorde", album: "Pure Heroine", year: "2013", duration: "3:10", duration_sec: 190 },
+                { title: "Dreams", artist: "Fleetwood Mac", album: "Rumours", year: "1977", duration: "4:17", duration_sec: 257 }
+            ]
+        },
+        "kendrick lamar": {
+            vibeKey: "hip hop", title: "Songs Like Kendrick Lamar: Conscious Hip-Hop", seeds: [
+                { title: "HUMBLE.", artist: "Kendrick Lamar", album: "DAMN.", year: "2017", duration: "2:57", duration_sec: 177 },
+                { title: "Money Trees", artist: "Kendrick Lamar", album: "good kid, m.A.A.d city", year: "2012", duration: "6:26", duration_sec: 386 },
+                { title: "N.Y. State of Mind", artist: "Nas", album: "Illmatic", year: "1994", duration: "4:54", duration_sec: 294 },
+                { title: "No Role Modelz", artist: "J. Cole", album: "2014 Forest Hills Drive", year: "2014", duration: "4:52", duration_sec: 292 },
+                { title: "C.R.E.A.M.", artist: "Wu-Tang Clan", album: "Enter the Wu-Tang (36 Chambers)", year: "1993", duration: "4:12", duration_sec: 252 },
+                { title: "Shook Ones, Pt. II", artist: "Mobb Deep", album: "The Infamous", year: "1995", duration: "5:25", duration_sec: 325 },
+                { title: "Ms. Jackson", artist: "OutKast", album: "Stankonia", year: "2000", duration: "4:30", duration_sec: 270 },
+                { title: "Electric Relaxation", artist: "A Tribe Called Quest", album: "Midnight Marauders", year: "1993", duration: "3:46", duration_sec: 226 },
+                { title: "Doomsday", artist: "MF DOOM", album: "Operation: Doomsday", year: "1999", duration: "4:58", duration_sec: 298 },
+                { title: "93 'Til Infinity", artist: "Souls of Mischief", album: "93 'til Infinity", year: "1993", duration: "4:46", duration_sec: 286 }
+            ]
+        },
+        "radiohead": {
+            vibeKey: "rock", title: "Songs Like Radiohead: Atmospheric Alt-Rock", seeds: [
+                { title: "Creep", artist: "Radiohead", album: "Pablo Honey", year: "1993", duration: "3:58", duration_sec: 238 },
+                { title: "Skinny Love", artist: "Bon Iver", album: "For Emma, Forever Ago", year: "2007", duration: "3:58", duration_sec: 238 },
+                { title: "Teardrop", artist: "Massive Attack", album: "Mezzanine", year: "1998", duration: "5:31", duration_sec: 331 },
+                { title: "Space Song", artist: "Beach House", album: "Depression Cherry", year: "2015", duration: "5:20", duration_sec: 320 },
+                { title: "The Scientist", artist: "Coldplay", album: "A Rush of Blood to the Head", year: "2002", duration: "5:09", duration_sec: 309 },
+                { title: "Breezeblocks", artist: "alt-J", album: "An Awesome Wave", year: "2012", duration: "3:47", duration_sec: 227 },
+                { title: "Everlong", artist: "Foo Fighters", album: "The Colour and the Shape", year: "1997", duration: "4:10", duration_sec: 250 },
+                { title: "Smells Like Teen Spirit", artist: "Nirvana", album: "Nevermind", year: "1991", duration: "5:01", duration_sec: 301 },
+                { title: "Karma Police", artist: "Radiohead", album: "OK Computer", year: "1997", duration: "4:21", duration_sec: 261 },
+                { title: "Apocalypse", artist: "Cigarettes After Sex", album: "Cigarettes After Sex", year: "2017", duration: "4:50", duration_sec: 290 }
+            ]
+        },
+        "bon iver": {
+            vibeKey: "acoustic", title: "Songs Like Bon Iver: Ethereal Indie Folk", seeds: [
+                { title: "Skinny Love", artist: "Bon Iver", album: "For Emma, Forever Ago", year: "2007", duration: "3:58", duration_sec: 238 },
+                { title: "Fast Car", artist: "Tracy Chapman", album: "Tracy Chapman", year: "1988", duration: "4:56", duration_sec: 296 },
+                { title: "San Luis", artist: "Gregory Alan Isakov", album: "Evening Machines", year: "2018", duration: "3:11", duration_sec: 191 },
+                { title: "Chicago", artist: "Sufjan Stevens", album: "Illinois", year: "2005", duration: "6:04", duration_sec: 364 },
+                { title: "Motion Sickness", artist: "Phoebe Bridgers", album: "Stranger in the Alps", year: "2017", duration: "3:49", duration_sec: 229 },
+                { title: "White Winter Hymnal", artist: "Fleet Foxes", album: "Fleet Foxes", year: "2008", duration: "2:27", duration_sec: 147 },
+                { title: "The Night We Met", artist: "Lord Huron", album: "Strange Trails", year: "2015", duration: "3:28", duration_sec: 208 },
+                { title: "Cherry Wine", artist: "Hozier", album: "Hozier", year: "2014", duration: "4:00", duration_sec: 240 },
+                { title: "Holocene", artist: "Bon Iver", album: "Bon Iver", year: "2011", duration: "5:36", duration_sec: 336 },
+                { title: "505", artist: "Arctic Monkeys", album: "Favourite Worst Nightmare", year: "2007", duration: "4:13", duration_sec: 253 }
+            ]
+        },
+        "tame impala": {
+            vibeKey: "chill", title: "Songs Like Tame Impala: Psych-Pop & Groove", seeds: [
+                { title: "The Less I Know the Better", artist: "Tame Impala", album: "Currents", year: "2015", duration: "3:36", duration_sec: 216 },
+                { title: "Electric Feel", artist: "MGMT", album: "Oracular Spectacular", year: "2007", duration: "3:49", duration_sec: 229 },
+                { title: "Chamber Of Reflection", artist: "Mac DeMarco", album: "Salad Days", year: "2014", duration: "3:51", duration_sec: 231 },
+                { title: "Space Song", artist: "Beach House", album: "Depression Cherry", year: "2015", duration: "5:20", duration_sec: 320 },
+                { title: "Redbone", artist: "Childish Gambino", album: "Awaken, My Love!", year: "2016", duration: "5:26", duration_sec: 326 },
+                { title: "Midnight City", artist: "M83", album: "Hurry Up, We're Dreaming", year: "2011", duration: "4:03", duration_sec: 243 },
+                { title: "Show Me How", artist: "Men I Trust", album: "Show Me How", year: "2018", duration: "3:35", duration_sec: 215 },
+                { title: "Walking On A Dream", artist: "Empire of the Sun", album: "Walking on a Dream", year: "2008", duration: "3:16", duration_sec: 196 },
+                { title: "Feel It All Around", artist: "Washed Out", album: "Life of Leisure", year: "2009", duration: "3:12", duration_sec: 192 },
+                { title: "Let It Happen", artist: "Tame Impala", album: "Currents", year: "2015", duration: "7:47", duration_sec: 467 }
+            ]
+        },
+        "daft punk": {
+            vibeKey: "edm", title: "Songs Like Daft Punk: French Touch & Electronic Funk", seeds: [
+                { title: "Get Lucky", artist: "Daft Punk", album: "Random Access Memories", year: "2013", duration: "4:08", duration_sec: 248 },
+                { title: "One More Time", artist: "Daft Punk", album: "Discovery", year: "2001", duration: "5:20", duration_sec: 320 },
+                { title: "Midnight City", artist: "M83", album: "Hurry Up, We're Dreaming", year: "2011", duration: "4:03", duration_sec: 243 },
+                { title: "Nightcall", artist: "Kavinsky", album: "OutRun", year: "2010", duration: "4:18", duration_sec: 258 },
+                { title: "Levels", artist: "Avicii", album: "Levels", year: "2011", duration: "3:19", duration_sec: 199 },
+                { title: "Latch", artist: "Disclosure & Sam Smith", album: "Settle", year: "2012", duration: "4:16", duration_sec: 256 },
+                { title: "Innerbloom", artist: "RÜFÜS DU SOL", album: "Bloom", year: "2016", duration: "9:38", duration_sec: 578 },
+                { title: "D.A.N.C.E.", artist: "Justice", album: "Cross", year: "2007", duration: "4:02", duration_sec: 242 },
+                { title: "Instant Crush", artist: "Daft Punk", album: "Random Access Memories", year: "2013", duration: "5:37", duration_sec: 337 },
+                { title: "Strobe", artist: "deadmau5", album: "For Lack of a Better Name", year: "2009", duration: "10:37", duration_sec: 637 }
+            ]
+        }
     };
 
     const VIBE_KEYS_LIST = Object.keys(CLIENT_VIBE_SEEDS);
@@ -4037,7 +4053,7 @@ function initAssistantApp() {
 }
 
 // Modal Ringtone Guide Platform & Method Switchers
-window.switchGuidePlatform = function(platform) {
+window.switchGuidePlatform = function (platform) {
     const tabIos = document.getElementById('rtTabIosPage') || document.getElementById('rtTabIosModal');
     const tabAndroid = document.getElementById('rtTabAndroidPage') || document.getElementById('rtTabAndroidModal');
     const panelIos = document.getElementById('rtGuidePanelIos');
@@ -4056,7 +4072,7 @@ window.switchGuidePlatform = function(platform) {
     }
 };
 
-window.switchGuideIosMethod = function(method) {
+window.switchGuideIosMethod = function (method) {
     const btnGb = document.getElementById('rtBtnGbPage') || document.getElementById('rtBtnGbModal');
     const btnPc = document.getElementById('rtBtnPcPage') || document.getElementById('rtBtnPcModal');
     const viewGb = document.getElementById('rtGuideViewGb');
