@@ -550,7 +550,7 @@ function initAssistantApp() {
                 <div class="msg-bubble assistant-bubble welcome-bubble">
                     <div class="msg-sender-name">MP3aud.io Assistant <span class="msg-time">Just now</span></div>
                     <div class="msg-text">
-                        <p>Text me any song, artist, mood, or vibe — I'll build instant playlists with playable previews, streaming links, and custom iPhone/Android ringtones.</p>
+                        <p>Where should we start?</p>
                     </div>
                     <div class="welcome-vibe-section">
                         <span class="welcome-vibe-label">⚡ 1-Tap Vibe Starters</span>
@@ -654,6 +654,10 @@ function initAssistantApp() {
     let externalDriveTracks = [];
     let externalDriveName = 'Studio External Drive';
     let externalDriveLoading = false;
+    let externalDriveFetchPromise = null;
+    let externalDriveSignature = '';
+    let externalDriveAutoDetectTimer = null;
+    let hasCompletedInitialDriveCheck = false;
 
     function buildLocalDriveArtworkDataUri(title, artist, idx = 1) {
         const hue = (Math.abs((artist || title || '').split('').reduce((a, c) => ((a << 5) - a + c.charCodeAt(0)) | 0, idx * 31)) % 360);
@@ -721,7 +725,7 @@ function initAssistantApp() {
                 ? 'Connecting to Studio External Drive...'
                 : (total > 0
                     ? `Streaming from ${externalDriveName} • ${total} tracks online`
-                    : 'Studio external drive library offline (run external_drive_connector.py)');
+                    : 'Waiting for Studio External Drive (auto-detects when plugged in)...');
         }
 
         if (!driveLibraryList || total === 0) return;
@@ -768,52 +772,110 @@ function initAssistantApp() {
         }
     }
 
-    async function fetchOwnerExternalDriveCatalog(showFeedback = false) {
-        if (externalDriveLoading) return;
-        externalDriveLoading = true;
-        renderExternalDriveLibrary(driveSearchInput ? driveSearchInput.value : '');
-
-        const candidateOrigins = [BACKEND_URL];
-        const isLocalDev = typeof window !== 'undefined' && window.location && (
-            window.location.protocol === 'http:'
-            || window.location.hostname === 'localhost'
-            || window.location.hostname === '127.0.0.1'
-            || window.location.protocol === 'file:'
-        );
-        if (isLocalDev) {
-            candidateOrigins.push('http://127.0.0.1:8765');
+    async function fetchOwnerExternalDriveCatalog(showFeedback = false, isBackgroundPoll = false) {
+        if (externalDriveFetchPromise) {
+            const existing = await externalDriveFetchPromise;
+            if (showFeedback && !isBackgroundPoll) {
+                if (externalDriveTracks.length > 0) {
+                    showToast(`💽 Connected to ${externalDriveName} (${externalDriveTracks.length} tracks)!`, 'success');
+                } else {
+                    showToast('Studio external drive catalog is currently offline.', 'info');
+                }
+            }
+            return existing;
         }
 
-        let loadedTracks = [];
-        let loadedDriveName = 'Studio External Drive';
-        try {
-            for (const origin of candidateOrigins) {
-                try {
-                    const resp = await fetchWithTimeout(`${origin}/api/library/tracks`, { cache: 'no-store' }, origin === BACKEND_URL ? 4500 : 1200);
-                    if (!resp || !resp.ok) continue;
-                    const data = await resp.json().catch(() => null);
-                    if (data && Array.isArray(data.tracks) && data.tracks.length > 0) {
-                        loadedDriveName = data.drive_name || loadedDriveName;
-                        const streamOrigin = (data.base_stream_url || origin || '').replace(/\/+$/, '');
-                        loadedTracks = data.tracks.map((item, idx) => normalizeOwnerDriveTrack(item, idx, streamOrigin));
-                        break;
-                    }
-                } catch (_) { }
+        const runCheck = async () => {
+            const shouldShowLoading = !isBackgroundPoll && externalDriveTracks.length === 0;
+            if (shouldShowLoading) {
+                externalDriveLoading = true;
+                renderExternalDriveLibrary(driveSearchInput ? driveSearchInput.value : '');
             }
-        } finally {
-            externalDriveLoading = false;
+
+            const candidateOrigins = ['http://127.0.0.1:8765', BACKEND_URL];
+
+            let loadedTracks = [];
+            let loadedDriveName = 'Studio External Drive';
+            try {
+                for (const origin of candidateOrigins) {
+                    try {
+                        const timeoutMs = origin === BACKEND_URL ? 4500 : 900;
+                        const resp = await fetchWithTimeout(`${origin}/api/library/tracks`, { cache: 'no-store' }, timeoutMs);
+                        if (!resp || !resp.ok) continue;
+                        const data = await resp.json().catch(() => null);
+                        if (data && Array.isArray(data.tracks) && data.tracks.length > 0) {
+                            loadedDriveName = data.drive_name || loadedDriveName;
+                            const streamOrigin = (data.base_stream_url || origin || '').replace(/\/+$/, '');
+                            loadedTracks = data.tracks.map((item, idx) => normalizeOwnerDriveTrack(item, idx, streamOrigin));
+                            break;
+                        }
+                    } catch (_) { }
+                }
+            } finally {
+                externalDriveLoading = false;
+            }
+
+            const newSignature = loadedTracks.length > 0
+                ? `${loadedDriveName}|${loadedTracks.length}|${loadedTracks[0].title}|${loadedTracks[loadedTracks.length - 1].title}`
+                : '';
+            const wasConnected = externalDriveSignature !== '';
+            const catalogChanged = newSignature !== externalDriveSignature;
+
+            if (loadedTracks.length > 0 && catalogChanged) {
+                externalDriveName = loadedDriveName;
+                externalDriveTracks = loadedTracks;
+                externalDriveSignature = newSignature;
+                renderExternalDriveLibrary(driveSearchInput ? driveSearchInput.value : '');
+                if (showFeedback || hasCompletedInitialDriveCheck || isBackgroundPoll) {
+                    showToast(`💽 Auto-detected ${externalDriveName} (${externalDriveTracks.length} tracks ready)!`, 'success');
+                }
+            } else if (loadedTracks.length === 0 && wasConnected) {
+                externalDriveName = 'Studio External Drive';
+                externalDriveTracks = [];
+                externalDriveSignature = '';
+                renderExternalDriveLibrary(driveSearchInput ? driveSearchInput.value : '');
+                showToast('💽 Studio External Drive disconnected.', 'info');
+            } else if (shouldShowLoading) {
+                renderExternalDriveLibrary(driveSearchInput ? driveSearchInput.value : '');
+                if (showFeedback && loadedTracks.length === 0) {
+                    showToast('Studio external drive catalog is currently offline.', 'info');
+                }
+            } else if (showFeedback && !isBackgroundPoll) {
+                if (loadedTracks.length > 0) {
+                    showToast(`💽 Connected to ${externalDriveName} (${externalDriveTracks.length} tracks)!`, 'success');
+                } else {
+                    showToast('Studio external drive catalog is currently offline.', 'info');
+                }
+            }
+
+            hasCompletedInitialDriveCheck = true;
+            return externalDriveTracks;
+        };
+
+        externalDriveFetchPromise = runCheck().finally(() => {
+            externalDriveFetchPromise = null;
+        });
+        return externalDriveFetchPromise;
+    }
+
+    function startExternalDriveAutoDetect() {
+        if (externalDriveAutoDetectTimer) return;
+        externalDriveAutoDetectTimer = setInterval(() => {
+            if (typeof document !== 'undefined' && document.visibilityState === 'hidden') return;
+            fetchOwnerExternalDriveCatalog(false, true);
+        }, 4000);
+
+        if (typeof window !== 'undefined') {
+            window.addEventListener('focus', () => {
+                fetchOwnerExternalDriveCatalog(false, true);
+            });
         }
-
-        externalDriveName = loadedDriveName;
-        externalDriveTracks = loadedTracks;
-        renderExternalDriveLibrary(driveSearchInput ? driveSearchInput.value : '');
-
-        if (showFeedback) {
-            if (externalDriveTracks.length > 0) {
-                showToast(`💽 Connected to ${externalDriveName} (${externalDriveTracks.length} tracks)!`, 'success');
-            } else {
-                showToast('Studio external drive catalog is currently offline.', 'info');
-            }
+        if (typeof document !== 'undefined') {
+            document.addEventListener('visibilitychange', () => {
+                if (document.visibilityState === 'visible') {
+                    fetchOwnerExternalDriveCatalog(false, true);
+                }
+            });
         }
     }
 
@@ -5061,7 +5123,8 @@ function initAssistantApp() {
     syncAllCrateHeartButtons();
     syncAutoDjButtonUi();
     renderExternalDriveLibrary('');
-    fetchOwnerExternalDriveCatalog(false);
+    fetchOwnerExternalDriveCatalog(false, false);
+    startExternalDriveAutoDetect();
     initServerWakeGate();
     initAiKeyConfig();
 }
