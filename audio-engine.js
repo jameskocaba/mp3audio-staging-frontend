@@ -74,17 +74,15 @@
             this.captureMode = ''; // 'worklet' | 'script'
             this.inAnalyserL = null;
             this.inAnalyserR = null;
-            this.inSpectrumAnalyser = null;
 
-            // Playback nodes + 5-band real-time EQ
+            // Playback nodes
             this.playbackGainNode = null;
-            this.eqFilters = [];
-            this.eqPreset = 'flat';
-            this.eqGains = [0, 0, 0, 0, 0];
             this.outAnalyserL = null;
             this.outAnalyserR = null;
-            this.outSpectrumAnalyser = null;
-            this._freqBuf = new Uint8Array(128);
+            this._meterBufL = new Float32Array(1024);
+            this._meterBufR = new Float32Array(1024);
+            this._waveBufL = new Float32Array(512);
+            this._waveBufR = new Float32Array(512);
             this.playbackSource = null;
             this.isPlaying = false;
             this.loopPlayback = false;
@@ -148,29 +146,9 @@
             const ctx = this.audioCtx;
             this.playbackGainNode = ctx.createGain();
             this.playbackGainNode.gain.value = this.playbackVolume;
-
-            const bandConfigs = [
-                { type: 'lowshelf', freq: 60 },
-                { type: 'peaking', freq: 230, q: 1.0 },
-                { type: 'peaking', freq: 910, q: 1.0 },
-                { type: 'peaking', freq: 3600, q: 1.0 },
-                { type: 'highshelf', freq: 12000 }
-            ];
-            this.eqFilters = bandConfigs.map((cfg, idx) => {
-                const f = ctx.createBiquadFilter();
-                f.type = cfg.type;
-                f.frequency.value = cfg.freq;
-                if (cfg.q) f.Q.value = cfg.q;
-                f.gain.value = this.eqGains[idx] || 0;
-                return f;
-            });
-
-            this.outSpectrumAnalyser = ctx.createAnalyser();
-            this.outSpectrumAnalyser.fftSize = 256;
-            this.outSpectrumAnalyser.smoothingTimeConstant = 0.78;
-            this.outSpectrumAnalyser.minDecibels = -85;
-            this.outSpectrumAnalyser.maxDecibels = -10;
-            this._freqBuf = new Uint8Array(this.outSpectrumAnalyser.frequencyBinCount);
+            this.playbackGainNode.channelCount = 2;
+            this.playbackGainNode.channelCountMode = 'explicit';
+            this.playbackGainNode.channelInterpretation = 'speakers';
 
             const splitter = ctx.createChannelSplitter(2);
             this.outAnalyserL = ctx.createAnalyser();
@@ -178,14 +156,8 @@
             this.outAnalyserL.fftSize = 1024;
             this.outAnalyserR.fftSize = 1024;
 
-            let chain = this.playbackGainNode;
-            for (const f of this.eqFilters) {
-                chain.connect(f);
-                chain = f;
-            }
-            chain.connect(this.outSpectrumAnalyser);
-            this.outSpectrumAnalyser.connect(ctx.destination);
-            this.outSpectrumAnalyser.connect(splitter);
+            this.playbackGainNode.connect(ctx.destination);
+            this.playbackGainNode.connect(splitter);
             splitter.connect(this.outAnalyserL, 0);
             splitter.connect(this.outAnalyserR, 1);
         }
@@ -295,19 +267,15 @@
             this.streamSourceNode = ctx.createMediaStreamSource(audioOnlyStream);
             this.inputGainNode = ctx.createGain();
             this.inputGainNode.gain.value = this.inputGain;
+            this.inputGainNode.channelCount = 2;
+            this.inputGainNode.channelCountMode = 'explicit';
+            this.inputGainNode.channelInterpretation = 'speakers';
 
             const splitter = ctx.createChannelSplitter(2);
             this.inAnalyserL = ctx.createAnalyser();
             this.inAnalyserR = ctx.createAnalyser();
             this.inAnalyserL.fftSize = 1024;
             this.inAnalyserR.fftSize = 1024;
-
-            this.inSpectrumAnalyser = ctx.createAnalyser();
-            this.inSpectrumAnalyser.fftSize = 256;
-            this.inSpectrumAnalyser.smoothingTimeConstant = 0.78;
-            this.inSpectrumAnalyser.minDecibels = -85;
-            this.inSpectrumAnalyser.maxDecibels = -10;
-            this._freqBuf = new Uint8Array(this.inSpectrumAnalyser.frequencyBinCount);
 
             this.monitorGainNode = ctx.createGain();
             this.monitorGainNode.gain.value = this.monitorEnabled ? this.playbackVolume : 0;
@@ -316,7 +284,6 @@
             this.silentSinkNode.gain.value = 0;
 
             this.streamSourceNode.connect(this.inputGainNode);
-            this.inputGainNode.connect(this.inSpectrumAnalyser);
             this.inputGainNode.connect(splitter);
             splitter.connect(this.inAnalyserL, 0);
             splitter.connect(this.inAnalyserR, 1);
@@ -430,7 +397,6 @@
             this.silentSinkNode = null;
             this.inAnalyserL = null;
             this.inAnalyserR = null;
-            this.inSpectrumAnalyser = null;
             this.mediaStream = null;
             this.sourceMode = null;
             this.sourceLabel = '';
@@ -1440,9 +1406,8 @@
         }
 
         getMeterLevels() {
-            const readAnalyser = (analyser) => {
+            const readAnalyser = (analyser, buf) => {
                 if (!analyser) return { rmsDb: -60, peakDb: -60, clipped: false };
-                const buf = new Float32Array(analyser.fftSize);
                 analyser.getFloatTimeDomainData(buf);
                 let sum = 0;
                 let peak = 0;
@@ -1460,10 +1425,18 @@
             };
 
             if (this.isPlaying && this.outAnalyserL && this.outAnalyserR) {
-                return { left: readAnalyser(this.outAnalyserL), right: readAnalyser(this.outAnalyserR), mode: 'playback' };
+                return {
+                    left: readAnalyser(this.outAnalyserL, this._meterBufL),
+                    right: readAnalyser(this.outAnalyserR, this._meterBufR),
+                    mode: 'playback'
+                };
             }
             if (this.isSourceConnected() && this.inAnalyserL && this.inAnalyserR) {
-                return { left: readAnalyser(this.inAnalyserL), right: readAnalyser(this.inAnalyserR), mode: 'input' };
+                return {
+                    left: readAnalyser(this.inAnalyserL, this._meterBufL),
+                    right: readAnalyser(this.inAnalyserR, this._meterBufR),
+                    mode: 'input'
+                };
             }
             return {
                 left: { rmsDb: -60, peakDb: -60, clipped: false },
@@ -1472,53 +1445,20 @@
             };
         }
 
-        // --- Equalizer, Spectrum & Active Track Metadata ---
-        setEqPreset(presetName) {
-            const presets = {
-                flat: [0, 0, 0, 0, 0],
-                bass: [6, 3, 0, 0, 1],
-                vocal: [-2, 1, 4, 3, 1],
-                warm: [4, 2, 0, -1, -2]
-            };
-            const key = presets[presetName] ? presetName : 'flat';
-            this.eqPreset = key;
-            const gains = presets[key];
-            for (let i = 0; i < 5; i++) {
-                this.setEqBandGain(i, gains[i]);
+        getLiveWaveSamples() {
+            if (this.isPlaying && this.outAnalyserL && this.outAnalyserR) {
+                this.outAnalyserL.getFloatTimeDomainData(this._waveBufL);
+                this.outAnalyserR.getFloatTimeDomainData(this._waveBufR);
+                return { left: this._waveBufL, right: this._waveBufR, active: true, mode: 'playback' };
             }
-            return { preset: this.eqPreset, gains: this.eqGains.slice() };
-        }
-
-        setEqBandGain(index, db) {
-            if (index < 0 || index >= 5) return;
-            const clamped = Math.max(-12, Math.min(12, Number(db) || 0));
-            this.eqGains[index] = clamped;
-            const filter = this.eqFilters[index];
-            if (filter && this.audioCtx) {
-                filter.gain.setTargetAtTime(clamped, this.audioCtx.currentTime, 0.02);
-            } else if (filter) {
-                filter.gain.value = clamped;
+            if (this.isSourceConnected() && this.inAnalyserL && this.inAnalyserR) {
+                this.inAnalyserL.getFloatTimeDomainData(this._waveBufL);
+                this.inAnalyserR.getFloatTimeDomainData(this._waveBufR);
+                return { left: this._waveBufL, right: this._waveBufR, active: true, mode: 'input' };
             }
-        }
-
-        getFrequencyData() {
-            if (!this._freqBuf || this._freqBuf.length === 0) {
-                this._freqBuf = new Uint8Array(128);
-            }
-            if (this.isPlaying && this.outSpectrumAnalyser) {
-                this.outSpectrumAnalyser.getByteFrequencyData(this._freqBuf);
-                return { bins: this._freqBuf, active: true, mode: 'playback' };
-            }
-            if (this.isSourceConnected() && this.inSpectrumAnalyser) {
-                this.inSpectrumAnalyser.getByteFrequencyData(this._freqBuf);
-                return {
-                    bins: this._freqBuf,
-                    active: true,
-                    mode: this.recordState === 'recording' ? 'recording' : 'input'
-                };
-            }
-            this._freqBuf.fill(0);
-            return { bins: this._freqBuf, active: false, mode: 'idle' };
+            this._waveBufL.fill(0);
+            this._waveBufR.fill(0);
+            return { left: this._waveBufL, right: this._waveBufR, active: false, mode: 'idle' };
         }
 
         getActiveTrackInfo() {
@@ -1555,36 +1495,6 @@
                 };
             }
             return null;
-        }
-
-        getSampleWindowSpectrum(centerSample = 0, numBands = 32) {
-            const out = new Float32Array(numBands);
-            if (this.length === 0) return out;
-            const winSize = Math.min(this.length, 1024);
-            const start = Math.max(0, Math.min(this.length - winSize, Math.floor(centerSample)));
-            // Compute DFT energy across log-spaced musical band frequencies for static paused preview
-            const minFreq = 55;
-            const maxFreq = Math.min(14000, this.sampleRate * 0.45);
-            for (let b = 0; b < numBands; b++) {
-                const frac = b / Math.max(1, numBands - 1);
-                const freq = minFreq * Math.pow(maxFreq / minFreq, frac);
-                const w = (2 * Math.PI * freq) / this.sampleRate;
-                let re = 0;
-                let im = 0;
-                const step = 4;
-                for (let n = 0; n < winSize; n += step) {
-                    const s = 0.5 * (this.left[start + n] + this.right[start + n]) / 32768;
-                    const hann = 0.5 * (1 - Math.cos((2 * Math.PI * n) / winSize));
-                    const v = s * hann;
-                    re += v * Math.cos(w * n);
-                    im += v * Math.sin(w * n);
-                }
-                const normSamples = winSize / step;
-                const mag = Math.sqrt(re * re + im * im) / Math.max(1, normSamples * 0.25);
-                const db = 20 * Math.log10(Math.max(mag, 1e-4));
-                out[b] = Math.max(0, Math.min(1, (db + 65) / 60));
-            }
-            return out;
         }
 
         getDurationSeconds() {

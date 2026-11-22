@@ -35,7 +35,7 @@
         const mobileHintBanner = document.getElementById('mobileHintBanner');
         const emptyCardDesc = document.getElementById('emptyCardDesc');
 
-        // Transport & Equalizer & Meters
+        // Transport, L/R Recording Meters & Wave Header
         const recordBtn = document.getElementById('recordBtn');
         const recordBtnLabel = document.getElementById('recordBtnLabel');
         const pauseRecBtn = document.getElementById('pauseRecBtn');
@@ -46,11 +46,10 @@
         const splitAtCursorBtn = document.getElementById('splitAtCursorBtn');
         const lcdTimecode = document.getElementById('lcdTimecode');
         const lcdFormatInfo = document.getElementById('lcdFormatInfo');
-        const eqStatusBadge = document.getElementById('eqStatusBadge');
-        const eqTrackTitle = document.getElementById('eqTrackTitle');
-        const eqTrackSub = document.getElementById('eqTrackSub');
-        const equalizerCanvas = document.getElementById('equalizerCanvas');
-        const eqPresetBtns = document.querySelectorAll('.eq-preset-btn[data-eq-preset]');
+        const meterDbReadout = document.getElementById('meterDbReadout');
+        const waveStatusBadge = document.getElementById('waveStatusBadge');
+        const waveTrackTitle = document.getElementById('waveTrackTitle');
+        const waveLiveViewBadge = document.getElementById('waveLiveViewBadge');
         const vuMeterL = document.getElementById('vuMeterL');
         const vuMeterR = document.getElementById('vuMeterR');
         const vuClipL = document.getElementById('vuClipL');
@@ -76,9 +75,9 @@
         const zoomFitBtn = document.getElementById('zoomFitBtn');
         const selectionReadout = document.getElementById('selectionReadout');
 
-        // Waveform Stage
+        // Continuous Waveform Stage
         const waveformCanvas = document.getElementById('waveformCanvas');
-        const waveformEmptyOverlay = document.getElementById('waveformEmptyOverlay');
+        const waveformEmptyHint = document.getElementById('waveformEmptyHint');
         const waveformPanSlider = document.getElementById('waveformPanSlider');
         const zoomLevelBadge = document.getElementById('zoomLevelBadge');
 
@@ -117,6 +116,7 @@
         const exportProgressFill = document.getElementById('exportProgressFill');
 
         // --- App State ---
+        const LIVE_SCROLL_SECONDS = 20;
         let dirHandle = null;
         let coverArtBytes = null;
         let coverArtMime = 'image/jpeg';
@@ -128,13 +128,7 @@
         let viewSpanSamples = 0;
         let userHasZoomed = false;
 
-        // Meter & Equalizer Peak State
-        const EQ_NUM_BANDS = 32;
-        const eqSmoothBars = new Float32Array(EQ_NUM_BANDS);
-        const eqPeakCaps = new Float32Array(EQ_NUM_BANDS);
-        let staticSpectrumCache = new Float32Array(EQ_NUM_BANDS);
-        let staticSpectrumCursor = -1;
-        let staticSpectrumLen = -1;
+        // Meter Peak State
         let peakHoldL = -60;
         let peakHoldR = -60;
         let peakHoldTimeL = 0;
@@ -161,7 +155,7 @@
             if (emptyCaptureMicBtn) emptyCaptureMicBtn.classList.remove('hidden');
             if (mobileHintBanner) mobileHintBanner.classList.remove('hidden');
             if (emptyCardDesc) {
-                emptyCardDesc.textContent = 'Record audio from your mic or external interface, or open any audio file to watch it live on the equalizer, auto-split songs, and save MP3s.';
+                emptyCardDesc.innerHTML = 'Tap <strong>Tap to Record</strong> or <strong>Open Audio</strong> — Left &amp; Right wave streams appear live here.';
             }
         }
         if (!supportsFolderPicker) {
@@ -199,6 +193,12 @@
 
         function clampViewport() {
             const total = engine.length;
+            if (engine.recordState === 'recording' || engine.recordState === 'paused') {
+                const liveWin = Math.max(engine.sampleRate * LIVE_SCROLL_SECONDS, 1);
+                viewSpanSamples = liveWin;
+                viewStartSample = total > liveWin ? total - liveWin : 0;
+                return;
+            }
             if (total === 0 || !userHasZoomed || viewSpanSamples <= 0 || viewSpanSamples >= total) {
                 viewStartSample = 0;
                 viewSpanSamples = total;
@@ -212,10 +212,10 @@
         function syncPanScrollbar() {
             if (!waveformPanSlider || !zoomLevelBadge) return;
             const total = engine.length;
-            if (total === 0 || !userHasZoomed || viewSpanSamples >= total) {
+            if (total === 0 || !userHasZoomed || viewSpanSamples >= total || engine.recordState !== 'idle') {
                 waveformPanSlider.disabled = true;
                 waveformPanSlider.value = '0';
-                zoomLevelBadge.textContent = '1.0x';
+                zoomLevelBadge.textContent = engine.recordState === 'recording' ? 'LIVE' : '1.0x';
                 return;
             }
             waveformPanSlider.disabled = false;
@@ -241,13 +241,20 @@
                 updateUiState();
             },
             onSourceEnded: () => {
-                showToast('Capture stopped — your track is ready below!', 'info');
+                showToast('Capture stopped — recorded wave is ready below.', 'info');
                 updateUiState();
             },
             onRecordStateChanged: ({ state }) => {
                 if (state === 'armed') {
-                    showToast('Armed — waiting for music to start playing...', 'warning');
+                    showToast('Armed — recording begins as soon as sound starts.', 'warning');
                 }
+                if (state === 'idle' && engine.length > 0) {
+                    userHasZoomed = false;
+                    viewStartSample = 0;
+                    viewSpanSamples = engine.length;
+                }
+                clampViewport();
+                syncPanScrollbar();
                 updateUiState();
             },
             onPlaybackStateChanged: () => {
@@ -255,7 +262,6 @@
                 renderTracksList();
             },
             onTracksChanged: () => {
-                staticSpectrumCursor = -1;
                 renderTracksList();
                 updateUiState();
             },
@@ -267,16 +273,13 @@
                 }
             },
             onBufferChanged: ({ length }) => {
-                staticSpectrumLen = -1;
                 if (length === 0) {
                     userHasZoomed = false;
                     viewStartSample = 0;
                     viewSpanSamples = 0;
-                } else if (!userHasZoomed) {
+                } else if (!userHasZoomed && engine.recordState === 'idle') {
                     viewStartSample = 0;
                     viewSpanSamples = length;
-                } else if (engine.recordState === 'recording') {
-                    viewStartSample = Math.max(0, length - viewSpanSamples);
                 }
                 clampViewport();
                 syncPanScrollbar();
@@ -290,12 +293,11 @@
             }
         });
 
-        // --- Equalizer Active Track & Guided Step Readout ---
-        let lastEqTitle = '';
-        let lastEqSub = '';
-        let lastEqBadge = '';
+        // --- Wave Header & Guided Step Readout ---
+        let lastWaveTitle = '';
+        let lastWaveBadge = '';
 
-        function syncEqualizerTrackDisplay() {
+        function syncWaveTrackDisplay() {
             const trk = engine.getActiveTrackInfo();
             const isRec = engine.recordState === 'recording';
             const isArmed = engine.recordState === 'armed';
@@ -304,76 +306,66 @@
             const connected = engine.isSourceConnected();
 
             let badgeText = 'STANDBY';
-            let badgeClass = 'eq-status-badge';
-            let titleText = 'No Track Active — Ready to Record';
-            let subText = supportsDisplayCapture
-                ? 'Tap Record Music Tab, Use Mic, or Open Audio to see your track live on the equalizer'
-                : 'Tap Tap to Record or Open Audio to see your track live on the equalizer';
+            let badgeClass = 'wave-status-badge';
+            let titleText = 'Live Stereo Wave — Ready to Record';
 
             if (isRec) {
-                badgeText = '● RECORDING';
+                badgeText = '● REC LIVE';
                 badgeClass += ' is-live';
-                titleText = `🎵 ${(trk && trk.title) || 'Track 01'}`;
-                subText = `Live on Equalizer • Source: ${(trk && trk.artist) || engine.sourceLabel || 'Audio Stream'} • Auto-split active`;
+                titleText = `Recording ${(trk && trk.title) || 'Track 01'} — ${(trk && trk.artist) || engine.sourceLabel || 'Audio Stream'}`;
             } else if (isArmed) {
                 badgeText = '⚡ ARMED';
                 badgeClass += ' is-live';
-                titleText = 'Waiting for Music to Start...';
-                subText = `Listening on ${engine.sourceLabel || 'Audio Input'} — recording begins automatically`;
+                titleText = `Armed on ${engine.sourceLabel || 'Audio Input'} — Waiting for sound...`;
             } else if (isPaused) {
-                badgeText = '⏸ REC PAUSED';
+                badgeText = '⏸ PAUSED';
                 badgeClass += ' is-ready';
-                titleText = `🎵 ${(trk && trk.title) || 'Track 01'}`;
-                subText = 'Recording paused — tap Pause again to resume or Stop to finish';
+                titleText = `Recording Paused — ${(trk && trk.title) || 'Track 01'}`;
             } else if (isPlay && trk) {
                 badgeText = '▶ PLAYING';
                 badgeClass += ' is-playing';
                 const totalTracks = Math.max(1, engine.tracks.length);
-                titleText = `🎵 ${trk.title}${trk.artist ? ' — ' + trk.artist : ''}`;
-                subText = `Track ${trk.index + 1} of ${totalTracks} • ${formatTimecode(trk.durationSec, false)} • Live Equalizer Active`;
+                titleText = `${trk.title}${trk.artist ? ' — ' + trk.artist : ''} (Track ${trk.index + 1}/${totalTracks})`;
             } else if (trk && engine.length > 0) {
-                badgeText = '● TRACK LOADED';
+                badgeText = '● LOADED';
                 badgeClass += ' is-ready';
                 const totalTracks = Math.max(1, engine.tracks.length);
-                titleText = `🎵 ${trk.title}${trk.artist ? ' — ' + trk.artist : ''}`;
-                subText = `Track ${trk.index + 1} of ${totalTracks} • ${formatTimecode(trk.durationSec, false)} • Tap ▶ Play to animate live EQ or 💾 Save`;
+                titleText = `${trk.title}${trk.artist ? ' — ' + trk.artist : ''} (Track ${trk.index + 1}/${totalTracks})`;
             } else if (connected) {
-                badgeText = '● INPUT READY';
+                badgeText = '● INPUT LIVE';
                 badgeClass += ' is-ready';
-                titleText = `Connected: ${engine.sourceLabel || 'Audio Input'}`;
-                subText = 'Monitoring input on equalizer — tap red Record to capture';
+                titleText = `Live Input Preview — ${engine.sourceLabel || 'Audio Input'}`;
             }
 
-            if (eqStatusBadge && (badgeText !== lastEqBadge || eqStatusBadge.className !== badgeClass)) {
-                eqStatusBadge.textContent = badgeText;
-                eqStatusBadge.className = badgeClass;
-                lastEqBadge = badgeText;
+            if (waveStatusBadge && (badgeText !== lastWaveBadge || waveStatusBadge.className !== badgeClass)) {
+                waveStatusBadge.textContent = badgeText;
+                waveStatusBadge.className = badgeClass;
+                lastWaveBadge = badgeText;
             }
-            if (eqTrackTitle && titleText !== lastEqTitle) {
-                eqTrackTitle.textContent = titleText;
-                lastEqTitle = titleText;
+            if (waveTrackTitle && titleText !== lastWaveTitle) {
+                waveTrackTitle.textContent = titleText;
+                lastWaveTitle = titleText;
             }
-            if (eqTrackSub && subText !== lastEqSub) {
-                eqTrackSub.textContent = subText;
-                lastEqSub = subText;
+            if (waveLiveViewBadge) {
+                waveLiveViewBadge.classList.toggle('hidden', !isRec);
             }
         }
 
         function syncGuidedStepBanner() {
             if (!guidedStepBanner) return;
             if (engine.recordState === 'recording') {
-                guidedStepBanner.innerHTML = '🔴 <strong>Recording live!</strong> Play your tracks — quiet gaps split songs automatically, or tap <strong>✂️ Split Song</strong> anytime.';
+                guidedStepBanner.innerHTML = '🔴 <strong>Recording live!</strong> Watch the Left &amp; Right wave and level bars below — songs split automatically on quiet gaps.';
             } else if (engine.recordState === 'armed') {
-                guidedStepBanner.innerHTML = '⚡ <strong>Armed:</strong> Hit Play on your music stream and recording will begin the instant sound starts.';
+                guidedStepBanner.innerHTML = '⚡ <strong>Armed:</strong> Hit Play on your music stream and the continuous recording wave starts immediately.';
             } else if (engine.isPlaying) {
-                guidedStepBanner.innerHTML = '🎧 <strong>Playing on Equalizer:</strong> Switch EQ presets (<em>Flat / Bass Boost / Vocal / Warm</em>) or drag the waveform to trim.';
+                guidedStepBanner.innerHTML = '🎧 <strong>Playing:</strong> Drag on the wave to highlight a section, or tap <strong>💾 Save</strong> below.';
             } else if (engine.length > 0) {
                 const n = engine.tracks.length;
-                guidedStepBanner.innerHTML = `✅ <strong>Ready to Save!</strong> ${n} track${n === 1 ? '' : 's'} detected — edit names below or tap <strong>💾 Save</strong>.`;
+                guidedStepBanner.innerHTML = `✅ <strong>Ready!</strong> ${n} track${n === 1 ? '' : 's'} captured — rename tracks below or tap <strong>💾 Save</strong>.`;
             } else if (supportsDisplayCapture) {
-                guidedStepBanner.innerHTML = '✨ <strong>Step 1:</strong> Tap <strong>Record Music Tab</strong> (or <strong>Open Audio</strong>) — songs automatically split on quiet gaps.';
+                guidedStepBanner.innerHTML = '✨ <strong>Step 1:</strong> Tap <strong>Record Music Tab</strong> (or <strong>Open Audio</strong>) — watch the continuous L/R recording wave and auto-split songs.';
             } else {
-                guidedStepBanner.innerHTML = '✨ <strong>Step 1:</strong> Tap <strong>Tap to Record</strong> or <strong>Open Audio</strong> to visualize your track and save MP3s.';
+                guidedStepBanner.innerHTML = '✨ <strong>Step 1:</strong> Tap <strong>Tap to Record</strong> or <strong>Open Audio</strong> to capture Left/Right audio and save MP3s.';
             }
         }
 
@@ -444,7 +436,7 @@
                 syncPanScrollbar();
                 renderTracksList();
                 updateUiState();
-                showToast(`Loaded "${file.name}" onto equalizer (${formatTimecode(info.length / info.sampleRate, false)})`, 'success');
+                showToast(`Loaded "${file.name}" (${formatTimecode(info.length / info.sampleRate, false)})`, 'success');
             } catch (err) {
                 showToast(`Could not decode audio file: ${(err && err.message) || 'Unsupported format'}`, 'error');
             }
@@ -706,7 +698,7 @@
                 titleInput.setAttribute('aria-label', `Track ${idx + 1} title`);
                 titleInput.addEventListener('input', () => {
                     engine.updateTrackMeta(trk.id, { title: titleInput.value, saved: false });
-                    syncEqualizerTrackDisplay();
+                    syncWaveTrackDisplay();
                 });
 
                 const actions = document.createElement('div');
@@ -715,7 +707,7 @@
                 const playTrkBtn = document.createElement('button');
                 playTrkBtn.type = 'button';
                 playTrkBtn.className = 'row-icon-btn';
-                playTrkBtn.title = 'Play on equalizer';
+                playTrkBtn.title = 'Play track';
                 playTrkBtn.textContent = '▶ Play';
                 playTrkBtn.addEventListener('click', () => {
                     engine.setSelection(trk.startSample, trk.endSample);
@@ -759,7 +751,7 @@
                 artistInput.setAttribute('aria-label', `Track ${idx + 1} artist`);
                 artistInput.addEventListener('input', () => {
                     engine.updateTrackMeta(trk.id, { artist: artistInput.value, saved: false });
-                    syncEqualizerTrackDisplay();
+                    syncWaveTrackDisplay();
                 });
 
                 const timeMeta = document.createElement('div');
@@ -772,7 +764,7 @@
                 const selTrkBtn = document.createElement('button');
                 selTrkBtn.type = 'button';
                 selTrkBtn.className = 'row-icon-btn';
-                selTrkBtn.title = 'Focus on equalizer & waveform';
+                selTrkBtn.title = 'Select on wave';
                 selTrkBtn.textContent = '🎯';
                 selTrkBtn.addEventListener('click', () => {
                     engine.setSelection(trk.startSample, trk.endSample);
@@ -821,8 +813,8 @@
             const isPaused = engine.recordState === 'paused';
             const hasSel = Boolean(engine.selection && engine.selection.endSample > engine.selection.startSample);
 
-            if (waveformEmptyOverlay) {
-                waveformEmptyOverlay.classList.toggle('hidden', hasAudio || !isIdle);
+            if (waveformEmptyHint) {
+                waveformEmptyHint.classList.toggle('hidden', hasAudio || !isIdle || connected);
             }
             if (waveformToolsBar) {
                 waveformToolsBar.classList.toggle('hidden', !hasAudio);
@@ -841,7 +833,6 @@
             }
 
             if (recordBtn) {
-                // Keep 1-click Record always enabled! Auto-connects source if idle & disconnected
                 recordBtn.disabled = false;
                 recordBtn.classList.toggle('is-recording', isRecording);
                 recordBtn.classList.toggle('is-armed', isArmed);
@@ -884,7 +875,7 @@
 
             if (lcdFormatInfo) {
                 const dur = formatTimecode(engine.getDurationSeconds(), false);
-                lcdFormatInfo.textContent = `${(engine.sampleRate / 1000).toFixed(1)} kHz • ${dur}`;
+                lcdFormatInfo.textContent = `${(engine.sampleRate / 1000).toFixed(1)} kHz • Stereo • ${dur}`;
             }
 
             if (selectionReadout) {
@@ -897,117 +888,11 @@
                 }
             }
 
-            syncEqualizerTrackDisplay();
+            syncWaveTrackDisplay();
             syncGuidedStepBanner();
         }
 
-        // --- 32-Band Live Graphic Equalizer Renderer ---
-        function drawEqualizer() {
-            if (!equalizerCanvas) return;
-            const rect = equalizerCanvas.getBoundingClientRect();
-            if (rect.width === 0 || rect.height === 0) return;
-
-            const dpr = Math.min(2, window.devicePixelRatio || 1);
-            const w = Math.round(rect.width * dpr);
-            const h = Math.round(rect.height * dpr);
-            if (equalizerCanvas.width !== w || equalizerCanvas.height !== h) {
-                equalizerCanvas.width = w;
-                equalizerCanvas.height = h;
-            }
-
-            const ctx = equalizerCanvas.getContext('2d');
-            ctx.save();
-            ctx.scale(dpr, dpr);
-
-            const W = rect.width;
-            const H = rect.height;
-
-            ctx.fillStyle = '#04090e';
-            ctx.fillRect(0, 0, W, H);
-
-            // Subtle horizontal dB grid lines
-            ctx.strokeStyle = 'rgba(255, 255, 255, 0.06)';
-            ctx.lineWidth = 1;
-            for (let g = 1; g <= 3; g++) {
-                const gy = Math.round((H * g) / 4) + 0.5;
-                ctx.beginPath();
-                ctx.moveTo(0, gy);
-                ctx.lineTo(W, gy);
-                ctx.stroke();
-            }
-
-            const freqInfo = engine.getFrequencyData();
-            const isLiveMode = freqInfo.active && (engine.isPlaying || engine.isSourceConnected());
-            let targetBars = null;
-
-            if (isLiveMode && freqInfo.bins && freqInfo.bins.length > 0) {
-                targetBars = new Float32Array(EQ_NUM_BANDS);
-                const binCount = freqInfo.bins.length;
-                for (let b = 0; b < EQ_NUM_BANDS; b++) {
-                    // Logarithmic bin mapping across 32 visual bands
-                    const f0 = Math.floor(Math.pow(b / EQ_NUM_BANDS, 1.55) * (binCount - 1));
-                    const f1 = Math.max(f0 + 1, Math.ceil(Math.pow((b + 1) / EQ_NUM_BANDS, 1.55) * (binCount - 1)));
-                    let peak = 0;
-                    for (let k = f0; k < Math.min(binCount, f1); k++) {
-                        if (freqInfo.bins[k] > peak) peak = freqInfo.bins[k];
-                    }
-                    targetBars[b] = peak / 255;
-                }
-            } else if (engine.length > 0) {
-                // Track loaded & paused: show static spectrum preview around cursor so track is clearly visualized on EQ
-                const cur = Math.max(0, Math.min(engine.length - 1, engine.cursorSample));
-                if (staticSpectrumLen !== engine.length || Math.abs(staticSpectrumCursor - cur) > 2048) {
-                    staticSpectrumCache = engine.getSampleWindowSpectrum(cur, EQ_NUM_BANDS);
-                    staticSpectrumCursor = cur;
-                    staticSpectrumLen = engine.length;
-                }
-                targetBars = staticSpectrumCache;
-            }
-
-            const gap = Math.max(2, Math.floor(W / 180));
-            const barW = Math.max(3, (W - gap * (EQ_NUM_BANDS + 1)) / EQ_NUM_BANDS);
-
-            const grad = ctx.createLinearGradient(0, H, 0, 0);
-            if (isLiveMode) {
-                grad.addColorStop(0, '#00a884');
-                grad.addColorStop(0.55, '#38bdf8');
-                grad.addColorStop(0.84, '#f59e0b');
-                grad.addColorStop(1, '#ef4444');
-            } else {
-                grad.addColorStop(0, 'rgba(0, 168, 132, 0.55)');
-                grad.addColorStop(1, 'rgba(56, 189, 248, 0.65)');
-            }
-
-            for (let b = 0; b < EQ_NUM_BANDS; b++) {
-                const target = targetBars ? targetBars[b] : 0.03;
-                const attack = target > eqSmoothBars[b] ? 0.45 : 0.16;
-                eqSmoothBars[b] += (target - eqSmoothBars[b]) * attack;
-                const val = Math.max(0.03, Math.min(1, eqSmoothBars[b]));
-
-                if (val > eqPeakCaps[b]) {
-                    eqPeakCaps[b] = val;
-                } else {
-                    eqPeakCaps[b] = Math.max(val, eqPeakCaps[b] - 0.008);
-                }
-
-                const x = gap + b * (barW + gap);
-                const barH = Math.max(3, val * (H - 8));
-                const y = H - barH;
-
-                ctx.fillStyle = grad;
-                ctx.fillRect(x, y, barW, barH);
-
-                if (targetBars && eqPeakCaps[b] > 0.05) {
-                    const capY = Math.max(2, H - eqPeakCaps[b] * (H - 8) - 3);
-                    ctx.fillStyle = eqPeakCaps[b] > 0.88 ? '#ef4444' : '#e0f2fe';
-                    ctx.fillRect(x, capY, barW, 2);
-                }
-            }
-
-            ctx.restore();
-        }
-
-        // --- High-DPI Stereo Waveform Canvas Rendering ---
+        // --- Continuous Visible Stereo Waveform Canvas Rendering ---
         function sampleToX(sample, width) {
             if (viewSpanSamples <= 0) return 0;
             return ((sample - viewStartSample) / viewSpanSamples) * width;
@@ -1046,36 +931,88 @@
             const MID_Y_R = WAVE_TOP + WAVE_H * 0.75;
             const CH_AMP = WAVE_H * 0.22;
 
-            ctx.fillStyle = '#070f15';
+            // Background
+            ctx.fillStyle = '#060d13';
             ctx.fillRect(0, 0, W, H);
 
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.015)';
+            // Top Left lane subtle tint & ±50% amplitude guides
+            ctx.fillStyle = 'rgba(56, 189, 248, 0.025)';
             ctx.fillRect(0, WAVE_TOP, W, WAVE_H * 0.5);
-            ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+            ctx.fillStyle = 'rgba(45, 212, 191, 0.02)';
+            ctx.fillRect(0, WAVE_TOP + WAVE_H * 0.5, W, WAVE_H * 0.5);
+
+            // L/R divider
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
             ctx.lineWidth = 1;
             ctx.beginPath();
             ctx.moveTo(0, WAVE_TOP + WAVE_H * 0.5);
             ctx.lineTo(W, WAVE_TOP + WAVE_H * 0.5);
             ctx.stroke();
 
-            ctx.strokeStyle = 'rgba(56, 189, 248, 0.18)';
+            // Zero-crossing centerlines for L and R
+            ctx.strokeStyle = 'rgba(56, 189, 248, 0.25)';
             ctx.beginPath();
             ctx.moveTo(0, MID_Y_L);
             ctx.lineTo(W, MID_Y_L);
+            ctx.stroke();
+
+            ctx.strokeStyle = 'rgba(45, 212, 191, 0.25)';
+            ctx.beginPath();
             ctx.moveTo(0, MID_Y_R);
             ctx.lineTo(W, MID_Y_R);
             ctx.stroke();
 
-            ctx.font = 'bold 10px ui-monospace, monospace';
-            ctx.fillStyle = 'rgba(143, 160, 170, 0.65)';
-            ctx.fillText('L', 8, WAVE_TOP + 13);
-            ctx.fillText('R', 8, WAVE_TOP + WAVE_H * 0.5 + 13);
+            // Subtle ±50% guide lines
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.04)';
+            ctx.beginPath();
+            ctx.moveTo(0, MID_Y_L - CH_AMP * 0.5);
+            ctx.lineTo(W, MID_Y_L - CH_AMP * 0.5);
+            ctx.moveTo(0, MID_Y_L + CH_AMP * 0.5);
+            ctx.lineTo(W, MID_Y_L + CH_AMP * 0.5);
+            ctx.moveTo(0, MID_Y_R - CH_AMP * 0.5);
+            ctx.lineTo(W, MID_Y_R - CH_AMP * 0.5);
+            ctx.moveTo(0, MID_Y_R + CH_AMP * 0.5);
+            ctx.lineTo(W, MID_Y_R + CH_AMP * 0.5);
+            ctx.stroke();
 
+            // Always-visible LEFT & RIGHT channel labels
+            ctx.font = 'bold 10px ui-monospace, monospace';
+            ctx.fillStyle = 'rgba(56, 189, 248, 0.85)';
+            ctx.fillText('LEFT', 8, WAVE_TOP + 13);
+            ctx.fillStyle = 'rgba(45, 212, 191, 0.85)';
+            ctx.fillText('RIGHT', 8, WAVE_TOP + WAVE_H * 0.5 + 13);
+
+            // Ruler & bottom tracks lane
             ctx.fillStyle = '#0c161e';
             ctx.fillRect(0, 0, W, RULER_H);
             ctx.fillRect(0, H - LANE_H, W, LANE_H);
 
             const total = engine.length;
+            const liveSampleInfo = engine.getLiveWaveSamples();
+
+            // Live oscilloscope preview when input is connected/armed before samples accumulate
+            if (total === 0 && liveSampleInfo.active && liveSampleInfo.left.length > 0) {
+                const len = liveSampleInfo.left.length;
+                ctx.lineWidth = 1.6;
+                ctx.strokeStyle = '#38bdf8';
+                ctx.beginPath();
+                for (let i = 0; i < len; i++) {
+                    const x = (i / (len - 1)) * W;
+                    const y = MID_Y_L - Math.max(-1, Math.min(1, liveSampleInfo.left[i])) * CH_AMP;
+                    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+                }
+                ctx.stroke();
+
+                ctx.strokeStyle = '#2dd4bf';
+                ctx.beginPath();
+                for (let i = 0; i < len; i++) {
+                    const x = (i / (len - 1)) * W;
+                    const y = MID_Y_R - Math.max(-1, Math.min(1, liveSampleInfo.right[i])) * CH_AMP;
+                    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+                }
+                ctx.stroke();
+            }
+
             if (total > 0 && viewSpanSamples > 0) {
                 const startSec = viewStartSample / engine.sampleRate;
                 const spanSec = viewSpanSamples / engine.sampleRate;
@@ -1092,7 +1029,7 @@
                 ctx.fillStyle = '#8fa0aa';
                 for (let t = firstTick; t <= startSec + spanSec; t += tickStep) {
                     const x = ((t - startSec) / spanSec) * W;
-                    ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
+                    ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
                     ctx.beginPath();
                     ctx.moveTo(x, RULER_H - 5);
                     ctx.lineTo(x, RULER_H);
@@ -1100,13 +1037,14 @@
                     ctx.fillText(formatTimecode(t, tickStep < 1), x + 4, 14);
                 }
 
+                // Track Regions Lane
                 const tracks = engine.tracks || [];
                 tracks.forEach((trk, idx) => {
                     const x0 = Math.max(0, sampleToX(trk.startSample, W));
                     const x1 = Math.min(W, sampleToX(trk.endSample, W));
                     if (x1 <= 0 || x0 >= W) return;
 
-                    ctx.fillStyle = idx % 2 === 0 ? 'rgba(56, 189, 248, 0.14)' : 'rgba(0, 168, 132, 0.14)';
+                    ctx.fillStyle = idx % 2 === 0 ? 'rgba(56, 189, 248, 0.16)' : 'rgba(45, 212, 191, 0.16)';
                     ctx.fillRect(x0, H - LANE_H + 2, Math.max(2, x1 - x0 - 1), LANE_H - 4);
 
                     if (x1 - x0 > 28) {
@@ -1137,6 +1075,7 @@
                     }
                 });
 
+                // Continuous Stereo Wave Bars
                 const samplesPerPx = viewSpanSamples / W;
                 const bucketSize = engine.peakBucketSize;
                 const usePeakCache = samplesPerPx >= bucketSize && engine.peakCount > 0;
@@ -1174,14 +1113,15 @@
                     const yTopL = MID_Y_L - (maxL / 32768) * CH_AMP;
                     const yBotL = MID_Y_L - (minL / 32768) * CH_AMP;
                     ctx.fillStyle = clipL ? '#ef4444' : '#38bdf8';
-                    ctx.fillRect(px, yTopL, 1, Math.max(1.2, yBotL - yTopL));
+                    ctx.fillRect(px, yTopL, 1.2, Math.max(1.5, yBotL - yTopL));
 
                     const yTopR = MID_Y_R - (maxR / 32768) * CH_AMP;
                     const yBotR = MID_Y_R - (minR / 32768) * CH_AMP;
-                    ctx.fillStyle = clipR ? '#ef4444' : '#22d3ee';
-                    ctx.fillRect(px, yTopR, 1, Math.max(1.2, yBotR - yTopR));
+                    ctx.fillStyle = clipR ? '#ef4444' : '#2dd4bf';
+                    ctx.fillRect(px, yTopR, 1.2, Math.max(1.5, yBotR - yTopR));
                 }
 
+                // Selection highlight
                 if (engine.selection && engine.selection.endSample > engine.selection.startSample) {
                     const sx0 = sampleToX(engine.selection.startSample, W);
                     const sx1 = sampleToX(engine.selection.endSample, W);
@@ -1201,6 +1141,7 @@
                     }
                 }
 
+                // Recording / Playback needle
                 const headSample = engine.recordState === 'recording'
                     ? engine.length
                     : (engine.isPlaying ? engine.getPlaybackPositionSample() : engine.cursorSample);
@@ -1212,6 +1153,13 @@
                     ctx.moveTo(hx, RULER_H);
                     ctx.lineTo(hx, H - LANE_H);
                     ctx.stroke();
+
+                    if (engine.recordState === 'recording') {
+                        ctx.fillStyle = '#ef4444';
+                        ctx.beginPath();
+                        ctx.arc(hx, RULER_H + 5, 4, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
                 }
             }
 
@@ -1235,24 +1183,32 @@
             const W = rect.width;
             const H = rect.height;
 
-            ctx.fillStyle = '#04090e';
+            ctx.fillStyle = '#03070b';
             ctx.fillRect(0, 0, W, H);
 
             const norm = (db) => Math.max(0, Math.min(1, (db + 60) / 60));
             const lvl = norm(rmsDb);
             const grad = ctx.createLinearGradient(0, 0, W, 0);
             grad.addColorStop(0, '#00a884');
-            grad.addColorStop(0.7, '#22c55e');
-            grad.addColorStop(0.86, '#f59e0b');
+            grad.addColorStop(0.65, '#22c55e');
+            grad.addColorStop(0.84, '#f59e0b');
             grad.addColorStop(1, '#ef4444');
 
             ctx.fillStyle = grad;
             ctx.fillRect(0, 0, lvl * W, H);
 
+            // Subtle segmented studio LED ticks
+            ctx.fillStyle = '#03070b';
+            const segStep = Math.max(6, Math.round(W / 44));
+            for (let x = segStep; x < W; x += segStep) {
+                ctx.fillRect(x, 0, 1.5, H);
+            }
+
+            // Peak hold tick
             const holdX = norm(peakHoldDb) * W;
             if (holdX > 2) {
                 ctx.fillStyle = peakHoldDb >= -1 ? '#ef4444' : '#ffffff';
-                ctx.fillRect(Math.min(W - 2, holdX), 0, 2, H);
+                ctx.fillRect(Math.min(W - 3, holdX), 0, 2.5, H);
             }
             ctx.restore();
         }
@@ -1269,7 +1225,7 @@
             }
 
             if (engine.isPlaying) {
-                syncEqualizerTrackDisplay();
+                syncWaveTrackDisplay();
             }
 
             const levels = engine.getMeterLevels();
@@ -1290,7 +1246,13 @@
             if (vuClipL) vuClipL.classList.toggle('clipped', now < clipUntilL);
             if (vuClipR) vuClipR.classList.toggle('clipped', now < clipUntilR);
 
-            drawEqualizer();
+            if (meterDbReadout) {
+                const maxPeak = Math.max(levels.left.peakDb, levels.right.peakDb);
+                meterDbReadout.textContent = (levels.mode === 'idle' || maxPeak <= -59.5)
+                    ? '-∞ dB'
+                    : `${maxPeak.toFixed(0)} dB`;
+            }
+
             drawVuBar(vuMeterL, levels.left.rmsDb, peakHoldL);
             drawVuBar(vuMeterR, levels.right.rmsDb, peakHoldR);
 
@@ -1306,7 +1268,7 @@
             requestAnimationFrame(animationTick);
         }
 
-        // --- Unified Pointer (Mouse + Touch) Interactions on Waveform ---
+        // --- Unified Pointer (Mouse + Touch) Interactions on Continuous Wave ---
         if (waveformCanvas) {
             waveformCanvas.addEventListener('pointerdown', (e) => {
                 if (engine.length === 0 || (e.pointerType === 'mouse' && e.button !== 0)) return;
@@ -1443,7 +1405,7 @@
             waveformCanvas.addEventListener('pointercancel', finishPointerDrag);
 
             waveformCanvas.addEventListener('wheel', (e) => {
-                if (engine.length === 0) return;
+                if (engine.length === 0 || engine.recordState !== 'idle') return;
                 e.preventDefault();
                 const rect = waveformCanvas.getBoundingClientRect();
                 if (e.shiftKey || Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
@@ -1460,7 +1422,7 @@
         }
 
         function zoomWaveform(factor, focusRatio = 0.5) {
-            if (engine.length === 0) return;
+            if (engine.length === 0 || engine.recordState !== 'idle') return;
             if (!userHasZoomed) {
                 viewStartSample = 0;
                 viewSpanSamples = engine.length;
@@ -1480,16 +1442,6 @@
             clampViewport();
             syncPanScrollbar();
         }
-
-        // --- Wire EQ Presets ---
-        eqPresetBtns.forEach(btn => {
-            btn.addEventListener('click', () => {
-                const preset = btn.getAttribute('data-eq-preset') || 'flat';
-                engine.setEqPreset(preset);
-                eqPresetBtns.forEach(b => b.classList.toggle('is-active', b === btn));
-                showToast(`🎛️ EQ Preset: ${btn.textContent}`, 'info');
-            });
-        });
 
         // --- Wire Controls ---
         if (captureTabBtn) captureTabBtn.addEventListener('click', handleCaptureTabClick);
@@ -1618,7 +1570,7 @@
         });
         if (waveformPanSlider) {
             waveformPanSlider.addEventListener('input', () => {
-                if (engine.length === 0 || !userHasZoomed) return;
+                if (engine.length === 0 || !userHasZoomed || engine.recordState !== 'idle') return;
                 const maxStart = Math.max(0, engine.length - viewSpanSamples);
                 viewStartSample = Math.round((Number(waveformPanSlider.value) / 1000) * maxStart);
                 clampViewport();

@@ -1,5 +1,5 @@
 /* ==========================================================================
-   MP3AUD.IO — USER-FRIENDLY MOBILE-FIRST STREAM RECORDER & LIVE EQUALIZER
+   MP3AUD.IO — CONTINUOUS STEREO RECORDING WAVE & MOBILE-FIRST STUDIO
    Dark Studio DAW Design System
    ========================================================================== */
 
@@ -21,6 +21,7 @@
     --brand-emerald: #00a884;
     --brand-emerald-hover: #06cf9c;
     --wave-cyan: #38bdf8;
+    --wave-teal: #2dd4bf;
     --rec-red: #ef4444;
     --amber: #f59e0b;
 
@@ -277,7 +278,7 @@ html, body {
 }
 
 /* ==========================================================================
-   1. RECORD & TRANSPORT HERO CARD
+   1. RECORD, TRANSPORT & LEFT/RIGHT CHANNEL RECORDING BARS
    ========================================================================== */
 .guided-step-banner {
     font-size: 0.83rem;
@@ -404,6 +405,132 @@ html, body {
     color: #fcd34d;
 }
 
+/* Convenient L/R Channel Recording Bars Deck */
+.lr-meter-deck {
+    background: #060d13;
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-md);
+    padding: 10px 12px 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+
+.lr-meter-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.lr-meter-title {
+    font-size: 0.69rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    color: var(--text-secondary);
+}
+
+.lr-meter-readouts {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.meter-db-pill {
+    font-family: var(--font-mono);
+    font-size: 0.74rem;
+    font-weight: 700;
+    color: var(--wave-cyan);
+    background: var(--bg-panel);
+    border: 1px solid var(--border-subtle);
+    border-radius: 4px;
+    padding: 2px 7px;
+}
+
+.lcd-time {
+    font-family: var(--font-mono);
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: #e0f2fe;
+}
+
+.lr-bars-rows {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.vu-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.vu-ch-label {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    font-weight: 800;
+    width: 18px;
+    height: 18px;
+    border-radius: 4px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.vu-ch-l {
+    background: rgba(56, 189, 248, 0.16);
+    color: var(--wave-cyan);
+    border: 1px solid rgba(56, 189, 248, 0.4);
+}
+
+.vu-ch-r {
+    background: rgba(45, 212, 191, 0.16);
+    color: var(--wave-teal);
+    border: 1px solid rgba(45, 212, 191, 0.4);
+}
+
+.vu-canvas {
+    flex: 1;
+    height: 14px;
+    display: block;
+    border-radius: 4px;
+    background: #03070b;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    min-width: 60px;
+}
+
+.vu-clip-led {
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    font-weight: 800;
+    padding: 2px 6px;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-muted);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    flex-shrink: 0;
+}
+
+.vu-clip-led.clipped {
+    background: var(--rec-red);
+    color: #ffffff;
+    border-color: #fca5a5;
+    box-shadow: 0 0 10px rgba(239, 68, 68, 0.75);
+}
+
+.vu-db-scale {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 46px 0 26px;
+    font-family: var(--font-mono);
+    font-size: 0.64rem;
+    color: var(--text-muted);
+}
+
 .mobile-hint-banner {
     font-size: 0.79rem;
     color: var(--text-secondary);
@@ -415,47 +542,34 @@ html, body {
 }
 
 /* ==========================================================================
-   2. LIVE EQUALIZER + STEREO WAVEFORM STAGE
+   2. CONTINUOUS VISIBLE STEREO RECORDING WAVE CARD
    ========================================================================== */
-.visualizer-stage-card {
+.waveform-card {
     padding: 0;
     overflow: hidden;
     gap: 0;
 }
 
-.eq-stage {
-    background: #060d13;
-    border-bottom: 1px solid var(--border-strong);
-    padding: 12px 14px 10px;
+.wave-header-bar {
     display: flex;
-    flex-direction: column;
-    gap: 9px;
-}
-
-.eq-header-bar {
-    display: flex;
-    align-items: flex-start;
+    align-items: center;
     justify-content: space-between;
     gap: 10px;
     flex-wrap: wrap;
+    padding: 9px 14px;
+    background: #0d161d;
+    border-bottom: 1px solid var(--border-subtle);
 }
 
-.eq-track-identity {
-    flex: 1;
-    min-width: 210px;
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
-}
-
-.eq-title-row {
+.wave-track-identity {
     display: flex;
     align-items: center;
     gap: 8px;
     min-width: 0;
+    flex: 1;
 }
 
-.eq-status-badge {
+.wave-status-badge {
     font-size: 0.67rem;
     font-weight: 800;
     letter-spacing: 0.05em;
@@ -467,175 +581,61 @@ html, body {
     flex-shrink: 0;
 }
 
-.eq-status-badge.is-live {
+.wave-status-badge.is-live {
     background: rgba(239, 68, 68, 0.22);
     color: #fca5a5;
     border: 1px solid rgba(239, 68, 68, 0.5);
 }
 
-.eq-status-badge.is-playing {
+.wave-status-badge.is-playing {
     background: rgba(0, 168, 132, 0.22);
     color: #6ee7b7;
     border: 1px solid rgba(0, 168, 132, 0.5);
 }
 
-.eq-status-badge.is-ready {
+.wave-status-badge.is-ready {
     background: rgba(56, 189, 248, 0.18);
     color: #7dd3fc;
     border: 1px solid rgba(56, 189, 248, 0.45);
 }
 
-.eq-track-title {
-    font-size: 0.98rem;
-    font-weight: 800;
+.wave-track-title {
+    font-size: 0.88rem;
+    font-weight: 700;
     color: #ffffff;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
 
-.eq-track-sub {
-    font-size: 0.76rem;
-    color: var(--text-secondary);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.eq-right-controls {
+.wave-header-meta {
     display: flex;
     align-items: center;
     gap: 8px;
-    flex-wrap: wrap;
-}
-
-.lcd-display-panel {
-    display: flex;
-    align-items: baseline;
-    gap: 7px;
-    padding: 5px 10px;
-    background: var(--bg-panel);
-    border: 1px solid var(--border-subtle);
-    border-radius: var(--radius-sm);
     flex-shrink: 0;
 }
 
-.lcd-time {
+.wave-live-pill {
     font-family: var(--font-mono);
-    font-size: 1.05rem;
-    font-weight: 800;
-    color: #e0f2fe;
+    font-size: 0.68rem;
+    font-weight: 700;
+    color: #fca5a5;
+    background: rgba(239, 68, 68, 0.15);
+    border: 1px solid rgba(239, 68, 68, 0.35);
+    padding: 2px 7px;
+    border-radius: 999px;
 }
 
 .lcd-sub {
-    font-size: 0.7rem;
+    font-size: 0.72rem;
     color: var(--text-secondary);
-}
-
-.eq-presets-row {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    flex-wrap: wrap;
-}
-
-.eq-preset-btn {
-    min-height: 32px;
-    padding: 4px 10px;
-    border-radius: 999px;
-    border: 1px solid var(--border-subtle);
-    background: rgba(255, 255, 255, 0.05);
-    color: var(--text-secondary);
-    font-size: 0.74rem;
-    font-weight: 600;
-    cursor: pointer;
-    white-space: nowrap;
-}
-
-.eq-preset-btn:hover {
-    color: #ffffff;
-    border-color: rgba(56, 189, 248, 0.5);
-}
-
-.eq-preset-btn.is-active {
-    background: rgba(56, 189, 248, 0.22);
-    border-color: var(--wave-cyan);
-    color: #e0f2fe;
-}
-
-.eq-canvas-wrap {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    background: #04090e;
-    border: 1px solid var(--border-subtle);
-    border-radius: var(--radius-md);
-    padding: 8px 8px 5px;
-}
-
-#equalizerCanvas {
-    width: 100%;
-    height: 112px;
-    display: block;
-}
-
-.eq-freq-labels {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    font-family: var(--font-mono);
-    font-size: 0.65rem;
-    color: var(--text-muted);
-    padding: 0 4px;
-}
-
-.vu-strip-compact {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-}
-
-.vu-row {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-
-.vu-ch-label {
-    font-family: var(--font-mono);
-    font-size: 0.65rem;
-    font-weight: 700;
-    color: var(--text-secondary);
-    width: 10px;
-}
-
-.vu-canvas {
-    flex: 1;
-    height: 8px;
-    display: block;
-    border-radius: 3px;
-    background: #04090e;
-    min-width: 40px;
-}
-
-.vu-clip-led {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.08);
-    flex-shrink: 0;
-}
-
-.vu-clip-led.clipped {
-    background: var(--rec-red);
-    box-shadow: 0 0 8px var(--rec-red);
 }
 
 .waveform-canvas-wrap {
     position: relative;
     width: 100%;
-    height: 220px;
-    background: var(--bg-well);
+    height: 270px;
+    background: #060d13;
 }
 
 #waveformCanvas {
@@ -646,46 +646,38 @@ html, body {
     touch-action: pan-y;
 }
 
-.waveform-empty-overlay {
+/* Lightweight semi-transparent prompt so Left & Right tracks remain visible underneath */
+.waveform-empty-hint {
     position: absolute;
-    inset: 14px;
+    inset: 22px 12px 24px 12px;
     display: flex;
     align-items: center;
     justify-content: center;
-    text-align: center;
     pointer-events: none;
 }
 
-.empty-card {
+.empty-hint-pill {
     pointer-events: auto;
-    max-width: 560px;
-    width: 100%;
-    padding: 18px 20px;
-    border-radius: var(--radius-lg);
-    background: rgba(17, 27, 33, 0.92);
-    border: 1px solid var(--border-strong);
-    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
-}
-
-.empty-card h1 {
-    font-size: 1.04rem;
-    font-weight: 800;
-    color: #ffffff;
-    margin-bottom: 6px;
-}
-
-.empty-card p {
-    font-size: 0.82rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 9px;
+    max-width: 500px;
+    padding: 11px 16px;
+    border-radius: var(--radius-md);
+    background: rgba(11, 20, 26, 0.76);
+    border: 1px solid rgba(56, 189, 248, 0.25);
+    backdrop-filter: blur(4px);
+    font-size: 0.81rem;
     color: var(--text-secondary);
-    line-height: 1.45;
-    margin-bottom: 14px;
 }
 
-.empty-cta-row {
+.empty-hint-actions {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 9px;
+    gap: 8px;
     flex-wrap: wrap;
 }
 
@@ -1455,24 +1447,16 @@ html, body {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(76px, 1fr));
     }
-    .eq-right-controls {
-        width: 100%;
-        justify-content: space-between;
-    }
-    #equalizerCanvas {
-        height: 92px;
-    }
-    .vu-strip-compact {
-        grid-template-columns: 1fr;
-        gap: 5px;
+    .vu-canvas {
+        height: 13px;
     }
     .waveform-canvas-wrap {
-        height: 185px;
+        height: 215px;
     }
-    .empty-card {
-        padding: 14px;
+    .empty-hint-pill {
+        padding: 10px 12px;
     }
-    .empty-cta-row .studio-btn {
+    .empty-hint-actions .studio-btn {
         width: 100%;
     }
     .track-row-main {

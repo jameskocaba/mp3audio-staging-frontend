@@ -6,12 +6,12 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 
-    <title>MP3aud.io | Free Browser Stream Audio Recorder &amp; Live Equalizer Studio</title>
-    <meta name="title" content="MP3aud.io | Free Browser Stream Audio Recorder &amp; Live Equalizer Studio">
+    <title>MP3aud.io | Browser Stream Audio Recorder &amp; Live Stereo Recording Wave</title>
+    <meta name="title" content="MP3aud.io | Browser Stream Audio Recorder &amp; Live Stereo Recording Wave">
     <meta name="description"
-        content="Record streamed music, browser tabs, mic, and audio files right in your browser like Audacity. Watch your track live on the 32-band equalizer, auto-split songs on silence, and save MP3 or WAV files straight to your device.">
+        content="Record streamed music, browser tabs, mic, and audio files right in your browser like Audacity. Watch the continuous stereo Left/Right recording wave, auto-split songs on silence, and save MP3 or WAV files straight to your hard drive.">
     <meta name="keywords"
-        content="browser audio recorder, mobile mp3 recorder, record streaming audio, live equalizer, audacity in browser, auto split tracks on silence, save mp3 to hard drive">
+        content="browser audio recorder, mobile mp3 recorder, record streaming audio, stereo recording wave, audacity in browser, auto split tracks on silence, save mp3 to hard drive">
     <meta name="author" content="MP3aud.io">
     <meta name="robots" content="index, follow">
     <link rel="canonical" href="https://mp3aud.io/">
@@ -19,16 +19,16 @@
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://mp3aud.io/">
     <meta property="og:site_name" content="MP3aud.io">
-    <meta property="og:title" content="MP3aud.io | Browser Audio Stream Recorder &amp; Live Equalizer">
+    <meta property="og:title" content="MP3aud.io | Browser Audio Stream Recorder &amp; Stereo Wave Studio">
     <meta property="og:description"
-        content="Simple, 100% browser-based audio recorder like Audacity. Capture streamed tracks or mic audio, see your track on the live equalizer, auto-split songs on silence, and save MP3/WAV.">
+        content="Simple, 100% browser-based audio recorder like Audacity. Capture streamed tracks with a live continuous stereo recording wave, L/R channel meters, auto-split on silence, and MP3/WAV saving.">
     <meta property="og:image" content="https://mp3aud.io/og-image.png">
     <meta property="og:locale" content="en_US">
 
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="MP3aud.io | Browser Audio Stream Recorder &amp; Live Equalizer">
+    <meta name="twitter:title" content="MP3aud.io | Browser Audio Stream Recorder &amp; Stereo Wave">
     <meta name="twitter:description"
-        content="Record streamed tracks, watch the live track equalizer, auto-split songs on silence, and save MP3/WAV straight to your computer or phone.">
+        content="Record streamed tracks with a continuous stereo recording wave and Left/Right channel meters, auto-split songs on silence, and save MP3/WAV straight to your device.">
     <meta name="twitter:image" content="https://mp3aud.io/og-image.png">
 
     <link rel="icon" type="image/png" href="favicon.png">
@@ -46,7 +46,7 @@
         gtag('config', 'G-VGVP90K1M4');
     </script>
 
-    <link rel="stylesheet" href="studio.css?v=20261122_03">
+    <link rel="stylesheet" href="studio.css?v=20261122_04">
 
     <script type="application/ld+json">
     {
@@ -54,7 +54,7 @@
       "@type": "WebApplication",
       "name": "MP3aud.io Browser Audio Stream Recorder",
       "url": "https://mp3aud.io/",
-      "description": "100% client-side browser audio recorder with live 32-band track equalizer and Audacity-style stereo waveform editor.",
+      "description": "100% client-side browser audio recorder with continuous live stereo recording wave, Left/Right channel bars, and Audacity-style track splitting.",
       "applicationCategory": "MultimediaApplication",
       "operatingSystem": "Windows, macOS, Linux, ChromeOS, iOS, Android",
       "offers": {
@@ -72,7 +72,7 @@
         <div class="drag-drop-card">
             <div class="drag-drop-icon">🎛️</div>
             <h2>Drop Audio File Here</h2>
-            <p>Load MP3, WAV, FLAC, M4A, OGG, or AAC locally to visualize on the equalizer, auto-split tracks, and save.</p>
+            <p>Load MP3, WAV, FLAC, M4A, OGG, or AAC locally to view the stereo waveform, auto-split tracks, and save.</p>
         </div>
     </div>
 
@@ -100,10 +100,10 @@
         </header>
 
         <main class="studio-container">
-            <!-- 2. SIMPLE 1-TAP RECORD & TRANSPORT CARD -->
-            <section class="studio-card recorder-hero-card" aria-label="Record and Transport">
+            <!-- 2. SIMPLE 1-TAP RECORD, TRANSPORT & CONVENIENT L/R CHANNEL RECORDING BARS -->
+            <section class="studio-card recorder-hero-card" aria-label="Record Transport and Stereo Channels">
                 <div id="guidedStepBanner" class="guided-step-banner">
-                    ✨ <strong>Step 1:</strong> Tap <strong>Record Music Tab</strong> (or <strong>Open Audio</strong>) — songs automatically split on quiet gaps.
+                    ✨ <strong>Step 1:</strong> Tap <strong>Record Music Tab</strong> (or <strong>Open Audio</strong>) — watch the continuous L/R recording wave and auto-split songs.
                 </div>
 
                 <div class="source-row">
@@ -150,89 +150,75 @@
                     </div>
                 </div>
 
-                <p id="mobileHintBanner" class="mobile-hint-banner hidden">
-                    📱 <strong>Mobile Ready:</strong> Tap <strong>Tap to Record</strong> for live mic/external audio or <strong>Open Audio</strong> to load a song/mix, see it on the equalizer, and save MP3s.
-                </p>
-            </section>
-
-            <!-- 3. LIVE EQUALIZER + STEREO WAVEFORM STAGE -->
-            <section class="studio-card visualizer-stage-card" aria-label="Live Equalizer and Waveform">
-                <!-- Equalizer Header: Always shows active Track + Status + Presets -->
-                <div class="eq-stage">
-                    <div class="eq-header-bar">
-                        <div class="eq-track-identity">
-                            <div class="eq-title-row">
-                                <span id="eqStatusBadge" class="eq-status-badge">STANDBY</span>
-                                <span id="eqTrackTitle" class="eq-track-title">No Track Active — Ready to Record</span>
-                            </div>
-                            <div id="eqTrackSub" class="eq-track-sub">
-                                Tap Record Music Tab, Use Mic, or Open Audio to see your track live on the 32-band equalizer
-                            </div>
-                        </div>
-
-                        <div class="eq-right-controls">
-                            <div class="lcd-display-panel">
-                                <span id="lcdTimecode" class="lcd-time">00:00.0</span>
-                                <span id="lcdFormatInfo" class="lcd-sub">44.1 kHz</span>
-                                <span id="lcdSourceStatus" class="hidden">STANDBY</span>
-                            </div>
-                            <div class="eq-presets-row" role="group" aria-label="Equalizer Presets">
-                                <button type="button" class="eq-preset-btn is-active" data-eq-preset="flat">Flat</button>
-                                <button type="button" class="eq-preset-btn" data-eq-preset="bass">Bass Boost</button>
-                                <button type="button" class="eq-preset-btn" data-eq-preset="vocal">Vocal</button>
-                                <button type="button" class="eq-preset-btn" data-eq-preset="warm">Warm</button>
-                            </div>
+                <!-- Convenient Left & Right Channel Recording Bars directly above the Continuous Wave -->
+                <div class="lr-meter-deck" aria-label="Left and Right Recording Channel Bars">
+                    <div class="lr-meter-header">
+                        <span class="lr-meter-title">LEFT &amp; RIGHT RECORDING CHANNELS</span>
+                        <div class="lr-meter-readouts">
+                            <span id="meterDbReadout" class="meter-db-pill">-∞ dB</span>
+                            <span id="lcdTimecode" class="lcd-time">00:00.0</span>
                         </div>
                     </div>
 
-                    <div class="eq-canvas-wrap">
-                        <canvas id="equalizerCanvas"></canvas>
-                        <div class="eq-freq-labels">
-                            <span>60Hz</span>
-                            <span>250Hz</span>
-                            <span>1kHz</span>
-                            <span>4kHz</span>
-                            <span>12kHz</span>
-                        </div>
-                    </div>
-
-                    <!-- Compact Stereo Peak Bars -->
-                    <div class="vu-strip-compact" aria-label="Stereo Level Meters">
+                    <div class="lr-bars-rows">
                         <div class="vu-row">
-                            <span class="vu-ch-label">L</span>
+                            <span class="vu-ch-label vu-ch-l">L</span>
                             <canvas id="vuMeterL" class="vu-canvas"></canvas>
-                            <span id="vuClipL" class="vu-clip-led" title="Left clip"></span>
+                            <span id="vuClipL" class="vu-clip-led" title="Left channel clip indicator">CLIP</span>
                         </div>
                         <div class="vu-row">
-                            <span class="vu-ch-label">R</span>
+                            <span class="vu-ch-label vu-ch-r">R</span>
                             <canvas id="vuMeterR" class="vu-canvas"></canvas>
-                            <span id="vuClipR" class="vu-clip-led" title="Right clip"></span>
+                            <span id="vuClipR" class="vu-clip-led" title="Right channel clip indicator">CLIP</span>
                         </div>
+                    </div>
+
+                    <div class="vu-db-scale" aria-hidden="true">
+                        <span>-60</span>
+                        <span>-36</span>
+                        <span>-18</span>
+                        <span>-12</span>
+                        <span>-6</span>
+                        <span>0 dB</span>
                     </div>
                 </div>
 
-                <!-- Stereo Waveform -->
+                <p id="mobileHintBanner" class="mobile-hint-banner hidden">
+                    📱 <strong>Mobile Ready:</strong> Tap <strong>Tap to Record</strong> for live mic/external audio or <strong>Open Audio</strong> to load a song/mix and save MP3s.
+                </p>
+            </section>
+
+            <!-- 3. CONTINUOUS VISIBLE STEREO RECORDING WAVE CARD -->
+            <section class="studio-card waveform-card" aria-label="Continuous Stereo Recording Wave">
+                <div class="wave-header-bar">
+                    <div class="wave-track-identity">
+                        <span id="waveStatusBadge" class="wave-status-badge">STANDBY</span>
+                        <span id="waveTrackTitle" class="wave-track-title">Live Stereo Wave — Ready to Record</span>
+                    </div>
+                    <div class="wave-header-meta">
+                        <span id="waveLiveViewBadge" class="wave-live-pill hidden">Live 20s Scroll</span>
+                        <span id="lcdFormatInfo" class="lcd-sub">44.1 kHz &bull; Stereo</span>
+                    </div>
+                </div>
+
                 <div class="waveform-canvas-wrap">
                     <canvas id="waveformCanvas"></canvas>
 
-                    <div id="waveformEmptyOverlay" class="waveform-empty-overlay">
-                        <div class="empty-card">
-                            <h1>Record Music &amp; See Your Track Live on the Equalizer</h1>
-                            <p id="emptyCardDesc">
-                                Play a song in another browser tab or open an audio file. MP3aud.io visualizes every beat on the 32-band equalizer, splits tracks on silence, and saves tagged MP3s straight to your device.
-                            </p>
-                            <div class="empty-cta-row">
-                                <button type="button" id="emptyCaptureTabBtn" class="studio-btn studio-btn-primary">
+                    <div id="waveformEmptyHint" class="waveform-empty-hint">
+                        <div class="empty-hint-pill">
+                            <span id="emptyCardDesc">Tap <strong>Record Music Tab</strong> or <strong>Open Audio</strong> — Left &amp; Right wave streams appear live here.</span>
+                            <div class="empty-hint-actions">
+                                <button type="button" id="emptyCaptureTabBtn" class="studio-btn studio-btn-primary studio-btn-compact">
                                     <span>🖥️</span>
                                     <span>Record Music Tab</span>
                                 </button>
-                                <button type="button" id="emptyCaptureMicBtn" class="studio-btn studio-btn-primary hidden">
+                                <button type="button" id="emptyCaptureMicBtn" class="studio-btn studio-btn-primary studio-btn-compact hidden">
                                     <span>🎙️</span>
                                     <span>Tap to Record</span>
                                 </button>
-                                <button type="button" id="emptyOpenFileBtn" class="studio-btn">
+                                <button type="button" id="emptyOpenFileBtn" class="studio-btn studio-btn-compact">
                                     <span>📂</span>
-                                    <span>Open Audio File</span>
+                                    <span>Open Audio</span>
                                 </button>
                             </div>
                         </div>
@@ -395,7 +381,7 @@
                             <button type="button" id="clearSessionBtn" class="tool-chip-btn" disabled>✕ Clear Session</button>
                         </div>
                         <p class="drawer-note">
-                            Tip: Tap the waveform to move the playhead, drag horizontally to select a section, or double-tap any track region to select it.
+                            Tip: Tap the wave to move the playhead, drag horizontally to select a section, or double-tap any track region to select it.
                         </p>
                     </div>
                 </details>
@@ -466,13 +452,13 @@
             <ol>
                 <li>Open your music stream in another browser tab.</li>
                 <li>Tap <strong>Record Music Tab</strong> (or the red <strong>Record</strong> button), pick that tab, and check <strong>"Share tab audio"</strong>.</li>
-                <li>Press Play in your music tab — watch your track appear live on the equalizer while songs auto-split on quiet gaps.</li>
+                <li>Press Play in your music tab — watch the Left &amp; Right recording bars and continuous stereo wave live while songs auto-split on quiet gaps.</li>
                 <li>Tap <strong>Save Track to Hard Drive</strong> (or choose a <strong>Save Folder</strong> for automatic saving).</li>
             </ol>
             <p><strong>On Mobile (iPhone / Android):</strong></p>
             <ul>
                 <li>Tap <strong>Tap to Record</strong> to capture live audio from your phone microphone or external audio interface.</li>
-                <li>Or tap <strong>Open Audio</strong> to load a song/mix from your phone, view it on the equalizer, auto-split tracks, and save MP3s.</li>
+                <li>Or tap <strong>Open Audio</strong> to load a song/mix from your phone, view the Left &amp; Right wave, auto-split tracks, and save MP3s.</li>
             </ul>
             <div class="shortcut-grid">
                 <div class="shortcut-item"><span>Play / Pause</span><kbd>Space</kbd></div>
@@ -490,9 +476,9 @@
             <button type="button" class="modal-close" onclick="closeModal('aboutModal')" aria-label="Close modal">&times;</button>
             <h2 id="aboutTitle">About MP3aud.io</h2>
             <p>
-                MP3aud.io is a 100% client-side browser audio recorder, live 32-band track equalizer, and waveform editor
-                inspired by Audacity. Capture, silence-splitting, DSP editing, ID3 tagging, and MP3/WAV encoding all run
-                locally on your device with zero uploads.
+                MP3aud.io is a 100% client-side browser audio recorder with a continuous live stereo recording wave,
+                Left &amp; Right channel bars, and Audacity-style track splitting. Capture, editing, ID3 tagging, and
+                MP3/WAV encoding all run locally on your device with zero uploads.
             </p>
         </div>
     </div>
@@ -519,9 +505,9 @@
         </div>
     </div>
 
-    <script src="export-engine.js?v=20261122_03"></script>
-    <script src="audio-engine.js?v=20261122_03"></script>
-    <script src="app.js?v=20261122_03"></script>
+    <script src="export-engine.js?v=20261122_04"></script>
+    <script src="audio-engine.js?v=20261122_04"></script>
+    <script src="app.js?v=20261122_04"></script>
 </body>
 
 </html>
