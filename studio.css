@@ -857,7 +857,7 @@ html, body {
 }
 
 .track-title-input {
-    flex: 1;
+    flex: 1.2 1 140px;
     min-width: 0;
 }
 
@@ -877,10 +877,8 @@ html, body {
 }
 
 .track-artist-input {
-    flex: 1;
-    min-width: 140px;
-    min-height: 36px;
-    font-size: 0.8rem;
+    flex: 1 1 120px;
+    min-width: 0;
 }
 
 .track-time-meta {
@@ -1477,9 +1475,17 @@ html, body {
     }
     .track-row-main {
         flex-wrap: wrap;
+        gap: 6px;
     }
     .track-title-input {
-        min-width: 140px;
+        flex: 1.15 1 0;
+        min-width: 0;
+        padding: 8px 9px;
+    }
+    .track-artist-input {
+        flex: 1 1 0;
+        min-width: 0;
+        padding: 8px 9px;
     }
     .track-row-actions {
         width: 100%;

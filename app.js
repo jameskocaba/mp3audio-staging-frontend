@@ -737,6 +737,17 @@
                     syncWaveTrackDisplay();
                 });
 
+                const artistInput = document.createElement('input');
+                artistInput.type = 'text';
+                artistInput.className = 'studio-input track-artist-input';
+                artistInput.value = trk.artist || '';
+                artistInput.placeholder = albumArtistMetaInput && albumArtistMetaInput.value ? albumArtistMetaInput.value : 'Artist (optional)';
+                artistInput.setAttribute('aria-label', `Track ${idx + 1} artist`);
+                artistInput.addEventListener('input', () => {
+                    engine.updateTrackMeta(trk.id, { artist: artistInput.value, saved: false });
+                    syncWaveTrackDisplay();
+                });
+
                 const actions = document.createElement('div');
                 actions.className = 'track-row-actions';
 
@@ -774,21 +785,11 @@
 
                 mainRow.appendChild(numBadge);
                 mainRow.appendChild(titleInput);
+                mainRow.appendChild(artistInput);
                 mainRow.appendChild(actions);
 
                 const subRow = document.createElement('div');
                 subRow.className = 'track-row-sub';
-
-                const artistInput = document.createElement('input');
-                artistInput.type = 'text';
-                artistInput.className = 'studio-input track-artist-input';
-                artistInput.value = trk.artist || '';
-                artistInput.placeholder = albumArtistMetaInput && albumArtistMetaInput.value ? albumArtistMetaInput.value : 'Artist (optional)';
-                artistInput.setAttribute('aria-label', `Track ${idx + 1} artist`);
-                artistInput.addEventListener('input', () => {
-                    engine.updateTrackMeta(trk.id, { artist: artistInput.value, saved: false });
-                    syncWaveTrackDisplay();
-                });
 
                 const timeMeta = document.createElement('div');
                 timeMeta.className = 'track-time-meta';
@@ -829,7 +830,6 @@
                     subTools.appendChild(rmBtn);
                 }
 
-                subRow.appendChild(artistInput);
                 subRow.appendChild(timeMeta);
                 subRow.appendChild(subTools);
 

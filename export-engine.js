@@ -598,6 +598,38 @@
         return { method: 'download', filename: safeName };
     }
 
+    function canShareFiles() {
+        try {
+            if (typeof navigator === 'undefined' || typeof navigator.share !== 'function' ||
+                typeof navigator.canShare !== 'function' || typeof File !== 'function') {
+                return false;
+            }
+            const probe = new File([new Uint8Array([0])], 'probe.mp3', { type: 'audio/mpeg' });
+            return Boolean(navigator.canShare({ files: [probe] }));
+        } catch (_) {
+            return false;
+        }
+    }
+
+    async function shareBlobFile(blob, filename) {
+        const safeName = sanitizeFilename(filename);
+        if (canShareFiles()) {
+            try {
+                const file = new File([blob], safeName, { type: (blob && blob.type) || 'audio/mpeg' });
+                if (navigator.canShare({ files: [file] })) {
+                    await navigator.share({ files: [file], title: safeName });
+                    return { method: 'share', filename: safeName };
+                }
+            } catch (err) {
+                if (err && err.name === 'AbortError') {
+                    return { method: 'cancelled', filename: safeName };
+                }
+            }
+        }
+        triggerAnchorDownload(blob, safeName);
+        return { method: 'download', filename: safeName };
+    }
+
     global.StudioExportEngine = {
         encodeWavBlob,
         prependId3v2Tags,
@@ -605,6 +637,8 @@
         buildZipBlob,
         supportsDirectoryPicker,
         supportsSaveFilePicker,
+        canShareFiles,
+        shareBlobFile,
         pickSaveDirectory,
         sanitizeFilename,
         buildTrackFilename,
