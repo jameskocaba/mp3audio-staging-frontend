@@ -520,12 +520,6 @@ function initAssistantApp() {
         });
     }
 
-    const WELCOME_STARTER_TRACKS = [
-        { title: "Midnight City", artist: "M83", album: "Hurry Up, We're Dreaming", year: "2011", duration: "4:03", duration_sec: 243, bubbleId: "welcome_t_0" },
-        { title: "Dreams", artist: "Fleetwood Mac", album: "Rumours", year: "1977", duration: "4:17", duration_sec: 257, bubbleId: "welcome_t_1" },
-        { title: "Get Lucky", artist: "Daft Punk", album: "Random Access Memories", year: "2013", duration: "4:08", duration_sec: 248, bubbleId: "welcome_t_2" }
-    ];
-
     function buildWelcomeScreenHtml() {
         const vibePrompts = [
             { label: "🌙 Late-Night Synthwave", prompt: "Curate a 10-track late-night synthwave drive playlist" },
@@ -540,7 +534,6 @@ function initAssistantApp() {
         const pillsHtml = vibePrompts.map(v =>
             `<button type="button" class="welcome-vibe-pill" data-prompt="${escapeHtml(v.prompt)}">${escapeHtml(v.label)}</button>`
         ).join('');
-        const starterTracksHtml = WELCOME_STARTER_TRACKS.map((t, idx) => renderTrackAudioBubbleHtml(t, idx)).join('');
         return `
             <div class="chat-date-divider">
                 <span>✨ AI MUSIC CONCIERGE &bull; CURATED BY GENRE &amp; MOOD</span>
@@ -555,13 +548,6 @@ function initAssistantApp() {
                     <div class="welcome-vibe-section">
                         <span class="welcome-vibe-label">⚡ 1-Tap Vibe Starters</span>
                         <div class="welcome-vibe-grid">${pillsHtml}</div>
-                    </div>
-                    <div class="welcome-starter-tracks-box">
-                        <div class="welcome-starter-header">
-                            <span class="welcome-vibe-label">🔥 Instant Featured Mix — Tap Play</span>
-                            <button type="button" class="btn-play-all-chat btn-play-welcome-starter">▶ Play All</button>
-                        </div>
-                        <div id="welcomeStarterTracks" class="tracks-bubble-stack">${starterTracksHtml}</div>
                     </div>
                 </div>
             </div>
@@ -578,32 +564,6 @@ function initAssistantApp() {
                 if (promptText) sendUserMessage(promptText);
             });
         });
-
-        const starterContainer = rootEl.querySelector('#welcomeStarterTracks');
-        if (starterContainer) {
-            wireTrackBubbleList(starterContainer, WELCOME_STARTER_TRACKS);
-            const playStarterBtn = rootEl.querySelector('.btn-play-welcome-starter');
-            if (playStarterBtn && !playStarterBtn.dataset.wired) {
-                playStarterBtn.dataset.wired = '1';
-                playStarterBtn.addEventListener('click', () => {
-                    playTrackFromQueue(WELCOME_STARTER_TRACKS, 0);
-                });
-            }
-            if (typeof enrichPresetSeedsNonBlocking === 'function') {
-                enrichPresetSeedsNonBlocking(WELCOME_STARTER_TRACKS).then(enriched => {
-                    if (!Array.isArray(enriched)) return;
-                    enriched.forEach((item, idx) => {
-                        if (!item || !WELCOME_STARTER_TRACKS[idx]) return;
-                        if (item.preview_url) WELCOME_STARTER_TRACKS[idx].preview_url = item.preview_url;
-                        if (item.artwork_url) {
-                            WELCOME_STARTER_TRACKS[idx].artwork_url = item.artwork_url;
-                            const imgEl = starterContainer.querySelector(`.track-audio-bubble[data-track-idx="${idx}"] .track-cover-img`);
-                            if (imgEl) imgEl.src = item.artwork_url;
-                        }
-                    });
-                }).catch(() => { });
-            }
-        }
     }
 
     function clearConversationThread(showFeedback = true) {

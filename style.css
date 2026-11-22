@@ -3292,29 +3292,12 @@ body.messenger-body {
 }
 
 /* ==========================================================================
-   RETENTION UPGRADES: WELCOME MIX, SAVED CRATE & MINI-PLAYER ACTIONS
+   RETENTION UPGRADES: SAVED CRATE & MINI-PLAYER ACTIONS
    ========================================================================== */
 
 .welcome-vibe-pill {
     cursor: pointer;
     transition: all 0.16s ease;
-}
-
-.welcome-starter-tracks-box {
-    margin-top: 14px;
-    padding-top: 12px;
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.welcome-starter-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 8px;
-}
-
-.welcome-starter-header .welcome-vibe-label {
-    margin-bottom: 0;
 }
 
 .track-save-crate-btn {
