@@ -12,10 +12,18 @@
             return;
         }
 
+        // --- Capability & Platform Detection ---
+        const isMobileUa = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent || '');
+        const supportsDisplayCapture = !isMobileUa && Boolean(navigator.mediaDevices && typeof navigator.mediaDevices.getDisplayMedia === 'function');
+        const supportsFolderPicker = !isMobileUa && ExportEngine.supportsDirectoryPicker();
+
         // --- DOM Elements ---
+        const guidedStepBanner = document.getElementById('guidedStepBanner');
         const captureTabBtn = document.getElementById('captureTabBtn');
         const emptyCaptureTabBtn = document.getElementById('emptyCaptureTabBtn');
         const captureMicBtn = document.getElementById('captureMicBtn');
+        const captureMicLabel = document.getElementById('captureMicLabel');
+        const emptyCaptureMicBtn = document.getElementById('emptyCaptureMicBtn');
         const micDeviceSelect = document.getElementById('micDeviceSelect');
         const openFileBtn = document.getElementById('openFileBtn');
         const emptyOpenFileBtn = document.getElementById('emptyOpenFileBtn');
@@ -24,8 +32,10 @@
         const pickFolderBtn = document.getElementById('pickFolderBtn');
         const pickFolderLabel = document.getElementById('pickFolderLabel');
         const disconnectSourceBtn = document.getElementById('disconnectSourceBtn');
+        const mobileHintBanner = document.getElementById('mobileHintBanner');
+        const emptyCardDesc = document.getElementById('emptyCardDesc');
 
-        // Transport & Meters
+        // Transport & Equalizer & Meters
         const recordBtn = document.getElementById('recordBtn');
         const recordBtnLabel = document.getElementById('recordBtnLabel');
         const pauseRecBtn = document.getElementById('pauseRecBtn');
@@ -35,8 +45,12 @@
         const loopBtn = document.getElementById('loopBtn');
         const splitAtCursorBtn = document.getElementById('splitAtCursorBtn');
         const lcdTimecode = document.getElementById('lcdTimecode');
-        const lcdSourceStatus = document.getElementById('lcdSourceStatus');
         const lcdFormatInfo = document.getElementById('lcdFormatInfo');
+        const eqStatusBadge = document.getElementById('eqStatusBadge');
+        const eqTrackTitle = document.getElementById('eqTrackTitle');
+        const eqTrackSub = document.getElementById('eqTrackSub');
+        const equalizerCanvas = document.getElementById('equalizerCanvas');
+        const eqPresetBtns = document.querySelectorAll('.eq-preset-btn[data-eq-preset]');
         const vuMeterL = document.getElementById('vuMeterL');
         const vuMeterR = document.getElementById('vuMeterR');
         const vuClipL = document.getElementById('vuClipL');
@@ -45,7 +59,8 @@
         const playbackVolSlider = document.getElementById('playbackVolSlider');
         const monitorToggle = document.getElementById('monitorToggle');
 
-        // Edit & Zoom Toolbar
+        // Edit & Zoom Controls
+        const waveformToolsBar = document.getElementById('waveformToolsBar');
         const undoBtn = document.getElementById('undoBtn');
         const redoBtn = document.getElementById('redoBtn');
         const trimSelBtn = document.getElementById('trimSelBtn');
@@ -71,6 +86,8 @@
         const liveAutoSplitToggle = document.getElementById('liveAutoSplitToggle');
         const soundActivatedToggle = document.getElementById('soundActivatedToggle');
         const autoTrimSilenceToggle = document.getElementById('autoTrimSilenceToggle');
+        const autoSaveLiveRow = document.getElementById('autoSaveLiveRow');
+        const autoSaveLiveToggle = document.getElementById('autoSaveLiveToggle');
         const thresholdDbSlider = document.getElementById('thresholdDbSlider');
         const thresholdDbVal = document.getElementById('thresholdDbVal');
         const minSilenceSlider = document.getElementById('minSilenceSlider');
@@ -78,6 +95,7 @@
         const minTrackSlider = document.getElementById('minTrackSlider');
         const minTrackVal = document.getElementById('minTrackVal');
         const scanSplitNowBtn = document.getElementById('scanSplitNowBtn');
+        const quickAutoSplitBtn = document.getElementById('quickAutoSplitBtn');
 
         // Track Queue & Metadata & Export
         const trackCountBadge = document.getElementById('trackCountBadge');
@@ -90,9 +108,7 @@
         const albumArtistMetaInput = document.getElementById('albumArtistMetaInput');
         const genreMetaInput = document.getElementById('genreMetaInput');
         const yearMetaInput = document.getElementById('yearMetaInput');
-        const exportFormatSelect = document.getElementById('exportFormatSelect');
-        const exportBitrateSelect = document.getElementById('exportBitrateSelect');
-        const autoSaveLiveToggle = document.getElementById('autoSaveLiveToggle');
+        const exportPresetSelect = document.getElementById('exportPresetSelect');
         const exportSelectionBtn = document.getElementById('exportSelectionBtn');
         const exportAllBtn = document.getElementById('exportAllBtn');
         const exportAllLabel = document.getElementById('exportAllLabel');
@@ -109,10 +125,16 @@
 
         // Viewport / Zoom State
         let viewStartSample = 0;
-        let viewSpanSamples = 0; // 0 = auto fit entire recording
+        let viewSpanSamples = 0;
         let userHasZoomed = false;
 
-        // Meter peak hold state
+        // Meter & Equalizer Peak State
+        const EQ_NUM_BANDS = 32;
+        const eqSmoothBars = new Float32Array(EQ_NUM_BANDS);
+        const eqPeakCaps = new Float32Array(EQ_NUM_BANDS);
+        let staticSpectrumCache = new Float32Array(EQ_NUM_BANDS);
+        let staticSpectrumCursor = -1;
+        let staticSpectrumLen = -1;
         let peakHoldL = -60;
         let peakHoldR = -60;
         let peakHoldTimeL = 0;
@@ -120,12 +142,32 @@
         let clipUntilL = 0;
         let clipUntilR = 0;
 
-        // Canvas drag state
-        let dragMode = null; // 'select' | 'resize-start' | 'resize-end' | 'move-split'
+        // Pointer drag state on waveform
+        let activePointerId = null;
+        let dragMode = null;
         let dragAnchorSample = 0;
         let dragSplitTrackIdx = -1;
         let hasDraggedBeyondThreshold = false;
         let dragStartX = 0;
+        let lastTapTime = 0;
+        let lastTapX = 0;
+
+        // Apply Capability Adaptations (Mobile vs Desktop)
+        if (!supportsDisplayCapture) {
+            if (captureTabBtn) captureTabBtn.classList.add('hidden');
+            if (emptyCaptureTabBtn) emptyCaptureTabBtn.classList.add('hidden');
+            if (captureMicBtn) captureMicBtn.classList.add('studio-btn-primary');
+            if (captureMicLabel) captureMicLabel.textContent = 'Tap to Record';
+            if (emptyCaptureMicBtn) emptyCaptureMicBtn.classList.remove('hidden');
+            if (mobileHintBanner) mobileHintBanner.classList.remove('hidden');
+            if (emptyCardDesc) {
+                emptyCardDesc.textContent = 'Record audio from your mic or external interface, or open any audio file to watch it live on the equalizer, auto-split songs, and save MP3s.';
+            }
+        }
+        if (!supportsFolderPicker) {
+            if (pickFolderBtn) pickFolderBtn.classList.add('hidden');
+            if (autoSaveLiveRow) autoSaveLiveRow.classList.add('hidden');
+        }
 
         // --- Toast Helper ---
         function showToast(message, type = 'info') {
@@ -141,7 +183,7 @@
             toast.innerHTML = `<span>${icon}</span><span></span>`;
             toast.children[1].textContent = message;
             container.appendChild(toast);
-            setTimeout(() => { try { toast.remove(); } catch (_) { } }, 4200);
+            setTimeout(() => { try { toast.remove(); } catch (_) { } }, 4000);
         }
 
         function formatTimecode(seconds, includeTenths = true) {
@@ -173,7 +215,7 @@
             if (total === 0 || !userHasZoomed || viewSpanSamples >= total) {
                 waveformPanSlider.disabled = true;
                 waveformPanSlider.value = '0';
-                zoomLevelBadge.textContent = 'Fit (1.0x)';
+                zoomLevelBadge.textContent = '1.0x';
                 return;
             }
             waveformPanSlider.disabled = false;
@@ -183,22 +225,28 @@
             zoomLevelBadge.textContent = `${zoomFactor.toFixed(1)}x`;
         }
 
+        function getSelectedPreset() {
+            const raw = exportPresetSelect ? exportPresetSelect.value : 'mp3:192';
+            const [fmt, kbpsStr] = raw.split(':');
+            return { fmt: fmt || 'mp3', kbps: parseInt(kbpsStr, 10) || 192 };
+        }
+
         // --- Instantiate Audio Engine ---
         const engine = new AudioEngineClass({
             onSourceConnected: ({ mode, label, sampleRate }) => {
                 updateUiState();
-                showToast(`Connected ${mode === 'display' ? 'Stream/Tab Audio' : 'Input'}: ${label} (${sampleRate} Hz)`, 'success');
+                showToast(`Connected ${mode === 'display' ? 'Music Tab / Stream' : 'Mic'}: ${label} (${sampleRate} Hz)`, 'success');
             },
             onSourceDisconnected: () => {
                 updateUiState();
             },
             onSourceEnded: () => {
-                showToast('Audio capture stream ended. Captured audio is ready in the waveform.', 'info');
+                showToast('Capture stopped — your track is ready below!', 'info');
                 updateUiState();
             },
             onRecordStateChanged: ({ state }) => {
                 if (state === 'armed') {
-                    showToast('Sound-Activated Recording Armed — waiting for audio above threshold...', 'warning');
+                    showToast('Armed — waiting for music to start playing...', 'warning');
                 }
                 updateUiState();
             },
@@ -207,17 +255,19 @@
                 renderTracksList();
             },
             onTracksChanged: () => {
+                staticSpectrumCursor = -1;
                 renderTracksList();
                 updateUiState();
             },
             onTrackAutoSplit: (track) => {
-                showToast(`✂️ Auto-detected Track ${track.index + 1} (${formatTimecode((track.endSample - track.startSample) / engine.sampleRate)})`, 'success');
+                showToast(`✂️ Split Track ${track.index + 1} (${formatTimecode((track.endSample - track.startSample) / engine.sampleRate, false)})`, 'success');
                 renderTracksList();
                 if (autoSaveLiveToggle && autoSaveLiveToggle.checked && dirHandle) {
                     queueLiveAutoSaveTrack(track);
                 }
             },
             onBufferChanged: ({ length }) => {
+                staticSpectrumLen = -1;
                 if (length === 0) {
                     userHasZoomed = false;
                     viewStartSample = 0;
@@ -226,7 +276,6 @@
                     viewStartSample = 0;
                     viewSpanSamples = length;
                 } else if (engine.recordState === 'recording') {
-                    // Follow playhead smoothly while zoomed during live recording
                     viewStartSample = Math.max(0, length - viewSpanSamples);
                 }
                 clampViewport();
@@ -241,13 +290,100 @@
             }
         });
 
+        // --- Equalizer Active Track & Guided Step Readout ---
+        let lastEqTitle = '';
+        let lastEqSub = '';
+        let lastEqBadge = '';
+
+        function syncEqualizerTrackDisplay() {
+            const trk = engine.getActiveTrackInfo();
+            const isRec = engine.recordState === 'recording';
+            const isArmed = engine.recordState === 'armed';
+            const isPaused = engine.recordState === 'paused';
+            const isPlay = engine.isPlaying;
+            const connected = engine.isSourceConnected();
+
+            let badgeText = 'STANDBY';
+            let badgeClass = 'eq-status-badge';
+            let titleText = 'No Track Active — Ready to Record';
+            let subText = supportsDisplayCapture
+                ? 'Tap Record Music Tab, Use Mic, or Open Audio to see your track live on the equalizer'
+                : 'Tap Tap to Record or Open Audio to see your track live on the equalizer';
+
+            if (isRec) {
+                badgeText = '● RECORDING';
+                badgeClass += ' is-live';
+                titleText = `🎵 ${(trk && trk.title) || 'Track 01'}`;
+                subText = `Live on Equalizer • Source: ${(trk && trk.artist) || engine.sourceLabel || 'Audio Stream'} • Auto-split active`;
+            } else if (isArmed) {
+                badgeText = '⚡ ARMED';
+                badgeClass += ' is-live';
+                titleText = 'Waiting for Music to Start...';
+                subText = `Listening on ${engine.sourceLabel || 'Audio Input'} — recording begins automatically`;
+            } else if (isPaused) {
+                badgeText = '⏸ REC PAUSED';
+                badgeClass += ' is-ready';
+                titleText = `🎵 ${(trk && trk.title) || 'Track 01'}`;
+                subText = 'Recording paused — tap Pause again to resume or Stop to finish';
+            } else if (isPlay && trk) {
+                badgeText = '▶ PLAYING';
+                badgeClass += ' is-playing';
+                const totalTracks = Math.max(1, engine.tracks.length);
+                titleText = `🎵 ${trk.title}${trk.artist ? ' — ' + trk.artist : ''}`;
+                subText = `Track ${trk.index + 1} of ${totalTracks} • ${formatTimecode(trk.durationSec, false)} • Live Equalizer Active`;
+            } else if (trk && engine.length > 0) {
+                badgeText = '● TRACK LOADED';
+                badgeClass += ' is-ready';
+                const totalTracks = Math.max(1, engine.tracks.length);
+                titleText = `🎵 ${trk.title}${trk.artist ? ' — ' + trk.artist : ''}`;
+                subText = `Track ${trk.index + 1} of ${totalTracks} • ${formatTimecode(trk.durationSec, false)} • Tap ▶ Play to animate live EQ or 💾 Save`;
+            } else if (connected) {
+                badgeText = '● INPUT READY';
+                badgeClass += ' is-ready';
+                titleText = `Connected: ${engine.sourceLabel || 'Audio Input'}`;
+                subText = 'Monitoring input on equalizer — tap red Record to capture';
+            }
+
+            if (eqStatusBadge && (badgeText !== lastEqBadge || eqStatusBadge.className !== badgeClass)) {
+                eqStatusBadge.textContent = badgeText;
+                eqStatusBadge.className = badgeClass;
+                lastEqBadge = badgeText;
+            }
+            if (eqTrackTitle && titleText !== lastEqTitle) {
+                eqTrackTitle.textContent = titleText;
+                lastEqTitle = titleText;
+            }
+            if (eqTrackSub && subText !== lastEqSub) {
+                eqTrackSub.textContent = subText;
+                lastEqSub = subText;
+            }
+        }
+
+        function syncGuidedStepBanner() {
+            if (!guidedStepBanner) return;
+            if (engine.recordState === 'recording') {
+                guidedStepBanner.innerHTML = '🔴 <strong>Recording live!</strong> Play your tracks — quiet gaps split songs automatically, or tap <strong>✂️ Split Song</strong> anytime.';
+            } else if (engine.recordState === 'armed') {
+                guidedStepBanner.innerHTML = '⚡ <strong>Armed:</strong> Hit Play on your music stream and recording will begin the instant sound starts.';
+            } else if (engine.isPlaying) {
+                guidedStepBanner.innerHTML = '🎧 <strong>Playing on Equalizer:</strong> Switch EQ presets (<em>Flat / Bass Boost / Vocal / Warm</em>) or drag the waveform to trim.';
+            } else if (engine.length > 0) {
+                const n = engine.tracks.length;
+                guidedStepBanner.innerHTML = `✅ <strong>Ready to Save!</strong> ${n} track${n === 1 ? '' : 's'} detected — edit names below or tap <strong>💾 Save</strong>.`;
+            } else if (supportsDisplayCapture) {
+                guidedStepBanner.innerHTML = '✨ <strong>Step 1:</strong> Tap <strong>Record Music Tab</strong> (or <strong>Open Audio</strong>) — songs automatically split on quiet gaps.';
+            } else {
+                guidedStepBanner.innerHTML = '✨ <strong>Step 1:</strong> Tap <strong>Tap to Record</strong> or <strong>Open Audio</strong> to visualize your track and save MP3s.';
+            }
+        }
+
         // --- Source Connection Handlers ---
         async function handleCaptureTabClick() {
             try {
                 await engine.connectDisplayAudio();
                 userHasZoomed = false;
                 engine.startRecording(false);
-                showToast('Recording started! Play your track in the shared tab/app — silence gaps will auto-split songs.', 'success');
+                showToast('Recording live! Play music in your shared tab.', 'success');
             } catch (err) {
                 if (err && err.name === 'NotAllowedError') {
                     showToast('Screen/tab audio permission was cancelled.', 'info');
@@ -268,7 +404,7 @@
             if (devices.length === 0) {
                 const opt = document.createElement('option');
                 opt.value = '';
-                opt.textContent = 'Default Audio Input / Loopback';
+                opt.textContent = 'Default Microphone / Input';
                 micDeviceSelect.appendChild(opt);
                 return;
             }
@@ -291,14 +427,14 @@
                 userHasZoomed = false;
                 engine.startRecording(false);
             } catch (err) {
-                showToast((err && err.message) || 'Could not access microphone / line-in device.', 'error');
+                showToast((err && err.message) || 'Could not access microphone / audio input.', 'error');
             }
         }
 
         async function handleLoadAudioFile(file) {
             if (!file) return;
             try {
-                showToast(`Decoding ${file.name}...`, 'info');
+                showToast(`Loading ${file.name}...`, 'info');
                 const info = await engine.importAudioFile(file);
                 if (albumArtistMetaInput && info.artist && !albumArtistMetaInput.value) {
                     albumArtistMetaInput.value = info.artist;
@@ -308,7 +444,7 @@
                 syncPanScrollbar();
                 renderTracksList();
                 updateUiState();
-                showToast(`Loaded "${file.name}" (${formatTimecode(info.length / info.sampleRate)})`, 'success');
+                showToast(`Loaded "${file.name}" onto equalizer (${formatTimecode(info.length / info.sampleRate, false)})`, 'success');
             } catch (err) {
                 showToast(`Could not decode audio file: ${(err && err.message) || 'Unsupported format'}`, 'error');
             }
@@ -317,19 +453,19 @@
         // --- Folder Selection & Live Auto-Save ---
         async function handlePickFolder() {
             if (!ExportEngine.supportsDirectoryPicker()) {
-                showToast('Direct folder access works in Chrome/Edge desktop. In this browser, exports save to Downloads.', 'info');
+                showToast('Folder saving requires Chrome or Edge on desktop.', 'info');
                 return null;
             }
             try {
                 const res = await ExportEngine.pickSaveDirectory();
                 dirHandle = res.handle;
                 if (pickFolderBtn) pickFolderBtn.classList.add('connected');
-                if (pickFolderLabel) pickFolderLabel.textContent = `Folder: ${res.name}`;
-                showToast(`📁 Connected hard drive folder "${res.name}" for direct saving!`, 'success');
+                if (pickFolderLabel) pickFolderLabel.textContent = res.name;
+                showToast(`📁 Connected folder "${res.name}"`, 'success');
                 return dirHandle;
             } catch (err) {
                 if (!err || err.name !== 'AbortError') {
-                    showToast((err && err.message) || 'Could not select hard drive folder.', 'error');
+                    showToast((err && err.message) || 'Could not select folder.', 'error');
                 }
                 return null;
             }
@@ -337,7 +473,7 @@
 
         async function encodeTrackToBlob(startSample, endSample, meta, onProgress) {
             const slice = engine.getSlice(startSample, endSample);
-            const fmt = exportFormatSelect ? exportFormatSelect.value : 'mp3';
+            const { fmt, kbps } = getSelectedPreset();
             if (fmt === 'wav') {
                 if (typeof onProgress === 'function') onProgress(100);
                 return {
@@ -345,7 +481,6 @@
                     blob: ExportEngine.encodeWavBlob(slice.left, slice.right, slice.sampleRate)
                 };
             }
-            const kbps = exportBitrateSelect ? parseInt(exportBitrateSelect.value, 10) || 192 : 192;
             const blob = await ExportEngine.encodeMp3Blob(slice.left, slice.right, slice.sampleRate, kbps, meta, onProgress);
             return { ext: 'mp3', blob };
         }
@@ -370,15 +505,14 @@
             renderTracksList();
             autoSaveQueue = autoSaveQueue.then(async () => {
                 try {
-                    const fmt = exportFormatSelect ? exportFormatSelect.value : 'mp3';
                     const meta = buildTrackExportMeta(track, track.index, Math.max(track.index + 1, engine.tracks.length));
                     const { ext, blob } = await encodeTrackToBlob(track.startSample, track.endSample, meta);
-                    const filename = ExportEngine.buildTrackFilename(meta, track.index, Math.max(track.index + 1, engine.tracks.length), ext || fmt);
+                    const filename = ExportEngine.buildTrackFilename(meta, track.index, Math.max(track.index + 1, engine.tracks.length), ext);
                     await ExportEngine.saveBlobToDirectory(dirHandle, filename, blob);
                     track.saving = false;
                     track.saved = true;
                     renderTracksList();
-                    showToast(`💾 Auto-saved "${filename}" to hard drive!`, 'success');
+                    showToast(`💾 Auto-saved "${filename}"`, 'success');
                 } catch (err) {
                     track.saving = false;
                     renderTracksList();
@@ -387,7 +521,7 @@
             });
         }
 
-        // --- Export / Save Flows ---
+        // --- Export / Save / Share Flows ---
         function setExportProgress(visible, labelText = '', pct = 0) {
             if (!exportProgressWrap) return;
             exportProgressWrap.classList.toggle('hidden', !visible);
@@ -395,7 +529,7 @@
             if (exportProgressFill) exportProgressFill.style.width = `${Math.max(0, Math.min(100, pct))}%`;
         }
 
-        async function saveSingleTrack(trackIdx) {
+        async function saveSingleTrack(trackIdx, useNativeShare = false) {
             if (isExporting || engine.length === 0) return;
             const track = engine.tracks[trackIdx];
             if (!track) return;
@@ -410,11 +544,13 @@
                     setExportProgress(true, `Encoding ${track.title}... ${pct}%`, pct);
                 });
                 const filename = ExportEngine.buildTrackFilename(meta, trackIdx, total, ext);
-                const res = await ExportEngine.saveBlobWithPickerOrDownload(blob, filename, ext, dirHandle);
+                const res = useNativeShare
+                    ? await ExportEngine.shareBlobFile(blob, filename)
+                    : await ExportEngine.saveBlobWithPickerOrDownload(blob, filename, ext, dirHandle);
                 track.saving = false;
                 if (res.method !== 'cancelled') {
                     track.saved = true;
-                    showToast(`💾 Saved ${res.filename}`, 'success');
+                    showToast(`💾 ${res.method === 'share' ? 'Shared' : 'Saved'} ${res.filename}`, 'success');
                 }
             } catch (err) {
                 track.saving = false;
@@ -459,12 +595,11 @@
                 : [{ id: 'trk_full', index: 0, title: 'Recording 01', artist: '', startSample: 0, endSample: engine.length }];
 
             if (tracks.length === 1 && !dirHandle) {
-                await saveSingleTrack(0);
+                await saveSingleTrack(0, false);
                 return;
             }
 
-            // If browser supports Folder Picker and user hasn't picked one yet, offer to pick a folder once
-            if (tracks.length > 1 && !dirHandle && ExportEngine.supportsDirectoryPicker()) {
+            if (tracks.length > 1 && !dirHandle && supportsFolderPicker) {
                 await handlePickFolder();
             }
 
@@ -499,13 +634,13 @@
                 }
 
                 if (dirHandle) {
-                    showToast(`💾 Saved all ${savedCount} tracks directly to your hard drive folder!`, 'success');
+                    showToast(`💾 Saved all ${savedCount} tracks to your folder!`, 'success');
                 } else if (zipFiles.length > 0) {
-                    setExportProgress(true, 'Packaging tracks into ZIP archive...', 98);
+                    setExportProgress(true, 'Packaging ZIP archive...', 98);
                     const zipBlob = ExportEngine.buildZipBlob(zipFiles);
                     const zipName = ExportEngine.sanitizeFilename(albumMetaInput && albumMetaInput.value.trim() ? albumMetaInput.value.trim() : 'MP3audio_Recorded_Tracks') + '.zip';
                     ExportEngine.triggerAnchorDownload(zipBlob, zipName);
-                    showToast(`📦 Downloaded ${zipFiles.length} tracks as ${zipName}!`, 'success');
+                    showToast(`📦 Saved ${zipFiles.length} tracks as ${zipName}!`, 'success');
                 }
             } catch (err) {
                 showToast(`Export error: ${(err && err.message) || err}`, 'error');
@@ -522,22 +657,26 @@
             if (!tracksList || !trackCountBadge) return;
             const tracks = engine.tracks || [];
             trackCountBadge.textContent = `${tracks.length} Track${tracks.length === 1 ? '' : 's'}`;
+
             if (exportAllLabel) {
+                const targetNoun = supportsFolderPicker ? 'Hard Drive' : 'Device';
                 exportAllLabel.textContent = tracks.length > 1
-                    ? `Save All ${tracks.length} Tracks to Hard Drive`
-                    : 'Save Track to Hard Drive';
+                    ? `Save All ${tracks.length} Tracks to ${targetNoun}`
+                    : `Save Track to ${targetNoun}`;
             }
 
             if (tracks.length === 0) {
                 tracksList.innerHTML = `
                     <div class="track-row-empty">
-                        Recorded songs and silence-split tracks will appear here. Hit <strong>Capture Tab / System Audio</strong> or drag an audio file onto the waveform to begin.
+                        Your recorded songs and silence-split tracks appear here. Ready to record or open an audio file.
                     </div>
                 `;
                 return;
             }
 
             tracksList.innerHTML = '';
+            const showMobileShare = isMobileUa && ExportEngine.canShareFiles();
+
             tracks.forEach((trk, idx) => {
                 const durSec = Math.max(0, (trk.endSample - trk.startSample) / engine.sampleRate);
                 const startStr = formatTimecode(trk.startSample / engine.sampleRate, false);
@@ -552,33 +691,23 @@
                     row.classList.add('is-playing');
                 }
 
+                const mainRow = document.createElement('div');
+                mainRow.className = 'track-row-main';
+
                 const numBadge = document.createElement('div');
                 numBadge.className = 'track-num-badge';
                 numBadge.textContent = String(idx + 1).padStart(2, '0');
 
                 const titleInput = document.createElement('input');
                 titleInput.type = 'text';
-                titleInput.className = 'studio-input';
+                titleInput.className = 'studio-input track-title-input';
                 titleInput.value = trk.title || `Track ${idx + 1}`;
                 titleInput.placeholder = 'Track Title';
                 titleInput.setAttribute('aria-label', `Track ${idx + 1} title`);
                 titleInput.addEventListener('input', () => {
                     engine.updateTrackMeta(trk.id, { title: titleInput.value, saved: false });
+                    syncEqualizerTrackDisplay();
                 });
-
-                const artistInput = document.createElement('input');
-                artistInput.type = 'text';
-                artistInput.className = 'studio-input';
-                artistInput.value = trk.artist || '';
-                artistInput.placeholder = albumArtistMetaInput && albumArtistMetaInput.value ? albumArtistMetaInput.value : 'Artist (optional)';
-                artistInput.setAttribute('aria-label', `Track ${idx + 1} artist`);
-                artistInput.addEventListener('input', () => {
-                    engine.updateTrackMeta(trk.id, { artist: artistInput.value, saved: false });
-                });
-
-                const timeMeta = document.createElement('div');
-                timeMeta.className = 'track-time-meta';
-                timeMeta.textContent = `${startStr}–${endStr} (${durStr})`;
 
                 const actions = document.createElement('div');
                 actions.className = 'track-row-actions';
@@ -586,34 +715,71 @@
                 const playTrkBtn = document.createElement('button');
                 playTrkBtn.type = 'button';
                 playTrkBtn.className = 'row-icon-btn';
-                playTrkBtn.title = 'Play this track';
-                playTrkBtn.textContent = '▶';
+                playTrkBtn.title = 'Play on equalizer';
+                playTrkBtn.textContent = '▶ Play';
                 playTrkBtn.addEventListener('click', () => {
                     engine.setSelection(trk.startSample, trk.endSample);
                     engine.play(trk.startSample, trk.endSample);
                 });
 
+                const saveTrkBtn = document.createElement('button');
+                saveTrkBtn.type = 'button';
+                saveTrkBtn.className = `row-icon-btn row-save-btn${trk.saved ? ' saved' : ''}`;
+                saveTrkBtn.title = 'Save this track';
+                saveTrkBtn.disabled = Boolean(trk.saving);
+                saveTrkBtn.textContent = trk.saving ? '⏳...' : (trk.saved ? '✓ Saved' : '💾 Save');
+                saveTrkBtn.addEventListener('click', () => saveSingleTrack(idx, false));
+
+                actions.appendChild(playTrkBtn);
+                actions.appendChild(saveTrkBtn);
+
+                if (showMobileShare) {
+                    const shareBtn = document.createElement('button');
+                    shareBtn.type = 'button';
+                    shareBtn.className = 'row-icon-btn';
+                    shareBtn.title = 'Share audio file';
+                    shareBtn.disabled = Boolean(trk.saving);
+                    shareBtn.textContent = '📤';
+                    shareBtn.addEventListener('click', () => saveSingleTrack(idx, true));
+                    actions.appendChild(shareBtn);
+                }
+
+                mainRow.appendChild(numBadge);
+                mainRow.appendChild(titleInput);
+                mainRow.appendChild(actions);
+
+                const subRow = document.createElement('div');
+                subRow.className = 'track-row-sub';
+
+                const artistInput = document.createElement('input');
+                artistInput.type = 'text';
+                artistInput.className = 'studio-input track-artist-input';
+                artistInput.value = trk.artist || '';
+                artistInput.placeholder = albumArtistMetaInput && albumArtistMetaInput.value ? albumArtistMetaInput.value : 'Artist (optional)';
+                artistInput.setAttribute('aria-label', `Track ${idx + 1} artist`);
+                artistInput.addEventListener('input', () => {
+                    engine.updateTrackMeta(trk.id, { artist: artistInput.value, saved: false });
+                    syncEqualizerTrackDisplay();
+                });
+
+                const timeMeta = document.createElement('div');
+                timeMeta.className = 'track-time-meta';
+                timeMeta.textContent = `${startStr}–${endStr} (${durStr})`;
+
+                const subTools = document.createElement('div');
+                subTools.className = 'track-sub-tools';
+
                 const selTrkBtn = document.createElement('button');
                 selTrkBtn.type = 'button';
                 selTrkBtn.className = 'row-icon-btn';
-                selTrkBtn.title = 'Highlight track on waveform';
+                selTrkBtn.title = 'Focus on equalizer & waveform';
                 selTrkBtn.textContent = '🎯';
                 selTrkBtn.addEventListener('click', () => {
                     engine.setSelection(trk.startSample, trk.endSample);
                     engine.cursorSample = trk.startSample;
+                    updateUiState();
                 });
-
-                const saveTrkBtn = document.createElement('button');
-                saveTrkBtn.type = 'button';
-                saveTrkBtn.className = `row-icon-btn row-save-btn${trk.saved ? ' saved' : ''}`;
-                saveTrkBtn.title = 'Save this track to hard drive';
-                saveTrkBtn.disabled = Boolean(trk.saving);
-                saveTrkBtn.textContent = trk.saving ? '⏳ Saving...' : (trk.saved ? '✓ Saved' : '💾 Save');
-                saveTrkBtn.addEventListener('click', () => saveSingleTrack(idx));
-
-                actions.appendChild(playTrkBtn);
-                actions.appendChild(selTrkBtn);
-                actions.appendChild(saveTrkBtn);
+                subTools.appendChild(selTrkBtn);
 
                 if (idx > 0) {
                     const mergeBtn = document.createElement('button');
@@ -621,29 +787,26 @@
                     mergeBtn.className = 'row-icon-btn';
                     mergeBtn.title = 'Merge with previous track';
                     mergeBtn.textContent = '🔗';
-                    mergeBtn.addEventListener('click', () => {
-                        engine.mergeTrackWithPrevious(trk.id);
-                    });
-                    actions.appendChild(mergeBtn);
+                    mergeBtn.addEventListener('click', () => engine.mergeTrackWithPrevious(trk.id));
+                    subTools.appendChild(mergeBtn);
                 }
 
                 if (tracks.length > 1) {
                     const rmBtn = document.createElement('button');
                     rmBtn.type = 'button';
                     rmBtn.className = 'row-icon-btn';
-                    rmBtn.title = 'Remove track region';
+                    rmBtn.title = 'Remove track';
                     rmBtn.textContent = '✕';
-                    rmBtn.addEventListener('click', () => {
-                        engine.deleteTrackRegion(trk.id);
-                    });
-                    actions.appendChild(rmBtn);
+                    rmBtn.addEventListener('click', () => engine.deleteTrackRegion(trk.id));
+                    subTools.appendChild(rmBtn);
                 }
 
-                row.appendChild(numBadge);
-                row.appendChild(titleInput);
-                row.appendChild(artistInput);
-                row.appendChild(timeMeta);
-                row.appendChild(actions);
+                subRow.appendChild(artistInput);
+                subRow.appendChild(timeMeta);
+                subRow.appendChild(subTools);
+
+                row.appendChild(mainRow);
+                row.appendChild(subRow);
                 tracksList.appendChild(row);
             });
         }
@@ -661,23 +824,32 @@
             if (waveformEmptyOverlay) {
                 waveformEmptyOverlay.classList.toggle('hidden', hasAudio || !isIdle);
             }
+            if (waveformToolsBar) {
+                waveformToolsBar.classList.toggle('hidden', !hasAudio);
+            }
             if (disconnectSourceBtn) {
                 disconnectSourceBtn.classList.toggle('hidden', !connected);
             }
+            if (pauseRecBtn) {
+                pauseRecBtn.classList.toggle('hidden', isIdle);
+                pauseRecBtn.disabled = !(isRecording || isPaused);
+                pauseRecBtn.textContent = isPaused ? '▶ Resume' : '⏸ Pause';
+            }
+            if (exportSelectionBtn) {
+                exportSelectionBtn.classList.toggle('hidden', !hasSel);
+                exportSelectionBtn.disabled = !hasSel || !isIdle;
+            }
 
             if (recordBtn) {
-                recordBtn.disabled = !connected;
+                // Keep 1-click Record always enabled! Auto-connects source if idle & disconnected
+                recordBtn.disabled = false;
                 recordBtn.classList.toggle('is-recording', isRecording);
                 recordBtn.classList.toggle('is-armed', isArmed);
             }
             if (recordBtnLabel) {
                 recordBtnLabel.textContent = isRecording
-                    ? 'Recording...'
-                    : (isArmed ? 'Armed (Waiting)' : (isPaused ? 'Paused' : 'Record'));
-            }
-            if (pauseRecBtn) {
-                pauseRecBtn.disabled = !(isRecording || isPaused);
-                pauseRecBtn.textContent = isPaused ? '▶ Resume' : '⏸ Pause Rec';
+                    ? 'Stop Rec'
+                    : (isArmed ? 'Armed (Stop)' : (isPaused ? 'Stop Rec' : 'Record'));
             }
             if (stopBtn) {
                 stopBtn.disabled = isIdle && !engine.isPlaying;
@@ -707,43 +879,132 @@
             if (trimDeadAirBtn) trimDeadAirBtn.disabled = !hasAudio || !isIdle;
             if (clearSessionBtn) clearSessionBtn.disabled = !hasAudio;
             if (scanSplitNowBtn) scanSplitNowBtn.disabled = !hasAudio || !isIdle;
-            if (exportSelectionBtn) exportSelectionBtn.disabled = !hasAudio || !isIdle;
+            if (quickAutoSplitBtn) quickAutoSplitBtn.disabled = !hasAudio || !isIdle;
             if (exportAllBtn) exportAllBtn.disabled = !hasAudio || !isIdle;
 
-            if (lcdSourceStatus) {
-                lcdSourceStatus.classList.remove('is-live', 'is-armed', 'is-ready');
-                if (isRecording) {
-                    lcdSourceStatus.textContent = '● REC LIVE';
-                    lcdSourceStatus.classList.add('is-live');
-                } else if (isArmed) {
-                    lcdSourceStatus.textContent = '⚡ ARMED';
-                    lcdSourceStatus.classList.add('is-armed');
-                } else if (isPaused) {
-                    lcdSourceStatus.textContent = '⏸ PAUSED';
-                    lcdSourceStatus.classList.add('is-armed');
-                } else if (connected) {
-                    lcdSourceStatus.textContent = `● READY: ${engine.sourceLabel.slice(0, 22)}`;
-                    lcdSourceStatus.classList.add('is-ready');
-                } else {
-                    lcdSourceStatus.textContent = 'STANDBY';
-                }
-            }
             if (lcdFormatInfo) {
                 const dur = formatTimecode(engine.getDurationSeconds(), false);
-                lcdFormatInfo.textContent = `${engine.sampleRate} Hz • Stereo 16-bit • Total ${dur}`;
+                lcdFormatInfo.textContent = `${(engine.sampleRate / 1000).toFixed(1)} kHz • ${dur}`;
             }
 
             if (selectionReadout) {
                 if (hasSel) {
                     const sSec = engine.selection.startSample / engine.sampleRate;
                     const eSec = engine.selection.endSample / engine.sampleRate;
-                    selectionReadout.textContent = `Sel: ${formatTimecode(sSec)} – ${formatTimecode(eSec)} (${formatTimecode(eSec - sSec)})`;
+                    selectionReadout.textContent = `Sel: ${formatTimecode(sSec)}–${formatTimecode(eSec)}`;
                 } else {
-                    selectionReadout.textContent = hasAudio
-                        ? `Cursor: ${formatTimecode(engine.cursorSample / engine.sampleRate)}`
-                        : 'Sel: 00:00.0 – 00:00.0';
+                    selectionReadout.textContent = `Cursor: ${formatTimecode(engine.cursorSample / engine.sampleRate)}`;
                 }
             }
+
+            syncEqualizerTrackDisplay();
+            syncGuidedStepBanner();
+        }
+
+        // --- 32-Band Live Graphic Equalizer Renderer ---
+        function drawEqualizer() {
+            if (!equalizerCanvas) return;
+            const rect = equalizerCanvas.getBoundingClientRect();
+            if (rect.width === 0 || rect.height === 0) return;
+
+            const dpr = Math.min(2, window.devicePixelRatio || 1);
+            const w = Math.round(rect.width * dpr);
+            const h = Math.round(rect.height * dpr);
+            if (equalizerCanvas.width !== w || equalizerCanvas.height !== h) {
+                equalizerCanvas.width = w;
+                equalizerCanvas.height = h;
+            }
+
+            const ctx = equalizerCanvas.getContext('2d');
+            ctx.save();
+            ctx.scale(dpr, dpr);
+
+            const W = rect.width;
+            const H = rect.height;
+
+            ctx.fillStyle = '#04090e';
+            ctx.fillRect(0, 0, W, H);
+
+            // Subtle horizontal dB grid lines
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.06)';
+            ctx.lineWidth = 1;
+            for (let g = 1; g <= 3; g++) {
+                const gy = Math.round((H * g) / 4) + 0.5;
+                ctx.beginPath();
+                ctx.moveTo(0, gy);
+                ctx.lineTo(W, gy);
+                ctx.stroke();
+            }
+
+            const freqInfo = engine.getFrequencyData();
+            const isLiveMode = freqInfo.active && (engine.isPlaying || engine.isSourceConnected());
+            let targetBars = null;
+
+            if (isLiveMode && freqInfo.bins && freqInfo.bins.length > 0) {
+                targetBars = new Float32Array(EQ_NUM_BANDS);
+                const binCount = freqInfo.bins.length;
+                for (let b = 0; b < EQ_NUM_BANDS; b++) {
+                    // Logarithmic bin mapping across 32 visual bands
+                    const f0 = Math.floor(Math.pow(b / EQ_NUM_BANDS, 1.55) * (binCount - 1));
+                    const f1 = Math.max(f0 + 1, Math.ceil(Math.pow((b + 1) / EQ_NUM_BANDS, 1.55) * (binCount - 1)));
+                    let peak = 0;
+                    for (let k = f0; k < Math.min(binCount, f1); k++) {
+                        if (freqInfo.bins[k] > peak) peak = freqInfo.bins[k];
+                    }
+                    targetBars[b] = peak / 255;
+                }
+            } else if (engine.length > 0) {
+                // Track loaded & paused: show static spectrum preview around cursor so track is clearly visualized on EQ
+                const cur = Math.max(0, Math.min(engine.length - 1, engine.cursorSample));
+                if (staticSpectrumLen !== engine.length || Math.abs(staticSpectrumCursor - cur) > 2048) {
+                    staticSpectrumCache = engine.getSampleWindowSpectrum(cur, EQ_NUM_BANDS);
+                    staticSpectrumCursor = cur;
+                    staticSpectrumLen = engine.length;
+                }
+                targetBars = staticSpectrumCache;
+            }
+
+            const gap = Math.max(2, Math.floor(W / 180));
+            const barW = Math.max(3, (W - gap * (EQ_NUM_BANDS + 1)) / EQ_NUM_BANDS);
+
+            const grad = ctx.createLinearGradient(0, H, 0, 0);
+            if (isLiveMode) {
+                grad.addColorStop(0, '#00a884');
+                grad.addColorStop(0.55, '#38bdf8');
+                grad.addColorStop(0.84, '#f59e0b');
+                grad.addColorStop(1, '#ef4444');
+            } else {
+                grad.addColorStop(0, 'rgba(0, 168, 132, 0.55)');
+                grad.addColorStop(1, 'rgba(56, 189, 248, 0.65)');
+            }
+
+            for (let b = 0; b < EQ_NUM_BANDS; b++) {
+                const target = targetBars ? targetBars[b] : 0.03;
+                const attack = target > eqSmoothBars[b] ? 0.45 : 0.16;
+                eqSmoothBars[b] += (target - eqSmoothBars[b]) * attack;
+                const val = Math.max(0.03, Math.min(1, eqSmoothBars[b]));
+
+                if (val > eqPeakCaps[b]) {
+                    eqPeakCaps[b] = val;
+                } else {
+                    eqPeakCaps[b] = Math.max(val, eqPeakCaps[b] - 0.008);
+                }
+
+                const x = gap + b * (barW + gap);
+                const barH = Math.max(3, val * (H - 8));
+                const y = H - barH;
+
+                ctx.fillStyle = grad;
+                ctx.fillRect(x, y, barW, barH);
+
+                if (targetBars && eqPeakCaps[b] > 0.05) {
+                    const capY = Math.max(2, H - eqPeakCaps[b] * (H - 8) - 3);
+                    ctx.fillStyle = eqPeakCaps[b] > 0.88 ? '#ef4444' : '#e0f2fe';
+                    ctx.fillRect(x, capY, barW, 2);
+                }
+            }
+
+            ctx.restore();
         }
 
         // --- High-DPI Stereo Waveform Canvas Rendering ---
@@ -777,19 +1038,17 @@
 
             const W = rect.width;
             const H = rect.height;
-            const RULER_H = 24;
-            const LANE_H = 26;
+            const RULER_H = 22;
+            const LANE_H = 24;
             const WAVE_TOP = RULER_H;
             const WAVE_H = H - RULER_H - LANE_H;
             const MID_Y_L = WAVE_TOP + WAVE_H * 0.25;
             const MID_Y_R = WAVE_TOP + WAVE_H * 0.75;
             const CH_AMP = WAVE_H * 0.22;
 
-            // Background
             ctx.fillStyle = '#070f15';
             ctx.fillRect(0, 0, W, H);
 
-            // Channel background bands & centerlines
             ctx.fillStyle = 'rgba(255, 255, 255, 0.015)';
             ctx.fillRect(0, WAVE_TOP, W, WAVE_H * 0.5);
             ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
@@ -807,35 +1066,20 @@
             ctx.lineTo(W, MID_Y_R);
             ctx.stroke();
 
-            // Channel Labels
             ctx.font = 'bold 10px ui-monospace, monospace';
             ctx.fillStyle = 'rgba(143, 160, 170, 0.65)';
-            ctx.fillText('L', 8, WAVE_TOP + 14);
-            ctx.fillText('R', 8, WAVE_TOP + WAVE_H * 0.5 + 14);
+            ctx.fillText('L', 8, WAVE_TOP + 13);
+            ctx.fillText('R', 8, WAVE_TOP + WAVE_H * 0.5 + 13);
 
-            // Top Time Ruler
             ctx.fillStyle = '#0c161e';
             ctx.fillRect(0, 0, W, RULER_H);
-            ctx.strokeStyle = 'rgba(255, 255, 255, 0.09)';
-            ctx.beginPath();
-            ctx.moveTo(0, RULER_H - 0.5);
-            ctx.lineTo(W, RULER_H - 0.5);
-            ctx.stroke();
-
-            // Bottom Track Regions Lane
-            ctx.fillStyle = '#0c161e';
             ctx.fillRect(0, H - LANE_H, W, LANE_H);
-            ctx.strokeStyle = 'rgba(255, 255, 255, 0.09)';
-            ctx.beginPath();
-            ctx.moveTo(0, H - LANE_H + 0.5);
-            ctx.lineTo(W, H - LANE_H + 0.5);
-            ctx.stroke();
 
             const total = engine.length;
             if (total > 0 && viewSpanSamples > 0) {
                 const startSec = viewStartSample / engine.sampleRate;
                 const spanSec = viewSpanSamples / engine.sampleRate;
-                const targetTicks = Math.max(4, Math.floor(W / 110));
+                const targetTicks = Math.max(3, Math.floor(W / 95));
                 const rawStep = spanSec / targetTicks;
                 const niceSteps = [0.1, 0.25, 0.5, 1, 2, 5, 10, 15, 30, 60, 120, 300, 600];
                 let tickStep = niceSteps[niceSteps.length - 1];
@@ -850,13 +1094,12 @@
                     const x = ((t - startSec) / spanSec) * W;
                     ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
                     ctx.beginPath();
-                    ctx.moveTo(x, RULER_H - 6);
+                    ctx.moveTo(x, RULER_H - 5);
                     ctx.lineTo(x, RULER_H);
                     ctx.stroke();
-                    ctx.fillText(formatTimecode(t, tickStep < 1), x + 4, 15);
+                    ctx.fillText(formatTimecode(t, tickStep < 1), x + 4, 14);
                 }
 
-                // Track Region Alternating Tints & Labels
                 const tracks = engine.tracks || [];
                 tracks.forEach((trk, idx) => {
                     const x0 = Math.max(0, sampleToX(trk.startSample, W));
@@ -865,10 +1108,8 @@
 
                     ctx.fillStyle = idx % 2 === 0 ? 'rgba(56, 189, 248, 0.14)' : 'rgba(0, 168, 132, 0.14)';
                     ctx.fillRect(x0, H - LANE_H + 2, Math.max(2, x1 - x0 - 1), LANE_H - 4);
-                    ctx.strokeStyle = idx % 2 === 0 ? 'rgba(56, 189, 248, 0.5)' : 'rgba(0, 168, 132, 0.5)';
-                    ctx.strokeRect(x0 + 0.5, H - LANE_H + 2.5, Math.max(1, x1 - x0 - 2), LANE_H - 5);
 
-                    if (x1 - x0 > 32) {
+                    if (x1 - x0 > 28) {
                         ctx.fillStyle = '#e9edef';
                         ctx.font = 'bold 11px sans-serif';
                         const label = `${String(idx + 1).padStart(2, '0')} ${trk.title || ''}`;
@@ -876,11 +1117,10 @@
                         ctx.beginPath();
                         ctx.rect(x0 + 4, H - LANE_H, Math.max(0, x1 - x0 - 8), LANE_H);
                         ctx.clip();
-                        ctx.fillText(label, x0 + 6, H - 9);
+                        ctx.fillText(label, x0 + 6, H - 8);
                         ctx.restore();
                     }
 
-                    // Split boundary line between tracks
                     if (idx > 0) {
                         const bx = sampleToX(trk.startSample, W);
                         if (bx >= 0 && bx <= W) {
@@ -897,7 +1137,6 @@
                     }
                 });
 
-                // Stereo Waveform Envelope Rendering (512-sample peak cache or raw zoom)
                 const samplesPerPx = viewSpanSamples / W;
                 const bucketSize = engine.peakBucketSize;
                 const usePeakCache = samplesPerPx >= bucketSize && engine.peakCount > 0;
@@ -943,17 +1182,16 @@
                     ctx.fillRect(px, yTopR, 1, Math.max(1.2, yBotR - yTopR));
                 }
 
-                // Selection Highlight Overlay
                 if (engine.selection && engine.selection.endSample > engine.selection.startSample) {
                     const sx0 = sampleToX(engine.selection.startSample, W);
                     const sx1 = sampleToX(engine.selection.endSample, W);
                     if (sx1 >= 0 && sx0 <= W) {
                         const cl0 = Math.max(0, sx0);
                         const cl1 = Math.min(W, sx1);
-                        ctx.fillStyle = 'rgba(255, 85, 0, 0.18)';
+                        ctx.fillStyle = 'rgba(255, 85, 0, 0.2)';
                         ctx.fillRect(cl0, WAVE_TOP, cl1 - cl0, WAVE_H);
-                        ctx.strokeStyle = 'rgba(255, 115, 45, 0.9)';
-                        ctx.lineWidth = 1.5;
+                        ctx.strokeStyle = 'rgba(255, 115, 45, 0.95)';
+                        ctx.lineWidth = 2;
                         ctx.beginPath();
                         ctx.moveTo(sx0, WAVE_TOP);
                         ctx.lineTo(sx0, WAVE_TOP + WAVE_H);
@@ -963,7 +1201,6 @@
                     }
                 }
 
-                // Playhead / Record Needle
                 const headSample = engine.recordState === 'recording'
                     ? engine.length
                     : (engine.isPlaying ? engine.getPlaybackPositionSample() : engine.cursorSample);
@@ -975,21 +1212,12 @@
                     ctx.moveTo(hx, RULER_H);
                     ctx.lineTo(hx, H - LANE_H);
                     ctx.stroke();
-
-                    ctx.fillStyle = engine.recordState === 'recording' ? '#ef4444' : '#ff5500';
-                    ctx.beginPath();
-                    ctx.moveTo(hx - 6, RULER_H - 9);
-                    ctx.lineTo(hx + 6, RULER_H - 9);
-                    ctx.lineTo(hx, RULER_H);
-                    ctx.closePath();
-                    ctx.fill();
                 }
             }
 
             ctx.restore();
         }
 
-        // --- Stereo VU Meter Rendering ---
         function drawVuBar(canvas, rmsDb, peakHoldDb) {
             if (!canvas) return;
             const rect = canvas.getBoundingClientRect();
@@ -1007,7 +1235,7 @@
             const W = rect.width;
             const H = rect.height;
 
-            ctx.fillStyle = '#050b10';
+            ctx.fillStyle = '#04090e';
             ctx.fillRect(0, 0, W, H);
 
             const norm = (db) => Math.max(0, Math.min(1, (db + 60) / 60));
@@ -1029,9 +1257,7 @@
             ctx.restore();
         }
 
-        // --- 60 FPS Animation Loop ---
         function animationTick(now) {
-            // Update LCD timecode during record/play
             if (lcdTimecode) {
                 if (engine.recordState === 'recording') {
                     lcdTimecode.textContent = formatTimecode(engine.getDurationSeconds());
@@ -1042,7 +1268,10 @@
                 }
             }
 
-            // Update VU Meters
+            if (engine.isPlaying) {
+                syncEqualizerTrackDisplay();
+            }
+
             const levels = engine.getMeterLevels();
             if (levels.left.peakDb > peakHoldL || now - peakHoldTimeL > 1100) {
                 peakHoldL = levels.left.peakDb;
@@ -1061,10 +1290,10 @@
             if (vuClipL) vuClipL.classList.toggle('clipped', now < clipUntilL);
             if (vuClipR) vuClipR.classList.toggle('clipped', now < clipUntilR);
 
+            drawEqualizer();
             drawVuBar(vuMeterL, levels.left.rmsDb, peakHoldL);
             drawVuBar(vuMeterR, levels.right.rmsDb, peakHoldR);
 
-            // Auto-scroll waveform when zoomed during playback
             if (engine.isPlaying && userHasZoomed && viewSpanSamples < engine.length) {
                 const pos = engine.getPlaybackPositionSample();
                 if (pos < viewStartSample || pos > viewStartSample + viewSpanSamples) {
@@ -1077,18 +1306,80 @@
             requestAnimationFrame(animationTick);
         }
 
-        // --- Waveform Canvas Mouse & Wheel Interactions ---
+        // --- Unified Pointer (Mouse + Touch) Interactions on Waveform ---
         if (waveformCanvas) {
-            const EDGE_PX = 8;
+            waveformCanvas.addEventListener('pointerdown', (e) => {
+                if (engine.length === 0 || (e.pointerType === 'mouse' && e.button !== 0)) return;
+                const rect = waveformCanvas.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                const edgePx = (e.pointerType === 'touch' || e.pointerType === 'pen') ? 20 : 8;
 
-            waveformCanvas.addEventListener('mousemove', (e) => {
+                activePointerId = e.pointerId;
+                try { waveformCanvas.setPointerCapture(e.pointerId); } catch (_) { }
+                dragStartX = x;
+                hasDraggedBeyondThreshold = false;
+
+                if (y > rect.height - 26) {
+                    const clickSample = xToSample(x, rect.width);
+                    const hitTrack = engine.tracks.find(t => clickSample >= t.startSample && clickSample <= t.endSample);
+                    if (hitTrack) {
+                        engine.setSelection(hitTrack.startSample, hitTrack.endSample);
+                        engine.cursorSample = hitTrack.startSample;
+                        activePointerId = null;
+                        updateUiState();
+                        return;
+                    }
+                }
+
+                const nowMs = Date.now();
+                if (nowMs - lastTapTime < 320 && Math.abs(x - lastTapX) < 24) {
+                    const sample = xToSample(x, rect.width);
+                    const hit = engine.tracks.find(t => sample >= t.startSample && sample <= t.endSample);
+                    if (hit) engine.setSelection(hit.startSample, hit.endSample);
+                    else engine.setSelection(0, engine.length);
+                    activePointerId = null;
+                    lastTapTime = 0;
+                    updateUiState();
+                    return;
+                }
+                lastTapTime = nowMs;
+                lastTapX = x;
+
+                if (engine.selection) {
+                    const sx0 = sampleToX(engine.selection.startSample, rect.width);
+                    const sx1 = sampleToX(engine.selection.endSample, rect.width);
+                    if (Math.abs(x - sx0) <= edgePx) { dragMode = 'resize-start'; waveformCanvas.style.touchAction = 'none'; return; }
+                    if (Math.abs(x - sx1) <= edgePx) { dragMode = 'resize-end'; waveformCanvas.style.touchAction = 'none'; return; }
+                }
+
+                for (let i = 1; i < engine.tracks.length; i++) {
+                    const bx = sampleToX(engine.tracks[i].startSample, rect.width);
+                    if (Math.abs(x - bx) <= edgePx) {
+                        dragMode = 'move-split';
+                        dragSplitTrackIdx = i;
+                        waveformCanvas.style.touchAction = 'none';
+                        return;
+                    }
+                }
+
+                dragMode = 'select';
+                dragAnchorSample = xToSample(x, rect.width);
+            });
+
+            waveformCanvas.addEventListener('pointermove', (e) => {
                 const rect = waveformCanvas.getBoundingClientRect();
                 const x = e.clientX - rect.left;
                 const y = e.clientY - rect.top;
 
-                if (dragMode) {
+                if (dragMode && e.pointerId === activePointerId) {
                     const curSample = xToSample(x, rect.width);
-                    if (Math.abs(x - dragStartX) > 3) hasDraggedBeyondThreshold = true;
+                    if (Math.abs(x - dragStartX) > 6) {
+                        hasDraggedBeyondThreshold = true;
+                        waveformCanvas.style.touchAction = 'none';
+                    }
+                    if (!hasDraggedBeyondThreshold && dragMode === 'select') return;
+
                     if (dragMode === 'select') {
                         engine.setSelection(dragAnchorSample, curSample);
                     } else if (dragMode === 'resize-start' && engine.selection) {
@@ -1110,22 +1401,19 @@
                     return;
                 }
 
-                // Hover cursor feedback
-                if (engine.length === 0) {
-                    waveformCanvas.style.cursor = 'default';
-                    return;
-                }
+                if (engine.length === 0 || e.pointerType !== 'mouse') return;
+                const edgePx = 8;
                 if (engine.selection) {
                     const sx0 = sampleToX(engine.selection.startSample, rect.width);
                     const sx1 = sampleToX(engine.selection.endSample, rect.width);
-                    if (Math.abs(x - sx0) <= EDGE_PX || Math.abs(x - sx1) <= EDGE_PX) {
+                    if (Math.abs(x - sx0) <= edgePx || Math.abs(x - sx1) <= edgePx) {
                         waveformCanvas.style.cursor = 'ew-resize';
                         return;
                     }
                 }
                 for (let i = 1; i < engine.tracks.length; i++) {
                     const bx = sampleToX(engine.tracks[i].startSample, rect.width);
-                    if (Math.abs(x - bx) <= EDGE_PX) {
+                    if (Math.abs(x - bx) <= edgePx) {
                         waveformCanvas.style.cursor = 'col-resize';
                         return;
                     }
@@ -1133,51 +1421,14 @@
                 waveformCanvas.style.cursor = y > rect.height - 26 ? 'pointer' : 'crosshair';
             });
 
-            waveformCanvas.addEventListener('mousedown', (e) => {
-                if (engine.length === 0 || e.button !== 0) return;
-                const rect = waveformCanvas.getBoundingClientRect();
-                const x = e.clientX - rect.left;
-                const y = e.clientY - rect.top;
-                dragStartX = x;
-                hasDraggedBeyondThreshold = false;
-
-                // Click inside bottom Track Regions lane selects that track
-                if (y > rect.height - 26) {
-                    const clickSample = xToSample(x, rect.width);
-                    const hitTrack = engine.tracks.find(t => clickSample >= t.startSample && clickSample <= t.endSample);
-                    if (hitTrack) {
-                        engine.setSelection(hitTrack.startSample, hitTrack.endSample);
-                        engine.cursorSample = hitTrack.startSample;
-                        return;
-                    }
-                }
-
-                // Check selection edge resize
-                if (engine.selection) {
-                    const sx0 = sampleToX(engine.selection.startSample, rect.width);
-                    const sx1 = sampleToX(engine.selection.endSample, rect.width);
-                    if (Math.abs(x - sx0) <= EDGE_PX) { dragMode = 'resize-start'; return; }
-                    if (Math.abs(x - sx1) <= EDGE_PX) { dragMode = 'resize-end'; return; }
-                }
-
-                // Check split marker drag
-                for (let i = 1; i < engine.tracks.length; i++) {
-                    const bx = sampleToX(engine.tracks[i].startSample, rect.width);
-                    if (Math.abs(x - bx) <= EDGE_PX) {
-                        dragMode = 'move-split';
-                        dragSplitTrackIdx = i;
-                        return;
-                    }
-                }
-
-                dragMode = 'select';
-                dragAnchorSample = xToSample(x, rect.width);
-            });
-
-            window.addEventListener('mouseup', () => {
-                if (!dragMode) return;
+            const finishPointerDrag = (e) => {
+                if (!dragMode || (activePointerId !== null && e.pointerId !== activePointerId)) return;
                 const finishedMode = dragMode;
                 dragMode = null;
+                activePointerId = null;
+                waveformCanvas.style.touchAction = 'pan-y';
+                try { waveformCanvas.releasePointerCapture(e.pointerId); } catch (_) { }
+
                 if (finishedMode === 'move-split') {
                     renderTracksList();
                 } else if (finishedMode === 'select' && !hasDraggedBeyondThreshold) {
@@ -1186,20 +1437,10 @@
                 }
                 dragSplitTrackIdx = -1;
                 updateUiState();
-            });
+            };
 
-            waveformCanvas.addEventListener('dblclick', (e) => {
-                if (engine.length === 0) return;
-                const rect = waveformCanvas.getBoundingClientRect();
-                const sample = xToSample(e.clientX - rect.left, rect.width);
-                const hit = engine.tracks.find(t => sample >= t.startSample && sample <= t.endSample);
-                if (hit) {
-                    engine.setSelection(hit.startSample, hit.endSample);
-                    engine.cursorSample = hit.startSample;
-                } else {
-                    engine.setSelection(0, engine.length);
-                }
-            });
+            waveformCanvas.addEventListener('pointerup', finishPointerDrag);
+            waveformCanvas.addEventListener('pointercancel', finishPointerDrag);
 
             waveformCanvas.addEventListener('wheel', (e) => {
                 if (engine.length === 0) return;
@@ -1240,10 +1481,21 @@
             syncPanScrollbar();
         }
 
-        // --- Wire All Controls ---
+        // --- Wire EQ Presets ---
+        eqPresetBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const preset = btn.getAttribute('data-eq-preset') || 'flat';
+                engine.setEqPreset(preset);
+                eqPresetBtns.forEach(b => b.classList.toggle('is-active', b === btn));
+                showToast(`🎛️ EQ Preset: ${btn.textContent}`, 'info');
+            });
+        });
+
+        // --- Wire Controls ---
         if (captureTabBtn) captureTabBtn.addEventListener('click', handleCaptureTabClick);
         if (emptyCaptureTabBtn) emptyCaptureTabBtn.addEventListener('click', handleCaptureTabClick);
         if (captureMicBtn) captureMicBtn.addEventListener('click', handleCaptureMicClick);
+        if (emptyCaptureMicBtn) emptyCaptureMicBtn.addEventListener('click', handleCaptureMicClick);
         if (disconnectSourceBtn) disconnectSourceBtn.addEventListener('click', () => {
             if (engine.recordState !== 'idle') engine.stopRecording();
             engine.disconnectSource();
@@ -1284,11 +1536,16 @@
 
         if (pickFolderBtn) pickFolderBtn.addEventListener('click', handlePickFolder);
 
-        // Transport
+        // 1-Click Smart Record Button
         if (recordBtn) {
-            recordBtn.addEventListener('click', () => {
+            recordBtn.addEventListener('click', async () => {
                 if (engine.recordState === 'idle') {
-                    engine.startRecording(engine.length > 0 && confirm('Append new recording to the current waveform? Click Cancel to start fresh.'));
+                    if (!engine.isSourceConnected()) {
+                        if (supportsDisplayCapture) await handleCaptureTabClick();
+                        else await handleCaptureMicClick();
+                        return;
+                    }
+                    engine.startRecording(engine.length > 0 && confirm('Append to existing waveform? Click Cancel to start fresh.'));
                 } else {
                     engine.stopRecording();
                 }
@@ -1325,8 +1582,8 @@
             splitAtCursorBtn.addEventListener('click', () => {
                 const pos = engine.recordState === 'recording' ? engine.length : engine.cursorSample;
                 const trk = engine.addManualSplitMarker(pos);
-                if (trk) showToast(`✂️ Split track marker added at ${formatTimecode(pos / engine.sampleRate)}`, 'success');
-                else showToast('Place cursor inside a track (away from edges) to split.', 'info');
+                if (trk) showToast(`✂️ Split track at ${formatTimecode(pos / engine.sampleRate)}`, 'success');
+                else showToast('Move cursor inside a track to split.', 'info');
             });
         }
 
@@ -1334,22 +1591,22 @@
         if (playbackVolSlider) playbackVolSlider.addEventListener('input', () => engine.setPlaybackVolume(playbackVolSlider.value));
         if (monitorToggle) monitorToggle.addEventListener('change', () => engine.setMonitorEnabled(monitorToggle.checked));
 
-        // Edit & Zoom Toolbar
+        // Edits & Zoom
         if (undoBtn) undoBtn.addEventListener('click', () => { if (engine.undo()) showToast('↶ Undone', 'info'); });
         if (redoBtn) redoBtn.addEventListener('click', () => { if (engine.redo()) showToast('↷ Redone', 'info'); });
-        if (trimSelBtn) trimSelBtn.addEventListener('click', () => { if (engine.trimToSelection()) showToast('✂️ Trimmed waveform to selection', 'success'); });
-        if (deleteSelBtn) deleteSelBtn.addEventListener('click', () => { if (engine.deleteSelection()) showToast('🗑️ Cut selected audio', 'info'); });
+        if (trimSelBtn) trimSelBtn.addEventListener('click', () => { if (engine.trimToSelection()) showToast('✂️ Trimmed to selection', 'success'); });
+        if (deleteSelBtn) deleteSelBtn.addEventListener('click', () => { if (engine.deleteSelection()) showToast('🗑️ Cut selection', 'info'); });
         if (silenceSelBtn) silenceSelBtn.addEventListener('click', () => { if (engine.silenceSelection()) showToast('🔇 Silenced selection', 'info'); });
         if (fadeInBtn) fadeInBtn.addEventListener('click', () => { if (engine.fadeIn()) showToast('📈 Applied Fade In', 'success'); });
         if (fadeOutBtn) fadeOutBtn.addEventListener('click', () => { if (engine.fadeOut()) showToast('📉 Applied Fade Out', 'success'); });
-        if (normalizeBtn) normalizeBtn.addEventListener('click', () => { if (engine.normalize(null, null, -1.0)) showToast('🔊 Normalized peak to -1.0 dBFS', 'success'); });
+        if (normalizeBtn) normalizeBtn.addEventListener('click', () => { if (engine.normalize(null, null, -1.0)) showToast('🔊 Normalized to -1.0 dBFS', 'success'); });
         if (trimDeadAirBtn) trimDeadAirBtn.addEventListener('click', () => {
-            if (engine.trimLeadingTrailingSilence()) showToast('🧹 Trimmed leading & trailing silence', 'success');
-            else showToast('No leading/trailing silence above threshold to trim.', 'info');
+            if (engine.trimLeadingTrailingSilence()) showToast('🧹 Trimmed silence', 'success');
+            else showToast('No dead air above threshold to trim.', 'info');
         });
         if (clearSessionBtn) clearSessionBtn.addEventListener('click', () => {
             engine.clearSession();
-            showToast('Cleared waveform session', 'info');
+            showToast('Cleared waveform', 'info');
         });
         if (zoomInBtn) zoomInBtn.addEventListener('click', () => zoomWaveform(0.6));
         if (zoomOutBtn) zoomOutBtn.addEventListener('click', () => zoomWaveform(1.6));
@@ -1368,7 +1625,7 @@
             });
         }
 
-        // Auto-Split Panel Bindings
+        // Auto-Split Settings
         const syncSettingsToEngine = () => {
             const thresholdDb = thresholdDbSlider ? Number(thresholdDbSlider.value) : -42;
             const minSilenceSec = minSilenceSlider ? Number(minSilenceSlider.value) : 1.5;
@@ -1393,12 +1650,12 @@
         });
         syncSettingsToEngine();
 
-        if (scanSplitNowBtn) {
-            scanSplitNowBtn.addEventListener('click', () => {
-                const tracks = engine.scanAndAutoSplit();
-                showToast(`🔍 Detected ${tracks.length} track${tracks.length === 1 ? '' : 's'} by silence gaps!`, 'success');
-            });
-        }
+        const runAutoSplitScan = () => {
+            const tracks = engine.scanAndAutoSplit();
+            showToast(`🔍 Detected ${tracks.length} track${tracks.length === 1 ? '' : 's'} by silence gaps`, 'success');
+        };
+        if (scanSplitNowBtn) scanSplitNowBtn.addEventListener('click', runAutoSplitScan);
+        if (quickAutoSplitBtn) quickAutoSplitBtn.addEventListener('click', runAutoSplitScan);
 
         // Cover Art Picker
         if (coverArtPickerBtn && coverArtInput) {
@@ -1419,23 +1676,17 @@
                         if (coverArtPlaceholder) coverArtPlaceholder.classList.add('hidden');
                     };
                     reader.readAsDataURL(file);
-                    showToast('🎨 Embedded cover art loaded for MP3 ID3 tags', 'success');
+                    showToast('🎨 Cover art loaded for MP3 ID3 tags', 'success');
                 } catch (_) {
                     showToast('Could not read cover art image.', 'error');
                 }
             });
         }
 
-        // Export Format Bitrate Toggle
-        if (exportFormatSelect && exportBitrateSelect) {
-            exportFormatSelect.addEventListener('change', () => {
-                exportBitrateSelect.disabled = exportFormatSelect.value === 'wav';
-            });
-        }
         if (exportSelectionBtn) exportSelectionBtn.addEventListener('click', exportSelectionToDisk);
         if (exportAllBtn) exportAllBtn.addEventListener('click', exportAllTracksToHardDrive);
 
-        // Keyboard Shortcuts (Audacity style)
+        // Keyboard Shortcuts
         document.addEventListener('keydown', (e) => {
             const tag = (e.target && e.target.tagName) ? e.target.tagName.toLowerCase() : '';
             if (tag === 'input' || tag === 'textarea' || tag === 'select' || e.target.isContentEditable) return;
@@ -1448,11 +1699,8 @@
                     else engine.play();
                 }
             } else if (!mod && (e.key === 'r' || e.key === 'R')) {
-                if (engine.isSourceConnected()) {
-                    e.preventDefault();
-                    if (engine.recordState === 'idle') engine.startRecording(false);
-                    else engine.stopRecording();
-                }
+                e.preventDefault();
+                recordBtn?.click();
             } else if (!mod && (e.key === 'p' || e.key === 'P')) {
                 if (engine.recordState === 'recording') engine.pauseRecording();
                 else if (engine.recordState === 'paused') engine.resumeRecording();
@@ -1500,15 +1748,8 @@
             }
         });
 
-        // Default year metadata
         if (yearMetaInput && !yearMetaInput.value) {
             yearMetaInput.value = String(new Date().getFullYear());
-        }
-
-        // Disable folder button cleanly on browsers without File System Access API
-        if (pickFolderBtn && !ExportEngine.supportsDirectoryPicker()) {
-            pickFolderBtn.title = 'Folder picker is supported in Chrome/Edge desktop. Exports will save via browser Downloads / ZIP.';
-            if (pickFolderLabel) pickFolderLabel.textContent = 'Save Mode: Browser Downloads';
         }
 
         refreshMicDevices();
@@ -1517,7 +1758,6 @@
         requestAnimationFrame(animationTick);
     }
 
-    // Modal Helpers
     window.openModal = function (id) {
         const el = document.getElementById(id);
         if (el) el.style.display = 'flex';

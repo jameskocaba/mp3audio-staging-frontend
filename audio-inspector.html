@@ -4,14 +4,14 @@
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 
-    <title>MP3aud.io | Free Browser Stream Audio Recorder &amp; Audacity-Style Waveform Studio</title>
-    <meta name="title" content="MP3aud.io | Free Browser Stream Audio Recorder &amp; Audacity-Style Waveform Studio">
+    <title>MP3aud.io | Free Browser Stream Audio Recorder &amp; Live Equalizer Studio</title>
+    <meta name="title" content="MP3aud.io | Free Browser Stream Audio Recorder &amp; Live Equalizer Studio">
     <meta name="description"
-        content="Record streamed music, browser tabs, and system audio live in your browser like Audacity. Auto-split tracks on silence, edit stereo waveforms, embed ID3 tags, and save MP3 or WAV files straight to your hard drive.">
+        content="Record streamed music, browser tabs, mic, and audio files right in your browser like Audacity. Watch your track live on the 32-band equalizer, auto-split songs on silence, and save MP3 or WAV files straight to your device.">
     <meta name="keywords"
-        content="browser audio recorder, record streaming audio, audacity in browser, record tab audio to mp3, auto split tracks on silence, save mp3 to hard drive, online waveform editor">
+        content="browser audio recorder, mobile mp3 recorder, record streaming audio, live equalizer, audacity in browser, auto split tracks on silence, save mp3 to hard drive">
     <meta name="author" content="MP3aud.io">
     <meta name="robots" content="index, follow">
     <link rel="canonical" href="https://mp3aud.io/">
@@ -19,21 +19,23 @@
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://mp3aud.io/">
     <meta property="og:site_name" content="MP3aud.io">
-    <meta property="og:title" content="MP3aud.io | Browser Stream Recorder &amp; Audacity Waveform Studio">
+    <meta property="og:title" content="MP3aud.io | Browser Audio Stream Recorder &amp; Live Equalizer">
     <meta property="og:description"
-        content="100% browser-based audio recorder like Audacity. Capture streamed tracks live while they play, auto-split songs on silence, edit waveforms, and save directly to your hard drive.">
+        content="Simple, 100% browser-based audio recorder like Audacity. Capture streamed tracks or mic audio, see your track on the live equalizer, auto-split songs on silence, and save MP3/WAV.">
     <meta property="og:image" content="https://mp3aud.io/og-image.png">
     <meta property="og:locale" content="en_US">
 
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="MP3aud.io | Browser Stream Recorder &amp; Waveform Studio">
+    <meta name="twitter:title" content="MP3aud.io | Browser Audio Stream Recorder &amp; Live Equalizer">
     <meta name="twitter:description"
-        content="Capture streamed audio live in Chrome or Edge, auto-split tracks on silence, edit stereo waveforms, and save MP3/WAV straight to your hard drive.">
+        content="Record streamed tracks, watch the live track equalizer, auto-split songs on silence, and save MP3/WAV straight to your computer or phone.">
     <meta name="twitter:image" content="https://mp3aud.io/og-image.png">
 
     <link rel="icon" type="image/png" href="favicon.png">
     <link rel="apple-touch-icon" href="favicon.png">
     <meta name="theme-color" content="#0b141a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
     <link rel="preconnect" href="https://www.googletagmanager.com">
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-VGVP90K1M4"></script>
@@ -44,17 +46,17 @@
         gtag('config', 'G-VGVP90K1M4');
     </script>
 
-    <link rel="stylesheet" href="studio.css?v=20261122_01">
+    <link rel="stylesheet" href="studio.css?v=20261122_03">
 
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
       "@type": "WebApplication",
-      "name": "MP3aud.io Browser Stream Recorder & Waveform Studio",
+      "name": "MP3aud.io Browser Audio Stream Recorder",
       "url": "https://mp3aud.io/",
-      "description": "100% client-side browser audio recorder and Audacity-style stereo waveform editor. Record streamed audio live while it plays, auto-split tracks on silence, tag ID3 metadata, and save MP3 or WAV files directly to your hard drive.",
+      "description": "100% client-side browser audio recorder with live 32-band track equalizer and Audacity-style stereo waveform editor.",
       "applicationCategory": "MultimediaApplication",
-      "operatingSystem": "Windows, macOS, Linux, ChromeOS",
+      "operatingSystem": "Windows, macOS, Linux, ChromeOS, iOS, Android",
       "offers": {
         "@type": "Offer",
         "price": "0",
@@ -65,290 +67,217 @@
 </head>
 
 <body>
-    <!-- Full-Window Audio File Drag & Drop Overlay -->
+    <!-- Drag & Drop Overlay -->
     <div id="dragDropOverlay" class="drag-drop-overlay hidden">
         <div class="drag-drop-card">
             <div class="drag-drop-icon">🎛️</div>
-            <h2>Drop Audio File into Studio</h2>
-            <p>Load MP3, WAV, FLAC, M4A, OGG, or AAC locally in your browser to edit waveforms, auto-split tracks, and save to your hard drive.</p>
+            <h2>Drop Audio File Here</h2>
+            <p>Load MP3, WAV, FLAC, M4A, OGG, or AAC locally to visualize on the equalizer, auto-split tracks, and save.</p>
         </div>
     </div>
 
-    <div class="studio-shell">
-        <!-- =====================================================
-             1. TOP STUDIO HEADER & CAPTURE SOURCE BAR
-             ===================================================== -->
+    <div class="studio-page">
+        <!-- 1. CLEAN HEADER -->
         <header class="studio-topbar">
             <a href="index.html" class="brand-group">
                 <img src="logo.webp" alt="MP3aud.io" class="brand-logo" onerror="this.style.display='none'">
                 <div class="brand-titles">
-                    <span class="brand-name">MP3aud<span class="accent">.io</span> Studio</span>
-                    <span class="brand-tag"><span class="local-badge-dot"></span> 100% Browser-Based &bull; Zero Uploads</span>
+                    <span class="brand-name">MP3aud<span class="accent">.io</span></span>
+                    <span class="brand-tag"><span class="local-badge-dot"></span> Browser Audio Recorder</span>
                 </div>
             </a>
 
-            <div class="source-actions-group">
-                <button type="button" id="captureTabBtn" class="studio-btn studio-btn-primary" title="Capture and record audio from another browser tab or system audio">
-                    <span>🖥️</span>
-                    <span>Capture Tab / System Audio</span>
-                </button>
-
-                <div class="mic-picker-wrap">
-                    <button type="button" id="captureMicBtn" class="studio-btn" title="Record from Microphone, Line-In, or Virtual Audio Cable">
-                        <span>🎙️</span>
-                        <span>Mic / Line-In</span>
-                    </button>
-                    <select id="micDeviceSelect" class="studio-select" aria-label="Audio input device"></select>
-                </div>
-
-                <button type="button" id="openFileBtn" class="studio-btn" title="Open local audio file to edit and split">
-                    <span>📂</span>
-                    <span>Open Audio File</span>
-                </button>
-                <input type="file" id="audioFileInput" accept="audio/*,.mp3,.wav,.flac,.m4a,.aac,.ogg,.opus,.webm" class="hidden">
-
-                <button type="button" id="disconnectSourceBtn" class="studio-btn hidden" title="Disconnect active audio capture source">
-                    <span>🔌</span>
-                    <span>Disconnect</span>
-                </button>
-            </div>
-
-            <div class="topbar-meta-group">
+            <div class="topbar-actions">
                 <button type="button" id="pickFolderBtn" class="folder-pill-btn" title="Choose a destination folder on your hard drive">
                     <span>📁</span>
-                    <span id="pickFolderLabel">Choose Save Folder</span>
+                    <span id="pickFolderLabel">Save Folder</span>
                 </button>
-                <button type="button" class="ghost-link-btn" onclick="openModal('howToRecordModal')">How to Record</button>
-                <button type="button" class="ghost-link-btn" onclick="openModal('aboutModal')">About</button>
-                <button type="button" class="ghost-link-btn" onclick="openModal('privacyModal')">Privacy</button>
-                <button type="button" class="ghost-link-btn" onclick="openModal('disclaimerModal')">Terms</button>
+                <button type="button" class="studio-btn studio-btn-compact" onclick="openModal('howToRecordModal')">
+                    <span>❓</span>
+                    <span>Guide</span>
+                </button>
             </div>
         </header>
 
-        <!-- =====================================================
-             2. TRANSPORT, LCD TIMECODE & STEREO VU METER DECK
-             ===================================================== -->
-        <section class="transport-deck" aria-label="Recorder Transport and Metering">
-            <div class="transport-buttons">
-                <button type="button" id="recordBtn" class="t-btn t-btn-record" disabled title="Record / Stop (R)">
-                    <span class="rec-dot"></span>
-                    <span id="recordBtnLabel">Record</span>
-                </button>
-                <button type="button" id="pauseRecBtn" class="t-btn" disabled title="Pause / Resume Recording (P)">
-                    ⏸ Pause Rec
-                </button>
-                <button type="button" id="stopBtn" class="t-btn" disabled title="Stop recording or playback">
-                    ⏹ Stop
-                </button>
-                <button type="button" id="playBtn" class="t-btn t-btn-play" disabled title="Play / Pause (Space)">
-                    <span id="playBtnIcon">▶ Play</span>
-                </button>
-                <button type="button" id="loopBtn" class="t-btn t-btn-loop" title="Loop playback of selection or buffer">
-                    🔁 Loop
-                </button>
-                <button type="button" id="splitAtCursorBtn" class="t-btn t-btn-split-marker" disabled title="Insert Track Split Boundary now / at cursor (M)">
-                    ✂️ Split Track (M)
-                </button>
-            </div>
-
-            <div class="lcd-display-panel">
-                <div id="lcdTimecode" class="lcd-time">00:00.0</div>
-                <div class="lcd-meta">
-                    <span id="lcdSourceStatus" class="status-pill">STANDBY</span>
-                    <span id="lcdFormatInfo">44100 Hz &bull; Stereo 16-bit</span>
+        <main class="studio-container">
+            <!-- 2. SIMPLE 1-TAP RECORD & TRANSPORT CARD -->
+            <section class="studio-card recorder-hero-card" aria-label="Record and Transport">
+                <div id="guidedStepBanner" class="guided-step-banner">
+                    ✨ <strong>Step 1:</strong> Tap <strong>Record Music Tab</strong> (or <strong>Open Audio</strong>) — songs automatically split on quiet gaps.
                 </div>
-            </div>
 
-            <div class="vu-deck" aria-label="Stereo Peak and RMS Meters">
-                <div class="vu-bars-stack">
-                    <div class="vu-row">
-                        <span class="vu-ch-label">L</span>
-                        <canvas id="vuMeterL" class="vu-canvas"></canvas>
-                        <span id="vuClipL" class="vu-clip-led" title="Left channel clip indicator"></span>
-                    </div>
-                    <div class="vu-row">
-                        <span class="vu-ch-label">R</span>
-                        <canvas id="vuMeterR" class="vu-canvas"></canvas>
-                        <span id="vuClipR" class="vu-clip-led" title="Right channel clip indicator"></span>
+                <div class="source-row">
+                    <button type="button" id="captureTabBtn" class="studio-btn studio-btn-primary">
+                        <span>🖥️</span>
+                        <span>Record Music Tab</span>
+                    </button>
+                    <button type="button" id="captureMicBtn" class="studio-btn">
+                        <span>🎙️</span>
+                        <span id="captureMicLabel">Use Mic</span>
+                    </button>
+                    <button type="button" id="openFileBtn" class="studio-btn">
+                        <span>📂</span>
+                        <span>Open Audio</span>
+                    </button>
+                    <input type="file" id="audioFileInput" accept="audio/*,.mp3,.wav,.flac,.m4a,.aac,.ogg,.opus,.webm" class="hidden">
+                    <button type="button" id="disconnectSourceBtn" class="studio-btn hidden" title="Disconnect capture source">
+                        <span>🔌</span>
+                        <span>Disconnect</span>
+                    </button>
+                </div>
+
+                <div class="transport-strip">
+                    <div class="transport-buttons">
+                        <button type="button" id="recordBtn" class="t-btn t-btn-record" title="Record / Stop (R)">
+                            <span class="rec-dot"></span>
+                            <span id="recordBtnLabel">Record</span>
+                        </button>
+                        <button type="button" id="pauseRecBtn" class="t-btn hidden" disabled title="Pause / Resume Recording (P)">
+                            ⏸ Pause
+                        </button>
+                        <button type="button" id="stopBtn" class="t-btn" disabled title="Stop">
+                            ⏹ Stop
+                        </button>
+                        <button type="button" id="playBtn" class="t-btn t-btn-play" disabled title="Play / Pause (Space)">
+                            <span id="playBtnIcon">▶ Play</span>
+                        </button>
+                        <button type="button" id="splitAtCursorBtn" class="t-btn t-btn-split-marker" disabled title="Split song here (M)">
+                            ✂️ Split Song
+                        </button>
+                        <button type="button" id="loopBtn" class="t-btn t-btn-loop" title="Loop playback" aria-label="Loop playback">
+                            🔁
+                        </button>
                     </div>
                 </div>
-            </div>
 
-            <div class="gain-controls-group">
-                <label class="mini-knob-group" title="Recording Input Gain">
-                    <span>In</span>
-                    <input type="range" id="inputGainSlider" min="0" max="2" step="0.05" value="1">
-                </label>
-                <label class="mini-knob-group" title="Playback Output Volume">
-                    <span>Out</span>
-                    <input type="range" id="playbackVolSlider" min="0" max="1.5" step="0.05" value="1">
-                </label>
-                <label class="monitor-toggle-chip" title="Listen to captured input through this tab (leave OFF for tab capture to prevent echo)">
-                    <input type="checkbox" id="monitorToggle">
-                    <span>🎧 Monitor</span>
-                </label>
-            </div>
-        </section>
+                <p id="mobileHintBanner" class="mobile-hint-banner hidden">
+                    📱 <strong>Mobile Ready:</strong> Tap <strong>Tap to Record</strong> for live mic/external audio or <strong>Open Audio</strong> to load a song/mix, see it on the equalizer, and save MP3s.
+                </p>
+            </section>
 
-        <!-- =====================================================
-             3. AUDACITY EDIT & ZOOM TOOLBAR
-             ===================================================== -->
-        <section class="edit-toolbar" aria-label="Waveform Editing Tools">
-            <div class="edit-tools-left">
-                <button type="button" id="undoBtn" class="tool-chip-btn" disabled title="Undo (Ctrl+Z)">↶ Undo</button>
-                <button type="button" id="redoBtn" class="tool-chip-btn" disabled title="Redo (Ctrl+Y)">↷ Redo</button>
-                <span class="toolbar-divider"></span>
-                <button type="button" id="trimSelBtn" class="tool-chip-btn" disabled title="Trim audio to selection (Ctrl+T)">✂️ Trim</button>
-                <button type="button" id="deleteSelBtn" class="tool-chip-btn" disabled title="Cut selected audio (Delete)">🗑️ Cut</button>
-                <button type="button" id="silenceSelBtn" class="tool-chip-btn" disabled title="Silence selection (Ctrl+L)">🔇 Silence</button>
-                <span class="toolbar-divider"></span>
-                <button type="button" id="fadeInBtn" class="tool-chip-btn" disabled title="Apply Fade In to selection (or first 2s)">📈 Fade In</button>
-                <button type="button" id="fadeOutBtn" class="tool-chip-btn" disabled title="Apply Fade Out to selection (or last 2s)">📉 Fade Out</button>
-                <button type="button" id="normalizeBtn" class="tool-chip-btn" disabled title="Normalize peak level to -1.0 dBFS">🔊 Normalize</button>
-                <button type="button" id="trimDeadAirBtn" class="tool-chip-btn" disabled title="Trim silent dead air from start and end">🧹 Trim Silence</button>
-                <button type="button" id="clearSessionBtn" class="tool-chip-btn" disabled title="Clear waveform buffer">✕ Clear</button>
-            </div>
+            <!-- 3. LIVE EQUALIZER + STEREO WAVEFORM STAGE -->
+            <section class="studio-card visualizer-stage-card" aria-label="Live Equalizer and Waveform">
+                <!-- Equalizer Header: Always shows active Track + Status + Presets -->
+                <div class="eq-stage">
+                    <div class="eq-header-bar">
+                        <div class="eq-track-identity">
+                            <div class="eq-title-row">
+                                <span id="eqStatusBadge" class="eq-status-badge">STANDBY</span>
+                                <span id="eqTrackTitle" class="eq-track-title">No Track Active — Ready to Record</span>
+                            </div>
+                            <div id="eqTrackSub" class="eq-track-sub">
+                                Tap Record Music Tab, Use Mic, or Open Audio to see your track live on the 32-band equalizer
+                            </div>
+                        </div>
 
-            <div class="edit-tools-right">
-                <span id="selectionReadout" class="selection-readout">Sel: 00:00.0 – 00:00.0</span>
-                <button type="button" id="zoomInBtn" class="tool-chip-btn" title="Zoom In (+)">🔍+</button>
-                <button type="button" id="zoomOutBtn" class="tool-chip-btn" title="Zoom Out (-)">🔍-</button>
-                <button type="button" id="zoomFitBtn" class="tool-chip-btn" title="Fit Entire Recording">↔ Fit</button>
-            </div>
-        </section>
+                        <div class="eq-right-controls">
+                            <div class="lcd-display-panel">
+                                <span id="lcdTimecode" class="lcd-time">00:00.0</span>
+                                <span id="lcdFormatInfo" class="lcd-sub">44.1 kHz</span>
+                                <span id="lcdSourceStatus" class="hidden">STANDBY</span>
+                            </div>
+                            <div class="eq-presets-row" role="group" aria-label="Equalizer Presets">
+                                <button type="button" class="eq-preset-btn is-active" data-eq-preset="flat">Flat</button>
+                                <button type="button" class="eq-preset-btn" data-eq-preset="bass">Bass Boost</button>
+                                <button type="button" class="eq-preset-btn" data-eq-preset="vocal">Vocal</button>
+                                <button type="button" class="eq-preset-btn" data-eq-preset="warm">Warm</button>
+                            </div>
+                        </div>
+                    </div>
 
-        <!-- =====================================================
-             4. STEREO WAVEFORM CANVAS & TRACK REGIONS STAGE
-             ===================================================== -->
-        <section class="waveform-stage" aria-label="Stereo Waveform Editor">
-            <div class="waveform-canvas-wrap">
-                <canvas id="waveformCanvas"></canvas>
+                    <div class="eq-canvas-wrap">
+                        <canvas id="equalizerCanvas"></canvas>
+                        <div class="eq-freq-labels">
+                            <span>60Hz</span>
+                            <span>250Hz</span>
+                            <span>1kHz</span>
+                            <span>4kHz</span>
+                            <span>12kHz</span>
+                        </div>
+                    </div>
 
-                <div id="waveformEmptyOverlay" class="waveform-empty-overlay">
-                    <div class="empty-card">
-                        <h2>Record Streamed Tracks Live in Your Browser — Just Like Audacity</h2>
-                        <p>
-                            Play any song, DJ set, radio show, or vinyl stream in another browser tab or app. Click
-                            <strong>Capture Tab / System Audio</strong>, check <em>"Share tab audio"</em>, and MP3aud.io
-                            records crisp stereo audio, automatically splits songs on silence gaps, and saves MP3/WAV
-                            files straight to your hard drive.
-                        </p>
-                        <div class="empty-cta-row">
-                            <button type="button" id="emptyCaptureTabBtn" class="studio-btn studio-btn-primary">
-                                <span>🖥️</span>
-                                <span>Capture Tab / System Audio</span>
-                            </button>
-                            <button type="button" id="emptyOpenFileBtn" class="studio-btn">
-                                <span>📂</span>
-                                <span>Or Drop / Open Audio File</span>
-                            </button>
-                            <button type="button" class="studio-btn" onclick="openModal('howToRecordModal')">
-                                <span>❓</span>
-                                <span>Setup Guide</span>
-                            </button>
+                    <!-- Compact Stereo Peak Bars -->
+                    <div class="vu-strip-compact" aria-label="Stereo Level Meters">
+                        <div class="vu-row">
+                            <span class="vu-ch-label">L</span>
+                            <canvas id="vuMeterL" class="vu-canvas"></canvas>
+                            <span id="vuClipL" class="vu-clip-led" title="Left clip"></span>
+                        </div>
+                        <div class="vu-row">
+                            <span class="vu-ch-label">R</span>
+                            <canvas id="vuMeterR" class="vu-canvas"></canvas>
+                            <span id="vuClipR" class="vu-clip-led" title="Right clip"></span>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <div class="waveform-scrollbar-row">
-                <input type="range" id="waveformPanSlider" min="0" max="1000" value="0" disabled aria-label="Scroll waveform">
-                <span id="zoomLevelBadge" class="zoom-badge">Fit (1.0x)</span>
-            </div>
-        </section>
+                <!-- Stereo Waveform -->
+                <div class="waveform-canvas-wrap">
+                    <canvas id="waveformCanvas"></canvas>
 
-        <!-- =====================================================
-             5. STUDIO WORKBENCH: AUTO-SPLIT + TRACKS & HARD DRIVE SAVE
-             ===================================================== -->
-        <section class="studio-workbench">
-            <!-- Left Pane: Auto-Split on Silence Controls -->
-            <aside class="workbench-pane autosplit-pane" aria-label="Auto-Split on Silence Settings">
+                    <div id="waveformEmptyOverlay" class="waveform-empty-overlay">
+                        <div class="empty-card">
+                            <h1>Record Music &amp; See Your Track Live on the Equalizer</h1>
+                            <p id="emptyCardDesc">
+                                Play a song in another browser tab or open an audio file. MP3aud.io visualizes every beat on the 32-band equalizer, splits tracks on silence, and saves tagged MP3s straight to your device.
+                            </p>
+                            <div class="empty-cta-row">
+                                <button type="button" id="emptyCaptureTabBtn" class="studio-btn studio-btn-primary">
+                                    <span>🖥️</span>
+                                    <span>Record Music Tab</span>
+                                </button>
+                                <button type="button" id="emptyCaptureMicBtn" class="studio-btn studio-btn-primary hidden">
+                                    <span>🎙️</span>
+                                    <span>Tap to Record</span>
+                                </button>
+                                <button type="button" id="emptyOpenFileBtn" class="studio-btn">
+                                    <span>📂</span>
+                                    <span>Open Audio File</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Contextual Quick Edit & Zoom Controls -->
+                <div id="waveformToolsBar" class="waveform-tools-bar hidden">
+                    <div class="quick-edit-strip" aria-label="Quick Waveform Edits">
+                        <button type="button" id="undoBtn" class="tool-chip-btn" disabled>↶ Undo</button>
+                        <button type="button" id="redoBtn" class="tool-chip-btn" disabled>↷ Redo</button>
+                        <button type="button" id="trimSelBtn" class="tool-chip-btn" disabled>✂️ Trim</button>
+                        <button type="button" id="deleteSelBtn" class="tool-chip-btn" disabled>🗑️ Cut</button>
+                        <button type="button" id="trimDeadAirBtn" class="tool-chip-btn" disabled>🧹 Trim Silence</button>
+                        <button type="button" id="normalizeBtn" class="tool-chip-btn" disabled>🔊 Normalize</button>
+                    </div>
+
+                    <div class="waveform-zoom-strip">
+                        <span id="selectionReadout" class="selection-readout">Cursor: 00:00.0</span>
+                        <div class="zoom-controls-row">
+                            <button type="button" id="zoomOutBtn" class="tool-chip-btn" aria-label="Zoom Out">−</button>
+                            <button type="button" id="zoomFitBtn" class="tool-chip-btn">Fit</button>
+                            <button type="button" id="zoomInBtn" class="tool-chip-btn" aria-label="Zoom In">+</button>
+                            <input type="range" id="waveformPanSlider" min="0" max="1000" value="0" disabled aria-label="Scroll waveform">
+                            <span id="zoomLevelBadge" class="zoom-badge">1.0x</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 4. TRACKS QUEUE & SAVE CARD -->
+            <section class="studio-card tracks-save-card" aria-label="Recorded Tracks and Export">
                 <div class="pane-header">
-                    <h2 class="pane-title">✂️ Auto-Split on Silence</h2>
-                    <span class="pane-badge">Real-Time DSP</span>
-                </div>
-
-                <label class="split-toggle-card">
-                    <div class="split-toggle-text">
-                        <strong>Live Auto-Split While Recording</strong>
-                        <span>Automatically marks a new track whenever a quiet gap is detected between streamed songs.</span>
+                    <div class="pane-title-group">
+                        <h2 class="pane-title">🎵 Tracks</h2>
+                        <span id="trackCountBadge" class="pane-badge">0 Tracks</span>
                     </div>
-                    <input type="checkbox" id="liveAutoSplitToggle" class="switch-input" checked>
-                </label>
-
-                <label class="split-toggle-card">
-                    <div class="split-toggle-text">
-                        <strong>Sound-Activated Recording</strong>
-                        <span>Waits in Armed mode until music starts playing (with pre-roll buffer so attacks never clip).</span>
-                    </div>
-                    <input type="checkbox" id="soundActivatedToggle" class="switch-input">
-                </label>
-
-                <label class="split-toggle-card">
-                    <div class="split-toggle-text">
-                        <strong>Auto-Trim Silence Gaps</strong>
-                        <span>Trims dead air between tracks so each exported MP3/WAV starts and ends cleanly.</span>
-                    </div>
-                    <input type="checkbox" id="autoTrimSilenceToggle" class="switch-input" checked>
-                </label>
-
-                <div class="slider-control-group">
-                    <div class="slider-label-row">
-                        <label for="thresholdDbSlider">Silence Threshold</label>
-                        <span id="thresholdDbVal" class="slider-val-pill">-42 dB</span>
-                    </div>
-                    <input type="range" id="thresholdDbSlider" min="-60" max="-20" step="1" value="-42">
-                </div>
-
-                <div class="slider-control-group">
-                    <div class="slider-label-row">
-                        <label for="minSilenceSlider">Minimum Gap Duration</label>
-                        <span id="minSilenceVal" class="slider-val-pill">1.5 s</span>
-                    </div>
-                    <input type="range" id="minSilenceSlider" min="0.5" max="5.0" step="0.1" value="1.5">
-                </div>
-
-                <div class="slider-control-group">
-                    <div class="slider-label-row">
-                        <label for="minTrackSlider">Minimum Track Length</label>
-                        <span id="minTrackVal" class="slider-val-pill">10 s</span>
-                    </div>
-                    <input type="range" id="minTrackSlider" min="3" max="60" step="1" value="10">
-                </div>
-
-                <button type="button" id="scanSplitNowBtn" class="studio-btn studio-btn-emerald" disabled>
-                    <span>🔍</span>
-                    <span>Scan Waveform &amp; Auto-Split Tracks</span>
-                </button>
-            </aside>
-
-            <!-- Right Pane: Recorded Tracks, ID3 Metadata & Hard Drive Export -->
-            <div class="workbench-pane tracks-export-pane" aria-label="Tracks and Hard Drive Export">
-                <div class="pane-header">
-                    <h2 class="pane-title">🎵 Recorded &amp; Split Tracks</h2>
-                    <span id="trackCountBadge" class="pane-badge">0 Tracks</span>
-                </div>
-
-                <!-- Shared Album ID3 Metadata & Cover Art -->
-                <div class="album-meta-bar">
-                    <button type="button" id="coverArtPickerBtn" class="cover-picker-btn" title="Choose album artwork image (embedded into MP3 ID3 tags)">
-                        <img id="coverArtPreview" src="" alt="Cover Art" class="hidden">
-                        <span id="coverArtPlaceholder">🎨 Cover Art</span>
+                    <button type="button" id="quickAutoSplitBtn" class="studio-btn studio-btn-emerald studio-btn-compact" disabled>
+                        <span>🔍</span>
+                        <span>Auto-Split</span>
                     </button>
-                    <input type="file" id="coverArtInput" accept="image/*" class="hidden">
-
-                    <div class="meta-inputs-grid">
-                        <input type="text" id="albumMetaInput" class="studio-input" placeholder="Album / Mix Name (ID3 TALB)" aria-label="Album name">
-                        <input type="text" id="albumArtistMetaInput" class="studio-input" placeholder="Default Artist (ID3 TPE1)" aria-label="Default artist">
-                        <input type="text" id="genreMetaInput" class="studio-input" placeholder="Genre (ID3 TCON)" aria-label="Genre">
-                        <input type="text" id="yearMetaInput" class="studio-input" placeholder="Year (ID3 TYER)" maxlength="4" aria-label="Year">
-                    </div>
                 </div>
 
-                <!-- Tracks Queue -->
                 <div id="tracksList" class="tracks-queue-list"></div>
 
-                <!-- Progress Bar -->
                 <div id="exportProgressWrap" class="export-progress-wrap hidden">
                     <div id="exportProgressLabel" class="export-progress-label">Encoding...</div>
                     <div class="export-progress-track">
@@ -356,66 +285,202 @@
                     </div>
                 </div>
 
-                <!-- Hard Drive Export Bar -->
-                <div class="export-footer-bar">
-                    <div class="export-format-group">
-                        <select id="exportFormatSelect" class="studio-select" aria-label="Export audio format">
-                            <option value="mp3" selected>MP3 (Tagged ID3v2.3)</option>
-                            <option value="wav">WAV (Lossless 16-bit PCM)</option>
-                        </select>
-                        <select id="exportBitrateSelect" class="studio-select" aria-label="MP3 Bitrate">
-                            <option value="320">320 kbps (Studio)</option>
-                            <option value="256">256 kbps (High)</option>
-                            <option value="192" selected>192 kbps (Standard)</option>
-                            <option value="128">128 kbps (Compact)</option>
-                        </select>
-                        <label class="monitor-toggle-chip" title="Automatically encode & save each track to your selected hard drive folder the moment silence splitting detects it">
-                            <input type="checkbox" id="autoSaveLiveToggle" checked>
-                            <span>⚡ Auto-Save Live to Folder</span>
-                        </label>
-                    </div>
+                <div class="save-footer-bar">
+                    <select id="exportPresetSelect" class="studio-select export-preset-select" aria-label="Export audio format and quality">
+                        <option value="mp3:192" selected>MP3 &bull; 192 kbps (Recommended)</option>
+                        <option value="mp3:320">MP3 &bull; 320 kbps (Studio Quality)</option>
+                        <option value="mp3:256">MP3 &bull; 256 kbps (High)</option>
+                        <option value="mp3:128">MP3 &bull; 128 kbps (Compact)</option>
+                        <option value="wav:0">WAV &bull; Lossless 16-bit PCM</option>
+                    </select>
 
-                    <div class="export-actions-group">
-                        <button type="button" id="exportSelectionBtn" class="studio-btn" disabled>
+                    <div class="save-actions-row">
+                        <button type="button" id="exportSelectionBtn" class="studio-btn hidden" disabled>
                             <span>✂️</span>
-                            <span>Save Selection Only</span>
+                            <span>Save Selection</span>
                         </button>
-                        <button type="button" id="exportAllBtn" class="studio-btn studio-btn-orange" disabled>
+                        <button type="button" id="exportAllBtn" class="studio-btn studio-btn-orange save-primary-btn" disabled>
                             <span>💾</span>
-                            <span id="exportAllLabel">Save Track to Hard Drive</span>
+                            <span id="exportAllLabel">Save Track to Device</span>
                         </button>
                     </div>
                 </div>
+            </section>
+
+            <!-- 5. COLLAPSIBLE STUDIO DRAWERS -->
+            <div class="studio-drawers-stack">
+                <details class="studio-drawer">
+                    <summary class="drawer-summary">
+                        <span class="drawer-title">✂️ Auto-Split Settings <span class="drawer-sub">Silence gap &amp; sound-activated detection</span></span>
+                        <span class="drawer-chevron">▾</span>
+                    </summary>
+                    <div class="drawer-body">
+                        <div class="drawer-toggles-grid">
+                            <label class="split-toggle-card">
+                                <div class="split-toggle-text">
+                                    <strong>Live Auto-Split While Recording</strong>
+                                    <span>Automatically separates songs when quiet gaps appear.</span>
+                                </div>
+                                <input type="checkbox" id="liveAutoSplitToggle" class="switch-input" checked>
+                            </label>
+
+                            <label id="autoSaveLiveRow" class="split-toggle-card">
+                                <div class="split-toggle-text">
+                                    <strong>Auto-Save Live to Folder</strong>
+                                    <span>Writes each track to your selected folder as it finishes.</span>
+                                </div>
+                                <input type="checkbox" id="autoSaveLiveToggle" class="switch-input" checked>
+                            </label>
+
+                            <label class="split-toggle-card">
+                                <div class="split-toggle-text">
+                                    <strong>Sound-Activated Recording</strong>
+                                    <span>Waits in Armed mode until music begins playing.</span>
+                                </div>
+                                <input type="checkbox" id="soundActivatedToggle" class="switch-input">
+                            </label>
+
+                            <label class="split-toggle-card">
+                                <div class="split-toggle-text">
+                                    <strong>Auto-Trim Silence Gaps</strong>
+                                    <span>Removes dead air at the start and end of split tracks.</span>
+                                </div>
+                                <input type="checkbox" id="autoTrimSilenceToggle" class="switch-input" checked>
+                            </label>
+                        </div>
+
+                        <div class="drawer-sliders-grid">
+                            <div class="slider-control-group">
+                                <div class="slider-label-row">
+                                    <label for="thresholdDbSlider">Silence Threshold</label>
+                                    <span id="thresholdDbVal" class="slider-val-pill">-42 dB</span>
+                                </div>
+                                <input type="range" id="thresholdDbSlider" min="-60" max="-20" step="1" value="-42">
+                            </div>
+
+                            <div class="slider-control-group">
+                                <div class="slider-label-row">
+                                    <label for="minSilenceSlider">Minimum Gap Duration</label>
+                                    <span id="minSilenceVal" class="slider-val-pill">1.5 s</span>
+                                </div>
+                                <input type="range" id="minSilenceSlider" min="0.5" max="5.0" step="0.1" value="1.5">
+                            </div>
+
+                            <div class="slider-control-group">
+                                <div class="slider-label-row">
+                                    <label for="minTrackSlider">Minimum Track Length</label>
+                                    <span id="minTrackVal" class="slider-val-pill">10 s</span>
+                                </div>
+                                <input type="range" id="minTrackSlider" min="3" max="60" step="1" value="10">
+                            </div>
+                        </div>
+
+                        <button type="button" id="scanSplitNowBtn" class="studio-btn studio-btn-emerald" disabled>
+                            <span>🔍</span>
+                            <span>Scan Waveform &amp; Auto-Split Tracks</span>
+                        </button>
+                    </div>
+                </details>
+
+                <details class="studio-drawer">
+                    <summary class="drawer-summary">
+                        <span class="drawer-title">🎛️ More Edit Tools <span class="drawer-sub">Fade In/Out, Silence &amp; Clear</span></span>
+                        <span class="drawer-chevron">▾</span>
+                    </summary>
+                    <div class="drawer-body">
+                        <div class="more-tools-row">
+                            <button type="button" id="silenceSelBtn" class="tool-chip-btn" disabled>🔇 Silence Selection</button>
+                            <button type="button" id="fadeInBtn" class="tool-chip-btn" disabled>📈 Fade In</button>
+                            <button type="button" id="fadeOutBtn" class="tool-chip-btn" disabled>📉 Fade Out</button>
+                            <button type="button" id="clearSessionBtn" class="tool-chip-btn" disabled>✕ Clear Session</button>
+                        </div>
+                        <p class="drawer-note">
+                            Tip: Tap the waveform to move the playhead, drag horizontally to select a section, or double-tap any track region to select it.
+                        </p>
+                    </div>
+                </details>
+
+                <details class="studio-drawer">
+                    <summary class="drawer-summary">
+                        <span class="drawer-title">🏷️ Tags, Cover Art &amp; Audio Levels <span class="drawer-sub">ID3 metadata, mic selector &amp; gain</span></span>
+                        <span class="drawer-chevron">▾</span>
+                    </summary>
+                    <div class="drawer-body">
+                        <div class="album-meta-bar">
+                            <button type="button" id="coverArtPickerBtn" class="cover-picker-btn" title="Choose album artwork image">
+                                <img id="coverArtPreview" src="" alt="Cover Art" class="hidden">
+                                <span id="coverArtPlaceholder">🎨 Cover Art</span>
+                            </button>
+                            <input type="file" id="coverArtInput" accept="image/*" class="hidden">
+
+                            <div class="meta-inputs-grid">
+                                <input type="text" id="albumMetaInput" class="studio-input" placeholder="Album / Mix Name" aria-label="Album name">
+                                <input type="text" id="albumArtistMetaInput" class="studio-input" placeholder="Default Artist" aria-label="Default artist">
+                                <input type="text" id="genreMetaInput" class="studio-input" placeholder="Genre" aria-label="Genre">
+                                <input type="text" id="yearMetaInput" class="studio-input" placeholder="Year" maxlength="4" aria-label="Year">
+                            </div>
+                        </div>
+
+                        <div class="audio-levels-row">
+                            <label class="device-select-group">
+                                <span>Input Device</span>
+                                <select id="micDeviceSelect" class="studio-select" aria-label="Audio input device"></select>
+                            </label>
+                            <label class="mini-knob-group">
+                                <span>Input Gain</span>
+                                <input type="range" id="inputGainSlider" min="0" max="2" step="0.05" value="1">
+                            </label>
+                            <label class="mini-knob-group">
+                                <span>Output Vol</span>
+                                <input type="range" id="playbackVolSlider" min="0" max="1.5" step="0.05" value="1">
+                            </label>
+                            <label class="monitor-toggle-chip" title="Listen to captured input through speakers (leave OFF for tab recording)">
+                                <input type="checkbox" id="monitorToggle">
+                                <span>🎧 Monitor</span>
+                            </label>
+                        </div>
+                    </div>
+                </details>
             </div>
-        </section>
+        </main>
+
+        <!-- 6. MINIMAL FOOTER -->
+        <footer class="studio-footer">
+            <span>100% Browser-Based &bull; Zero Uploads</span>
+            <div class="footer-links">
+                <button type="button" class="ghost-link-btn" onclick="openModal('aboutModal')">About</button>
+                <span>&middot;</span>
+                <button type="button" class="ghost-link-btn" onclick="openModal('privacyModal')">Privacy</button>
+                <span>&middot;</span>
+                <button type="button" class="ghost-link-btn" onclick="openModal('disclaimerModal')">Terms</button>
+            </div>
+        </footer>
     </div>
 
-    <!-- =====================================================
-         MODALS: HOW TO RECORD, ABOUT, PRIVACY, TERMS
-         ===================================================== -->
+    <!-- MODALS -->
     <div id="howToRecordModal" class="modal" role="dialog" aria-labelledby="howToRecordTitle" aria-hidden="true">
         <div class="modal-content">
             <button type="button" class="modal-close" onclick="closeModal('howToRecordModal')" aria-label="Close modal">&times;</button>
-            <h2 id="howToRecordTitle">How to Record Streamed Tracks in Your Browser</h2>
+            <h2 id="howToRecordTitle">How to Record &amp; Save Tracks</h2>
+            <p><strong>On Desktop (Chrome / Edge):</strong></p>
             <ol>
-                <li><strong>Open your music stream</strong> in another browser tab (Spotify Web, SoundCloud, Bandcamp, YouTube, Mixcloud, web radio, etc.).</li>
-                <li><strong>Click "Capture Tab / System Audio"</strong> in MP3aud.io Studio.</li>
-                <li>In the browser picker, select that tab (or Entire Screen on Windows/ChromeOS) and make sure <strong>"Share tab audio"</strong> (or <strong>"Share system audio"</strong>) is checked.</li>
-                <li>Press <strong>Play</strong> in your streaming tab. Keep <strong>Monitor OFF</strong> here so you don't hear double audio.</li>
-                <li>MP3aud.io records crisp stereo PCM locally in RAM, watches for quiet gaps between tracks to auto-split them, and lets you edit waveforms or save MP3/WAV files straight to a folder on your hard drive.</li>
+                <li>Open your music stream in another browser tab.</li>
+                <li>Tap <strong>Record Music Tab</strong> (or the red <strong>Record</strong> button), pick that tab, and check <strong>"Share tab audio"</strong>.</li>
+                <li>Press Play in your music tab — watch your track appear live on the equalizer while songs auto-split on quiet gaps.</li>
+                <li>Tap <strong>Save Track to Hard Drive</strong> (or choose a <strong>Save Folder</strong> for automatic saving).</li>
             </ol>
-            <h3 style="font-size: 0.92rem; color: #ffffff; margin-top: 14px; margin-bottom: 6px;">Keyboard Shortcuts</h3>
+            <p><strong>On Mobile (iPhone / Android):</strong></p>
+            <ul>
+                <li>Tap <strong>Tap to Record</strong> to capture live audio from your phone microphone or external audio interface.</li>
+                <li>Or tap <strong>Open Audio</strong> to load a song/mix from your phone, view it on the equalizer, auto-split tracks, and save MP3s.</li>
+            </ul>
             <div class="shortcut-grid">
                 <div class="shortcut-item"><span>Play / Pause</span><kbd>Space</kbd></div>
                 <div class="shortcut-item"><span>Record / Stop</span><kbd>R</kbd></div>
-                <div class="shortcut-item"><span>Pause / Resume Rec</span><kbd>P</kbd></div>
-                <div class="shortcut-item"><span>Split Track at Cursor</span><kbd>M</kbd></div>
-                <div class="shortcut-item"><span>Cut Selection</span><kbd>Delete</kbd></div>
-                <div class="shortcut-item"><span>Trim to Selection</span><kbd>Ctrl+T</kbd></div>
-                <div class="shortcut-item"><span>Silence Selection</span><kbd>Ctrl+L</kbd></div>
+                <div class="shortcut-item"><span>Split Track</span><kbd>M</kbd></div>
                 <div class="shortcut-item"><span>Undo / Redo</span><kbd>Ctrl+Z / Y</kbd></div>
-                <div class="shortcut-item"><span>Save to Hard Drive</span><kbd>Ctrl+S</kbd></div>
-                <div class="shortcut-item"><span>Zoom In / Out</span><kbd>+ / -</kbd></div>
+                <div class="shortcut-item"><span>Cut / Trim</span><kbd>Del / Ctrl+T</kbd></div>
+                <div class="shortcut-item"><span>Save Tracks</span><kbd>Ctrl+S</kbd></div>
             </div>
         </div>
     </div>
@@ -423,12 +488,11 @@
     <div id="aboutModal" class="modal" role="dialog" aria-labelledby="aboutTitle" aria-hidden="true">
         <div class="modal-content">
             <button type="button" class="modal-close" onclick="closeModal('aboutModal')" aria-label="Close modal">&times;</button>
-            <h2 id="aboutTitle">About MP3aud.io Browser Studio</h2>
+            <h2 id="aboutTitle">About MP3aud.io</h2>
             <p>
-                MP3aud.io is a 100% browser-based audio stream recorder and Audacity-style stereo waveform workstation.
-                Every bit of capture, waveform visualization, silence detection, DSP editing, ID3 tagging, and MP3/WAV
-                encoding runs locally on your machine using Web Audio API, AudioWorklet, Web Workers, and the File System
-                Access API—with no software installation and no server uploads.
+                MP3aud.io is a 100% client-side browser audio recorder, live 32-band track equalizer, and waveform editor
+                inspired by Audacity. Capture, silence-splitting, DSP editing, ID3 tagging, and MP3/WAV encoding all run
+                locally on your device with zero uploads.
             </p>
         </div>
     </div>
@@ -438,10 +502,8 @@
             <button type="button" class="modal-close" onclick="closeModal('privacyModal')" aria-label="Close modal">&times;</button>
             <h2 id="privacyTitle">Privacy Policy</h2>
             <p>
-                MP3aud.io processes all audio entirely inside your browser's local memory. Your recordings, imported audio
-                files, cover artwork, and folder selections never leave your computer and are never uploaded to any server.
-                Saving directly to your hard drive uses your browser's permission-gated File System Access API or standard
-                local file downloads.
+                All audio recording, editing, and MP3/WAV conversion stays completely inside your browser memory.
+                Nothing is ever uploaded to any server. Saved files go directly to your chosen folder or device Downloads.
             </p>
         </div>
     </div>
@@ -451,17 +513,15 @@
             <button type="button" class="modal-close" onclick="closeModal('disclaimerModal')" aria-label="Close modal">&times;</button>
             <h2 id="disclaimerTitle">Terms &amp; Legal Disclaimer</h2>
             <p>
-                MP3aud.io Studio is a client-side recording and audio editing tool intended for personal archival,
-                time-shifting, voice/podcast production, and recording authorized or user-owned audio streams. You are
-                solely responsible for complying with applicable copyright laws and the terms of service of any media
-                sources you record.
+                MP3aud.io is a local browser audio tool for personal archival, voice recording, and authorized streams.
+                Users are responsible for complying with applicable copyright laws and terms of service.
             </p>
         </div>
     </div>
 
-    <script src="export-engine.js?v=20261122_01"></script>
-    <script src="audio-engine.js?v=20261122_01"></script>
-    <script src="app.js?v=20261122_01"></script>
+    <script src="export-engine.js?v=20261122_03"></script>
+    <script src="audio-engine.js?v=20261122_03"></script>
+    <script src="app.js?v=20261122_03"></script>
 </body>
 
 </html>
