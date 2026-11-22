@@ -46,7 +46,7 @@
         gtag('config', 'G-VGVP90K1M4');
     </script>
 
-    <link rel="stylesheet" href="studio.css?v=20261122_04">
+    <link rel="stylesheet" href="studio.css?v=20261122_05">
 
     <script type="application/ld+json">
     {
@@ -148,38 +148,38 @@
                             🔁
                         </button>
                     </div>
-                </div>
 
-                <!-- Convenient Left & Right Channel Recording Bars directly above the Continuous Wave -->
-                <div class="lr-meter-deck" aria-label="Left and Right Recording Channel Bars">
-                    <div class="lr-meter-header">
-                        <span class="lr-meter-title">LEFT &amp; RIGHT RECORDING CHANNELS</span>
-                        <div class="lr-meter-readouts">
-                            <span id="meterDbReadout" class="meter-db-pill">-∞ dB</span>
-                            <span id="lcdTimecode" class="lcd-time">00:00.0</span>
+                    <!-- Left & Right Channel Recording Bars placed directly to the right of Loop button -->
+                    <div class="lr-meter-deck" id="lrMeterDeck" aria-label="Left and Right Recording Channel Bars">
+                        <div class="lr-meter-header">
+                            <span class="lr-meter-title">L / R LEVELS</span>
+                            <div class="lr-meter-readouts">
+                                <span id="meterDbReadout" class="meter-db-pill">-∞ dB</span>
+                                <span id="lcdTimecode" class="lcd-time">00:00.0</span>
+                            </div>
                         </div>
-                    </div>
 
-                    <div class="lr-bars-rows">
-                        <div class="vu-row">
-                            <span class="vu-ch-label vu-ch-l">L</span>
-                            <canvas id="vuMeterL" class="vu-canvas"></canvas>
-                            <span id="vuClipL" class="vu-clip-led" title="Left channel clip indicator">CLIP</span>
+                        <div class="lr-bars-rows">
+                            <div class="vu-row">
+                                <span class="vu-ch-label vu-ch-l">L</span>
+                                <canvas id="vuMeterL" class="vu-canvas"></canvas>
+                                <span id="vuClipL" class="vu-clip-led" title="Left channel clip indicator">CLIP</span>
+                            </div>
+                            <div class="vu-row">
+                                <span class="vu-ch-label vu-ch-r">R</span>
+                                <canvas id="vuMeterR" class="vu-canvas"></canvas>
+                                <span id="vuClipR" class="vu-clip-led" title="Right channel clip indicator">CLIP</span>
+                            </div>
                         </div>
-                        <div class="vu-row">
-                            <span class="vu-ch-label vu-ch-r">R</span>
-                            <canvas id="vuMeterR" class="vu-canvas"></canvas>
-                            <span id="vuClipR" class="vu-clip-led" title="Right channel clip indicator">CLIP</span>
-                        </div>
-                    </div>
 
-                    <div class="vu-db-scale" aria-hidden="true">
-                        <span>-60</span>
-                        <span>-36</span>
-                        <span>-18</span>
-                        <span>-12</span>
-                        <span>-6</span>
-                        <span>0 dB</span>
+                        <div class="vu-db-scale" aria-hidden="true">
+                            <span>-60</span>
+                            <span>-36</span>
+                            <span>-18</span>
+                            <span>-12</span>
+                            <span>-6</span>
+                            <span>0 dB</span>
+                        </div>
                     </div>
                 </div>
 
@@ -196,7 +196,7 @@
                         <span id="waveTrackTitle" class="wave-track-title">Live Stereo Wave — Ready to Record</span>
                     </div>
                     <div class="wave-header-meta">
-                        <span id="waveLiveViewBadge" class="wave-live-pill hidden">Live 20s Scroll</span>
+                        <span id="waveLiveViewBadge" class="wave-live-pill hidden">Live Scroll</span>
                         <span id="lcdFormatInfo" class="lcd-sub">44.1 kHz &bull; Stereo</span>
                     </div>
                 </div>
@@ -505,9 +505,9 @@
         </div>
     </div>
 
-    <script src="export-engine.js?v=20261122_04"></script>
-    <script src="audio-engine.js?v=20261122_04"></script>
-    <script src="app.js?v=20261122_04"></script>
+    <script src="export-engine.js?v=20261122_05"></script>
+    <script src="audio-engine.js?v=20261122_05"></script>
+    <script src="app.js?v=20261122_05"></script>
 </body>
 
 </html>

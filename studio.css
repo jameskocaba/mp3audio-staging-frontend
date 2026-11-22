@@ -301,8 +301,8 @@ html, body {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 10px;
-    flex-wrap: wrap;
+    gap: 12px;
+    flex-wrap: nowrap;
     padding-top: 10px;
     border-top: 1px solid var(--border-subtle);
 }
@@ -310,9 +310,10 @@ html, body {
 .transport-buttons {
     display: flex;
     align-items: center;
-    gap: 7px;
-    flex-wrap: wrap;
-    width: 100%;
+    gap: 6px;
+    flex-wrap: nowrap;
+    flex-shrink: 0;
+    width: auto;
 }
 
 .t-btn {
@@ -405,15 +406,17 @@ html, body {
     color: #fcd34d;
 }
 
-/* Convenient L/R Channel Recording Bars Deck */
+/* Convenient L/R Channel Recording Bars Deck (right of Loop button) */
 .lr-meter-deck {
+    flex: 1;
+    min-width: 220px;
     background: #060d13;
     border: 1px solid var(--border-strong);
     border-radius: var(--radius-md);
-    padding: 10px 12px 8px;
+    padding: 7px 10px 5px;
     display: flex;
     flex-direction: column;
-    gap: 7px;
+    gap: 5px;
 }
 
 .lr-meter-header {
@@ -494,7 +497,7 @@ html, body {
 
 .vu-canvas {
     flex: 1;
-    height: 14px;
+    height: 12px;
     display: block;
     border-radius: 4px;
     background: #03070b;
@@ -1423,8 +1426,21 @@ html, body {
 .toast-warning { border-color: rgba(245, 158, 11, 0.7); }
 
 /* ==========================================================================
-   MOBILE BREAKPOINT (<= 680px)
+   TABLET & MOBILE BREAKPOINTS
    ========================================================================== */
+@media (max-width: 860px) {
+    .transport-strip {
+        flex-wrap: wrap;
+    }
+    .transport-buttons {
+        flex-wrap: wrap;
+        width: 100%;
+    }
+    .lr-meter-deck {
+        width: 100%;
+    }
+}
+
 @media (max-width: 680px) {
     .studio-topbar {
         padding: 10px 12px;

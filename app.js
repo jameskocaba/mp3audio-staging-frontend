@@ -116,12 +116,13 @@
         const exportProgressFill = document.getElementById('exportProgressFill');
 
         // --- App State ---
-        const LIVE_SCROLL_SECONDS = 20;
+        const LIVE_SCROLL_SECONDS = 12;
         let dirHandle = null;
         let coverArtBytes = null;
         let coverArtMime = 'image/jpeg';
         let isExporting = false;
         let autoSaveQueue = Promise.resolve();
+        let lastObservedRecLength = 0;
 
         // Viewport / Zoom State
         let viewStartSample = 0;
@@ -191,12 +192,33 @@
             return includeTenths ? `${mm}:${ss}.${tenths}` : `${mm}:${ss}`;
         }
 
+        function updateLiveScrollViewport() {
+            const total = engine.length;
+            const liveWin = Math.max((engine.sampleRate || 44100) * LIVE_SCROLL_SECONDS, 1);
+
+            if (engine.recordState === 'recording' || engine.recordState === 'paused') {
+                const leadAnchor = Math.round(liveWin * 0.88);
+                viewSpanSamples = liveWin;
+                viewStartSample = total > leadAnchor ? (total - leadAnchor) : 0;
+                return;
+            }
+
+            if (engine.isPlaying && total > 0) {
+                if (!userHasZoomed || viewSpanSamples <= 0 || viewSpanSamples >= total) {
+                    const fallbackSpan = Math.min(total, Math.max((engine.sampleRate || 44100) * 4, Math.min(liveWin, Math.round(total * 0.45))));
+                    viewSpanSamples = fallbackSpan > 0 ? fallbackSpan : total;
+                }
+                const pos = engine.getPlaybackPositionSample();
+                const anchorOffset = Math.round(viewSpanSamples * 0.30);
+                viewStartSample = Math.max(0, Math.min(Math.max(0, total - viewSpanSamples), pos - anchorOffset));
+                return;
+            }
+        }
+
         function clampViewport() {
             const total = engine.length;
-            if (engine.recordState === 'recording' || engine.recordState === 'paused') {
-                const liveWin = Math.max(engine.sampleRate * LIVE_SCROLL_SECONDS, 1);
-                viewSpanSamples = liveWin;
-                viewStartSample = total > liveWin ? total - liveWin : 0;
+            if (engine.recordState === 'recording' || engine.recordState === 'paused' || (engine.isPlaying && total > 0)) {
+                updateLiveScrollViewport();
                 return;
             }
             if (total === 0 || !userHasZoomed || viewSpanSamples <= 0 || viewSpanSamples >= total) {
@@ -212,6 +234,14 @@
         function syncPanScrollbar() {
             if (!waveformPanSlider || !zoomLevelBadge) return;
             const total = engine.length;
+            const liveActive = engine.recordState === 'recording' || engine.isPlaying;
+            if (liveActive && viewSpanSamples > 0 && total > 0) {
+                waveformPanSlider.disabled = true;
+                const maxStart = Math.max(1, total - viewSpanSamples);
+                waveformPanSlider.value = String(Math.min(1000, Math.round((viewStartSample / maxStart) * 1000)));
+                zoomLevelBadge.textContent = 'LIVE';
+                return;
+            }
             if (total === 0 || !userHasZoomed || viewSpanSamples >= total || engine.recordState !== 'idle') {
                 waveformPanSlider.disabled = true;
                 waveformPanSlider.value = '0';
@@ -257,7 +287,13 @@
                 syncPanScrollbar();
                 updateUiState();
             },
-            onPlaybackStateChanged: () => {
+            onPlaybackStateChanged: ({ playing } = {}) => {
+                if (!playing && !userHasZoomed && engine.recordState === 'idle') {
+                    viewStartSample = 0;
+                    viewSpanSamples = engine.length;
+                }
+                clampViewport();
+                syncPanScrollbar();
                 updateUiState();
                 renderTracksList();
             },
@@ -347,7 +383,7 @@
                 lastWaveTitle = titleText;
             }
             if (waveLiveViewBadge) {
-                waveLiveViewBadge.classList.toggle('hidden', !isRec);
+                waveLiveViewBadge.classList.toggle('hidden', !isRec && !isPlay);
             }
         }
 
@@ -1109,15 +1145,17 @@
 
                     const clipL = maxL >= 32500 || minL <= -32500;
                     const clipR = maxR >= 32500 || minR <= -32500;
+                    const playCursor = engine.isPlaying ? engine.getPlaybackPositionSample() : -1;
+                    const isAheadOfPlayhead = engine.isPlaying && s0 > playCursor;
 
                     const yTopL = MID_Y_L - (maxL / 32768) * CH_AMP;
                     const yBotL = MID_Y_L - (minL / 32768) * CH_AMP;
-                    ctx.fillStyle = clipL ? '#ef4444' : '#38bdf8';
+                    ctx.fillStyle = clipL ? '#ef4444' : (isAheadOfPlayhead ? 'rgba(56, 189, 248, 0.52)' : '#38bdf8');
                     ctx.fillRect(px, yTopL, 1.2, Math.max(1.5, yBotL - yTopL));
 
                     const yTopR = MID_Y_R - (maxR / 32768) * CH_AMP;
                     const yBotR = MID_Y_R - (minR / 32768) * CH_AMP;
-                    ctx.fillStyle = clipR ? '#ef4444' : '#2dd4bf';
+                    ctx.fillStyle = clipR ? '#ef4444' : (isAheadOfPlayhead ? 'rgba(45, 212, 191, 0.52)' : '#2dd4bf');
                     ctx.fillRect(px, yTopR, 1.2, Math.max(1.5, yBotR - yTopR));
                 }
 
@@ -1253,16 +1291,21 @@
                     : `${maxPeak.toFixed(0)} dB`;
             }
 
+            if (engine.length !== lastObservedRecLength && engine.recordState === 'recording') {
+                const wasZero = lastObservedRecLength === 0;
+                lastObservedRecLength = engine.length;
+                if (wasZero) updateUiState();
+            } else if (engine.recordState === 'idle') {
+                lastObservedRecLength = engine.length;
+            }
+
+            if (engine.recordState === 'recording' || engine.recordState === 'paused' || (engine.isPlaying && engine.length > 0)) {
+                updateLiveScrollViewport();
+                syncPanScrollbar();
+            }
+
             drawVuBar(vuMeterL, levels.left.rmsDb, peakHoldL);
             drawVuBar(vuMeterR, levels.right.rmsDb, peakHoldR);
-
-            if (engine.isPlaying && userHasZoomed && viewSpanSamples < engine.length) {
-                const pos = engine.getPlaybackPositionSample();
-                if (pos < viewStartSample || pos > viewStartSample + viewSpanSamples) {
-                    viewStartSample = Math.max(0, Math.min(engine.length - viewSpanSamples, pos - viewSpanSamples * 0.15));
-                    syncPanScrollbar();
-                }
-            }
 
             drawWaveform();
             requestAnimationFrame(animationTick);
@@ -1703,6 +1746,11 @@
         if (yearMetaInput && !yearMetaInput.value) {
             yearMetaInput.value = String(new Date().getFullYear());
         }
+
+        window.__STUDIO_STATE__ = {
+            engine,
+            getViewport: () => ({ viewStartSample, viewSpanSamples, userHasZoomed })
+        };
 
         refreshMicDevices();
         renderTracksList();
