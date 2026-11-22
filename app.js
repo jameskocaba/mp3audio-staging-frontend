@@ -6,6 +6,7 @@
         window.__MP3AUDIO_STUDIO_INIT__ = true;
 
         const ExportEngine = window.StudioExportEngine;
+        const IdentifyEngine = window.StudioIdentifyEngine;
         const AudioEngineClass = window.StudioAudioEngine;
         if (!ExportEngine || !AudioEngineClass) {
             console.error('Studio engines missing');
@@ -85,6 +86,7 @@
         const liveAutoSplitToggle = document.getElementById('liveAutoSplitToggle');
         const soundActivatedToggle = document.getElementById('soundActivatedToggle');
         const autoTrimSilenceToggle = document.getElementById('autoTrimSilenceToggle');
+        const autoIdentifyToggle = document.getElementById('autoIdentifyToggle');
         const autoSaveLiveRow = document.getElementById('autoSaveLiveRow');
         const autoSaveLiveToggle = document.getElementById('autoSaveLiveToggle');
         const thresholdDbSlider = document.getElementById('thresholdDbSlider');
@@ -120,9 +122,12 @@
         let dirHandle = null;
         let coverArtBytes = null;
         let coverArtMime = 'image/jpeg';
+        let userEditedCoverArt = false;
         let isExporting = false;
         let autoSaveQueue = Promise.resolve();
         let lastObservedRecLength = 0;
+        let prevRecordState = 'idle';
+        const inFlightIdentifyIds = new Set();
 
         // Viewport / Zoom State
         let viewStartSample = 0;
@@ -275,6 +280,8 @@
                 updateUiState();
             },
             onRecordStateChanged: ({ state }) => {
+                const wasActiveRec = prevRecordState !== 'idle';
+                prevRecordState = state;
                 if (state === 'armed') {
                     showToast('Armed — recording begins as soon as sound starts.', 'warning');
                 }
@@ -286,6 +293,9 @@
                 clampViewport();
                 syncPanScrollbar();
                 updateUiState();
+                if (wasActiveRec && state === 'idle' && engine.length > 0 && autoIdentifyToggle && autoIdentifyToggle.checked) {
+                    queueAutoIdentifyGenericTracks();
+                }
             },
             onPlaybackStateChanged: ({ playing } = {}) => {
                 if (!playing && !userHasZoomed && engine.recordState === 'idle') {
@@ -301,11 +311,22 @@
                 renderTracksList();
                 updateUiState();
             },
-            onTrackAutoSplit: (track) => {
+            onTrackAutoSplit: async (track) => {
                 showToast(`✂️ Split Track ${track.index + 1} (${formatTimecode((track.endSample - track.startSample) / engine.sampleRate, false)})`, 'success');
                 renderTracksList();
+                const shouldAutoIdentify = autoIdentifyToggle && autoIdentifyToggle.checked && IdentifyEngine &&
+                    !track.userEditedTitle && IdentifyEngine.isGenericTrackTitle(track.title);
                 if (autoSaveLiveToggle && autoSaveLiveToggle.checked && dirHandle) {
-                    queueLiveAutoSaveTrack(track);
+                    if (shouldAutoIdentify) {
+                        await Promise.race([
+                            identifyTrackById(track.id, { manual: false, forceOverwrite: false }),
+                            new Promise(r => setTimeout(r, 7000))
+                        ]);
+                    }
+                    const latest = engine.tracks.find(t => t.id === track.id) || track;
+                    queueLiveAutoSaveTrack(latest);
+                } else if (shouldAutoIdentify) {
+                    identifyTrackById(track.id, { manual: false, forceOverwrite: false });
                 }
             },
             onBufferChanged: ({ length }) => {
@@ -459,6 +480,132 @@
             }
         }
 
+        function setCoverArtPreview(bytes, mime = 'image/jpeg') {
+            coverArtBytes = bytes || null;
+            coverArtMime = mime || 'image/jpeg';
+            if (!coverArtPreview || !coverArtPlaceholder) return;
+            if (!coverArtBytes || coverArtBytes.length === 0) {
+                coverArtPreview.src = '';
+                coverArtPreview.classList.add('hidden');
+                coverArtPlaceholder.classList.remove('hidden');
+                return;
+            }
+            try {
+                const blob = new Blob([coverArtBytes], { type: coverArtMime });
+                const reader = new FileReader();
+                reader.onload = () => {
+                    coverArtPreview.src = String(reader.result);
+                    coverArtPreview.classList.remove('hidden');
+                    coverArtPlaceholder.classList.add('hidden');
+                };
+                reader.readAsDataURL(blob);
+            } catch (_) { }
+        }
+
+        function applySessionMetaIfEmpty(meta = {}) {
+            if (albumMetaInput && meta.album && !albumMetaInput.value.trim()) {
+                albumMetaInput.value = meta.album;
+            }
+            if (yearMetaInput && meta.year && !yearMetaInput.value.trim()) {
+                yearMetaInput.value = meta.year;
+            }
+            if (genreMetaInput && meta.genre && !genreMetaInput.value.trim()) {
+                genreMetaInput.value = meta.genre;
+            }
+            if (!userEditedCoverArt && !coverArtBytes && meta.coverBytes && meta.coverBytes.length > 0) {
+                setCoverArtPreview(meta.coverBytes, meta.coverMime || 'image/jpeg');
+            }
+        }
+
+        async function identifyTrackById(trackId, { manual = false, forceOverwrite = false } = {}) {
+            if (!IdentifyEngine) return false;
+            const track = (engine.tracks || []).find(t => t.id === trackId);
+            if (!track || track.identifying || inFlightIdentifyIds.has(trackId)) return false;
+
+            const durSec = Math.max(0, (track.endSample - track.startSample) / (engine.sampleRate || 44100));
+            const minSec = manual ? 3 : 5;
+            if (durSec < minSec) {
+                if (manual) {
+                    showToast('Track is too short to fingerprint (need at least 3 seconds).', 'info');
+                }
+                return false;
+            }
+
+            inFlightIdentifyIds.add(trackId);
+            engine.updateTrackMeta(trackId, { identifying: true });
+            renderTracksList();
+
+            try {
+                const slice = engine.getSlice(track.startSample, track.endSample);
+                const result = await IdentifyEngine.identifyTrackSlice(slice.left, slice.right, slice.sampleRate, { manual });
+                const liveTrk = (engine.tracks || []).find(t => t.id === trackId);
+                if (!liveTrk) return false;
+
+                if (result && result.matched && result.title) {
+                    const patch = {
+                        identifying: false,
+                        identified: true,
+                        saved: false
+                    };
+                    if (forceOverwrite || (!liveTrk.userEditedTitle && IdentifyEngine.isGenericTrackTitle(liveTrk.title))) {
+                        patch.title = result.title;
+                    }
+                    if (result.artist && (forceOverwrite || (!liveTrk.userEditedArtist && !String(liveTrk.artist || '').trim()))) {
+                        patch.artist = result.artist;
+                    }
+                    if (result.album) patch.album = result.album;
+                    if (result.year) patch.year = result.year;
+                    if (result.genre) patch.genre = result.genre;
+                    if (result.coverBytes) {
+                        patch.coverBytes = result.coverBytes;
+                        patch.coverMime = result.coverMime || 'image/jpeg';
+                    }
+
+                    engine.updateTrackMeta(trackId, patch);
+                    applySessionMetaIfEmpty({
+                        album: result.album,
+                        year: result.year,
+                        genre: result.genre,
+                        coverBytes: result.coverBytes,
+                        coverMime: result.coverMime
+                    });
+                    syncWaveTrackDisplay();
+                    renderTracksList();
+                    const dispArtist = (patch.artist || liveTrk.artist || '').trim();
+                    const dispTitle = (patch.title || liveTrk.title || '').trim();
+                    showToast(`🎵 Identified: ${dispArtist ? dispArtist + ' — ' : ''}${dispTitle}`, 'success');
+                    return true;
+                }
+
+                engine.updateTrackMeta(trackId, { identifying: false });
+                renderTracksList();
+                if (manual) {
+                    showToast('No AcoustID match found — type Title & Artist directly.', 'info');
+                }
+                return false;
+            } catch (err) {
+                engine.updateTrackMeta(trackId, { identifying: false });
+                renderTracksList();
+                if (manual) {
+                    showToast(`Identify unavailable: ${(err && err.message) || 'Network error'}`, 'info');
+                }
+                return false;
+            } finally {
+                inFlightIdentifyIds.delete(trackId);
+            }
+        }
+
+        function queueAutoIdentifyGenericTracks() {
+            if (!IdentifyEngine || !autoIdentifyToggle || !autoIdentifyToggle.checked) return;
+            const list = (engine.tracks || []).filter(trk =>
+                !trk.identified &&
+                !trk.identifying &&
+                !trk.userEditedTitle &&
+                (IdentifyEngine.isGenericTrackTitle(trk.title) || (!trk.userEditedArtist && !String(trk.artist || '').trim()))
+            );
+            list.forEach(trk => { identifyTrackById(trk.id, { manual: false, forceOverwrite: false }); });
+        }
+
         async function handleLoadAudioFile(file) {
             if (!file) return;
             try {
@@ -467,12 +614,17 @@
                 if (albumArtistMetaInput && info.artist && !albumArtistMetaInput.value) {
                     albumArtistMetaInput.value = info.artist;
                 }
+                applySessionMetaIfEmpty(info);
                 userHasZoomed = false;
                 clampViewport();
                 syncPanScrollbar();
                 renderTracksList();
                 updateUiState();
                 showToast(`Loaded "${file.name}" (${formatTimecode(info.length / info.sampleRate, false)})`, 'success');
+                if (autoIdentifyToggle && autoIdentifyToggle.checked && IdentifyEngine && engine.tracks.length > 0 &&
+                    (!info.artist || IdentifyEngine.isGenericTrackTitle(info.title))) {
+                    identifyTrackById(engine.tracks[0].id, { manual: false, forceOverwrite: false });
+                }
             } catch (err) {
                 showToast(`Could not decode audio file: ${(err && err.message) || 'Unsupported format'}`, 'error');
             }
@@ -515,15 +667,18 @@
 
         function buildTrackExportMeta(track, idx, total) {
             const albumArtist = albumArtistMetaInput ? albumArtistMetaInput.value.trim() : '';
+            const sessionAlbum = albumMetaInput ? albumMetaInput.value.trim() : '';
+            const sessionYear = yearMetaInput ? yearMetaInput.value.trim() : '';
+            const sessionGenre = genreMetaInput ? genreMetaInput.value.trim() : '';
             return {
                 title: (track && track.title) || `Track ${idx + 1}`,
                 artist: (track && track.artist) || albumArtist,
-                album: albumMetaInput ? albumMetaInput.value.trim() : '',
+                album: (track && track.album) || sessionAlbum,
                 trackNumber: `${idx + 1}/${Math.max(1, total)}`,
-                year: yearMetaInput ? yearMetaInput.value.trim() : '',
-                genre: genreMetaInput ? genreMetaInput.value.trim() : '',
-                coverBytes: coverArtBytes,
-                coverMime: coverArtMime
+                year: (track && track.year) || sessionYear,
+                genre: (track && track.genre) || sessionGenre,
+                coverBytes: (track && track.coverBytes) || coverArtBytes,
+                coverMime: (track && track.coverBytes ? track.coverMime : coverArtMime) || 'image/jpeg'
             };
         }
 
@@ -733,7 +888,7 @@
                 titleInput.placeholder = 'Track Title';
                 titleInput.setAttribute('aria-label', `Track ${idx + 1} title`);
                 titleInput.addEventListener('input', () => {
-                    engine.updateTrackMeta(trk.id, { title: titleInput.value, saved: false });
+                    engine.updateTrackMeta(trk.id, { title: titleInput.value, userEditedTitle: true, saved: false });
                     syncWaveTrackDisplay();
                 });
 
@@ -744,7 +899,7 @@
                 artistInput.placeholder = albumArtistMetaInput && albumArtistMetaInput.value ? albumArtistMetaInput.value : 'Artist (optional)';
                 artistInput.setAttribute('aria-label', `Track ${idx + 1} artist`);
                 artistInput.addEventListener('input', () => {
-                    engine.updateTrackMeta(trk.id, { artist: artistInput.value, saved: false });
+                    engine.updateTrackMeta(trk.id, { artist: artistInput.value, userEditedArtist: true, saved: false });
                     syncWaveTrackDisplay();
                 });
 
@@ -797,6 +952,16 @@
 
                 const subTools = document.createElement('div');
                 subTools.className = 'track-sub-tools';
+
+                const idBtn = document.createElement('button');
+                idBtn.type = 'button';
+                idBtn.className = `row-icon-btn row-identify-btn${trk.identified ? ' identified' : ''}`;
+                idBtn.disabled = Boolean(trk.identifying);
+                idBtn.title = trk.identifying ? 'Identifying song...' : 'Auto-identify Artist & Title (AcoustID)';
+                idBtn.setAttribute('aria-label', `Identify track ${idx + 1}`);
+                idBtn.textContent = trk.identifying ? '⏳' : '🪄';
+                idBtn.addEventListener('click', () => identifyTrackById(trk.id, { manual: true, forceOverwrite: true }));
+                subTools.appendChild(idBtn);
 
                 const selTrkBtn = document.createElement('button');
                 selTrkBtn.type = 'button';
@@ -1648,6 +1813,9 @@
         const runAutoSplitScan = () => {
             const tracks = engine.scanAndAutoSplit();
             showToast(`🔍 Detected ${tracks.length} track${tracks.length === 1 ? '' : 's'} by silence gaps`, 'success');
+            if (autoIdentifyToggle && autoIdentifyToggle.checked) {
+                queueAutoIdentifyGenericTracks();
+            }
         };
         if (scanSplitNowBtn) scanSplitNowBtn.addEventListener('click', runAutoSplitScan);
         if (quickAutoSplitBtn) quickAutoSplitBtn.addEventListener('click', runAutoSplitScan);
@@ -1660,17 +1828,8 @@
                 if (!file) return;
                 try {
                     const buf = await file.arrayBuffer();
-                    coverArtBytes = new Uint8Array(buf);
-                    coverArtMime = file.type || 'image/jpeg';
-                    const reader = new FileReader();
-                    reader.onload = () => {
-                        if (coverArtPreview) {
-                            coverArtPreview.src = String(reader.result);
-                            coverArtPreview.classList.remove('hidden');
-                        }
-                        if (coverArtPlaceholder) coverArtPlaceholder.classList.add('hidden');
-                    };
-                    reader.readAsDataURL(file);
+                    userEditedCoverArt = true;
+                    setCoverArtPreview(new Uint8Array(buf), file.type || 'image/jpeg');
                     showToast('🎨 Cover art loaded for MP3 ID3 tags', 'success');
                 } catch (_) {
                     showToast('Could not read cover art image.', 'error');

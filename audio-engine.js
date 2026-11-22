@@ -787,6 +787,14 @@
                 title: (prevMeta && prevMeta.title) || `Track ${String(num).padStart(2, '0')}`,
                 artist: (prevMeta && prevMeta.artist) || '',
                 album: (prevMeta && prevMeta.album) || '',
+                year: (prevMeta && prevMeta.year) || '',
+                genre: (prevMeta && prevMeta.genre) || '',
+                coverBytes: (prevMeta && prevMeta.coverBytes) || null,
+                coverMime: (prevMeta && prevMeta.coverMime) || 'image/jpeg',
+                identifying: false,
+                identified: Boolean(prevMeta && prevMeta.identified),
+                userEditedTitle: Boolean(prevMeta && prevMeta.userEditedTitle),
+                userEditedArtist: Boolean(prevMeta && prevMeta.userEditedArtist),
                 startSample: Math.max(0, Math.floor(startSample)),
                 endSample: Math.max(0, Math.floor(endSample)),
                 saved: false,
@@ -1243,7 +1251,15 @@
 
             const ctx = await this._ensureAudioContext();
             const arrayBuf = await file.arrayBuffer();
-            const decoded = await ctx.decodeAudioData(arrayBuf);
+            let id3Tags = {};
+            try {
+                if (global.StudioIdentifyEngine && typeof global.StudioIdentifyEngine.readLocalAudioTags === 'function') {
+                    id3Tags = global.StudioIdentifyEngine.readLocalAudioTags(arrayBuf) || {};
+                }
+            } catch (_) {
+                id3Tags = {};
+            }
+            const decoded = await ctx.decodeAudioData(arrayBuf.slice(0));
 
             const len = decoded.length;
             const ch0 = decoded.getChannelData(0);
@@ -1258,11 +1274,27 @@
 
             const base = String(file.name || 'Imported Track').replace(/\.[^/.]+$/, '').trim();
             const parts = base.split(/\s+[-–—]\s+/);
-            const artist = parts.length >= 2 ? parts[0].trim() : '';
-            const title = parts.length >= 2 ? parts.slice(1).join(' - ').trim() : base;
+            const fallbackArtist = parts.length >= 2 ? parts[0].trim() : '';
+            const fallbackTitle = parts.length >= 2 ? parts.slice(1).join(' - ').trim() : base;
 
-            this.loadSyntheticBuffer(leftI16, rightI16, decoded.sampleRate, { title, artist });
-            return { length: len, sampleRate: decoded.sampleRate, title, artist };
+            const title = (id3Tags.title && id3Tags.title.trim()) || fallbackTitle;
+            const artist = (id3Tags.artist && id3Tags.artist.trim()) || fallbackArtist;
+            const album = (id3Tags.album && id3Tags.album.trim()) || '';
+            const year = (id3Tags.year && id3Tags.year.trim()) || '';
+            const genre = (id3Tags.genre && id3Tags.genre.trim()) || '';
+            const coverBytes = id3Tags.coverBytes || null;
+            const coverMime = id3Tags.coverMime || 'image/jpeg';
+
+            this.loadSyntheticBuffer(leftI16, rightI16, decoded.sampleRate, {
+                title,
+                artist,
+                album,
+                year,
+                genre,
+                coverBytes,
+                coverMime
+            });
+            return { length: len, sampleRate: decoded.sampleRate, title, artist, album, year, genre, coverBytes, coverMime };
         }
 
         loadSyntheticBuffer(leftInt16, rightInt16, sampleRate = 44100, meta = {}) {
@@ -1278,7 +1310,12 @@
                 ? [this._createTrackObject(0, 0, this.length, {
                     title: meta.title || 'Track 01',
                     artist: meta.artist || '',
-                    album: meta.album || ''
+                    album: meta.album || '',
+                    year: meta.year || '',
+                    genre: meta.genre || '',
+                    coverBytes: meta.coverBytes || null,
+                    coverMime: meta.coverMime || 'image/jpeg',
+                    identified: Boolean(meta.identified)
                 })]
                 : [];
             this._rebuildPeakCache();
