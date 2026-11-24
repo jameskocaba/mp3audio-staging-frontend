@@ -1133,17 +1133,17 @@
             const CH_AMP = WAVE_H * 0.22;
 
             // Background
-            ctx.fillStyle = '#060d13';
+            ctx.fillStyle = '#f8fafc';
             ctx.fillRect(0, 0, W, H);
 
             // Top Left lane subtle tint & ±50% amplitude guides
-            ctx.fillStyle = 'rgba(56, 189, 248, 0.025)';
+            ctx.fillStyle = 'rgba(2, 132, 199, 0.045)';
             ctx.fillRect(0, WAVE_TOP, W, WAVE_H * 0.5);
-            ctx.fillStyle = 'rgba(45, 212, 191, 0.02)';
+            ctx.fillStyle = 'rgba(13, 148, 136, 0.04)';
             ctx.fillRect(0, WAVE_TOP + WAVE_H * 0.5, W, WAVE_H * 0.5);
 
             // L/R divider
-            ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+            ctx.strokeStyle = 'rgba(15, 23, 42, 0.14)';
             ctx.lineWidth = 1;
             ctx.beginPath();
             ctx.moveTo(0, WAVE_TOP + WAVE_H * 0.5);
@@ -1151,20 +1151,20 @@
             ctx.stroke();
 
             // Zero-crossing centerlines for L and R
-            ctx.strokeStyle = 'rgba(56, 189, 248, 0.25)';
+            ctx.strokeStyle = 'rgba(2, 132, 199, 0.28)';
             ctx.beginPath();
             ctx.moveTo(0, MID_Y_L);
             ctx.lineTo(W, MID_Y_L);
             ctx.stroke();
 
-            ctx.strokeStyle = 'rgba(45, 212, 191, 0.25)';
+            ctx.strokeStyle = 'rgba(13, 148, 136, 0.28)';
             ctx.beginPath();
             ctx.moveTo(0, MID_Y_R);
             ctx.lineTo(W, MID_Y_R);
             ctx.stroke();
 
             // Subtle ±50% guide lines
-            ctx.strokeStyle = 'rgba(255, 255, 255, 0.04)';
+            ctx.strokeStyle = 'rgba(15, 23, 42, 0.06)';
             ctx.beginPath();
             ctx.moveTo(0, MID_Y_L - CH_AMP * 0.5);
             ctx.lineTo(W, MID_Y_L - CH_AMP * 0.5);
@@ -1178,13 +1178,13 @@
 
             // Always-visible LEFT & RIGHT channel labels
             ctx.font = 'bold 10px ui-monospace, monospace';
-            ctx.fillStyle = 'rgba(56, 189, 248, 0.85)';
+            ctx.fillStyle = 'rgba(3, 105, 161, 0.9)';
             ctx.fillText('LEFT', 8, WAVE_TOP + 13);
-            ctx.fillStyle = 'rgba(45, 212, 191, 0.85)';
+            ctx.fillStyle = 'rgba(15, 118, 110, 0.9)';
             ctx.fillText('RIGHT', 8, WAVE_TOP + WAVE_H * 0.5 + 13);
 
             // Ruler & bottom tracks lane
-            ctx.fillStyle = '#0c161e';
+            ctx.fillStyle = '#eef2f6';
             ctx.fillRect(0, 0, W, RULER_H);
             ctx.fillRect(0, H - LANE_H, W, LANE_H);
 
@@ -1195,7 +1195,7 @@
             if (total === 0 && liveSampleInfo.active && liveSampleInfo.left.length > 0) {
                 const len = liveSampleInfo.left.length;
                 ctx.lineWidth = 1.6;
-                ctx.strokeStyle = '#38bdf8';
+                ctx.strokeStyle = '#0284c7';
                 ctx.beginPath();
                 for (let i = 0; i < len; i++) {
                     const x = (i / (len - 1)) * W;
@@ -1204,7 +1204,7 @@
                 }
                 ctx.stroke();
 
-                ctx.strokeStyle = '#2dd4bf';
+                ctx.strokeStyle = '#0d9488';
                 ctx.beginPath();
                 for (let i = 0; i < len; i++) {
                     const x = (i / (len - 1)) * W;
@@ -1227,10 +1227,10 @@
 
                 const firstTick = Math.ceil(startSec / tickStep) * tickStep;
                 ctx.font = '10px ui-monospace, monospace';
-                ctx.fillStyle = '#8fa0aa';
+                ctx.fillStyle = '#475569';
                 for (let t = firstTick; t <= startSec + spanSec; t += tickStep) {
                     const x = ((t - startSec) / spanSec) * W;
-                    ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+                    ctx.strokeStyle = 'rgba(15, 23, 42, 0.15)';
                     ctx.beginPath();
                     ctx.moveTo(x, RULER_H - 5);
                     ctx.lineTo(x, RULER_H);
@@ -1245,11 +1245,11 @@
                     const x1 = Math.min(W, sampleToX(trk.endSample, W));
                     if (x1 <= 0 || x0 >= W) return;
 
-                    ctx.fillStyle = idx % 2 === 0 ? 'rgba(56, 189, 248, 0.16)' : 'rgba(45, 212, 191, 0.16)';
+                    ctx.fillStyle = idx % 2 === 0 ? 'rgba(2, 132, 199, 0.14)' : 'rgba(13, 148, 136, 0.14)';
                     ctx.fillRect(x0, H - LANE_H + 2, Math.max(2, x1 - x0 - 1), LANE_H - 4);
 
                     if (x1 - x0 > 28) {
-                        ctx.fillStyle = '#e9edef';
+                        ctx.fillStyle = '#0f172a';
                         ctx.font = 'bold 11px sans-serif';
                         const label = `${String(idx + 1).padStart(2, '0')} ${trk.title || ''}`;
                         ctx.save();
@@ -1265,7 +1265,7 @@
                         if (bx >= 0 && bx <= W) {
                             ctx.save();
                             ctx.setLineDash([4, 4]);
-                            ctx.strokeStyle = '#f59e0b';
+                            ctx.strokeStyle = '#d97706';
                             ctx.lineWidth = 1.5;
                             ctx.beginPath();
                             ctx.moveTo(bx, WAVE_TOP);
@@ -1315,12 +1315,12 @@
 
                     const yTopL = MID_Y_L - (maxL / 32768) * CH_AMP;
                     const yBotL = MID_Y_L - (minL / 32768) * CH_AMP;
-                    ctx.fillStyle = clipL ? '#ef4444' : (isAheadOfPlayhead ? 'rgba(56, 189, 248, 0.52)' : '#38bdf8');
+                    ctx.fillStyle = clipL ? '#dc2626' : (isAheadOfPlayhead ? 'rgba(2, 132, 199, 0.42)' : '#0284c7');
                     ctx.fillRect(px, yTopL, 1.2, Math.max(1.5, yBotL - yTopL));
 
                     const yTopR = MID_Y_R - (maxR / 32768) * CH_AMP;
                     const yBotR = MID_Y_R - (minR / 32768) * CH_AMP;
-                    ctx.fillStyle = clipR ? '#ef4444' : (isAheadOfPlayhead ? 'rgba(45, 212, 191, 0.52)' : '#2dd4bf');
+                    ctx.fillStyle = clipR ? '#dc2626' : (isAheadOfPlayhead ? 'rgba(13, 148, 136, 0.42)' : '#0d9488');
                     ctx.fillRect(px, yTopR, 1.2, Math.max(1.5, yBotR - yTopR));
                 }
 
@@ -1331,9 +1331,9 @@
                     if (sx1 >= 0 && sx0 <= W) {
                         const cl0 = Math.max(0, sx0);
                         const cl1 = Math.min(W, sx1);
-                        ctx.fillStyle = 'rgba(255, 85, 0, 0.2)';
+                        ctx.fillStyle = 'rgba(234, 88, 12, 0.16)';
                         ctx.fillRect(cl0, WAVE_TOP, cl1 - cl0, WAVE_H);
-                        ctx.strokeStyle = 'rgba(255, 115, 45, 0.95)';
+                        ctx.strokeStyle = 'rgba(234, 88, 12, 0.9)';
                         ctx.lineWidth = 2;
                         ctx.beginPath();
                         ctx.moveTo(sx0, WAVE_TOP);
@@ -1350,7 +1350,7 @@
                     : (engine.isPlaying ? engine.getPlaybackPositionSample() : engine.cursorSample);
                 const hx = sampleToX(headSample, W);
                 if (hx >= -2 && hx <= W + 2) {
-                    ctx.strokeStyle = engine.recordState === 'recording' ? '#ef4444' : '#ffffff';
+                    ctx.strokeStyle = engine.recordState === 'recording' ? '#dc2626' : '#0f172a';
                     ctx.lineWidth = 2;
                     ctx.beginPath();
                     ctx.moveTo(hx, RULER_H);
@@ -1358,7 +1358,7 @@
                     ctx.stroke();
 
                     if (engine.recordState === 'recording') {
-                        ctx.fillStyle = '#ef4444';
+                        ctx.fillStyle = '#dc2626';
                         ctx.beginPath();
                         ctx.arc(hx, RULER_H + 5, 4, 0, Math.PI * 2);
                         ctx.fill();
@@ -1386,22 +1386,22 @@
             const W = rect.width;
             const H = rect.height;
 
-            ctx.fillStyle = '#03070b';
+            ctx.fillStyle = '#e2e8f0';
             ctx.fillRect(0, 0, W, H);
 
             const norm = (db) => Math.max(0, Math.min(1, (db + 60) / 60));
             const lvl = norm(rmsDb);
             const grad = ctx.createLinearGradient(0, 0, W, 0);
-            grad.addColorStop(0, '#00a884');
-            grad.addColorStop(0.65, '#22c55e');
-            grad.addColorStop(0.84, '#f59e0b');
-            grad.addColorStop(1, '#ef4444');
+            grad.addColorStop(0, '#059669');
+            grad.addColorStop(0.65, '#16a34a');
+            grad.addColorStop(0.84, '#d97706');
+            grad.addColorStop(1, '#dc2626');
 
             ctx.fillStyle = grad;
             ctx.fillRect(0, 0, lvl * W, H);
 
             // Subtle segmented studio LED ticks
-            ctx.fillStyle = '#03070b';
+            ctx.fillStyle = '#e2e8f0';
             const segStep = Math.max(6, Math.round(W / 44));
             for (let x = segStep; x < W; x += segStep) {
                 ctx.fillRect(x, 0, 1.5, H);
@@ -1410,7 +1410,7 @@
             // Peak hold tick
             const holdX = norm(peakHoldDb) * W;
             if (holdX > 2) {
-                ctx.fillStyle = peakHoldDb >= -1 ? '#ef4444' : '#ffffff';
+                ctx.fillStyle = peakHoldDb >= -1 ? '#dc2626' : '#0f172a';
                 ctx.fillRect(Math.min(W - 3, holdX), 0, 2.5, H);
             }
             ctx.restore();
@@ -1899,6 +1899,26 @@
                 engine.seek(0);
             } else if (e.key === 'End') {
                 engine.seek(engine.length);
+            } else if (e.key === 'Escape') {
+                closeInlineDrawers();
+            }
+        });
+
+        const drawersBar = document.getElementById('studioDrawersBar');
+        const inlineDrawers = Array.from(document.querySelectorAll('.studio-drawer-inline'));
+        function closeInlineDrawers(exceptDrawer = null) {
+            inlineDrawers.forEach(d => {
+                if (d !== exceptDrawer && d.open) d.open = false;
+            });
+        }
+        inlineDrawers.forEach(d => {
+            d.addEventListener('toggle', () => {
+                if (d.open) closeInlineDrawers(d);
+            });
+        });
+        document.addEventListener('click', (e) => {
+            if (drawersBar && !drawersBar.contains(e.target)) {
+                closeInlineDrawers();
             }
         });
 

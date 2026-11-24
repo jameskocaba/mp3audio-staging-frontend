@@ -33,9 +33,9 @@
 
     <link rel="icon" type="image/png" href="favicon.png">
     <link rel="apple-touch-icon" href="favicon.png">
-    <meta name="theme-color" content="#0b141a">
+    <meta name="theme-color" content="#f1f5f9">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
 
     <link rel="preconnect" href="https://www.googletagmanager.com">
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-VGVP90K1M4"></script>
@@ -46,7 +46,7 @@
         gtag('config', 'G-VGVP90K1M4');
     </script>
 
-    <link rel="stylesheet" href="studio.css?v=20261122_08">
+    <link rel="stylesheet" href="studio.css?v=20261124_02">
 
     <script type="application/ld+json">
     {
@@ -149,7 +149,151 @@
                         </button>
                     </div>
 
-                    <!-- Left & Right Channel Recording Bars placed directly to the right of Loop button -->
+                    <!-- Settings, Tools & Tags/Levels Drawers placed between transport controls and L/R Level display -->
+                    <div class="transport-drawers-inline" id="studioDrawersBar" aria-label="Studio Settings, Edit Tools, and Tags">
+                        <details class="studio-drawer studio-drawer-inline studio-drawer-inline-settings">
+                            <summary class="drawer-summary" title="Auto-Split & Identify Settings">
+                                <span class="drawer-title">✂️ Settings</span>
+                                <span class="drawer-chevron">▾</span>
+                            </summary>
+                            <div class="drawer-body">
+                                <div class="drawer-toggles-grid">
+                                    <label class="split-toggle-card">
+                                        <div class="split-toggle-text">
+                                            <strong>Live Auto-Split While Recording</strong>
+                                            <span>Automatically separates songs when quiet gaps appear.</span>
+                                        </div>
+                                        <input type="checkbox" id="liveAutoSplitToggle" class="switch-input" checked>
+                                    </label>
+
+                                    <label id="autoSaveLiveRow" class="split-toggle-card">
+                                        <div class="split-toggle-text">
+                                            <strong>Auto-Save Live to Folder</strong>
+                                            <span>Writes each track to your selected folder as it finishes.</span>
+                                        </div>
+                                        <input type="checkbox" id="autoSaveLiveToggle" class="switch-input" checked>
+                                    </label>
+
+                                    <label class="split-toggle-card">
+                                        <div class="split-toggle-text">
+                                            <strong>Sound-Activated Recording</strong>
+                                            <span>Waits in Armed mode until music begins playing.</span>
+                                        </div>
+                                        <input type="checkbox" id="soundActivatedToggle" class="switch-input">
+                                    </label>
+
+                                    <label class="split-toggle-card">
+                                        <div class="split-toggle-text">
+                                            <strong>Auto-Trim Silence Gaps</strong>
+                                            <span>Removes dead air at the start and end of split tracks.</span>
+                                        </div>
+                                        <input type="checkbox" id="autoTrimSilenceToggle" class="switch-input" checked>
+                                    </label>
+
+                                    <label class="split-toggle-card">
+                                        <div class="split-toggle-text">
+                                            <strong>Auto-Identify Artist &amp; Title</strong>
+                                            <span>Matches songs in your browser via AcoustID (zero uploads).</span>
+                                        </div>
+                                        <input type="checkbox" id="autoIdentifyToggle" class="switch-input" checked>
+                                    </label>
+                                </div>
+
+                                <div class="drawer-sliders-grid">
+                                    <div class="slider-control-group">
+                                        <div class="slider-label-row">
+                                            <label for="thresholdDbSlider">Silence Threshold</label>
+                                            <span id="thresholdDbVal" class="slider-val-pill">-42 dB</span>
+                                        </div>
+                                        <input type="range" id="thresholdDbSlider" min="-60" max="-20" step="1" value="-42">
+                                    </div>
+
+                                    <div class="slider-control-group">
+                                        <div class="slider-label-row">
+                                            <label for="minSilenceSlider">Minimum Gap Duration</label>
+                                            <span id="minSilenceVal" class="slider-val-pill">1.5 s</span>
+                                        </div>
+                                        <input type="range" id="minSilenceSlider" min="0.5" max="5.0" step="0.1" value="1.5">
+                                    </div>
+
+                                    <div class="slider-control-group">
+                                        <div class="slider-label-row">
+                                            <label for="minTrackSlider">Minimum Track Length</label>
+                                            <span id="minTrackVal" class="slider-val-pill">10 s</span>
+                                        </div>
+                                        <input type="range" id="minTrackSlider" min="3" max="60" step="1" value="10">
+                                    </div>
+                                </div>
+
+                                <button type="button" id="scanSplitNowBtn" class="studio-btn studio-btn-emerald" disabled>
+                                    <span>🔍</span>
+                                    <span>Scan Waveform &amp; Auto-Split Tracks</span>
+                                </button>
+                            </div>
+                        </details>
+
+                        <details class="studio-drawer studio-drawer-inline studio-drawer-inline-tools">
+                            <summary class="drawer-summary" title="More Edit Tools">
+                                <span class="drawer-title">🎛️ Tools</span>
+                                <span class="drawer-chevron">▾</span>
+                            </summary>
+                            <div class="drawer-body">
+                                <div class="more-tools-row">
+                                    <button type="button" id="silenceSelBtn" class="tool-chip-btn" disabled>🔇 Silence Selection</button>
+                                    <button type="button" id="fadeInBtn" class="tool-chip-btn" disabled>📈 Fade In</button>
+                                    <button type="button" id="fadeOutBtn" class="tool-chip-btn" disabled>📉 Fade Out</button>
+                                    <button type="button" id="clearSessionBtn" class="tool-chip-btn" disabled>✕ Clear Session</button>
+                                </div>
+                                <p class="drawer-note">
+                                    Tip: Tap the wave to move the playhead, drag horizontally to select a section, or double-tap any track region to select it.
+                                </p>
+                            </div>
+                        </details>
+
+                        <details class="studio-drawer studio-drawer-inline studio-drawer-inline-tags">
+                            <summary class="drawer-summary" title="Tags, Cover Art & Audio Levels">
+                                <span class="drawer-title">🏷️ Tags &amp; Levels</span>
+                                <span class="drawer-chevron">▾</span>
+                            </summary>
+                            <div class="drawer-body">
+                                <div class="album-meta-bar">
+                                    <button type="button" id="coverArtPickerBtn" class="cover-picker-btn" title="Choose album artwork image">
+                                        <img id="coverArtPreview" src="" alt="Cover Art" class="hidden">
+                                        <span id="coverArtPlaceholder">🎨 Cover Art</span>
+                                    </button>
+                                    <input type="file" id="coverArtInput" accept="image/*" class="hidden">
+
+                                    <div class="meta-inputs-grid">
+                                        <input type="text" id="albumMetaInput" class="studio-input" placeholder="Album / Mix Name" aria-label="Album name">
+                                        <input type="text" id="albumArtistMetaInput" class="studio-input" placeholder="Default Artist" aria-label="Default artist">
+                                        <input type="text" id="genreMetaInput" class="studio-input" placeholder="Genre" aria-label="Genre">
+                                        <input type="text" id="yearMetaInput" class="studio-input" placeholder="Year" maxlength="4" aria-label="Year">
+                                    </div>
+                                </div>
+
+                                <div class="audio-levels-row">
+                                    <label class="device-select-group">
+                                        <span>Input Device</span>
+                                        <select id="micDeviceSelect" class="studio-select" aria-label="Audio input device"></select>
+                                    </label>
+                                    <label class="mini-knob-group">
+                                        <span>Input Gain</span>
+                                        <input type="range" id="inputGainSlider" min="0" max="2" step="0.05" value="1">
+                                    </label>
+                                    <label class="mini-knob-group">
+                                        <span>Output Vol</span>
+                                        <input type="range" id="playbackVolSlider" min="0" max="1.5" step="0.05" value="1">
+                                    </label>
+                                    <label class="monitor-toggle-chip" title="Listen to captured input through speakers (leave OFF for tab recording)">
+                                        <input type="checkbox" id="monitorToggle">
+                                        <span>🎧 Monitor</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </details>
+                    </div>
+
+                    <!-- Compact Left & Right Channel Recording Bars -->
                     <div class="lr-meter-deck" id="lrMeterDeck" aria-label="Left and Right Recording Channel Bars">
                         <div class="lr-meter-header">
                             <span class="lr-meter-title">L / R LEVELS</span>
@@ -188,213 +332,66 @@
                 </p>
             </section>
 
-            <!-- 3. WORKSPACE SPLIT: LEFT SETTINGS/TOOLS/TAGS + RIGHT STEREO WAVE -->
-            <div class="studio-workspace-grid" id="studioWorkspaceGrid">
-                <!-- Left Column: Collapsible Settings, Edit Tools & Tags Drawers -->
-                <aside class="studio-drawers-stack studio-sidebar-col" id="studioSidebarCol" aria-label="Studio Settings, Edit Tools, and Tags">
-                    <details class="studio-drawer">
-                        <summary class="drawer-summary">
-                            <span class="drawer-title">✂️ Auto-Split Settings <span class="drawer-sub">Silence gap &amp; sound-activated detection</span></span>
-                            <span class="drawer-chevron">▾</span>
-                        </summary>
-                        <div class="drawer-body">
-                            <div class="drawer-toggles-grid">
-                                <label class="split-toggle-card">
-                                    <div class="split-toggle-text">
-                                        <strong>Live Auto-Split While Recording</strong>
-                                        <span>Automatically separates songs when quiet gaps appear.</span>
-                                    </div>
-                                    <input type="checkbox" id="liveAutoSplitToggle" class="switch-input" checked>
-                                </label>
+            <!-- 3. FULL-WIDTH CONTINUOUS VISIBLE STEREO RECORDING WAVE CARD -->
+            <section class="studio-card waveform-card" id="waveformCard" aria-label="Continuous Stereo Recording Wave">
+                <div class="wave-header-bar">
+                    <div class="wave-track-identity">
+                        <span id="waveStatusBadge" class="wave-status-badge">STANDBY</span>
+                        <span id="waveTrackTitle" class="wave-track-title">Live Stereo Wave — Ready to Record</span>
+                    </div>
+                    <div class="wave-header-meta">
+                        <span id="waveLiveViewBadge" class="wave-live-pill hidden">Live Scroll</span>
+                        <span id="lcdFormatInfo" class="lcd-sub">44.1 kHz &bull; Stereo</span>
+                    </div>
+                </div>
 
-                                <label id="autoSaveLiveRow" class="split-toggle-card">
-                                    <div class="split-toggle-text">
-                                        <strong>Auto-Save Live to Folder</strong>
-                                        <span>Writes each track to your selected folder as it finishes.</span>
-                                    </div>
-                                    <input type="checkbox" id="autoSaveLiveToggle" class="switch-input" checked>
-                                </label>
+                <div class="waveform-canvas-wrap">
+                    <canvas id="waveformCanvas"></canvas>
 
-                                <label class="split-toggle-card">
-                                    <div class="split-toggle-text">
-                                        <strong>Sound-Activated Recording</strong>
-                                        <span>Waits in Armed mode until music begins playing.</span>
-                                    </div>
-                                    <input type="checkbox" id="soundActivatedToggle" class="switch-input">
-                                </label>
-
-                                <label class="split-toggle-card">
-                                    <div class="split-toggle-text">
-                                        <strong>Auto-Trim Silence Gaps</strong>
-                                        <span>Removes dead air at the start and end of split tracks.</span>
-                                    </div>
-                                    <input type="checkbox" id="autoTrimSilenceToggle" class="switch-input" checked>
-                                </label>
-
-                                <label class="split-toggle-card">
-                                    <div class="split-toggle-text">
-                                        <strong>Auto-Identify Artist &amp; Title</strong>
-                                        <span>Matches songs in your browser via AcoustID (zero uploads).</span>
-                                    </div>
-                                    <input type="checkbox" id="autoIdentifyToggle" class="switch-input" checked>
-                                </label>
-                            </div>
-
-                            <div class="drawer-sliders-grid">
-                                <div class="slider-control-group">
-                                    <div class="slider-label-row">
-                                        <label for="thresholdDbSlider">Silence Threshold</label>
-                                        <span id="thresholdDbVal" class="slider-val-pill">-42 dB</span>
-                                    </div>
-                                    <input type="range" id="thresholdDbSlider" min="-60" max="-20" step="1" value="-42">
-                                </div>
-
-                                <div class="slider-control-group">
-                                    <div class="slider-label-row">
-                                        <label for="minSilenceSlider">Minimum Gap Duration</label>
-                                        <span id="minSilenceVal" class="slider-val-pill">1.5 s</span>
-                                    </div>
-                                    <input type="range" id="minSilenceSlider" min="0.5" max="5.0" step="0.1" value="1.5">
-                                </div>
-
-                                <div class="slider-control-group">
-                                    <div class="slider-label-row">
-                                        <label for="minTrackSlider">Minimum Track Length</label>
-                                        <span id="minTrackVal" class="slider-val-pill">10 s</span>
-                                    </div>
-                                    <input type="range" id="minTrackSlider" min="3" max="60" step="1" value="10">
-                                </div>
-                            </div>
-
-                            <button type="button" id="scanSplitNowBtn" class="studio-btn studio-btn-emerald" disabled>
-                                <span>🔍</span>
-                                <span>Scan Waveform &amp; Auto-Split Tracks</span>
-                            </button>
-                        </div>
-                    </details>
-
-                    <details class="studio-drawer">
-                        <summary class="drawer-summary">
-                            <span class="drawer-title">🎛️ More Edit Tools <span class="drawer-sub">Fade In/Out, Silence &amp; Clear</span></span>
-                            <span class="drawer-chevron">▾</span>
-                        </summary>
-                        <div class="drawer-body">
-                            <div class="more-tools-row">
-                                <button type="button" id="silenceSelBtn" class="tool-chip-btn" disabled>🔇 Silence Selection</button>
-                                <button type="button" id="fadeInBtn" class="tool-chip-btn" disabled>📈 Fade In</button>
-                                <button type="button" id="fadeOutBtn" class="tool-chip-btn" disabled>📉 Fade Out</button>
-                                <button type="button" id="clearSessionBtn" class="tool-chip-btn" disabled>✕ Clear Session</button>
-                            </div>
-                            <p class="drawer-note">
-                                Tip: Tap the wave to move the playhead, drag horizontally to select a section, or double-tap any track region to select it.
-                            </p>
-                        </div>
-                    </details>
-
-                    <details class="studio-drawer">
-                        <summary class="drawer-summary">
-                            <span class="drawer-title">🏷️ Tags, Cover Art &amp; Audio Levels <span class="drawer-sub">ID3 metadata, mic selector &amp; gain</span></span>
-                            <span class="drawer-chevron">▾</span>
-                        </summary>
-                        <div class="drawer-body">
-                            <div class="album-meta-bar">
-                                <button type="button" id="coverArtPickerBtn" class="cover-picker-btn" title="Choose album artwork image">
-                                    <img id="coverArtPreview" src="" alt="Cover Art" class="hidden">
-                                    <span id="coverArtPlaceholder">🎨 Cover Art</span>
+                    <div id="waveformEmptyHint" class="waveform-empty-hint">
+                        <div class="empty-hint-pill">
+                            <span id="emptyCardDesc">Tap <strong>Record Music Tab</strong> or <strong>Open Audio</strong> — Left &amp; Right wave streams appear live here.</span>
+                            <div class="empty-hint-actions">
+                                <button type="button" id="emptyCaptureTabBtn" class="studio-btn studio-btn-primary studio-btn-compact">
+                                    <span>🖥️</span>
+                                    <span>Record Music Tab</span>
                                 </button>
-                                <input type="file" id="coverArtInput" accept="image/*" class="hidden">
-
-                                <div class="meta-inputs-grid">
-                                    <input type="text" id="albumMetaInput" class="studio-input" placeholder="Album / Mix Name" aria-label="Album name">
-                                    <input type="text" id="albumArtistMetaInput" class="studio-input" placeholder="Default Artist" aria-label="Default artist">
-                                    <input type="text" id="genreMetaInput" class="studio-input" placeholder="Genre" aria-label="Genre">
-                                    <input type="text" id="yearMetaInput" class="studio-input" placeholder="Year" maxlength="4" aria-label="Year">
-                                </div>
-                            </div>
-
-                            <div class="audio-levels-row">
-                                <label class="device-select-group">
-                                    <span>Input Device</span>
-                                    <select id="micDeviceSelect" class="studio-select" aria-label="Audio input device"></select>
-                                </label>
-                                <label class="mini-knob-group">
-                                    <span>Input Gain</span>
-                                    <input type="range" id="inputGainSlider" min="0" max="2" step="0.05" value="1">
-                                </label>
-                                <label class="mini-knob-group">
-                                    <span>Output Vol</span>
-                                    <input type="range" id="playbackVolSlider" min="0" max="1.5" step="0.05" value="1">
-                                </label>
-                                <label class="monitor-toggle-chip" title="Listen to captured input through speakers (leave OFF for tab recording)">
-                                    <input type="checkbox" id="monitorToggle">
-                                    <span>🎧 Monitor</span>
-                                </label>
-                            </div>
-                        </div>
-                    </details>
-                </aside>
-
-                <!-- Right Column: Continuous Visible Stereo Recording Wave Card -->
-                <section class="studio-card waveform-card" id="waveformCard" aria-label="Continuous Stereo Recording Wave">
-                    <div class="wave-header-bar">
-                        <div class="wave-track-identity">
-                            <span id="waveStatusBadge" class="wave-status-badge">STANDBY</span>
-                            <span id="waveTrackTitle" class="wave-track-title">Live Stereo Wave — Ready to Record</span>
-                        </div>
-                        <div class="wave-header-meta">
-                            <span id="waveLiveViewBadge" class="wave-live-pill hidden">Live Scroll</span>
-                            <span id="lcdFormatInfo" class="lcd-sub">44.1 kHz &bull; Stereo</span>
-                        </div>
-                    </div>
-
-                    <div class="waveform-canvas-wrap">
-                        <canvas id="waveformCanvas"></canvas>
-
-                        <div id="waveformEmptyHint" class="waveform-empty-hint">
-                            <div class="empty-hint-pill">
-                                <span id="emptyCardDesc">Tap <strong>Record Music Tab</strong> or <strong>Open Audio</strong> — Left &amp; Right wave streams appear live here.</span>
-                                <div class="empty-hint-actions">
-                                    <button type="button" id="emptyCaptureTabBtn" class="studio-btn studio-btn-primary studio-btn-compact">
-                                        <span>🖥️</span>
-                                        <span>Record Music Tab</span>
-                                    </button>
-                                    <button type="button" id="emptyCaptureMicBtn" class="studio-btn studio-btn-primary studio-btn-compact hidden">
-                                        <span>🎙️</span>
-                                        <span>Tap to Record</span>
-                                    </button>
-                                    <button type="button" id="emptyOpenFileBtn" class="studio-btn studio-btn-compact">
-                                        <span>📂</span>
-                                        <span>Open Audio</span>
-                                    </button>
-                                </div>
+                                <button type="button" id="emptyCaptureMicBtn" class="studio-btn studio-btn-primary studio-btn-compact hidden">
+                                    <span>🎙️</span>
+                                    <span>Tap to Record</span>
+                                </button>
+                                <button type="button" id="emptyOpenFileBtn" class="studio-btn studio-btn-compact">
+                                    <span>📂</span>
+                                    <span>Open Audio</span>
+                                </button>
                             </div>
                         </div>
                     </div>
+                </div>
 
-                    <!-- Contextual Quick Edit & Zoom Controls -->
-                    <div id="waveformToolsBar" class="waveform-tools-bar hidden">
-                        <div class="quick-edit-strip" aria-label="Quick Waveform Edits">
-                            <button type="button" id="undoBtn" class="tool-chip-btn" disabled>↶ Undo</button>
-                            <button type="button" id="redoBtn" class="tool-chip-btn" disabled>↷ Redo</button>
-                            <button type="button" id="trimSelBtn" class="tool-chip-btn" disabled>✂️ Trim</button>
-                            <button type="button" id="deleteSelBtn" class="tool-chip-btn" disabled>🗑️ Cut</button>
-                            <button type="button" id="trimDeadAirBtn" class="tool-chip-btn" disabled>🧹 Trim Silence</button>
-                            <button type="button" id="normalizeBtn" class="tool-chip-btn" disabled>🔊 Normalize</button>
-                        </div>
+                <!-- Contextual Quick Edit & Zoom Controls -->
+                <div id="waveformToolsBar" class="waveform-tools-bar hidden">
+                    <div class="quick-edit-strip" aria-label="Quick Waveform Edits">
+                        <button type="button" id="undoBtn" class="tool-chip-btn" disabled>↶ Undo</button>
+                        <button type="button" id="redoBtn" class="tool-chip-btn" disabled>↷ Redo</button>
+                        <button type="button" id="trimSelBtn" class="tool-chip-btn" disabled>✂️ Trim</button>
+                        <button type="button" id="deleteSelBtn" class="tool-chip-btn" disabled>🗑️ Cut</button>
+                        <button type="button" id="trimDeadAirBtn" class="tool-chip-btn" disabled>🧹 Trim Silence</button>
+                        <button type="button" id="normalizeBtn" class="tool-chip-btn" disabled>🔊 Normalize</button>
+                    </div>
 
-                        <div class="waveform-zoom-strip">
-                            <span id="selectionReadout" class="selection-readout">Cursor: 00:00.0</span>
-                            <div class="zoom-controls-row">
-                                <button type="button" id="zoomOutBtn" class="tool-chip-btn" aria-label="Zoom Out">−</button>
-                                <button type="button" id="zoomFitBtn" class="tool-chip-btn">Fit</button>
-                                <button type="button" id="zoomInBtn" class="tool-chip-btn" aria-label="Zoom In">+</button>
-                                <input type="range" id="waveformPanSlider" min="0" max="1000" value="0" disabled aria-label="Scroll waveform">
-                                <span id="zoomLevelBadge" class="zoom-badge">1.0x</span>
-                            </div>
+                    <div class="waveform-zoom-strip">
+                        <span id="selectionReadout" class="selection-readout">Cursor: 00:00.0</span>
+                        <div class="zoom-controls-row">
+                            <button type="button" id="zoomOutBtn" class="tool-chip-btn" aria-label="Zoom Out">−</button>
+                            <button type="button" id="zoomFitBtn" class="tool-chip-btn">Fit</button>
+                            <button type="button" id="zoomInBtn" class="tool-chip-btn" aria-label="Zoom In">+</button>
+                            <input type="range" id="waveformPanSlider" min="0" max="1000" value="0" disabled aria-label="Scroll waveform">
+                            <span id="zoomLevelBadge" class="zoom-badge">1.0x</span>
                         </div>
                     </div>
-                </section>
-            </div>
+                </div>
+            </section>
 
             <!-- 4. TRACKS QUEUE & SAVE CARD -->
             <section class="studio-card tracks-save-card" aria-label="Recorded Tracks and Export">
@@ -516,10 +513,10 @@
         </div>
     </div>
 
-    <script src="export-engine.js?v=20261122_08"></script>
-    <script src="identify-engine.js?v=20261122_08"></script>
-    <script src="audio-engine.js?v=20261122_08"></script>
-    <script src="app.js?v=20261122_08"></script>
+    <script src="export-engine.js?v=20261124_02"></script>
+    <script src="identify-engine.js?v=20261124_02"></script>
+    <script src="audio-engine.js?v=20261124_02"></script>
+    <script src="app.js?v=20261124_02"></script>
 </body>
 
 </html>
