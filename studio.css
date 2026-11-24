@@ -298,6 +298,12 @@ html, body {
     flex-wrap: wrap;
 }
 
+.record-transport-card {
+    position: relative;
+    z-index: 30;
+    overflow: visible;
+}
+
 .transport-strip {
     display: flex;
     align-items: center;
@@ -991,140 +997,12 @@ html, body {
 }
 
 /* ==========================================================================
-   4. INLINE TRANSPORT DRAWER POPOVERS (BETWEEN TRANSPORT & L/R LEVELS)
+   4. STUDIO DRAWERS & INLINE TRANSPORT POPOVERS (BETWEEN TRANSPORT & L/R)
    ========================================================================== */
-.transport-drawers-inline {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    flex: 0 1 auto;
-    min-width: 0;
-    position: relative;
-}
-
 .studio-drawers-stack {
     display: flex;
     flex-direction: column;
     gap: 10px;
-}
-
-.studio-drawer-inline {
-    position: relative;
-    overflow: visible;
-    border-radius: var(--radius-md);
-    background: #f8fafc;
-    border: 1px solid var(--border-strong);
-    box-shadow: none;
-}
-
-.studio-drawer-inline[open] {
-    border-color: var(--wave-cyan);
-    background: rgba(2, 132, 199, 0.08);
-}
-
-.studio-drawer-inline > .drawer-summary {
-    min-height: 44px;
-    padding: 0 10px;
-    gap: 5px;
-    white-space: nowrap;
-}
-
-.studio-drawer-inline > .drawer-summary .drawer-title {
-    font-size: 0.8rem;
-    font-weight: 700;
-    gap: 4px;
-    flex-wrap: nowrap;
-}
-
-.studio-drawer-inline > .drawer-summary .drawer-chevron {
-    font-size: 0.82rem;
-}
-
-.studio-drawer-inline > .drawer-body {
-    position: absolute;
-    top: calc(100% + 8px);
-    left: 0;
-    z-index: 65;
-    width: 340px;
-    max-width: min(360px, calc(100vw - 24px));
-    max-height: 70dvh;
-    overflow-y: auto;
-    background: var(--bg-panel);
-    border: 1px solid var(--border-strong);
-    border-radius: var(--radius-lg);
-    box-shadow: 0 14px 36px rgba(15, 23, 42, 0.16);
-    padding: 12px 14px 14px;
-    gap: 10px;
-}
-
-.studio-drawer-inline-tools > .drawer-body {
-    width: 300px;
-}
-
-.studio-drawer-inline-tags > .drawer-body {
-    left: auto;
-    right: 0;
-    width: 350px;
-}
-
-.studio-drawer-inline .drawer-toggles-grid,
-.studio-drawer-inline .drawer-sliders-grid {
-    grid-template-columns: 1fr;
-}
-
-.studio-drawer-inline .more-tools-row {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 7px;
-}
-
-.studio-drawer-inline .more-tools-row .tool-chip-btn {
-    justify-content: center;
-    text-align: center;
-    white-space: normal;
-    line-height: 1.25;
-}
-
-.studio-drawer-inline .album-meta-bar {
-    align-items: flex-start;
-    gap: 10px;
-}
-
-.studio-drawer-inline .meta-inputs-grid {
-    min-width: 0;
-    flex: 1 1 160px;
-    grid-template-columns: 1fr;
-}
-
-.studio-drawer-inline .audio-levels-row {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 9px;
-}
-
-.studio-drawer-inline .device-select-group {
-    min-width: 0;
-    width: 100%;
-    flex-direction: column;
-    align-items: stretch;
-    gap: 4px;
-}
-
-.studio-drawer-inline .mini-knob-group {
-    justify-content: space-between;
-    width: 100%;
-}
-
-.studio-drawer-inline .mini-knob-group input[type="range"] {
-    flex: 1;
-    max-width: 150px;
-}
-
-.studio-drawer-inline #scanSplitNowBtn {
-    width: 100%;
-    white-space: normal;
-    text-align: center;
 }
 
 .studio-drawer {
@@ -1133,6 +1011,10 @@ html, body {
     border-radius: var(--radius-lg);
     overflow: hidden;
     box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+}
+
+.studio-drawer:not([open]) > .drawer-body {
+    display: none;
 }
 
 .drawer-summary {
@@ -1376,6 +1258,136 @@ html, body {
     color: #92400e;
 }
 
+/* Inline Transport Drawers Bar & Floating Popovers */
+.transport-drawers-inline {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    flex: 0 1 auto;
+    min-width: 0;
+    position: relative;
+}
+
+.studio-drawer.studio-drawer-inline {
+    position: relative;
+    overflow: visible;
+    border-radius: var(--radius-md);
+    background: #f8fafc;
+    border: 1px solid var(--border-strong);
+    box-shadow: none;
+}
+
+.studio-drawer.studio-drawer-inline[open] {
+    border-color: var(--wave-cyan);
+    background: rgba(2, 132, 199, 0.08);
+}
+
+.studio-drawer.studio-drawer-inline > .drawer-summary {
+    min-height: 44px;
+    padding: 0 10px;
+    gap: 5px;
+    white-space: nowrap;
+}
+
+.studio-drawer.studio-drawer-inline > .drawer-summary .drawer-title {
+    font-size: 0.8rem;
+    font-weight: 700;
+    gap: 4px;
+    flex-wrap: nowrap;
+}
+
+.studio-drawer.studio-drawer-inline > .drawer-summary .drawer-chevron {
+    font-size: 0.82rem;
+}
+
+.studio-drawer.studio-drawer-inline[open] > .drawer-body {
+    display: flex;
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    z-index: 65;
+    width: 340px;
+    max-width: min(360px, calc(100vw - 24px));
+    max-height: 70dvh;
+    overflow-y: auto;
+    background: var(--bg-panel);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 14px 36px rgba(15, 23, 42, 0.16);
+    padding: 12px 14px 14px;
+    gap: 10px;
+}
+
+.studio-drawer.studio-drawer-inline-tools[open] > .drawer-body {
+    width: 300px;
+}
+
+.studio-drawer.studio-drawer-inline-tags[open] > .drawer-body {
+    left: auto;
+    right: 0;
+    width: 350px;
+}
+
+.studio-drawer.studio-drawer-inline .drawer-toggles-grid,
+.studio-drawer.studio-drawer-inline .drawer-sliders-grid {
+    grid-template-columns: 1fr;
+}
+
+.studio-drawer.studio-drawer-inline .more-tools-row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 7px;
+}
+
+.studio-drawer.studio-drawer-inline .more-tools-row .tool-chip-btn {
+    justify-content: center;
+    text-align: center;
+    white-space: normal;
+    line-height: 1.25;
+}
+
+.studio-drawer.studio-drawer-inline .album-meta-bar {
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.studio-drawer.studio-drawer-inline .meta-inputs-grid {
+    min-width: 0;
+    flex: 1 1 160px;
+    grid-template-columns: 1fr;
+}
+
+.studio-drawer.studio-drawer-inline .audio-levels-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 9px;
+}
+
+.studio-drawer.studio-drawer-inline .device-select-group {
+    min-width: 0;
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 4px;
+}
+
+.studio-drawer.studio-drawer-inline .mini-knob-group {
+    justify-content: space-between;
+    width: 100%;
+}
+
+.studio-drawer.studio-drawer-inline .mini-knob-group input[type="range"] {
+    flex: 1;
+    max-width: 150px;
+}
+
+.studio-drawer.studio-drawer-inline #scanSplitNowBtn {
+    width: 100%;
+    white-space: normal;
+    text-align: center;
+}
+
 /* ==========================================================================
    5. MINIMAL FOOTER
    ========================================================================== */
@@ -1572,10 +1584,10 @@ html, body {
         padding: 0 10px;
         font-size: 0.81rem;
     }
-    .studio-drawer-inline > .drawer-summary {
+    .studio-drawer.studio-drawer-inline > .drawer-summary {
         padding: 0 8px;
     }
-    .studio-drawer-inline > .drawer-summary .drawer-title {
+    .studio-drawer.studio-drawer-inline > .drawer-summary .drawer-title {
         font-size: 0.76rem;
     }
     .lr-meter-deck {
@@ -1599,16 +1611,16 @@ html, body {
         grid-template-columns: repeat(3, minmax(0, 1fr));
         gap: 6px;
     }
-    .studio-drawer-inline {
+    .studio-drawer.studio-drawer-inline {
         position: static;
     }
-    .studio-drawer-inline > .drawer-summary {
+    .studio-drawer.studio-drawer-inline > .drawer-summary {
         justify-content: center;
         padding: 0 6px;
     }
-    .studio-drawer-inline > .drawer-body,
-    .studio-drawer-inline-tools > .drawer-body,
-    .studio-drawer-inline-tags > .drawer-body {
+    .studio-drawer.studio-drawer-inline[open] > .drawer-body,
+    .studio-drawer.studio-drawer-inline-tools[open] > .drawer-body,
+    .studio-drawer.studio-drawer-inline-tags[open] > .drawer-body {
         left: 0;
         right: 0;
         width: 100%;

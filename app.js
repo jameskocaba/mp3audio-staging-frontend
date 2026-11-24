@@ -1912,6 +1912,10 @@
             });
         }
         inlineDrawers.forEach(d => {
+            const summary = d.querySelector('.drawer-summary');
+            if (summary) {
+                summary.addEventListener('click', () => closeInlineDrawers(d));
+            }
             d.addEventListener('toggle', () => {
                 if (d.open) closeInlineDrawers(d);
             });
