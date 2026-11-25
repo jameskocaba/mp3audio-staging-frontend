@@ -46,7 +46,7 @@
         gtag('config', 'G-VGVP90K1M4');
     </script>
 
-    <link rel="stylesheet" href="studio.css?v=20261124_04">
+    <link rel="stylesheet" href="studio.css?v=20261125_01">
 
     <script type="application/ld+json">
     {
@@ -127,30 +127,31 @@
                 </div>
 
                 <div class="transport-strip">
-                    <div class="transport-buttons">
-                        <button type="button" id="recordBtn" class="t-btn t-btn-record" title="Record / Stop (R)">
-                            <span class="rec-dot"></span>
-                            <span id="recordBtnLabel">Record</span>
-                        </button>
-                        <button type="button" id="pauseRecBtn" class="t-btn hidden" disabled title="Pause / Resume Recording (P)">
-                            ⏸ Pause
-                        </button>
-                        <button type="button" id="stopBtn" class="t-btn" disabled title="Stop">
-                            ⏹ Stop
-                        </button>
-                        <button type="button" id="playBtn" class="t-btn t-btn-play" disabled title="Play / Pause (Space)">
-                            <span id="playBtnIcon">▶ Play</span>
-                        </button>
-                        <button type="button" id="splitAtCursorBtn" class="t-btn t-btn-split-marker" disabled title="Split song here (M)">
-                            ✂️ Split Song
-                        </button>
-                        <button type="button" id="loopBtn" class="t-btn t-btn-loop" title="Loop playback" aria-label="Loop playback">
-                            🔁
-                        </button>
-                    </div>
+                    <div class="transport-controls-col">
+                        <div class="transport-buttons">
+                            <button type="button" id="recordBtn" class="t-btn t-btn-record" title="Record / Stop (R)">
+                                <span class="rec-dot"></span>
+                                <span id="recordBtnLabel">Record</span>
+                            </button>
+                            <button type="button" id="pauseRecBtn" class="t-btn hidden" disabled title="Pause / Resume Recording (P)">
+                                ⏸ Pause
+                            </button>
+                            <button type="button" id="stopBtn" class="t-btn" disabled title="Stop">
+                                ⏹ Stop
+                            </button>
+                            <button type="button" id="playBtn" class="t-btn t-btn-play" disabled title="Play / Pause (Space)">
+                                <span id="playBtnIcon">▶ Play</span>
+                            </button>
+                            <button type="button" id="splitAtCursorBtn" class="t-btn t-btn-split-marker" disabled title="Split song here (M)">
+                                ✂️ Split Song
+                            </button>
+                            <button type="button" id="loopBtn" class="t-btn t-btn-loop" title="Loop playback" aria-label="Loop playback">
+                                🔁
+                            </button>
+                        </div>
 
-                    <!-- Settings, Tools & Tags/Levels Drawers placed between transport controls and L/R Level display -->
-                    <div class="transport-drawers-inline" id="studioDrawersBar" aria-label="Studio Settings, Edit Tools, and Tags">
+                        <!-- Settings, Tools & Tags/Levels Drawers stacked directly under transport buttons -->
+                        <div class="transport-drawers-inline" id="studioDrawersBar" aria-label="Studio Settings, Edit Tools, and Tags">
                         <details class="studio-drawer studio-drawer-inline studio-drawer-inline-settings">
                             <summary class="drawer-summary" title="Auto-Split & Identify Settings">
                                 <span class="drawer-title">✂️ Settings</span>
@@ -291,9 +292,10 @@
                                 </div>
                             </div>
                         </details>
+                        </div>
                     </div>
 
-                    <!-- Compact Left & Right Channel Recording Bars -->
+                    <!-- Expanded Left & Right Channel Recording Bars filling remaining field -->
                     <div class="lr-meter-deck" id="lrMeterDeck" aria-label="Left and Right Recording Channel Bars">
                         <div class="lr-meter-header">
                             <span class="lr-meter-title">L / R LEVELS</span>
@@ -513,10 +515,10 @@
         </div>
     </div>
 
-    <script src="export-engine.js?v=20261124_04"></script>
-    <script src="identify-engine.js?v=20261124_04"></script>
-    <script src="audio-engine.js?v=20261124_04"></script>
-    <script src="app.js?v=20261124_04"></script>
+    <script src="export-engine.js?v=20261125_01"></script>
+    <script src="identify-engine.js?v=20261125_01"></script>
+    <script src="audio-engine.js?v=20261125_01"></script>
+    <script src="app.js?v=20261125_01"></script>
 </body>
 
 </html>
