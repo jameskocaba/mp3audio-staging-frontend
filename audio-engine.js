@@ -38,6 +38,11 @@
             this.right = new Int16Array(0);
             this.length = 0;
 
+            // Marathon / Track-by-Track Flush state (session timeline offset for evicted PCM)
+            this.bufferOffsetSamples = 0;
+            this.flushedTrackCount = 0;
+            this.totalFlushedBytes = 0;
+
             // Recording backing capacity (to avoid reallocating every block)
             this._recLeftCap = new Int16Array(0);
             this._recRightCap = new Int16Array(0);
@@ -104,7 +109,9 @@
                 thresholdDb: -42,
                 minSilenceSec: 1.5,
                 minTrackSec: 10,
-                autoTrimSilence: true
+                autoTrimSilence: true,
+                flushToDiskMode: false,
+                maxSegmentSec: 900
             };
 
             this._liveState = null;
@@ -445,14 +452,23 @@
             }
 
             this.stopPlayback();
-            this._pushUndo();
+            if (!this.settings.flushToDiskMode) {
+                this._pushUndo();
+            } else {
+                this.undoStack = [];
+                this.redoStack = [];
+                this._emit('onHistoryChanged', { canUndo: false, canRedo: false });
+            }
 
             const ctxRate = this.audioCtx ? this.audioCtx.sampleRate : 44100;
 
-            if (!appendToExisting || this.length === 0) {
+            if (!appendToExisting || (this.length === 0 && this.tracks.length === 0)) {
                 this.sampleRate = ctxRate;
                 this._initRecordingCapacity(Math.max(INITIAL_CAPACITY_SAMPLES, ctxRate * 120));
                 this.length = 0;
+                this.bufferOffsetSamples = 0;
+                this.flushedTrackCount = 0;
+                this.totalFlushedBytes = 0;
                 this.tracks = [];
                 this._nextTrackUid = 1;
                 this.selection = null;
@@ -759,7 +775,9 @@
         }
 
         _processLiveSplitSamples(fromSample, toSample) {
-            if (!this._liveState || !this.settings.liveAutoSplit) return;
+            const maxSegmentSec = Number(this.settings.maxSegmentSec || 0);
+            const hasMaxSegmentCap = Boolean(this.settings.flushToDiskMode && maxSegmentSec >= 60);
+            if (!this._liveState || (!this.settings.liveAutoSplit && !hasMaxSegmentCap)) return;
 
             const ls = this._liveState;
             const frameLen = ls.frameSize;
@@ -767,6 +785,7 @@
             const minSilenceSamples = Math.round(this.settings.minSilenceSec * this.sampleRate);
             const minTrackSamples = Math.round(this.settings.minTrackSec * this.sampleRate);
             const padSamples = Math.round(this.sampleRate * 0.12);
+            const maxSegmentSamples = hasMaxSegmentCap ? Math.round(maxSegmentSec * this.sampleRate) : 0;
 
             let pos = fromSample;
             while (pos < toSample) {
@@ -781,7 +800,7 @@
                         ls.currentTrackStartSample = Math.max(0, pos - padSamples);
                     }
                 } else {
-                    if (isSilent) {
+                    if (this.settings.liveAutoSplit && isSilent) {
                         if (!ls.inSilence) {
                             ls.inSilence = true;
                             ls.silenceStartSample = pos;
@@ -797,10 +816,25 @@
                                 this._emit('onTrackAutoSplit', track);
                                 this._emit('onTracksChanged', this.tracks);
                                 this._emit('onTracksCreated', { tracks: [track], reason: 'live-split' });
+                                pos = chunkEnd;
+                                continue;
                             }
                         }
                     } else {
                         ls.inSilence = false;
+                    }
+
+                    // Marathon safety valve: split continuous gapless streams at maxSegmentSec so RAM stays bounded
+                    if (maxSegmentSamples > 0 && (chunkEnd - ls.currentTrackStartSample) >= maxSegmentSamples) {
+                        const track = this._createTrackObject(this.tracks.length, ls.currentTrackStartSample, chunkEnd);
+                        track.splitReason = 'max-segment';
+                        this.tracks.push(track);
+                        ls.currentTrackStartSample = chunkEnd;
+                        ls.inSilence = false;
+                        ls.waitingForNextTrackStart = false;
+                        this._emit('onTrackAutoSplit', track);
+                        this._emit('onTracksChanged', this.tracks);
+                        this._emit('onTracksCreated', { tracks: [track], reason: 'max-segment' });
                     }
                 }
                 pos = chunkEnd;
@@ -809,6 +843,8 @@
 
         _createTrackObject(index, startSample, endSample, prevMeta = null) {
             const num = index + 1;
+            const s = Math.max(0, Math.floor(startSample));
+            const e = Math.max(s, Math.floor(endSample));
             return {
                 id: `trk_${this._nextTrackUid++}`,
                 index,
@@ -828,11 +864,163 @@
                 identified: Boolean(prevMeta && prevMeta.identified),
                 userEditedTitle: Boolean(prevMeta && prevMeta.userEditedTitle),
                 userEditedArtist: Boolean(prevMeta && prevMeta.userEditedArtist),
-                startSample: Math.max(0, Math.floor(startSample)),
-                endSample: Math.max(0, Math.floor(endSample)),
-                saved: false,
+                startSample: s,
+                endSample: e,
+                sessionStartSample: (prevMeta && Number.isFinite(prevMeta.sessionStartSample)) ? prevMeta.sessionStartSample : (this.bufferOffsetSamples + s),
+                sessionEndSample: (prevMeta && Number.isFinite(prevMeta.sessionEndSample)) ? prevMeta.sessionEndSample : (this.bufferOffsetSamples + e),
+                durationSec: (prevMeta && Number.isFinite(prevMeta.durationSec)) ? prevMeta.durationSec : ((e - s) / Math.max(1, this.sampleRate)),
+                flushed: Boolean(prevMeta && prevMeta.flushed),
+                evictedFromRam: Boolean(prevMeta && prevMeta.evictedFromRam),
+                savedFilename: (prevMeta && prevMeta.savedFilename) || '',
+                savedMethod: (prevMeta && prevMeta.savedMethod) || '',
+                saved: Boolean(prevMeta && prevMeta.saved),
                 saving: false
             };
+        }
+
+        /**
+         * Marks a saved track as flushed to disk and evicts any contiguous prefix of
+         * flushed tracks from the live PCM RAM buffer so 12+ hour sessions keep RAM flat
+         * and consume 0 bytes of browser origin storage.
+         */
+        markTrackFlushedAndCompact(trackId, { filename = '', method = 'directory', byteSize = 0 } = {}) {
+            const track = this.tracks.find(t => t.id === trackId);
+            if (!track) return { evictedSamples: 0, freedBytes: 0, flushedTracks: [] };
+
+            if (!track.flushed) {
+                track.durationSec = Math.max(0, (track.endSample - track.startSample) / Math.max(1, this.sampleRate));
+                track.sessionStartSample = this.bufferOffsetSamples + track.startSample;
+                track.sessionEndSample = this.bufferOffsetSamples + track.endSample;
+            }
+            track.flushed = true;
+            track.saved = true;
+            track.saving = false;
+            if (filename) track.savedFilename = filename;
+            if (method) track.savedMethod = method;
+            if (byteSize > 0) this.totalFlushedBytes += byteSize;
+
+            // Compute the highest sample we can safely evict without touching active recording or unflushed tracks
+            const isActiveRec = this.recordState === 'recording' || this.recordState === 'paused' || this.recordState === 'armed';
+            let maxSafeEvict = this.length;
+            if (isActiveRec && this._liveState) {
+                if (this._liveState.waitingForNextTrackStart) {
+                    const keepPad = Math.round(this.sampleRate * 0.2);
+                    maxSafeEvict = Math.max(0, this.length - keepPad);
+                } else {
+                    maxSafeEvict = Math.max(0, this._liveState.currentTrackStartSample);
+                }
+            }
+
+            // Collect contiguous prefix of flushed tracks that haven't been evicted yet
+            const newlyEvicted = [];
+            let candidateEnd = 0;
+            let firstUnflushedIdx = -1;
+            for (let i = 0; i < this.tracks.length; i++) {
+                const t = this.tracks[i];
+                if (t.evictedFromRam) continue;
+                if (!t.flushed) {
+                    firstUnflushedIdx = i;
+                    break;
+                }
+                newlyEvicted.push(t);
+                if (t.endSample > candidateEnd) candidateEnd = t.endSample;
+            }
+
+            if (firstUnflushedIdx !== -1) {
+                for (let j = firstUnflushedIdx; j < this.tracks.length; j++) {
+                    const t = this.tracks[j];
+                    if (!t.evictedFromRam && t.startSample < maxSafeEvict) {
+                        maxSafeEvict = Math.max(0, t.startSample);
+                    }
+                }
+            }
+
+            const evictEnd = Math.max(0, Math.min(this.length, maxSafeEvict, candidateEnd));
+
+            for (const t of newlyEvicted) {
+                t.evictedFromRam = true;
+                t.startSample = 0;
+                t.endSample = 0;
+            }
+            if (newlyEvicted.length > 0) {
+                this.flushedTrackCount += newlyEvicted.length;
+            }
+
+            if (evictEnd <= 0) {
+                this._emit('onTracksChanged', this.tracks);
+                return { evictedSamples: 0, freedBytes: 0, flushedTracks: newlyEvicted };
+            }
+
+            if (this.isPlaying) {
+                this.stopPlayback();
+            }
+
+            const keepSamples = Math.max(0, this.length - evictEnd);
+            if (!isActiveRec) {
+                const newL = new Int16Array(keepSamples);
+                const newR = new Int16Array(keepSamples);
+                if (keepSamples > 0) {
+                    newL.set(this.left.subarray(evictEnd, this.length));
+                    newR.set(this.right.subarray(evictEnd, this.length));
+                }
+                this.left = newL;
+                this.right = newR;
+                this._recLeftCap = new Int16Array(0);
+                this._recRightCap = new Int16Array(0);
+            } else {
+                const minCap = Math.max(INITIAL_CAPACITY_SAMPLES, this.sampleRate * 120);
+                const newCap = Math.max(minCap, keepSamples + this.sampleRate * 60);
+                const newL = new Int16Array(newCap);
+                const newR = new Int16Array(newCap);
+                if (keepSamples > 0) {
+                    newL.set(this.left.subarray(evictEnd, this.length));
+                    newR.set(this.right.subarray(evictEnd, this.length));
+                }
+                this._recLeftCap = newL;
+                this._recRightCap = newR;
+                this.left = newL;
+                this.right = newR;
+            }
+
+            this.length = keepSamples;
+            this.bufferOffsetSamples += evictEnd;
+
+            for (const t of this.tracks) {
+                if (!t.evictedFromRam) {
+                    t.startSample = Math.max(0, t.startSample - evictEnd);
+                    t.endSample = Math.max(t.startSample, t.endSample - evictEnd);
+                }
+            }
+
+            if (this._liveState) {
+                this._liveState.currentTrackStartSample = Math.max(0, this._liveState.currentTrackStartSample - evictEnd);
+                this._liveState.silenceStartSample = Math.max(0, this._liveState.silenceStartSample - evictEnd);
+            }
+
+            this.cursorSample = Math.max(0, Math.min(this.length, this.cursorSample - evictEnd));
+            if (this.selection) {
+                const ns = Math.max(0, this.selection.startSample - evictEnd);
+                const ne = Math.max(0, this.selection.endSample - evictEnd);
+                this.selection = ne > ns ? { startSample: ns, endSample: ne } : null;
+            }
+
+            // Release undo/redo PCM snapshots so evicted buffers are immediately garbage-collected
+            this.undoStack = [];
+            this.redoStack = [];
+            this._rebuildPeakCache();
+
+            const freedBytes = evictEnd * 4;
+            this._emit('onBufferEvicted', {
+                evictedSamples: evictEnd,
+                freedBytes,
+                bufferOffsetSamples: this.bufferOffsetSamples,
+                remainingLength: this.length,
+                flushedTracks: newlyEvicted
+            });
+            this._emit('onHistoryChanged', { canUndo: false, canRedo: false });
+            this._emit('onTracksChanged', this.tracks);
+            this._emit('onBufferChanged', { length: this.length, sampleRate: this.sampleRate });
+            return { evictedSamples: evictEnd, freedBytes, flushedTracks: newlyEvicted };
         }
 
         addManualSplitMarker(samplePos = null) {
@@ -865,8 +1053,8 @@
                 return t1;
             }
 
-            // Find the track containing splitAt and split it into two
-            const idx = this.tracks.findIndex(t => splitAt > t.startSample + 200 && splitAt < t.endSample - 200);
+            // Find the unflushed track containing splitAt and split it into two
+            const idx = this.tracks.findIndex(t => !t.flushed && splitAt > t.startSample + 200 && splitAt < t.endSample - 200);
             if (idx === -1) return null;
 
             const orig = this.tracks[idx];
@@ -904,7 +1092,8 @@
             const minTrackSamples = Math.round(minTrackSec * this.sampleRate);
             const padSamples = Math.round(this.sampleRate * 0.12);
 
-            const prevTracks = this.tracks.slice();
+            const flushedTracks = this.tracks.filter(t => t.flushed);
+            const prevTracks = this.tracks.filter(t => !t.flushed);
             const detected = [];
 
             let trackStart = null;
@@ -962,7 +1151,8 @@
             const matchTol = Math.round(this.sampleRate * 1.0);
             const usedPrev = new Set();
             const createdTracks = [];
-            this.tracks = detected.map((seg, idx) => {
+            const liveTracks = detected.map((seg, idx) => {
+                const trackIdx = flushedTracks.length + idx;
                 const matchingPrev = prevTracks.find((pt, pIdx) =>
                     !usedPrev.has(pIdx) &&
                     Math.abs(pt.startSample - seg.startSample) <= matchTol &&
@@ -970,12 +1160,14 @@
                 );
                 if (matchingPrev) {
                     usedPrev.add(prevTracks.indexOf(matchingPrev));
-                    return this._createTrackObject(idx, seg.startSample, seg.endSample, matchingPrev);
+                    return this._createTrackObject(trackIdx, seg.startSample, seg.endSample, matchingPrev);
                 }
-                const fresh = this._createTrackObject(idx, seg.startSample, seg.endSample, null);
+                const fresh = this._createTrackObject(trackIdx, seg.startSample, seg.endSample, null);
                 createdTracks.push(fresh);
                 return fresh;
             });
+            this.tracks = flushedTracks.concat(liveTracks);
+            this._reindexTracks();
             this._emit('onTracksChanged', this.tracks);
             if (createdTracks.length > 0) {
                 this._emit('onTracksCreated', { tracks: createdTracks, reason: 'auto-split' });
@@ -986,10 +1178,13 @@
         mergeTrackWithPrevious(trackId) {
             const idx = this.tracks.findIndex(t => t.id === trackId);
             if (idx <= 0) return false;
-            this._pushUndo();
             const prev = this.tracks[idx - 1];
             const curr = this.tracks[idx];
+            if (prev.flushed || curr.flushed) return false;
+            this._pushUndo();
             prev.endSample = curr.endSample;
+            prev.sessionEndSample = this.bufferOffsetSamples + curr.endSample;
+            prev.durationSec = Math.max(0, (prev.endSample - prev.startSample) / Math.max(1, this.sampleRate));
             prev.saved = false;
             if (!prev.userEditedTitle && !prev.userEditedArtist) {
                 prev.identified = false;
@@ -1017,11 +1212,14 @@
 
         updateTrackBounds(trackId, startSample, endSample) {
             const t = this.tracks.find(item => item.id === trackId);
-            if (!t) return false;
+            if (!t || t.flushed) return false;
             const s = Math.max(0, Math.min(this.length - 1, Math.floor(startSample)));
             const e = Math.max(s + 1, Math.min(this.length, Math.floor(endSample)));
             t.startSample = s;
             t.endSample = e;
+            t.sessionStartSample = this.bufferOffsetSamples + s;
+            t.sessionEndSample = this.bufferOffsetSamples + e;
+            t.durationSec = Math.max(0, (e - s) / Math.max(1, this.sampleRate));
             t.saved = false;
             this._emit('onTracksChanged', this.tracks);
             return true;
@@ -1043,6 +1241,7 @@
             return {
                 sampleRate: this.sampleRate,
                 length: this.length,
+                bufferOffsetSamples: this.bufferOffsetSamples,
                 left: this.left.slice(0, this.length),
                 right: this.right.slice(0, this.length),
                 tracks: this.tracks.map(t => Object.assign({}, t)),
@@ -1054,6 +1253,7 @@
         _restoreSnapshot(snap) {
             this.sampleRate = snap.sampleRate;
             this.length = snap.length;
+            this.bufferOffsetSamples = snap.bufferOffsetSamples || 0;
             this.left = snap.left.slice();
             this.right = snap.right.slice();
             this.tracks = snap.tracks.map(t => Object.assign({}, t));
@@ -1141,17 +1341,25 @@
 
             const updated = [];
             for (const t of this.tracks) {
+                if (t.flushed) {
+                    updated.push(t);
+                    continue;
+                }
                 const ns = Math.max(0, t.startSample - range.start);
                 const ne = Math.min(this.length, t.endSample - range.start);
                 if (ne > ns) {
                     t.startSample = ns;
                     t.endSample = ne;
+                    t.sessionStartSample = this.bufferOffsetSamples + ns;
+                    t.sessionEndSample = this.bufferOffsetSamples + ne;
+                    t.durationSec = (ne - ns) / Math.max(1, this.sampleRate);
                     t.saved = false;
                     updated.push(t);
                 }
             }
-            const createdFallback = updated.length === 0 ? this._createTrackObject(0, 0, this.length) : null;
-            this.tracks = updated.length ? updated : [createdFallback];
+            const hasLiveTrack = updated.some(t => !t.flushed);
+            const createdFallback = !hasLiveTrack ? this._createTrackObject(updated.length, 0, this.length) : null;
+            this.tracks = createdFallback ? updated.concat([createdFallback]) : updated;
             this._reindexTracks();
             this.selection = null;
             this.cursorSample = 0;
@@ -1188,11 +1396,17 @@
 
             const updated = [];
             for (const t of this.tracks) {
+                if (t.flushed) {
+                    updated.push(t);
+                    continue;
+                }
                 if (t.endSample <= range.start) {
                     updated.push(t);
                 } else if (t.startSample >= range.end) {
                     t.startSample -= cutLen;
                     t.endSample -= cutLen;
+                    t.sessionStartSample = this.bufferOffsetSamples + t.startSample;
+                    t.sessionEndSample = this.bufferOffsetSamples + t.endSample;
                     t.saved = false;
                     updated.push(t);
                 } else {
@@ -1203,13 +1417,17 @@
                     if (newEnd > newStart) {
                         t.startSample = newStart;
                         t.endSample = newEnd;
+                        t.sessionStartSample = this.bufferOffsetSamples + newStart;
+                        t.sessionEndSample = this.bufferOffsetSamples + newEnd;
+                        t.durationSec = (newEnd - newStart) / Math.max(1, this.sampleRate);
                         t.saved = false;
                         updated.push(t);
                     }
                 }
             }
-            const createdFallback = (updated.length === 0 && newLen > 0) ? this._createTrackObject(0, 0, newLen) : null;
-            this.tracks = updated.length ? updated : (createdFallback ? [createdFallback] : []);
+            const hasLiveTrack = updated.some(t => !t.flushed);
+            const createdFallback = (!hasLiveTrack && newLen > 0) ? this._createTrackObject(updated.length, 0, newLen) : null;
+            this.tracks = createdFallback ? updated.concat([createdFallback]) : updated;
             this._reindexTracks();
             this.selection = null;
             this.cursorSample = Math.min(range.start, newLen);
@@ -1386,6 +1604,9 @@
             this.stopPlayback();
             if (this.length > 0) this._pushUndo();
             this.sampleRate = sampleRate || 44100;
+            this.bufferOffsetSamples = 0;
+            this.flushedTrackCount = 0;
+            this.totalFlushedBytes = 0;
             this.left = leftInt16 instanceof Int16Array ? leftInt16.slice() : new Int16Array(leftInt16);
             this.right = rightInt16 instanceof Int16Array ? rightInt16.slice() : this.left.slice();
             this.length = Math.min(this.left.length, this.right.length);
@@ -1423,6 +1644,9 @@
             this.left = new Int16Array(0);
             this.right = new Int16Array(0);
             this.length = 0;
+            this.bufferOffsetSamples = 0;
+            this.flushedTrackCount = 0;
+            this.totalFlushedBytes = 0;
             this.tracks = [];
             this.selection = null;
             this.cursorSample = 0;
@@ -1597,14 +1821,14 @@
                     index: idx,
                     title: `Track ${String(idx + 1).padStart(2, '0')}`,
                     artist: this.sourceLabel || 'Live Audio Stream',
-                    durationSec: this.getDurationSeconds(),
+                    durationSec: this.getTotalDurationSeconds(),
                     isLive: true
                 };
             }
             if (this.length > 0) {
                 const pos = this.isPlaying ? this.getPlaybackPositionSample() : this.cursorSample;
-                let trk = this.tracks.find(t => pos >= t.startSample && pos <= t.endSample);
-                if (!trk) trk = this.tracks[0] || null;
+                let trk = this.tracks.find(t => !t.flushed && pos >= t.startSample && pos <= t.endSample);
+                if (!trk) trk = this.tracks.find(t => !t.flushed) || null;
                 if (trk) {
                     return {
                         id: trk.id,
@@ -1623,11 +1847,51 @@
                     isLive: false
                 };
             }
+            if (this.tracks.length > 0) {
+                const last = this.tracks[this.tracks.length - 1];
+                return {
+                    id: last.id,
+                    index: last.index,
+                    title: last.title || `Track ${String(last.index + 1).padStart(2, '0')}`,
+                    artist: last.artist || '',
+                    durationSec: Number.isFinite(last.durationSec) ? last.durationSec : 0,
+                    isLive: false,
+                    flushed: Boolean(last.flushed)
+                };
+            }
             return null;
         }
 
         getDurationSeconds() {
             return this.sampleRate > 0 ? this.length / this.sampleRate : 0;
+        }
+
+        getTotalSessionSamples() {
+            return this.bufferOffsetSamples + this.length;
+        }
+
+        getTotalDurationSeconds() {
+            return this.sampleRate > 0 ? (this.bufferOffsetSamples + this.length) / this.sampleRate : 0;
+        }
+
+        getRamUsageBytes() {
+            const pcmBytes = (this._recLeftCap && this._recLeftCap.byteLength > 0)
+                ? (this._recLeftCap.byteLength + this._recRightCap.byteLength)
+                : (this.left.byteLength + this.right.byteLength);
+            const peakBytes = this.peaksMinL.byteLength + this.peaksMaxL.byteLength + this.peaksMinR.byteLength + this.peaksMaxR.byteLength;
+            return pcmBytes + peakBytes;
+        }
+
+        getFlushedTrackCount() {
+            let count = 0;
+            for (let i = 0; i < this.tracks.length; i++) {
+                if (this.tracks[i].flushed) count++;
+            }
+            return count;
+        }
+
+        getUnflushedTracks() {
+            return this.tracks.filter(t => !t.flushed);
         }
 
         getSlice(startSample, endSample) {

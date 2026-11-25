@@ -962,6 +962,22 @@ html, body {
     border: 1px solid rgba(5, 150, 105, 0.30);
 }
 
+.track-tag-pill.is-flushed {
+    background: rgba(13, 148, 136, 0.12);
+    color: #0f766e;
+    border: 1px solid rgba(13, 148, 136, 0.34);
+}
+
+.track-row-card.is-flushed {
+    border-color: rgba(13, 148, 136, 0.28);
+    background: rgba(240, 253, 250, 0.55);
+}
+
+.track-row-card.is-flushed .track-title-input,
+.track-row-card.is-flushed .track-artist-input {
+    opacity: 0.85;
+}
+
 .track-artist-input {
     flex: 1 1 120px;
     min-width: 0;

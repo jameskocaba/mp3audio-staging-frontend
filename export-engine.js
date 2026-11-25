@@ -551,6 +551,15 @@
         return safeName;
     }
 
+    async function readFileFromDirectory(dirHandle, filename) {
+        if (!dirHandle || !filename) {
+            throw new Error('Save folder is not connected.');
+        }
+        const safeName = sanitizeFilename(filename);
+        const fileHandle = await dirHandle.getFileHandle(safeName, { create: false });
+        return await fileHandle.getFile();
+    }
+
     function triggerAnchorDownload(blob, filename) {
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
@@ -643,6 +652,7 @@
         sanitizeFilename,
         buildTrackFilename,
         saveBlobToDirectory,
+        readFileFromDirectory,
         saveBlobWithPickerOrDownload,
         triggerAnchorDownload
     };

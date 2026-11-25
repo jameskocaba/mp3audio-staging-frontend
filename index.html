@@ -171,10 +171,18 @@
 
                                     <label id="autoSaveLiveRow" class="split-toggle-card">
                                         <div class="split-toggle-text">
-                                            <strong>Auto-Save Live to Folder</strong>
-                                            <span>Writes each track to your selected folder as it finishes.</span>
+                                            <strong id="autoSaveLiveTitle">Auto-Save Live to Folder</strong>
+                                            <span id="autoSaveLiveDesc">Writes each finished track directly to your chosen folder (0 browser storage).</span>
                                         </div>
                                         <input type="checkbox" id="autoSaveLiveToggle" class="switch-input" checked>
+                                    </label>
+
+                                    <label id="flushOnSaveRow" class="split-toggle-card">
+                                        <div class="split-toggle-text">
+                                            <strong>Track-by-Track Flush (12h+ Safe)</strong>
+                                            <span>Evicts each saved track from browser RAM immediately so 12+ hour sessions stay flat in memory.</span>
+                                        </div>
+                                        <input type="checkbox" id="flushOnSaveToggle" class="switch-input" checked>
                                     </label>
 
                                     <label class="split-toggle-card">
@@ -225,6 +233,14 @@
                                             <span id="minTrackVal" class="slider-val-pill">10 s</span>
                                         </div>
                                         <input type="range" id="minTrackSlider" min="3" max="60" step="1" value="10">
+                                    </div>
+
+                                    <div class="slider-control-group">
+                                        <div class="slider-label-row">
+                                            <label for="maxSegmentSlider">Max Segment Split (Gapless Cap)</label>
+                                            <span id="maxSegmentVal" class="slider-val-pill">15 min</span>
+                                        </div>
+                                        <input type="range" id="maxSegmentSlider" min="5" max="60" step="5" value="15">
                                     </div>
                                 </div>
 

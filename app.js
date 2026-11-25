@@ -88,13 +88,19 @@
         const autoTrimSilenceToggle = document.getElementById('autoTrimSilenceToggle');
         const autoIdentifyToggle = document.getElementById('autoIdentifyToggle');
         const autoSaveLiveRow = document.getElementById('autoSaveLiveRow');
+        const autoSaveLiveTitle = document.getElementById('autoSaveLiveTitle');
+        const autoSaveLiveDesc = document.getElementById('autoSaveLiveDesc');
         const autoSaveLiveToggle = document.getElementById('autoSaveLiveToggle');
+        const flushOnSaveRow = document.getElementById('flushOnSaveRow');
+        const flushOnSaveToggle = document.getElementById('flushOnSaveToggle');
         const thresholdDbSlider = document.getElementById('thresholdDbSlider');
         const thresholdDbVal = document.getElementById('thresholdDbVal');
         const minSilenceSlider = document.getElementById('minSilenceSlider');
         const minSilenceVal = document.getElementById('minSilenceVal');
         const minTrackSlider = document.getElementById('minTrackSlider');
         const minTrackVal = document.getElementById('minTrackVal');
+        const maxSegmentSlider = document.getElementById('maxSegmentSlider');
+        const maxSegmentVal = document.getElementById('maxSegmentVal');
         const scanSplitNowBtn = document.getElementById('scanSplitNowBtn');
         const quickAutoSplitBtn = document.getElementById('quickAutoSplitBtn');
 
@@ -127,6 +133,13 @@
         let autoSaveQueue = Promise.resolve();
         let lastObservedRecLength = 0;
         let prevRecordState = 'idle';
+        let wakeLockSentinel = null;
+        let diskAudioEl = null;
+        let diskAudioUrl = '';
+        let playingDiskTrackId = null;
+        let warnedHighRamWithoutFolder = false;
+        let lastRamCheckMs = 0;
+        const usedSavedFilenames = new Set();
         const inFlightIdentifyPromises = new Map();
         const trackCoverUrlCache = new WeakMap();
 
@@ -172,7 +185,16 @@
         }
         if (!supportsFolderPicker) {
             if (pickFolderBtn) pickFolderBtn.classList.add('hidden');
-            if (autoSaveLiveRow) autoSaveLiveRow.classList.add('hidden');
+            if (isMobileUa) {
+                if (autoSaveLiveRow) autoSaveLiveRow.classList.add('hidden');
+                if (flushOnSaveRow) flushOnSaveRow.classList.add('hidden');
+                if (autoSaveLiveToggle) autoSaveLiveToggle.checked = false;
+            } else {
+                // Firefox/Safari desktop fallback: opt-in segmented auto-download + RAM flush (0 browser storage)
+                if (autoSaveLiveToggle) autoSaveLiveToggle.checked = false;
+                if (autoSaveLiveTitle) autoSaveLiveTitle.textContent = 'Auto-Download Live Tracks';
+                if (autoSaveLiveDesc) autoSaveLiveDesc.textContent = 'Downloads each finished track automatically and frees RAM (0 browser storage).';
+            }
         }
 
         // --- Toast Helper ---
@@ -194,13 +216,131 @@
 
         function formatTimecode(seconds, includeTenths = true) {
             const s = Math.max(0, Number(seconds) || 0);
-            const mins = Math.floor(s / 60);
-            const rem = s - mins * 60;
+            const hrs = Math.floor(s / 3600);
+            const remAfterHrs = s - hrs * 3600;
+            const mins = Math.floor(remAfterHrs / 60);
+            const rem = remAfterHrs - mins * 60;
             const secs = Math.floor(rem);
             const tenths = Math.floor((rem - secs) * 10);
             const mm = String(mins).padStart(2, '0');
             const ss = String(secs).padStart(2, '0');
+            if (hrs > 0) {
+                const hh = String(hrs).padStart(2, '0');
+                return includeTenths ? `${hh}:${mm}:${ss}.${tenths}` : `${hh}:${mm}:${ss}`;
+            }
             return includeTenths ? `${mm}:${ss}.${tenths}` : `${mm}:${ss}`;
+        }
+
+        function formatBytesCompact(bytes) {
+            const b = Math.max(0, Number(bytes) || 0);
+            if (b >= 1024 * 1024 * 1024) return `${(b / (1024 * 1024 * 1024)).toFixed(2)} GB`;
+            if (b >= 1024 * 1024) return `${Math.round(b / (1024 * 1024))} MB`;
+            if (b >= 1024) return `${Math.round(b / 1024)} KB`;
+            return `${b} B`;
+        }
+
+        function isLiveAutoSaveAvailable() {
+            if (!autoSaveLiveToggle || !autoSaveLiveToggle.checked) return false;
+            return Boolean(dirHandle || (!supportsFolderPicker && !isMobileUa));
+        }
+
+        function isTrackByTrackFlushActive() {
+            return Boolean(flushOnSaveToggle && flushOnSaveToggle.checked && isLiveAutoSaveAvailable());
+        }
+
+        function allocateUniqueFilename(rawFilename) {
+            const safe = ExportEngine.sanitizeFilename(rawFilename);
+            const dot = safe.lastIndexOf('.');
+            const base = dot > 0 ? safe.slice(0, dot) : safe;
+            const ext = dot > 0 ? safe.slice(dot) : '';
+            let candidate = safe;
+            let suffix = 2;
+            while (usedSavedFilenames.has(candidate.toLowerCase())) {
+                candidate = `${base} (${suffix++})${ext}`;
+            }
+            usedSavedFilenames.add(candidate.toLowerCase());
+            return candidate;
+        }
+
+        async function acquireWakeLock() {
+            try {
+                if (!navigator.wakeLock || typeof navigator.wakeLock.request !== 'function') return;
+                if (wakeLockSentinel && !wakeLockSentinel.released) return;
+                wakeLockSentinel = await navigator.wakeLock.request('screen');
+                wakeLockSentinel.addEventListener('release', () => {
+                    wakeLockSentinel = null;
+                });
+            } catch (_) {
+                // Non-fatal: browser or OS policy may deny wake lock
+            }
+        }
+
+        async function releaseWakeLock() {
+            try {
+                if (wakeLockSentinel) {
+                    const s = wakeLockSentinel;
+                    wakeLockSentinel = null;
+                    await s.release();
+                }
+            } catch (_) { }
+        }
+
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible' &&
+                (engine.recordState === 'recording' || engine.recordState === 'armed')) {
+                acquireWakeLock();
+            }
+        });
+
+        function stopDiskPlayback(silent = false) {
+            if (diskAudioEl) {
+                try { diskAudioEl.pause(); diskAudioEl.src = ''; } catch (_) { }
+                diskAudioEl = null;
+            }
+            if (diskAudioUrl) {
+                try { URL.revokeObjectURL(diskAudioUrl); } catch (_) { }
+                diskAudioUrl = '';
+            }
+            const wasPlayingDisk = playingDiskTrackId !== null;
+            playingDiskTrackId = null;
+            if (wasPlayingDisk && !silent) {
+                renderTracksList();
+                updateUiState();
+            }
+        }
+
+        async function playFlushedTrackFromDisk(track) {
+            if (!track) return;
+            if (playingDiskTrackId === track.id) {
+                stopDiskPlayback(false);
+                return;
+            }
+            stopDiskPlayback(true);
+            engine.stopPlayback(true);
+
+            if (!dirHandle || !track.savedFilename || typeof ExportEngine.readFileFromDirectory !== 'function') {
+                showToast(`"${track.savedFilename || track.title}" was already saved to your downloads/folder.`, 'info');
+                return;
+            }
+            try {
+                const file = await ExportEngine.readFileFromDirectory(dirHandle, track.savedFilename);
+                diskAudioUrl = URL.createObjectURL(file);
+                const audio = new Audio(diskAudioUrl);
+                audio.volume = Math.max(0, Math.min(1, engine.playbackVolume));
+                diskAudioEl = audio;
+                playingDiskTrackId = track.id;
+                audio.addEventListener('ended', () => stopDiskPlayback(false));
+                audio.addEventListener('error', () => {
+                    stopDiskPlayback(false);
+                    showToast(`Could not play "${track.savedFilename}" from folder.`, 'error');
+                });
+                await audio.play();
+                renderTracksList();
+                updateUiState();
+            } catch (err) {
+                stopDiskPlayback(false);
+                showToast(`Could not open "${track.savedFilename}" from folder: ${(err && err.message) || 'File moved'}`, 'info');
+            }
         }
 
         function resetSmoothScrollState() {
@@ -343,6 +483,16 @@
                 const wasActiveRec = prevRecordState !== 'idle';
                 prevRecordState = state;
                 resetSmoothScrollState();
+                if (state === 'recording' || state === 'armed') {
+                    stopDiskPlayback(true);
+                    acquireWakeLock();
+                    if (!wasActiveRec && engine.length === 0 && engine.tracks.length === 0) {
+                        usedSavedFilenames.clear();
+                        warnedHighRamWithoutFolder = false;
+                    }
+                } else if (state === 'idle') {
+                    releaseWakeLock();
+                }
                 if (state === 'armed') {
                     showToast('Armed — recording begins as soon as sound starts.', 'warning');
                 }
@@ -355,10 +505,11 @@
                 syncPanScrollbar();
                 updateUiState();
                 if (wasActiveRec && state === 'idle' && engine.length > 0 && isAutoTagEnabled()) {
-                    queueAutoTagTracks(engine.tracks);
+                    queueAutoTagTracks(engine.getUnflushedTracks());
                 }
             },
             onPlaybackStateChanged: ({ playing } = {}) => {
+                if (playing) stopDiskPlayback(true);
                 resetSmoothScrollState();
                 if (!playing && !userHasZoomed && engine.recordState === 'idle') {
                     viewStartSample = 0;
@@ -375,22 +526,36 @@
             },
             onTracksCreated: ({ tracks }) => {
                 if (!isAutoTagEnabled() || !Array.isArray(tracks) || tracks.length === 0) return;
-                queueAutoTagTracks(tracks);
+                queueAutoTagTracks(tracks.filter(t => !t.flushed));
             },
             onTrackAutoSplit: async (track) => {
-                showToast(`✂️ Split Track ${track.index + 1} (${formatTimecode((track.endSample - track.startSample) / engine.sampleRate, false)})`, 'success');
+                const durSec = Math.max(0, (track.endSample - track.startSample) / Math.max(1, engine.sampleRate));
+                const splitPrefix = track.splitReason === 'max-segment' ? '⏱️ Segment Split' : '✂️ Split';
+                showToast(`${splitPrefix} Track ${track.index + 1} (${formatTimecode(durSec, false)})`, 'success');
                 renderTracksList();
                 const shouldTag = isAutoTagEnabled() && shouldAutoTagTrack(track);
                 if (shouldTag) {
                     identifyTrackById(track.id, { manual: false, forceOverwrite: false });
                 }
-                if (autoSaveLiveToggle && autoSaveLiveToggle.checked && dirHandle) {
+                if (isLiveAutoSaveAvailable()) {
                     if (shouldTag || inFlightIdentifyPromises.has(track.id)) {
                         await waitForTrackAutoTag(track.id, 12000);
                     }
                     const latest = engine.tracks.find(t => t.id === track.id) || track;
-                    queueLiveAutoSaveTrack(latest);
+                    if (!latest.flushed && !latest.saving) {
+                        queueLiveAutoSaveTrack(latest);
+                    }
                 }
+            },
+            onBufferEvicted: ({ evictedSamples }) => {
+                if (evictedSamples > 0) {
+                    viewStartSample = Math.max(0, viewStartSample - evictedSamples);
+                    smoothScrollStart = Math.max(0, smoothScrollStart - evictedSamples);
+                    lastObservedRecLength = engine.length;
+                }
+                clampViewport();
+                syncPanScrollbar();
+                updateUiState();
             },
             onBufferChanged: ({ length }) => {
                 if (length === 0) {
@@ -474,14 +639,26 @@
         function syncGuidedStepBanner() {
             if (!guidedStepBanner) return;
             if (engine.recordState === 'recording') {
-                guidedStepBanner.innerHTML = '🔴 <strong>Recording live!</strong> Watch the Left &amp; Right wave and level bars below — songs split automatically on quiet gaps.';
+                if (isTrackByTrackFlushActive()) {
+                    const flushedCount = engine.getFlushedTrackCount();
+                    guidedStepBanner.innerHTML = `🔴 <strong>Recording live (12h+ Flush Active)</strong> — finished tracks save directly to disk &amp; free RAM automatically${flushedCount > 0 ? ` (<strong>${flushedCount}</strong> flushed)` : ''}.`;
+                } else {
+                    guidedStepBanner.innerHTML = '🔴 <strong>Recording live!</strong> Watch the Left &amp; Right wave and level bars below — songs split automatically on quiet gaps.';
+                }
             } else if (engine.recordState === 'armed') {
                 guidedStepBanner.innerHTML = '⚡ <strong>Armed:</strong> Hit Play on your music stream and the continuous recording wave starts immediately.';
-            } else if (engine.isPlaying) {
+            } else if (engine.isPlaying || playingDiskTrackId) {
                 guidedStepBanner.innerHTML = '🎧 <strong>Playing:</strong> Drag on the wave to highlight a section, or tap <strong>💾 Save</strong> below.';
-            } else if (engine.length > 0) {
+            } else if (engine.length > 0 || engine.tracks.length > 0) {
                 const n = engine.tracks.length;
-                guidedStepBanner.innerHTML = `✅ <strong>Ready!</strong> ${n} track${n === 1 ? '' : 's'} captured — rename tracks below or tap <strong>💾 Save</strong>.`;
+                const flushedCount = engine.getFlushedTrackCount();
+                if (flushedCount > 0 && engine.length === 0) {
+                    guidedStepBanner.innerHTML = `✅ <strong>All ${flushedCount} track${flushedCount === 1 ? '' : 's'} flushed to disk!</strong> Browser storage &amp; RAM freed.`;
+                } else if (flushedCount > 0) {
+                    guidedStepBanner.innerHTML = `✅ <strong>Ready!</strong> ${n} track${n === 1 ? '' : 's'} (${flushedCount} already flushed to disk) — save remaining below.`;
+                } else {
+                    guidedStepBanner.innerHTML = `✅ <strong>Ready!</strong> ${n} track${n === 1 ? '' : 's'} captured — rename tracks below or tap <strong>💾 Save</strong>.`;
+                }
             } else if (supportsDisplayCapture) {
                 guidedStepBanner.innerHTML = '<span class="guided-steps-flow"><span class="guided-step-item">✨ <strong>Step 1:</strong> Tap <strong>Record Music Tab</strong> (or <strong>Open Audio</strong>)</span><span class="guided-step-sep" aria-hidden="true">→</span><span class="guided-step-item"><strong>Step 2:</strong> Choose what to record</span><span class="guided-step-sep" aria-hidden="true">→</span><span class="guided-step-item"><strong>Step 3:</strong> Press <strong>Record</strong></span><span class="guided-step-sep" aria-hidden="true">→</span><span class="guided-step-item"><strong>Step 4:</strong> Navigate back to the <strong>MP3aud.io</strong> tab</span></span>';
             } else {
@@ -622,7 +799,7 @@
                 return inFlightIdentifyPromises.get(trackId);
             }
             const track = (engine.tracks || []).find(t => t.id === trackId);
-            if (!track || track.identifying) return Promise.resolve(false);
+            if (!track || track.flushed || track.evictedFromRam || track.identifying) return Promise.resolve(false);
 
             const durSec = Math.max(0, (track.endSample - track.startSample) / (engine.sampleRate || 44100));
             const minSec = manual ? 3 : 4;
@@ -818,7 +995,21 @@
                 dirHandle = res.handle;
                 if (pickFolderBtn) pickFolderBtn.classList.add('connected');
                 if (pickFolderLabel) pickFolderLabel.textContent = res.name;
-                showToast(`📁 Connected folder "${res.name}"`, 'success');
+                syncSettingsToEngine();
+                const flushActive = isTrackByTrackFlushActive();
+                showToast(
+                    flushActive
+                        ? `📁 Connected "${res.name}" — Track-by-Track Flush armed (0 browser storage)`
+                        : `📁 Connected folder "${res.name}"`,
+                    'success'
+                );
+                // If connected mid-recording, immediately save & flush any already-completed tracks
+                if (flushActive && (engine.recordState === 'recording' || engine.recordState === 'paused')) {
+                    engine.getUnflushedTracks().forEach(t => {
+                        if (!t.saving) queueLiveAutoSaveTrack(t);
+                    });
+                }
+                updateUiState();
                 return dirHandle;
             } catch (err) {
                 if (!err || err.name !== 'AbortError') {
@@ -860,19 +1051,62 @@
         }
 
         function queueLiveAutoSaveTrack(track) {
-            if (!dirHandle || !track) return;
+            if (!track || track.flushed || track.evictedFromRam || track.saving) return;
+            const useDirectory = Boolean(dirHandle);
+            const useDownloadFallback = !useDirectory && !supportsFolderPicker && !isMobileUa && Boolean(autoSaveLiveToggle && autoSaveLiveToggle.checked);
+            if (!useDirectory && !useDownloadFallback) return;
+
             track.saving = true;
             renderTracksList();
             autoSaveQueue = autoSaveQueue.then(async () => {
-                try {
-                    const meta = buildTrackExportMeta(track, track.index, Math.max(track.index + 1, engine.tracks.length));
-                    const { ext, blob } = await encodeTrackToBlob(track.startSample, track.endSample, meta);
-                    const filename = ExportEngine.buildTrackFilename(meta, track.index, Math.max(track.index + 1, engine.tracks.length), ext);
-                    await ExportEngine.saveBlobToDirectory(dirHandle, filename, blob);
+                if (track.flushed || track.evictedFromRam) {
                     track.saving = false;
-                    track.saved = true;
-                    renderTracksList();
-                    showToast(`💾 Auto-saved "${filename}"`, 'success');
+                    return;
+                }
+                try {
+                    const liveTrk = engine.tracks.find(t => t.id === track.id) || track;
+                    if (liveTrk.flushed || liveTrk.evictedFromRam || liveTrk.endSample <= liveTrk.startSample) {
+                        liveTrk.saving = false;
+                        return;
+                    }
+                    const total = Math.max(liveTrk.index + 1, engine.tracks.length);
+                    const meta = buildTrackExportMeta(liveTrk, liveTrk.index, total);
+                    const { ext, blob } = await encodeTrackToBlob(liveTrk.startSample, liveTrk.endSample, meta);
+                    const rawFilename = ExportEngine.buildTrackFilename(meta, liveTrk.index, total, ext);
+                    const filename = allocateUniqueFilename(rawFilename);
+
+                    let savedName = filename;
+                    let method = 'download';
+                    if (dirHandle) {
+                        savedName = await ExportEngine.saveBlobToDirectory(dirHandle, filename, blob);
+                        method = 'directory';
+                    } else {
+                        ExportEngine.triggerAnchorDownload(blob, filename);
+                        method = 'download';
+                    }
+
+                    const shouldFlushRam = Boolean(flushOnSaveToggle && flushOnSaveToggle.checked);
+                    if (shouldFlushRam) {
+                        // Cap retained per-track cover bytes on marathon sessions so RAM stays flat over 12+ hours
+                        if (engine.getFlushedTrackCount() >= 25 && liveTrk.coverBytes) {
+                            liveTrk.coverBytes = null;
+                        }
+                        const res = engine.markTrackFlushedAndCompact(liveTrk.id, {
+                            filename: savedName,
+                            method,
+                            byteSize: blob ? blob.size : 0
+                        });
+                        renderTracksList();
+                        const freedMsg = res.freedBytes > 0 ? ` • ${formatBytesCompact(res.freedBytes)} RAM freed` : '';
+                        showToast(`💾 Flushed "${savedName}"${freedMsg}`, 'success');
+                    } else {
+                        liveTrk.saving = false;
+                        liveTrk.saved = true;
+                        liveTrk.savedFilename = savedName;
+                        liveTrk.savedMethod = method;
+                        renderTracksList();
+                        showToast(`💾 Auto-saved "${savedName}"`, 'success');
+                    }
                 } catch (err) {
                     track.saving = false;
                     renderTracksList();
@@ -890,9 +1124,14 @@
         }
 
         async function saveSingleTrack(trackIdx, useNativeShare = false) {
-            if (isExporting || engine.length === 0) return;
+            if (isExporting) return;
             const track = engine.tracks[trackIdx];
             if (!track) return;
+            if (track.flushed || track.evictedFromRam) {
+                showToast(`"${track.savedFilename || track.title}" is already saved to disk.`, 'info');
+                return;
+            }
+            if (engine.length === 0) return;
             isExporting = true;
             if (inFlightIdentifyPromises.has(track.id)) {
                 setExportProgress(true, 'Auto-tagging song metadata...', 2);
@@ -953,15 +1192,27 @@
         }
 
         async function exportAllTracksToHardDrive() {
-            if (isExporting || engine.length === 0) return;
+            if (isExporting) return;
+            const flushedCount = engine.getFlushedTrackCount();
+            const unflushed = engine.getUnflushedTracks();
 
-            const tracks = engine.tracks.length > 0
-                ? engine.tracks
-                : [{ id: 'trk_full', index: 0, title: 'Recording 01', artist: '', startSample: 0, endSample: engine.length }];
+            if (engine.length === 0) {
+                if (flushedCount > 0) {
+                    showToast(`✅ All ${flushedCount} track${flushedCount === 1 ? '' : 's'} are already saved to disk!`, 'success');
+                }
+                return;
+            }
+
+            const tracks = unflushed.length > 0
+                ? unflushed
+                : [{ id: 'trk_full', index: engine.tracks.length, title: 'Recording 01', artist: '', startSample: 0, endSample: engine.length }];
 
             if (tracks.length === 1 && !dirHandle) {
-                await saveSingleTrack(0, false);
-                return;
+                const idx = engine.tracks.indexOf(tracks[0]);
+                if (idx >= 0) {
+                    await saveSingleTrack(idx, false);
+                    return;
+                }
             }
 
             if (tracks.length > 1 && !dirHandle && supportsFolderPicker) {
@@ -978,20 +1229,24 @@
                     setExportProgress(true, `Auto-tagging ${pendingTagIds.length} song${pendingTagIds.length === 1 ? '' : 's'}...`, 2);
                     await Promise.all(pendingTagIds.map(id => waitForTrackAutoTag(id, 12000)));
                 }
+                const totalSessionTracks = Math.max(tracks.length, engine.tracks.length);
                 for (let i = 0; i < tracks.length; i++) {
                     const trk = tracks[i];
+                    const trkNumIdx = Number.isInteger(trk.index) ? trk.index : i;
                     trk.saving = true;
                     renderTracksList();
-                    const meta = buildTrackExportMeta(trk, i, tracks.length);
+                    const meta = buildTrackExportMeta(trk, trkNumIdx, totalSessionTracks);
                     const { ext, blob } = await encodeTrackToBlob(trk.startSample, trk.endSample, meta, (pct) => {
                         const overall = Math.round(((i + pct / 100) / tracks.length) * 100);
                         setExportProgress(true, `Encoding track ${i + 1}/${tracks.length}: ${meta.title} (${pct}%)`, overall);
                     });
-                    const filename = ExportEngine.buildTrackFilename(meta, i, tracks.length, ext);
+                    const filename = allocateUniqueFilename(ExportEngine.buildTrackFilename(meta, trkNumIdx, totalSessionTracks, ext));
 
                     if (dirHandle) {
-                        await ExportEngine.saveBlobToDirectory(dirHandle, filename, blob);
+                        const savedName = await ExportEngine.saveBlobToDirectory(dirHandle, filename, blob);
                         trk.saved = true;
+                        trk.savedFilename = savedName;
+                        trk.savedMethod = 'directory';
                         savedCount++;
                     } else {
                         const bytes = new Uint8Array(await blob.arrayBuffer());
@@ -1026,13 +1281,23 @@
         function renderTracksList() {
             if (!tracksList || !trackCountBadge) return;
             const tracks = engine.tracks || [];
-            trackCountBadge.textContent = `${tracks.length} Track${tracks.length === 1 ? '' : 's'}`;
+            const flushedCount = engine.getFlushedTrackCount();
+            const unflushedCount = tracks.length - flushedCount;
+            trackCountBadge.textContent = flushedCount > 0
+                ? `${tracks.length} Track${tracks.length === 1 ? '' : 's'} (${flushedCount} Flushed)`
+                : `${tracks.length} Track${tracks.length === 1 ? '' : 's'}`;
 
             if (exportAllLabel) {
                 const targetNoun = supportsFolderPicker ? 'Hard Drive' : 'Device';
-                exportAllLabel.textContent = tracks.length > 1
-                    ? `Save All ${tracks.length} Tracks to ${targetNoun}`
-                    : `Save Track to ${targetNoun}`;
+                if (tracks.length > 0 && unflushedCount === 0) {
+                    exportAllLabel.textContent = `All ${tracks.length} Saved to Disk ✓`;
+                } else if (unflushedCount > 1) {
+                    exportAllLabel.textContent = flushedCount > 0
+                        ? `Save ${unflushedCount} Remaining to ${targetNoun}`
+                        : `Save All ${unflushedCount} Tracks to ${targetNoun}`;
+                } else {
+                    exportAllLabel.textContent = `Save Track to ${targetNoun}`;
+                }
             }
 
             if (tracks.length === 0) {
@@ -1048,16 +1313,29 @@
             const showMobileShare = isMobileUa && ExportEngine.canShareFiles();
 
             tracks.forEach((trk, idx) => {
-                const durSec = Math.max(0, (trk.endSample - trk.startSample) / engine.sampleRate);
-                const startStr = formatTimecode(trk.startSample / engine.sampleRate, false);
-                const endStr = formatTimecode(trk.endSample / engine.sampleRate, false);
+                const isFlushed = Boolean(trk.flushed);
+                const sr = Math.max(1, engine.sampleRate);
+                const durSec = isFlushed && Number.isFinite(trk.durationSec)
+                    ? Math.max(0, trk.durationSec)
+                    : Math.max(0, (trk.endSample - trk.startSample) / sr);
+                const absStartSample = isFlushed && Number.isFinite(trk.sessionStartSample)
+                    ? trk.sessionStartSample
+                    : (engine.bufferOffsetSamples + trk.startSample);
+                const absEndSample = isFlushed && Number.isFinite(trk.sessionEndSample)
+                    ? trk.sessionEndSample
+                    : (engine.bufferOffsetSamples + trk.endSample);
+                const startStr = formatTimecode(absStartSample / sr, false);
+                const endStr = formatTimecode(absEndSample / sr, false);
                 const durStr = formatTimecode(durSec, false);
 
                 const row = document.createElement('div');
                 row.className = 'track-row-card';
-                if (engine.isPlaying && engine._playbackRange &&
+                if (isFlushed) row.classList.add('is-flushed');
+                const isPlayingThisDisk = isFlushed && playingDiskTrackId === trk.id;
+                const isPlayingThisLive = !isFlushed && engine.isPlaying && engine._playbackRange &&
                     engine._playbackRange.start === trk.startSample &&
-                    engine._playbackRange.end === trk.endSample) {
+                    engine._playbackRange.end === trk.endSample;
+                if (isPlayingThisDisk || isPlayingThisLive) {
                     row.classList.add('is-playing');
                 }
 
@@ -1066,7 +1344,7 @@
 
                 const numBadge = document.createElement('div');
                 numBadge.className = 'track-num-badge';
-                numBadge.textContent = String(idx + 1).padStart(2, '0');
+                numBadge.textContent = String(idx + 1).padStart(tracks.length >= 100 ? 3 : 2, '0');
 
                 const coverThumbUrl = trk.coverBytes ? getTrackCoverObjectUrl(trk.coverBytes, trk.coverMime) : '';
                 let coverThumbEl = null;
@@ -1084,10 +1362,15 @@
                 titleInput.value = trk.title || `Track ${idx + 1}`;
                 titleInput.placeholder = 'Track Title';
                 titleInput.setAttribute('aria-label', `Track ${idx + 1} title`);
-                titleInput.addEventListener('input', () => {
-                    engine.updateTrackMeta(trk.id, { title: titleInput.value, userEditedTitle: true, saved: false });
-                    syncWaveTrackDisplay();
-                });
+                if (isFlushed) {
+                    titleInput.readOnly = true;
+                    titleInput.title = trk.savedFilename ? `Flushed to disk: ${trk.savedFilename}` : 'Flushed to disk';
+                } else {
+                    titleInput.addEventListener('input', () => {
+                        engine.updateTrackMeta(trk.id, { title: titleInput.value, userEditedTitle: true, saved: false });
+                        syncWaveTrackDisplay();
+                    });
+                }
 
                 const artistInput = document.createElement('input');
                 artistInput.type = 'text';
@@ -1095,10 +1378,14 @@
                 artistInput.value = trk.artist || '';
                 artistInput.placeholder = albumArtistMetaInput && albumArtistMetaInput.value ? albumArtistMetaInput.value : 'Artist (optional)';
                 artistInput.setAttribute('aria-label', `Track ${idx + 1} artist`);
-                artistInput.addEventListener('input', () => {
-                    engine.updateTrackMeta(trk.id, { artist: artistInput.value, userEditedArtist: true, saved: false });
-                    syncWaveTrackDisplay();
-                });
+                if (isFlushed) {
+                    artistInput.readOnly = true;
+                } else {
+                    artistInput.addEventListener('input', () => {
+                        engine.updateTrackMeta(trk.id, { artist: artistInput.value, userEditedArtist: true, saved: false });
+                        syncWaveTrackDisplay();
+                    });
+                }
 
                 const actions = document.createElement('div');
                 actions.className = 'track-row-actions';
@@ -1106,25 +1393,39 @@
                 const playTrkBtn = document.createElement('button');
                 playTrkBtn.type = 'button';
                 playTrkBtn.className = 'row-icon-btn';
-                playTrkBtn.title = 'Play track';
-                playTrkBtn.textContent = '▶ Play';
-                playTrkBtn.addEventListener('click', () => {
-                    engine.setSelection(trk.startSample, trk.endSample);
-                    engine.play(trk.startSample, trk.endSample);
-                });
+                if (isFlushed) {
+                    const canPlayFromFolder = Boolean(dirHandle && trk.savedFilename && trk.savedMethod === 'directory');
+                    playTrkBtn.title = canPlayFromFolder ? `Play "${trk.savedFilename}" from folder` : 'Already downloaded to your device';
+                    playTrkBtn.disabled = !canPlayFromFolder;
+                    playTrkBtn.textContent = isPlayingThisDisk ? '⏹ Stop' : '▶ Play';
+                    playTrkBtn.addEventListener('click', () => playFlushedTrackFromDisk(trk));
+                } else {
+                    playTrkBtn.title = 'Play track';
+                    playTrkBtn.textContent = '▶ Play';
+                    playTrkBtn.addEventListener('click', () => {
+                        engine.setSelection(trk.startSample, trk.endSample);
+                        engine.play(trk.startSample, trk.endSample);
+                    });
+                }
 
                 const saveTrkBtn = document.createElement('button');
                 saveTrkBtn.type = 'button';
                 saveTrkBtn.className = `row-icon-btn row-save-btn${trk.saved ? ' saved' : ''}`;
-                saveTrkBtn.title = 'Save this track';
-                saveTrkBtn.disabled = Boolean(trk.saving);
-                saveTrkBtn.textContent = trk.saving ? '⏳...' : (trk.saved ? '✓ Saved' : '💾 Save');
-                saveTrkBtn.addEventListener('click', () => saveSingleTrack(idx, false));
+                if (isFlushed) {
+                    saveTrkBtn.title = trk.savedFilename ? `Flushed to disk: ${trk.savedFilename}` : 'Flushed to disk';
+                    saveTrkBtn.disabled = true;
+                    saveTrkBtn.textContent = '✓ On Disk';
+                } else {
+                    saveTrkBtn.title = 'Save this track';
+                    saveTrkBtn.disabled = Boolean(trk.saving);
+                    saveTrkBtn.textContent = trk.saving ? '⏳...' : (trk.saved ? '✓ Saved' : '💾 Save');
+                    saveTrkBtn.addEventListener('click', () => saveSingleTrack(idx, false));
+                }
 
                 actions.appendChild(playTrkBtn);
                 actions.appendChild(saveTrkBtn);
 
-                if (showMobileShare) {
+                if (showMobileShare && !isFlushed) {
                     const shareBtn = document.createElement('button');
                     shareBtn.type = 'button';
                     shareBtn.className = 'row-icon-btn';
@@ -1152,6 +1453,14 @@
                 timeMeta.textContent = `${startStr}–${endStr} (${durStr})`;
                 metaGroup.appendChild(timeMeta);
 
+                if (isFlushed) {
+                    const flushedPill = document.createElement('span');
+                    flushedPill.className = 'track-tag-pill is-flushed';
+                    flushedPill.textContent = trk.savedMethod === 'download' ? '💾 Downloaded • RAM Freed' : '💾 Flushed to Disk';
+                    flushedPill.title = trk.savedFilename ? `Saved as ${trk.savedFilename} (PCM evicted from browser RAM)` : 'PCM evicted from browser RAM';
+                    metaGroup.appendChild(flushedPill);
+                }
+
                 if (trk.identifying) {
                     const tagPill = document.createElement('span');
                     tagPill.className = 'track-tag-pill is-tagging';
@@ -1173,43 +1482,45 @@
                 const subTools = document.createElement('div');
                 subTools.className = 'track-sub-tools';
 
-                const idBtn = document.createElement('button');
-                idBtn.type = 'button';
-                idBtn.className = `row-icon-btn row-identify-btn${trk.identified ? ' identified' : ''}`;
-                idBtn.disabled = Boolean(trk.identifying);
-                idBtn.title = trk.identifying ? 'Auto-tagging song...' : 'Re-tag song automatically (AcoustID)';
-                idBtn.setAttribute('aria-label', `Re-tag track ${idx + 1}`);
-                idBtn.textContent = trk.identifying ? '⏳' : '🪄';
-                idBtn.addEventListener('click', () => identifyTrackById(trk.id, { manual: true, forceOverwrite: true }));
-                subTools.appendChild(idBtn);
+                if (!isFlushed) {
+                    const idBtn = document.createElement('button');
+                    idBtn.type = 'button';
+                    idBtn.className = `row-icon-btn row-identify-btn${trk.identified ? ' identified' : ''}`;
+                    idBtn.disabled = Boolean(trk.identifying);
+                    idBtn.title = trk.identifying ? 'Auto-tagging song...' : 'Re-tag song automatically (AcoustID)';
+                    idBtn.setAttribute('aria-label', `Re-tag track ${idx + 1}`);
+                    idBtn.textContent = trk.identifying ? '⏳' : '🪄';
+                    idBtn.addEventListener('click', () => identifyTrackById(trk.id, { manual: true, forceOverwrite: true }));
+                    subTools.appendChild(idBtn);
 
-                const selTrkBtn = document.createElement('button');
-                selTrkBtn.type = 'button';
-                selTrkBtn.className = 'row-icon-btn';
-                selTrkBtn.title = 'Select on wave';
-                selTrkBtn.textContent = '🎯';
-                selTrkBtn.addEventListener('click', () => {
-                    engine.setSelection(trk.startSample, trk.endSample);
-                    engine.cursorSample = trk.startSample;
-                    updateUiState();
-                });
-                subTools.appendChild(selTrkBtn);
+                    const selTrkBtn = document.createElement('button');
+                    selTrkBtn.type = 'button';
+                    selTrkBtn.className = 'row-icon-btn';
+                    selTrkBtn.title = 'Select on wave';
+                    selTrkBtn.textContent = '🎯';
+                    selTrkBtn.addEventListener('click', () => {
+                        engine.setSelection(trk.startSample, trk.endSample);
+                        engine.cursorSample = trk.startSample;
+                        updateUiState();
+                    });
+                    subTools.appendChild(selTrkBtn);
 
-                if (idx > 0) {
-                    const mergeBtn = document.createElement('button');
-                    mergeBtn.type = 'button';
-                    mergeBtn.className = 'row-icon-btn';
-                    mergeBtn.title = 'Merge with previous track';
-                    mergeBtn.textContent = '🔗';
-                    mergeBtn.addEventListener('click', () => engine.mergeTrackWithPrevious(trk.id));
-                    subTools.appendChild(mergeBtn);
+                    if (idx > 0 && !tracks[idx - 1].flushed) {
+                        const mergeBtn = document.createElement('button');
+                        mergeBtn.type = 'button';
+                        mergeBtn.className = 'row-icon-btn';
+                        mergeBtn.title = 'Merge with previous track';
+                        mergeBtn.textContent = '🔗';
+                        mergeBtn.addEventListener('click', () => engine.mergeTrackWithPrevious(trk.id));
+                        subTools.appendChild(mergeBtn);
+                    }
                 }
 
                 if (tracks.length > 1) {
                     const rmBtn = document.createElement('button');
                     rmBtn.type = 'button';
                     rmBtn.className = 'row-icon-btn';
-                    rmBtn.title = 'Remove track';
+                    rmBtn.title = isFlushed ? 'Remove from list (file stays on disk)' : 'Remove track';
                     rmBtn.textContent = '✕';
                     rmBtn.addEventListener('click', () => engine.deleteTrackRegion(trk.id));
                     subTools.appendChild(rmBtn);
@@ -1264,7 +1575,7 @@
                     : (isArmed ? 'Armed (Stop)' : (isPaused ? 'Stop Rec' : 'Record'));
             }
             if (stopBtn) {
-                stopBtn.disabled = isIdle && !engine.isPlaying;
+                stopBtn.disabled = isIdle && !engine.isPlaying && !playingDiskTrackId;
             }
             if (playBtn) {
                 playBtn.disabled = !hasAudio || !isIdle;
@@ -1289,14 +1600,20 @@
             if (fadeOutBtn) fadeOutBtn.disabled = !hasAudio || !isIdle;
             if (normalizeBtn) normalizeBtn.disabled = !hasAudio || !isIdle;
             if (trimDeadAirBtn) trimDeadAirBtn.disabled = !hasAudio || !isIdle;
-            if (clearSessionBtn) clearSessionBtn.disabled = !hasAudio;
+            if (clearSessionBtn) clearSessionBtn.disabled = !(hasAudio || engine.tracks.length > 0);
             if (scanSplitNowBtn) scanSplitNowBtn.disabled = !hasAudio || !isIdle;
             if (quickAutoSplitBtn) quickAutoSplitBtn.disabled = !hasAudio || !isIdle;
             if (exportAllBtn) exportAllBtn.disabled = !hasAudio || !isIdle;
 
             if (lcdFormatInfo) {
-                const dur = formatTimecode(engine.getDurationSeconds(), false);
-                lcdFormatInfo.textContent = `${(engine.sampleRate / 1000).toFixed(1)} kHz • Stereo • ${dur}`;
+                const dur = formatTimecode(engine.getTotalDurationSeconds(), false);
+                const flushedCount = engine.getFlushedTrackCount();
+                const ramStr = formatBytesCompact(engine.getRamUsageBytes());
+                if (flushedCount > 0 || (isTrackByTrackFlushActive() && !isIdle)) {
+                    lcdFormatInfo.textContent = `${(engine.sampleRate / 1000).toFixed(1)} kHz • Stereo • ${dur} • RAM ${ramStr}${flushedCount > 0 ? ` • ${flushedCount} Flushed` : ''}`;
+                } else {
+                    lcdFormatInfo.textContent = `${(engine.sampleRate / 1000).toFixed(1)} kHz • Stereo • ${dur}`;
+                }
             }
 
             if (selectionReadout) {
@@ -1435,7 +1752,7 @@
             }
 
             if (total > 0 && viewSpanSamples > 0) {
-                const startSec = viewStartSample / engine.sampleRate;
+                const startSec = (engine.bufferOffsetSamples + viewStartSample) / engine.sampleRate;
                 const spanSec = viewSpanSamples / engine.sampleRate;
                 const targetTicks = Math.max(3, Math.floor(W / 95));
                 const rawStep = spanSec / targetTicks;
@@ -1461,6 +1778,7 @@
                 // Track Regions Lane
                 const tracks = engine.tracks || [];
                 tracks.forEach((trk, idx) => {
+                    if (trk.flushed) return;
                     const x0 = Math.max(0, sampleToX(trk.startSample, W));
                     const x1 = Math.min(W, sampleToX(trk.endSample, W));
                     if (x1 <= 0 || x0 >= W) return;
@@ -1757,11 +2075,24 @@
         function animationTick(now) {
             if (lcdTimecode) {
                 if (engine.recordState === 'recording') {
-                    lcdTimecode.textContent = formatTimecode(engine.getDurationSeconds());
+                    lcdTimecode.textContent = formatTimecode(engine.getTotalDurationSeconds());
                 } else if (engine.isPlaying) {
-                    lcdTimecode.textContent = formatTimecode(engine.getPlaybackPositionSample() / engine.sampleRate);
+                    lcdTimecode.textContent = formatTimecode((engine.bufferOffsetSamples + engine.getPlaybackPositionSample()) / engine.sampleRate);
                 } else {
-                    lcdTimecode.textContent = formatTimecode(engine.cursorSample / engine.sampleRate);
+                    lcdTimecode.textContent = formatTimecode((engine.bufferOffsetSamples + engine.cursorSample) / engine.sampleRate);
+                }
+            }
+
+            if (engine.recordState === 'recording' && now - lastRamCheckMs > 5000) {
+                lastRamCheckMs = now;
+                if (!isTrackByTrackFlushActive() && !warnedHighRamWithoutFolder && engine.getRamUsageBytes() > 350 * 1024 * 1024) {
+                    warnedHighRamWithoutFolder = true;
+                    showToast(
+                        supportsFolderPicker
+                            ? '⚡ Long recording: connect a Save Folder (top right) to enable Track-by-Track Flush & keep RAM low.'
+                            : '⚡ Long recording: enable Auto-Download Live Tracks in Settings to flush RAM track-by-track.',
+                        'warning'
+                    );
                 }
             }
 
@@ -1832,7 +2163,7 @@
 
                 if (y > rect.height - 26) {
                     const clickSample = xToSample(x, rect.width);
-                    const hitTrack = engine.tracks.find(t => clickSample >= t.startSample && clickSample <= t.endSample);
+                    const hitTrack = engine.tracks.find(t => !t.flushed && clickSample >= t.startSample && clickSample <= t.endSample);
                     if (hitTrack) {
                         engine.setSelection(hitTrack.startSample, hitTrack.endSample);
                         engine.cursorSample = hitTrack.startSample;
@@ -1845,7 +2176,7 @@
                 const nowMs = Date.now();
                 if (nowMs - lastTapTime < 320 && Math.abs(x - lastTapX) < 24) {
                     const sample = xToSample(x, rect.width);
-                    const hit = engine.tracks.find(t => sample >= t.startSample && sample <= t.endSample);
+                    const hit = engine.tracks.find(t => !t.flushed && sample >= t.startSample && sample <= t.endSample);
                     if (hit) engine.setSelection(hit.startSample, hit.endSample);
                     else engine.setSelection(0, engine.length);
                     activePointerId = null;
@@ -1864,6 +2195,7 @@
                 }
 
                 for (let i = 1; i < engine.tracks.length; i++) {
+                    if (engine.tracks[i].flushed || engine.tracks[i - 1].flushed) continue;
                     const bx = sampleToX(engine.tracks[i].startSample, rect.width);
                     if (Math.abs(x - bx) <= edgePx) {
                         dragMode = 'move-split';
@@ -1922,6 +2254,7 @@
                     }
                 }
                 for (let i = 1; i < engine.tracks.length; i++) {
+                    if (engine.tracks[i].flushed || engine.tracks[i - 1].flushed) continue;
                     const bx = sampleToX(engine.tracks[i].startSample, rect.width);
                     if (Math.abs(x - bx) <= edgePx) {
                         waveformCanvas.style.cursor = 'col-resize';
@@ -2061,6 +2394,7 @@
             stopBtn.addEventListener('click', () => {
                 if (engine.recordState !== 'idle') engine.stopRecording();
                 if (engine.isPlaying) engine.stopPlayback();
+                stopDiskPlayback(false);
                 engine.cursorSample = 0;
                 updateUiState();
             });
@@ -2105,6 +2439,9 @@
             else showToast('No dead air above threshold to trim.', 'info');
         });
         if (clearSessionBtn) clearSessionBtn.addEventListener('click', () => {
+            stopDiskPlayback(true);
+            usedSavedFilenames.clear();
+            warnedHighRamWithoutFolder = false;
             engine.clearSession();
             showToast('Cleared waveform', 'info');
         });
@@ -2125,29 +2462,49 @@
             });
         }
 
-        // Auto-Split Settings
+        // Auto-Split & Track-by-Track Flush Settings
         const syncSettingsToEngine = () => {
             const thresholdDb = thresholdDbSlider ? Number(thresholdDbSlider.value) : -42;
             const minSilenceSec = minSilenceSlider ? Number(minSilenceSlider.value) : 1.5;
             const minTrackSec = minTrackSlider ? Number(minTrackSlider.value) : 10;
+            const maxSegmentMin = maxSegmentSlider ? Number(maxSegmentSlider.value) : 15;
             if (thresholdDbVal) thresholdDbVal.textContent = `${thresholdDb} dB`;
             if (minSilenceVal) minSilenceVal.textContent = `${minSilenceSec.toFixed(1)} s`;
             if (minTrackVal) minTrackVal.textContent = `${minTrackSec} s`;
+            if (maxSegmentVal) maxSegmentVal.textContent = `${maxSegmentMin} min`;
 
             engine.updateSettings({
                 liveAutoSplit: liveAutoSplitToggle ? liveAutoSplitToggle.checked : true,
                 soundActivated: soundActivatedToggle ? soundActivatedToggle.checked : false,
                 autoTrimSilence: autoTrimSilenceToggle ? autoTrimSilenceToggle.checked : true,
+                flushToDiskMode: isTrackByTrackFlushActive(),
+                maxSegmentSec: Math.max(60, maxSegmentMin * 60),
                 thresholdDb,
                 minSilenceSec,
                 minTrackSec
             });
         };
 
-        [liveAutoSplitToggle, soundActivatedToggle, autoTrimSilenceToggle, thresholdDbSlider, minSilenceSlider, minTrackSlider].forEach(el => {
+        [liveAutoSplitToggle, soundActivatedToggle, autoTrimSilenceToggle, autoSaveLiveToggle, flushOnSaveToggle, thresholdDbSlider, minSilenceSlider, minTrackSlider, maxSegmentSlider].forEach(el => {
             if (el) el.addEventListener('input', syncSettingsToEngine);
             if (el) el.addEventListener('change', syncSettingsToEngine);
         });
+        if (flushOnSaveToggle) {
+            flushOnSaveToggle.addEventListener('change', () => {
+                if (flushOnSaveToggle.checked && supportsFolderPicker && !dirHandle) {
+                    showToast('📁 Pick a Save Folder in the top bar so finished tracks flush directly to disk.', 'info');
+                }
+                updateUiState();
+            });
+        }
+        if (autoSaveLiveToggle) {
+            autoSaveLiveToggle.addEventListener('change', () => {
+                if (autoSaveLiveToggle.checked && supportsFolderPicker && !dirHandle) {
+                    showToast('📁 Pick a Save Folder in the top bar to auto-save & flush tracks live.', 'info');
+                }
+                updateUiState();
+            });
+        }
         syncSettingsToEngine();
 
         if (autoIdentifyToggle) {
