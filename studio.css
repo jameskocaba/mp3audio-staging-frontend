@@ -329,7 +329,11 @@ html, body {
     gap: 6px;
     flex-wrap: nowrap;
     flex-shrink: 0;
-    width: auto;
+    width: 100%;
+}
+
+.transport-buttons .t-btn {
+    flex: 1 0 auto;
 }
 
 .t-btn {
@@ -1334,7 +1338,7 @@ html, body {
 }
 
 .studio-drawer.studio-drawer-inline-tools[open] > .drawer-body {
-    width: 300px;
+    width: 320px;
 }
 
 .studio-drawer.studio-drawer-inline-tags[open] > .drawer-body {
@@ -1359,6 +1363,18 @@ html, body {
     text-align: center;
     white-space: normal;
     line-height: 1.25;
+}
+
+.tool-chip-btn.t-btn-split-marker {
+    background: rgba(217, 119, 6, 0.10);
+    border-color: rgba(217, 119, 6, 0.40);
+    color: #92400e;
+}
+
+.tool-chip-btn.t-btn-loop.is-active {
+    background: rgba(2, 132, 199, 0.14);
+    border-color: var(--wave-cyan);
+    color: #0369a1;
 }
 
 .studio-drawer.studio-drawer-inline .album-meta-bar {
