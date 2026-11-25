@@ -300,11 +300,16 @@
             await this._setupCaptureProcessor(ctx);
 
             const handleEnded = () => {
+                let stopResult = null;
                 if (this.recordState === 'recording' || this.recordState === 'paused' || this.recordState === 'armed') {
-                    this.stopRecording();
+                    stopResult = this.stopRecording();
                 }
                 this.disconnectSource();
-                this._emit('onSourceEnded', { mode, label });
+                this._emit('onSourceEnded', {
+                    mode,
+                    label,
+                    noSoundDetected: Boolean(stopResult && stopResult.noSoundDetected)
+                });
             };
 
             stream.getAudioTracks().forEach(t => {
@@ -452,7 +457,9 @@
             }
 
             this.stopPlayback();
-            if (!this.settings.flushToDiskMode) {
+            const isAppending = Boolean(appendToExisting && (this.length > 0 || this.tracks.length > 0));
+            const pushedUndo = !this.settings.flushToDiskMode;
+            if (pushedUndo) {
                 this._pushUndo();
             } else {
                 this.undoStack = [];
@@ -462,7 +469,7 @@
 
             const ctxRate = this.audioCtx ? this.audioCtx.sampleRate : 44100;
 
-            if (!appendToExisting || (this.length === 0 && this.tracks.length === 0)) {
+            if (!isAppending) {
                 this.sampleRate = ctxRate;
                 this._initRecordingCapacity(Math.max(INITIAL_CAPACITY_SAMPLES, ctxRate * 120));
                 this.length = 0;
@@ -484,6 +491,10 @@
             this._armedSpeechSamples = 0;
 
             this._liveState = {
+                takeStartSample: this.length,
+                takeHadTracksCreated: false,
+                appendToExisting: isAppending,
+                pushedUndo,
                 currentTrackStartSample: this.length,
                 inSilence: false,
                 silenceStartSample: 0,
@@ -513,10 +524,28 @@
             }
         }
 
-        stopRecording() {
-            if (this.recordState === 'idle') return;
+        hasAudibleAudio(startSample = 0, endSample = this.length, thresholdDb = null) {
+            const maxLen = Math.min(this.length, this.left.length, this.right.length);
+            const s = Math.max(0, Math.min(maxLen, Math.floor(startSample || 0)));
+            const e = Math.max(s, Math.min(maxLen, Math.floor(endSample === undefined ? maxLen : endSample)));
+            if (e <= s) return false;
+            const dbLimit = Number(thresholdDb !== null && thresholdDb !== undefined ? thresholdDb : (this.settings.thresholdDb ?? -42));
+            const frameSize = Math.max(256, Math.round((this.sampleRate || 44100) * 0.05));
+            for (let pos = s; pos < e; pos += frameSize) {
+                const fEnd = Math.min(e, pos + frameSize);
+                if (computeStereoFrameDb(this.left, this.right, pos, fEnd) >= dbLimit) {
+                    return true;
+                }
+            }
+            return false;
+        }
 
-            const wasArmedOnly = this.recordState === 'armed' && this.length === 0;
+        stopRecording(options = {}) {
+            if (this.recordState === 'idle') return { noSoundDetected: false, createdTracks: [] };
+
+            const suppressNoSoundEvent = Boolean(options && options.suppressNoSoundEvent);
+            const liveState = this._liveState;
+            const wasArmedOnly = this.recordState === 'armed' && (!liveState || this.length <= liveState.takeStartSample);
             this.recordState = 'idle';
 
             // Trim capacity tightly to recorded length
@@ -525,45 +554,89 @@
             this._recLeftCap = new Int16Array(0);
             this._recRightCap = new Int16Array(0);
 
-            // Finalize trailing track region if there is recorded audio since currentTrackStartSample
+            const takeStart = liveState ? Math.max(0, Math.min(this.length, liveState.takeStartSample)) : 0;
+            const takeHadTracks = Boolean(liveState && liveState.takeHadTracksCreated);
+            const takeHasAudibleSound = !wasArmedOnly && this.hasAudibleAudio(takeStart, this.length);
+
+            // If this recording contained no audible sound, do not create a track/MP3 and notify the user
+            if (!takeHadTracks && !takeHasAudibleSound) {
+                if (liveState && liveState.appendToExisting) {
+                    this.left = this.left.slice(0, takeStart);
+                    this.right = this.right.slice(0, takeStart);
+                    this.length = takeStart;
+                } else {
+                    this.left = new Int16Array(0);
+                    this.right = new Int16Array(0);
+                    this.length = 0;
+                    this.tracks = [];
+                    this.selection = null;
+                }
+
+                if (liveState && liveState.pushedUndo && this.undoStack.length > 0) {
+                    this.undoStack.pop();
+                    this._emit('onHistoryChanged', { canUndo: this.undoStack.length > 0, canRedo: this.redoStack.length > 0 });
+                }
+
+                this._liveState = null;
+                this._preRollBuffer = [];
+                this._preRollSamples = 0;
+
+                this._rebuildPeakCache();
+                this.cursorSample = Math.min(this.cursorSample, this.length);
+
+                this._emit('onRecordStateChanged', { state: 'idle', noSoundDetected: true });
+                this._emit('onTracksChanged', this.tracks);
+                this._emit('onBufferChanged', { length: this.length, sampleRate: this.sampleRate });
+                if (!suppressNoSoundEvent) {
+                    this._emit('onRecordingSilent', {
+                        reason: 'no-sound',
+                        message: 'An MP3 was not generated because no sound was detected.'
+                    });
+                }
+                return { noSoundDetected: true, createdTracks: [] };
+            }
+
+            // Finalize trailing track region if there is audible recorded audio since currentTrackStartSample
             const createdOnStop = [];
-            if (!wasArmedOnly && this.length > 0 && this._liveState && !this._liveState.waitingForNextTrackStart) {
-                let startS = Math.max(0, Math.min(this.length, this._liveState.currentTrackStartSample));
+            if (!wasArmedOnly && this.length > 0 && liveState && !liveState.waitingForNextTrackStart) {
+                let startS = Math.max(0, Math.min(this.length, liveState.currentTrackStartSample));
                 let endS = this.length;
                 const pad = Math.round(this.sampleRate * 0.12);
-                if (this._liveState.inSilence && this._liveState.silenceStartSample > startS) {
-                    endS = Math.min(this.length, this._liveState.silenceStartSample + pad);
+                if (liveState.inSilence && liveState.silenceStartSample > startS) {
+                    endS = Math.min(this.length, liveState.silenceStartSample + pad);
                 }
-                if (this.settings.autoTrimSilence && endS - startS > Math.round(this.sampleRate * 0.5)) {
-                    const frameSize = Math.max(256, Math.round(this.sampleRate * 0.05));
-                    const dbLimit = Number(this.settings.thresholdDb ?? -42);
-                    let firstSound = -1;
-                    let lastSound = -1;
-                    for (let pos = startS; pos < endS; pos += frameSize) {
-                        const fEnd = Math.min(endS, pos + frameSize);
-                        if (computeStereoFrameDb(this.left, this.right, pos, fEnd) >= dbLimit) {
-                            if (firstSound === -1) firstSound = pos;
-                            lastSound = fEnd;
+                if (this.hasAudibleAudio(startS, endS)) {
+                    if (this.settings.autoTrimSilence && endS - startS > Math.round(this.sampleRate * 0.5)) {
+                        const frameSize = Math.max(256, Math.round(this.sampleRate * 0.05));
+                        const dbLimit = Number(this.settings.thresholdDb ?? -42);
+                        let firstSound = -1;
+                        let lastSound = -1;
+                        for (let pos = startS; pos < endS; pos += frameSize) {
+                            const fEnd = Math.min(endS, pos + frameSize);
+                            if (computeStereoFrameDb(this.left, this.right, pos, fEnd) >= dbLimit) {
+                                if (firstSound === -1) firstSound = pos;
+                                lastSound = fEnd;
+                            }
+                        }
+                        if (firstSound !== -1 && lastSound > firstSound) {
+                            const trimmedStart = Math.max(startS, firstSound - pad);
+                            const trimmedEnd = Math.min(endS, lastSound + pad);
+                            if (trimmedEnd - trimmedStart > Math.round(this.sampleRate * 0.5)) {
+                                startS = trimmedStart;
+                                endS = trimmedEnd;
+                            }
                         }
                     }
-                    if (firstSound !== -1 && lastSound > firstSound) {
-                        const trimmedStart = Math.max(startS, firstSound - pad);
-                        const trimmedEnd = Math.min(endS, lastSound + pad);
-                        if (trimmedEnd - trimmedStart > Math.round(this.sampleRate * 0.5)) {
-                            startS = trimmedStart;
-                            endS = trimmedEnd;
-                        }
+                    if (endS - startS > Math.round(this.sampleRate * 0.5)) {
+                        const track = this._createTrackObject(this.tracks.length, startS, endS);
+                        this.tracks.push(track);
+                        createdOnStop.push(track);
+                        this._emit('onTrackAutoSplit', track);
                     }
-                }
-                if (endS - startS > Math.round(this.sampleRate * 0.5)) {
-                    const track = this._createTrackObject(this.tracks.length, startS, endS);
-                    this.tracks.push(track);
-                    createdOnStop.push(track);
-                    this._emit('onTrackAutoSplit', track);
                 }
             }
 
-            if (this.length > 0 && this.tracks.length === 0) {
+            if (this.length > 0 && this.tracks.length === 0 && this.hasAudibleAudio(0, this.length)) {
                 const track = this._createTrackObject(0, 0, this.length);
                 this.tracks.push(track);
                 createdOnStop.push(track);
@@ -576,12 +649,13 @@
             this._rebuildPeakCache();
             this.cursorSample = 0;
 
-            this._emit('onRecordStateChanged', { state: 'idle' });
+            this._emit('onRecordStateChanged', { state: 'idle', noSoundDetected: false });
             this._emit('onTracksChanged', this.tracks);
             this._emit('onBufferChanged', { length: this.length, sampleRate: this.sampleRate });
             if (createdOnStop.length > 0) {
                 this._emit('onTracksCreated', { tracks: createdOnStop, reason: 'record-stop' });
             }
+            return { noSoundDetected: false, createdTracks: createdOnStop };
         }
 
         _initRecordingCapacity(cap) {
@@ -809,13 +883,16 @@
                             const trackDur = ls.silenceStartSample - ls.currentTrackStartSample;
                             if (silenceDur >= minSilenceSamples && trackDur >= minTrackSamples) {
                                 const trackEnd = Math.min(this.length, ls.silenceStartSample + padSamples);
-                                const track = this._createTrackObject(this.tracks.length, ls.currentTrackStartSample, trackEnd);
-                                this.tracks.push(track);
                                 ls.waitingForNextTrackStart = true;
                                 ls.inSilence = false;
-                                this._emit('onTrackAutoSplit', track);
-                                this._emit('onTracksChanged', this.tracks);
-                                this._emit('onTracksCreated', { tracks: [track], reason: 'live-split' });
+                                if (this.hasAudibleAudio(ls.currentTrackStartSample, trackEnd)) {
+                                    const track = this._createTrackObject(this.tracks.length, ls.currentTrackStartSample, trackEnd);
+                                    this.tracks.push(track);
+                                    ls.takeHadTracksCreated = true;
+                                    this._emit('onTrackAutoSplit', track);
+                                    this._emit('onTracksChanged', this.tracks);
+                                    this._emit('onTracksCreated', { tracks: [track], reason: 'live-split' });
+                                }
                                 pos = chunkEnd;
                                 continue;
                             }
@@ -826,15 +903,22 @@
 
                     // Marathon safety valve: split continuous gapless streams at maxSegmentSec so RAM stays bounded
                     if (maxSegmentSamples > 0 && (chunkEnd - ls.currentTrackStartSample) >= maxSegmentSamples) {
-                        const track = this._createTrackObject(this.tracks.length, ls.currentTrackStartSample, chunkEnd);
-                        track.splitReason = 'max-segment';
-                        this.tracks.push(track);
-                        ls.currentTrackStartSample = chunkEnd;
-                        ls.inSilence = false;
-                        ls.waitingForNextTrackStart = false;
-                        this._emit('onTrackAutoSplit', track);
-                        this._emit('onTracksChanged', this.tracks);
-                        this._emit('onTracksCreated', { tracks: [track], reason: 'max-segment' });
+                        if (this.hasAudibleAudio(ls.currentTrackStartSample, chunkEnd)) {
+                            const track = this._createTrackObject(this.tracks.length, ls.currentTrackStartSample, chunkEnd);
+                            track.splitReason = 'max-segment';
+                            this.tracks.push(track);
+                            ls.takeHadTracksCreated = true;
+                            ls.currentTrackStartSample = chunkEnd;
+                            ls.inSilence = false;
+                            ls.waitingForNextTrackStart = false;
+                            this._emit('onTrackAutoSplit', track);
+                            this._emit('onTracksChanged', this.tracks);
+                            this._emit('onTracksCreated', { tracks: [track], reason: 'max-segment' });
+                        } else {
+                            ls.currentTrackStartSample = chunkEnd;
+                            ls.inSilence = false;
+                            ls.waitingForNextTrackStart = true;
+                        }
                     }
                 }
                 pos = chunkEnd;
@@ -993,6 +1077,7 @@
             }
 
             if (this._liveState) {
+                this._liveState.takeStartSample = Math.max(0, this._liveState.takeStartSample - evictEnd);
                 this._liveState.currentTrackStartSample = Math.max(0, this._liveState.currentTrackStartSample - evictEnd);
                 this._liveState.silenceStartSample = Math.max(0, this._liveState.silenceStartSample - evictEnd);
             }
@@ -1032,6 +1117,7 @@
                 if (splitAt - startS >= Math.round(this.sampleRate * 0.5)) {
                     const track = this._createTrackObject(this.tracks.length, startS, splitAt);
                     this.tracks.push(track);
+                    this._liveState.takeHadTracksCreated = true;
                     this._liveState.currentTrackStartSample = splitAt;
                     this._liveState.waitingForNextTrackStart = false;
                     this._liveState.inSilence = false;
@@ -1539,7 +1625,7 @@
         async importAudioFile(file) {
             if (!file) throw new Error('No file selected');
             this.stopPlayback();
-            if (this.recordState !== 'idle') this.stopRecording();
+            if (this.recordState !== 'idle') this.stopRecording({ suppressNoSoundEvent: true });
 
             const ctx = await this._ensureAudioContext();
             const arrayBuf = await file.arrayBuffer();
@@ -1639,7 +1725,7 @@
 
         clearSession() {
             this.stopPlayback();
-            if (this.recordState !== 'idle') this.stopRecording();
+            if (this.recordState !== 'idle') this.stopRecording({ suppressNoSoundEvent: true });
             if (this.length > 0) this._pushUndo();
             this.left = new Int16Array(0);
             this.right = new Int16Array(0);

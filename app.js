@@ -128,6 +128,7 @@
         // --- App State ---
         const LIVE_SCROLL_SECONDS = 12;
         const TRACKS_WINDOW_STEP = 50;
+        const NO_SOUND_MP3_MSG = 'An MP3 was not generated because no sound was detected.';
         let dirHandle = null;
         let visibleFlushedLimit = TRACKS_WINDOW_STEP;
         let coverArtBytes = null;
@@ -137,6 +138,7 @@
         let autoSaveQueue = Promise.resolve();
         let lastObservedRecLength = 0;
         let prevRecordState = 'idle';
+        let lastRecordingNoSound = false;
         let wakeLockSentinel = null;
         let diskAudioEl = null;
         let diskAudioUrl = '';
@@ -203,7 +205,7 @@
         }
 
         // --- Toast Helper ---
-        function showToast(message, type = 'info') {
+        function showToast(message, type = 'info', durationMs = 4000) {
             let container = document.getElementById('toast-container');
             if (!container) {
                 container = document.createElement('div');
@@ -216,7 +218,7 @@
             toast.innerHTML = `<span>${icon}</span><span></span>`;
             toast.children[1].textContent = message;
             container.appendChild(toast);
-            setTimeout(() => { try { toast.remove(); } catch (_) { } }, 4000);
+            setTimeout(() => { try { toast.remove(); } catch (_) { } }, Math.max(1500, Number(durationMs) || 4000));
         }
 
         function formatTimecode(seconds, includeTenths = true) {
@@ -480,15 +482,22 @@
             onSourceDisconnected: () => {
                 updateUiState();
             },
-            onSourceEnded: () => {
-                showToast('Capture stopped — recorded wave is ready below.', 'info');
+            onSourceEnded: ({ noSoundDetected } = {}) => {
+                if (!noSoundDetected) {
+                    if (engine.length > 0 || engine.tracks.length > 0) {
+                        showToast('Capture stopped — recorded wave is ready below.', 'info');
+                    } else {
+                        showToast('Capture source stopped.', 'info');
+                    }
+                }
                 updateUiState();
             },
-            onRecordStateChanged: ({ state }) => {
+            onRecordStateChanged: ({ state, noSoundDetected } = {}) => {
                 const wasActiveRec = prevRecordState !== 'idle';
                 prevRecordState = state;
                 resetSmoothScrollState();
                 if (state === 'recording' || state === 'armed') {
+                    lastRecordingNoSound = false;
                     stopDiskPlayback(true);
                     acquireWakeLock();
                     if (!wasActiveRec && engine.length === 0 && engine.tracks.length === 0) {
@@ -497,6 +506,9 @@
                         visibleFlushedLimit = TRACKS_WINDOW_STEP;
                     }
                 } else if (state === 'idle') {
+                    if (noSoundDetected) {
+                        lastRecordingNoSound = true;
+                    }
                     releaseWakeLock();
                 }
                 if (state === 'armed') {
@@ -510,12 +522,20 @@
                 clampViewport();
                 syncPanScrollbar();
                 updateUiState();
-                if (wasActiveRec && state === 'idle' && engine.length > 0 && isAutoTagEnabled()) {
+                if (wasActiveRec && state === 'idle' && !noSoundDetected && engine.length > 0 && isAutoTagEnabled()) {
                     queueAutoTagTracks(engine.getUnflushedTracks());
                 }
             },
+            onRecordingSilent: ({ message } = {}) => {
+                lastRecordingNoSound = true;
+                showToast(message || NO_SOUND_MP3_MSG, 'warning', 6000);
+                updateUiState();
+            },
             onPlaybackStateChanged: ({ playing } = {}) => {
-                if (playing) stopDiskPlayback(true);
+                if (playing) {
+                    lastRecordingNoSound = false;
+                    stopDiskPlayback(true);
+                }
                 resetSmoothScrollState();
                 if (!playing && !userHasZoomed && engine.recordState === 'idle') {
                     viewStartSample = 0;
@@ -655,6 +675,8 @@
                 guidedStepBanner.innerHTML = '⚡ <strong>Armed:</strong> Hit Play on your music stream and the continuous recording wave starts immediately.';
             } else if (engine.isPlaying || playingDiskTrackId) {
                 guidedStepBanner.innerHTML = '🎧 <strong>Playing:</strong> Drag on the wave to highlight a section, or tap <strong>💾 Save</strong> below.';
+            } else if (lastRecordingNoSound) {
+                guidedStepBanner.innerHTML = '⚠️ <strong>No sound detected:</strong> An MP3 was not generated because no sound was detected. Check that audio is playing and try recording again.';
             } else if (engine.length > 0 || engine.tracks.length > 0) {
                 const n = engine.tracks.length;
                 const flushedCount = engine.getFlushedTrackCount();
@@ -1013,6 +1035,7 @@
         async function handleLoadAudioFile(file) {
             if (!file) return;
             try {
+                lastRecordingNoSound = false;
                 showToast(`Loading ${file.name}...`, 'info');
                 const info = await engine.importAudioFile(file);
                 if (albumArtistMetaInput && info.artist && !albumArtistMetaInput.value) {
@@ -1115,6 +1138,12 @@
                         liveTrk.saving = false;
                         return;
                     }
+                    if (!engine.hasAudibleAudio(liveTrk.startSample, liveTrk.endSample)) {
+                        liveTrk.saving = false;
+                        renderTracksList();
+                        showToast(NO_SOUND_MP3_MSG, 'warning', 6000);
+                        return;
+                    }
                     const total = Math.max(liveTrk.index + 1, engine.tracks.length);
                     const meta = buildTrackExportMeta(liveTrk, liveTrk.index, total);
                     const { ext, blob } = await encodeTrackToBlob(liveTrk.startSample, liveTrk.endSample, meta);
@@ -1178,6 +1207,10 @@
                 return;
             }
             if (engine.length === 0) return;
+            if (!engine.hasAudibleAudio(track.startSample, track.endSample)) {
+                showToast(NO_SOUND_MP3_MSG, 'warning', 6000);
+                return;
+            }
             isExporting = true;
             if (inFlightIdentifyPromises.has(track.id)) {
                 setExportProgress(true, 'Auto-tagging song metadata...', 2);
@@ -1216,6 +1249,10 @@
             if (isExporting || engine.length === 0) return;
             const s = engine.selection ? engine.selection.startSample : 0;
             const e = engine.selection ? engine.selection.endSample : engine.length;
+            if (!engine.hasAudibleAudio(s, e)) {
+                showToast(NO_SOUND_MP3_MSG, 'warning', 6000);
+                return;
+            }
             isExporting = true;
             setExportProgress(true, 'Encoding selection...', 5);
             try {
@@ -1249,9 +1286,18 @@
                 return;
             }
 
-            const tracks = unflushed.length > 0
+            const rawTracks = unflushed.length > 0
                 ? unflushed
                 : [{ id: 'trk_full', index: engine.tracks.length, title: 'Recording 01', artist: '', startSample: 0, endSample: engine.length }];
+            const tracks = rawTracks.filter(t => engine.hasAudibleAudio(t.startSample, t.endSample));
+            const skippedSilentCount = rawTracks.length - tracks.length;
+            if (tracks.length === 0) {
+                showToast(NO_SOUND_MP3_MSG, 'warning', 6000);
+                return;
+            }
+            if (skippedSilentCount > 0) {
+                showToast(`Skipped ${skippedSilentCount} silent track${skippedSilentCount === 1 ? '' : 's'} — ${NO_SOUND_MP3_MSG}`, 'warning', 6000);
+            }
 
             if (tracks.length === 1 && !dirHandle) {
                 const idx = engine.tracks.indexOf(tracks[0]);
@@ -2558,6 +2604,7 @@
             else showToast('No dead air above threshold to trim.', 'info');
         });
         if (clearSessionBtn) clearSessionBtn.addEventListener('click', () => {
+            lastRecordingNoSound = false;
             stopDiskPlayback(true);
             usedSavedFilenames.clear();
             warnedHighRamWithoutFolder = false;
