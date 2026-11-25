@@ -6,7 +6,7 @@
      * 100% client-side Audacity-style capture, live silence auto-splitting,
      * stereo Int16 PCM buffer management, DSP editing, Undo/Redo, and playback engine.
      */
-    const PEAK_BUCKET_SIZE = 512;
+    const PEAK_BUCKET_SIZE = 128;
     const MAX_UNDO_STATES = 15;
     const INITIAL_CAPACITY_SAMPLES = 48000 * 120; // 2 minutes initial capacity, grows automatically
 

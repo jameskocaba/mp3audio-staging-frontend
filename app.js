@@ -133,6 +133,11 @@
         let viewStartSample = 0;
         let viewSpanSamples = 0;
         let userHasZoomed = false;
+        let lastAnimNow = 0;
+        let smoothScrollStart = 0;
+        let smoothScrollActive = false;
+        let smoothPlaySample = 0;
+        let smoothPlayActive = false;
 
         // Meter Peak State
         let peakHoldL = -60;
@@ -197,27 +202,81 @@
             return includeTenths ? `${mm}:${ss}.${tenths}` : `${mm}:${ss}`;
         }
 
-        function updateLiveScrollViewport() {
+        function resetSmoothScrollState() {
+            smoothScrollActive = false;
+            smoothPlayActive = false;
+            lastAnimNow = 0;
+        }
+
+        function getVisualPlaybackSample() {
+            if (!engine.isPlaying) return engine.cursorSample;
+            return smoothPlayActive ? smoothPlaySample : engine.getPlaybackPositionSample();
+        }
+
+        function updateLiveScrollViewport(now = null) {
             const total = engine.length;
-            const liveWin = Math.max((engine.sampleRate || 44100) * LIVE_SCROLL_SECONDS, 1);
+            const sr = engine.sampleRate || 44100;
+            const liveWin = Math.max(sr * LIVE_SCROLL_SECONDS, 1);
+            const hasClock = typeof now === 'number' && Number.isFinite(now);
+            const dtSec = (hasClock && lastAnimNow > 0 && now > lastAnimNow)
+                ? Math.min(0.1, (now - lastAnimNow) / 1000)
+                : 0;
+            if (hasClock) {
+                lastAnimNow = now;
+            }
 
             if (engine.recordState === 'recording' || engine.recordState === 'paused') {
                 const leadAnchor = Math.round(liveWin * 0.88);
                 viewSpanSamples = liveWin;
-                viewStartSample = total > leadAnchor ? (total - leadAnchor) : 0;
+                const targetStart = total > leadAnchor ? (total - leadAnchor) : 0;
+
+                if (engine.recordState === 'paused' || targetStart === 0 || !hasClock) {
+                    smoothScrollStart = targetStart;
+                    smoothScrollActive = false;
+                    viewStartSample = targetStart;
+                    return;
+                }
+
+                if (!smoothScrollActive || Math.abs(targetStart - smoothScrollStart) > sr * 0.35) {
+                    smoothScrollStart = targetStart;
+                    smoothScrollActive = true;
+                } else if (dtSec > 0) {
+                    smoothScrollStart += dtSec * sr;
+                    const drift = targetStart - smoothScrollStart;
+                    smoothScrollStart += drift * Math.min(1, dtSec * 8);
+                    if (smoothScrollStart < 0) smoothScrollStart = 0;
+                }
+                viewStartSample = smoothScrollStart;
                 return;
             }
 
             if (engine.isPlaying && total > 0) {
                 if (!userHasZoomed || viewSpanSamples <= 0 || viewSpanSamples >= total) {
-                    const fallbackSpan = Math.min(total, Math.max((engine.sampleRate || 44100) * 4, Math.min(liveWin, Math.round(total * 0.45))));
+                    const fallbackSpan = Math.min(total, Math.max(sr * 4, Math.min(liveWin, Math.round(total * 0.45))));
                     viewSpanSamples = fallbackSpan > 0 ? fallbackSpan : total;
                 }
-                const pos = engine.getPlaybackPositionSample();
-                const anchorOffset = Math.round(viewSpanSamples * 0.30);
-                viewStartSample = Math.max(0, Math.min(Math.max(0, total - viewSpanSamples), pos - anchorOffset));
+
+                const rawPos = engine.getPlaybackPositionSample();
+                if (!hasClock || !smoothPlayActive || Math.abs(rawPos - smoothPlaySample) > sr * 0.35) {
+                    smoothPlaySample = rawPos;
+                    smoothPlayActive = hasClock;
+                } else if (dtSec > 0) {
+                    smoothPlaySample += dtSec * sr;
+                    const playDrift = rawPos - smoothPlaySample;
+                    smoothPlaySample += playDrift * Math.min(1, dtSec * 12);
+                    smoothPlaySample = Math.max(engine.playStartSample || 0, Math.min(engine.playEndSample || total, smoothPlaySample));
+                }
+
+                const anchorOffset = viewSpanSamples * 0.30;
+                const maxStart = Math.max(0, total - viewSpanSamples);
+                const targetStart = Math.max(0, Math.min(maxStart, smoothPlaySample - anchorOffset));
+                smoothScrollStart = targetStart;
+                smoothScrollActive = targetStart > 0 && targetStart < maxStart;
+                viewStartSample = targetStart;
                 return;
             }
+
+            resetSmoothScrollState();
         }
 
         function clampViewport() {
@@ -282,6 +341,7 @@
             onRecordStateChanged: ({ state }) => {
                 const wasActiveRec = prevRecordState !== 'idle';
                 prevRecordState = state;
+                resetSmoothScrollState();
                 if (state === 'armed') {
                     showToast('Armed — recording begins as soon as sound starts.', 'warning');
                 }
@@ -298,6 +358,7 @@
                 }
             },
             onPlaybackStateChanged: ({ playing } = {}) => {
+                resetSmoothScrollState();
                 if (!playing && !userHasZoomed && engine.recordState === 'idle') {
                     viewStartSample = 0;
                     viewSpanSamples = engine.length;
@@ -1276,52 +1337,170 @@
                     }
                 });
 
-                // Continuous Stereo Wave Bars
+                // Continuous Stereo Wave Envelope (world-space locked blocks to eliminate scroll vibration/aliasing)
                 const samplesPerPx = viewSpanSamples / W;
-                const bucketSize = engine.peakBucketSize;
-                const usePeakCache = samplesPerPx >= bucketSize && engine.peakCount > 0;
+                const bucketSize = engine.peakBucketSize || 128;
 
-                for (let px = 0; px < W; px++) {
-                    const s0 = Math.floor(viewStartSample + px * samplesPerPx);
-                    const s1 = Math.min(total, Math.ceil(viewStartSample + (px + 1) * samplesPerPx));
-                    if (s0 >= total) break;
+                // Deterministic power-of-2 world-space block size (~0.5 to 1.0 CSS px per block)
+                // independent of viewStartSample so each block's peaks remain invariant while scrolling
+                let blockSamples = 1;
+                while (blockSamples * 2 <= samplesPerPx) {
+                    blockSamples *= 2;
+                }
 
-                    let minL = 32767, maxL = -32768, minR = 32767, maxR = -32768;
-                    if (usePeakCache) {
-                        const b0 = Math.floor(s0 / bucketSize);
-                        const b1 = Math.min(engine.peakCount - 1, Math.floor(Math.max(s0, s1 - 1) / bucketSize));
-                        for (let b = b0; b <= b1; b++) {
-                            if (engine.peaksMinL[b] < minL) minL = engine.peaksMinL[b];
-                            if (engine.peaksMaxL[b] > maxL) maxL = engine.peaksMaxL[b];
-                            if (engine.peaksMinR[b] < minR) minR = engine.peaksMinR[b];
-                            if (engine.peaksMaxR[b] > maxR) maxR = engine.peaksMaxR[b];
+                const usePeakCache = blockSamples >= bucketSize && engine.peakCount > 0 && (blockSamples % bucketSize === 0);
+                const bucketsPerBlock = usePeakCache ? (blockSamples / bucketSize) : 1;
+
+                const totalBlocks = Math.ceil(total / blockSamples);
+                const kStart = Math.max(0, Math.floor(viewStartSample / blockSamples) - 1);
+                const kEnd = Math.min(totalBlocks - 1, Math.ceil((viewStartSample + viewSpanSamples) / blockSamples) + 1);
+                const maxBlocks = kEnd - kStart + 1;
+
+                if (maxBlocks > 0) {
+                    const maxWaveX = sampleToX(total, W);
+                    const xs = new Float32Array(maxBlocks);
+                    const topL = new Float32Array(maxBlocks);
+                    const botL = new Float32Array(maxBlocks);
+                    const topR = new Float32Array(maxBlocks);
+                    const botR = new Float32Array(maxBlocks);
+                    const clipXsL = [];
+                    const clipXsR = [];
+                    let drawnCount = 0;
+
+                    for (let k = kStart; k <= kEnd; k++) {
+                        const s0 = k * blockSamples;
+                        if (s0 >= total) break;
+                        const s1 = Math.min(total, s0 + blockSamples);
+
+                        let minL = 32767, maxL = -32768, minR = 32767, maxR = -32768;
+                        if (usePeakCache) {
+                            const b0 = k * bucketsPerBlock;
+                            const b1 = Math.min(engine.peakCount - 1, b0 + bucketsPerBlock - 1);
+                            for (let b = b0; b <= b1; b++) {
+                                if (engine.peaksMinL[b] < minL) minL = engine.peaksMinL[b];
+                                if (engine.peaksMaxL[b] > maxL) maxL = engine.peaksMaxL[b];
+                                if (engine.peaksMinR[b] < minR) minR = engine.peaksMinR[b];
+                                if (engine.peaksMaxR[b] > maxR) maxR = engine.peaksMaxR[b];
+                            }
+                        } else {
+                            // Full exact scan of every sample in this fixed world block (zero stride aliasing)
+                            for (let i = s0; i < s1; i++) {
+                                const lv = engine.left[i];
+                                const rv = engine.right[i];
+                                if (lv < minL) minL = lv;
+                                if (lv > maxL) maxL = lv;
+                                if (rv < minR) minR = rv;
+                                if (rv > maxR) maxR = rv;
+                            }
                         }
-                    } else {
-                        const step = Math.max(1, Math.floor((s1 - s0) / 32));
-                        for (let i = s0; i < s1; i += step) {
-                            const lv = engine.left[i];
-                            const rv = engine.right[i];
-                            if (lv < minL) minL = lv;
-                            if (lv > maxL) maxL = lv;
-                            if (rv < minR) minR = rv;
-                            if (rv > maxR) maxR = rv;
+
+                        if (minL > maxL) { minL = 0; maxL = 0; }
+                        if (minR > maxR) { minR = 0; maxR = 0; }
+
+                        const sampleXPos = (k === totalBlocks - 1) ? s1 : (s0 + blockSamples * 0.5);
+                        const x = Math.min(maxWaveX, (sampleXPos - viewStartSample) / samplesPerPx);
+                        xs[drawnCount] = x;
+
+                        let yTL = MID_Y_L - (maxL / 32768) * CH_AMP;
+                        let yBL = MID_Y_L - (minL / 32768) * CH_AMP;
+                        if (yBL - yTL < 1.5) {
+                            const mid = 0.5 * (yTL + yBL);
+                            yTL = mid - 0.75;
+                            yBL = mid + 0.75;
                         }
+                        topL[drawnCount] = yTL;
+                        botL[drawnCount] = yBL;
+
+                        let yTR = MID_Y_R - (maxR / 32768) * CH_AMP;
+                        let yBR = MID_Y_R - (minR / 32768) * CH_AMP;
+                        if (yBR - yTR < 1.5) {
+                            const mid = 0.5 * (yTR + yBR);
+                            yTR = mid - 0.75;
+                            yBR = mid + 0.75;
+                        }
+                        topR[drawnCount] = yTR;
+                        botR[drawnCount] = yBR;
+
+                        if (maxL >= 32500 || minL <= -32500) clipXsL.push(x, yTL, yBL);
+                        if (maxR >= 32500 || minR <= -32500) clipXsR.push(x, yTR, yBR);
+                        drawnCount++;
                     }
 
-                    const clipL = maxL >= 32500 || minL <= -32500;
-                    const clipR = maxR >= 32500 || minR <= -32500;
-                    const playCursor = engine.isPlaying ? engine.getPlaybackPositionSample() : -1;
-                    const isAheadOfPlayhead = engine.isPlaying && s0 > playCursor;
+                    const drawChannelEnvelope = (topArr, botArr, fillPlayed, fillAhead, playX, isPlay) => {
+                        if (drawnCount === 0) return;
+                        if (drawnCount === 1) {
+                            const x0 = xs[0];
+                            ctx.fillStyle = (isPlay && x0 > playX) ? fillAhead : fillPlayed;
+                            ctx.fillRect(x0 - 0.75, topArr[0], 1.5, Math.max(1.5, botArr[0] - topArr[0]));
+                            return;
+                        }
 
-                    const yTopL = MID_Y_L - (maxL / 32768) * CH_AMP;
-                    const yBotL = MID_Y_L - (minL / 32768) * CH_AMP;
-                    ctx.fillStyle = clipL ? '#dc2626' : (isAheadOfPlayhead ? 'rgba(2, 132, 199, 0.42)' : '#0284c7');
-                    ctx.fillRect(px, yTopL, 1.2, Math.max(1.5, yBotL - yTopL));
+                        const tracePath = () => {
+                            ctx.beginPath();
+                            ctx.moveTo(xs[0], topArr[0]);
+                            for (let i = 1; i < drawnCount; i++) {
+                                ctx.lineTo(xs[i], topArr[i]);
+                            }
+                            for (let i = drawnCount - 1; i >= 0; i--) {
+                                ctx.lineTo(xs[i], botArr[i]);
+                            }
+                            ctx.closePath();
+                        };
 
-                    const yTopR = MID_Y_R - (maxR / 32768) * CH_AMP;
-                    const yBotR = MID_Y_R - (minR / 32768) * CH_AMP;
-                    ctx.fillStyle = clipR ? '#dc2626' : (isAheadOfPlayhead ? 'rgba(13, 148, 136, 0.42)' : '#0d9488');
-                    ctx.fillRect(px, yTopR, 1.2, Math.max(1.5, yBotR - yTopR));
+                        if (isPlay) {
+                            const splitX = Math.max(0, Math.min(W, playX));
+                            if (splitX > 0) {
+                                ctx.save();
+                                ctx.beginPath();
+                                ctx.rect(0, WAVE_TOP, splitX, WAVE_H);
+                                ctx.clip();
+                                tracePath();
+                                ctx.fillStyle = fillPlayed;
+                                ctx.fill();
+                                ctx.restore();
+                            }
+                            if (splitX < W) {
+                                ctx.save();
+                                ctx.beginPath();
+                                ctx.rect(splitX, WAVE_TOP, W - splitX, WAVE_H);
+                                ctx.clip();
+                                tracePath();
+                                ctx.fillStyle = fillAhead;
+                                ctx.fill();
+                                ctx.restore();
+                            }
+                        } else {
+                            ctx.save();
+                            ctx.beginPath();
+                            ctx.rect(0, WAVE_TOP, W, WAVE_H);
+                            ctx.clip();
+                            tracePath();
+                            ctx.fillStyle = fillPlayed;
+                            ctx.fill();
+                            ctx.restore();
+                        }
+                    };
+
+                    const playCursor = engine.isPlaying ? getVisualPlaybackSample() : -1;
+                    const playX = engine.isPlaying ? sampleToX(playCursor, W) : W;
+
+                    drawChannelEnvelope(topL, botL, '#0284c7', 'rgba(2, 132, 199, 0.42)', playX, engine.isPlaying);
+                    drawChannelEnvelope(topR, botR, '#0d9488', 'rgba(13, 148, 136, 0.42)', playX, engine.isPlaying);
+
+                    if (clipXsL.length > 0 || clipXsR.length > 0) {
+                        ctx.save();
+                        ctx.beginPath();
+                        ctx.rect(0, WAVE_TOP, W, WAVE_H);
+                        ctx.clip();
+                        ctx.fillStyle = '#dc2626';
+                        for (let i = 0; i < clipXsL.length; i += 3) {
+                            ctx.fillRect(clipXsL[i] - 0.75, clipXsL[i + 1], 1.5, Math.max(2, clipXsL[i + 2] - clipXsL[i + 1]));
+                        }
+                        for (let i = 0; i < clipXsR.length; i += 3) {
+                            ctx.fillRect(clipXsR[i] - 0.75, clipXsR[i + 1], 1.5, Math.max(2, clipXsR[i + 2] - clipXsR[i + 1]));
+                        }
+                        ctx.restore();
+                    }
                 }
 
                 // Selection highlight
@@ -1347,7 +1526,7 @@
                 // Recording / Playback needle
                 const headSample = engine.recordState === 'recording'
                     ? engine.length
-                    : (engine.isPlaying ? engine.getPlaybackPositionSample() : engine.cursorSample);
+                    : (engine.isPlaying ? getVisualPlaybackSample() : engine.cursorSample);
                 const hx = sampleToX(headSample, W);
                 if (hx >= -2 && hx <= W + 2) {
                     ctx.strokeStyle = engine.recordState === 'recording' ? '#dc2626' : '#0f172a';
@@ -1465,8 +1644,10 @@
             }
 
             if (engine.recordState === 'recording' || engine.recordState === 'paused' || (engine.isPlaying && engine.length > 0)) {
-                updateLiveScrollViewport();
+                updateLiveScrollViewport(now);
                 syncPanScrollbar();
+            } else {
+                resetSmoothScrollState();
             }
 
             drawVuBar(vuMeterL, levels.left.rmsDb, peakHoldL);
