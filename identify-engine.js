@@ -39,33 +39,97 @@
         let jsUrl = '';
         let wasmUrl = '';
         try {
-            jsUrl = new URL('vendor/chromaprint_web.js', base).href;
-            wasmUrl = new URL('vendor/chromaprint_web_bg.wasm', base).href;
+            jsUrl = new URL('vendor/libchromaprint.js', base).href;
+            wasmUrl = new URL('vendor/libchromaprint.wasm', base).href;
         } catch (_) {
             const origin = (global.location && global.location.origin) || '';
-            jsUrl = `${origin}/vendor/chromaprint_web.js`;
-            wasmUrl = `${origin}/vendor/chromaprint_web_bg.wasm`;
+            jsUrl = `${origin}/vendor/libchromaprint.js`;
+            wasmUrl = `${origin}/vendor/libchromaprint.wasm`;
         }
         return { jsUrl, wasmUrl };
     }
 
-    function buildMonoPcmWindow(leftInt16, rightInt16, sampleRate) {
+    function findActiveAudioBounds(leftInt16, rightInt16, totalLen, sampleRate) {
+        const sr = Math.max(8000, Math.round(sampleRate || 44100));
+        if (totalLen < sr * 3) return { start: 0, end: totalLen };
+
+        const frameLen = Math.max(256, Math.round(sr * 0.05));
+        const padSamples = Math.round(sr * 0.08);
+        const minTrimSamples = Math.round(sr * 0.35);
+        const lenR = rightInt16 ? rightInt16.length : 0;
+
+        let peakRms = 0;
+        for (let pos = 0; pos < totalLen; pos += frameLen) {
+            const end = Math.min(totalLen, pos + frameLen);
+            let sumSq = 0;
+            for (let i = pos; i < end; i++) {
+                const l = (leftInt16[i] || 0) / 32768;
+                const r = (lenR > i ? rightInt16[i] : (leftInt16[i] || 0)) / 32768;
+                sumSq += 0.5 * (l * l + r * r);
+            }
+            const rms = Math.sqrt(sumSq / Math.max(1, end - pos));
+            if (rms > peakRms) peakRms = rms;
+        }
+
+        if (peakRms < 0.002) {
+            return { start: 0, end: totalLen };
+        }
+        const thresh = Math.max(0.002, Math.min(0.005, peakRms * 0.008));
+
+        let firstSound = -1;
+        let lastSound = -1;
+        for (let pos = 0; pos < totalLen; pos += frameLen) {
+            const end = Math.min(totalLen, pos + frameLen);
+            let sumSq = 0;
+            for (let i = pos; i < end; i++) {
+                const l = (leftInt16[i] || 0) / 32768;
+                const r = (lenR > i ? rightInt16[i] : (leftInt16[i] || 0)) / 32768;
+                sumSq += 0.5 * (l * l + r * r);
+            }
+            const rms = Math.sqrt(sumSq / Math.max(1, end - pos));
+            if (rms >= thresh) {
+                if (firstSound === -1) firstSound = pos;
+                lastSound = end;
+            }
+        }
+
+        if (firstSound === -1 || lastSound <= firstSound) {
+            return { start: 0, end: totalLen };
+        }
+
+        const start = firstSound >= minTrimSamples ? Math.max(0, firstSound - padSamples) : 0;
+        const end = (totalLen - lastSound) >= minTrimSamples ? Math.min(totalLen, lastSound + padSamples) : totalLen;
+        if (end - start < sr * 2) {
+            return { start: 0, end: totalLen };
+        }
+        return { start, end };
+    }
+
+    function buildMonoPcmWindow(leftInt16, rightInt16, sampleRate, trimSilence = true) {
         const lenL = leftInt16 ? leftInt16.length : 0;
         const lenR = rightInt16 ? rightInt16.length : 0;
         const totalLen = Math.min(lenL, lenR || lenL);
         const sr = Math.max(8000, Math.round(sampleRate || 44100));
-        const duration = Math.max(1, Math.round(totalLen / sr));
         if (totalLen === 0) {
             return { mono: new Int16Array(0), effectiveRate: sr, duration: 0 };
         }
 
-        const windowLen = Math.min(totalLen, Math.round(sr * MAX_FINGERPRINT_SECONDS));
+        const bounds = trimSilence
+            ? findActiveAudioBounds(leftInt16, rightInt16, totalLen, sr)
+            : { start: 0, end: totalLen };
+        const activeLen = Math.max(0, bounds.end - bounds.start);
+        const duration = Math.max(1, Math.round(activeLen / sr));
+        if (activeLen === 0) {
+            return { mono: new Int16Array(0), effectiveRate: sr, duration: 0 };
+        }
+
+        const windowLen = Math.min(activeLen, Math.round(sr * MAX_FINGERPRINT_SECONDS));
         const step = sr > 65535 ? Math.ceil(sr / 44100) : 1;
         const effectiveRate = Math.floor(sr / step);
         const outLen = Math.floor(windowLen / step);
         const mono = new Int16Array(outLen);
 
-        for (let i = 0, src = 0; i < outLen; i++, src += step) {
+        for (let i = 0, src = bounds.start; i < outLen; i++, src += step) {
             const l = leftInt16[src] || 0;
             const r = rightInt16 && src < lenR ? rightInt16[src] : l;
             mono[i] = (l + r) >> 1;
@@ -80,21 +144,57 @@
         if (classicAssetPromise) return classicAssetPromise;
         classicAssetPromise = (async () => {
             const [jsResp, wasmResp] = await Promise.all([fetch(jsUrl), fetch(wasmUrl)]);
-            if (!jsResp.ok) throw new Error(`Failed to fetch chromaprint_web.js (${jsResp.status})`);
-            if (!wasmResp.ok) throw new Error(`Failed to fetch chromaprint_web_bg.wasm (${wasmResp.status})`);
+            if (!jsResp.ok) throw new Error(`Failed to fetch libchromaprint.js (${jsResp.status})`);
+            if (!wasmResp.ok) throw new Error(`Failed to fetch libchromaprint.wasm (${wasmResp.status})`);
             const [jsText, wasmBuf] = await Promise.all([jsResp.text(), wasmResp.arrayBuffer()]);
             const patchedJs = jsText
-                .replace(/\/\*[\s\S]*?\*\//, '')
-                .replace(/\bimport\.meta\.url\b/g, JSON.stringify(wasmUrl))
-                .replace(/export\s+function\s+fingerprint\b/, 'function fingerprint')
-                .replace(/export\s*\{[\s\S]*?\}\s*;?/g, '');
+                .replace(/export\s+default\s+createChromaprintModule\s*;?/g, '')
+                .replace(/\bimport\.meta\.url\b/g, JSON.stringify(jsUrl));
             const wasmMod = await WebAssembly.compile(wasmBuf);
-            return { patchedJs, wasmMod };
+            return { patchedJs, wasmMod, wasmBytes: new Uint8Array(wasmBuf) };
         })().catch((err) => {
             classicAssetPromise = null;
             throw err;
         });
         return classicAssetPromise;
+    }
+
+    function runLibChromaprint(M, sampleRate, samples) {
+        const ctx = M._chromaprint_new(1); // CHROMAPRINT_ALGORITHM_TEST2 (AcoustID default)
+        if (!ctx) throw new Error('Failed to initialize Chromaprint context');
+        const chunkSamples = 32768;
+        const ptr = M._malloc(chunkSamples * 2);
+        try {
+            if (!M._chromaprint_start(ctx, sampleRate, 1)) {
+                throw new Error('Failed to start Chromaprint');
+            }
+            for (let off = 0; off < samples.length; off += chunkSamples) {
+                const end = Math.min(samples.length, off + chunkSamples);
+                const sub = samples.subarray(off, end);
+                M.HEAP16.set(sub, ptr >> 1);
+                if (!M._chromaprint_feed(ctx, ptr, sub.length)) {
+                    throw new Error('Failed to feed PCM to Chromaprint');
+                }
+            }
+            if (!M._chromaprint_finish(ctx)) {
+                throw new Error('Failed to finish Chromaprint');
+            }
+            const fpPtr = M._malloc(4);
+            try {
+                if (!M._chromaprint_get_fingerprint(ctx, fpPtr)) {
+                    throw new Error('Failed to read Chromaprint fingerprint');
+                }
+                const strPtr = M.HEAP32[fpPtr >> 2] >>> 0;
+                const fp = M.UTF8ToString(strPtr);
+                M._free(strPtr);
+                return fp;
+            } finally {
+                M._free(fpPtr);
+            }
+        } finally {
+            M._free(ptr);
+            M._chromaprint_free(ctx);
+        }
     }
 
     function getFingerprintWorker(patchedJs) {
@@ -105,20 +205,36 @@
 
         const workerCode = `
 ${patchedJs}
-let initedMod = null;
+let modPromise = null;
+let loadedWasmMod = null;
+
+function ensureModule(wasmMod) {
+    if (modPromise && loadedWasmMod === wasmMod) return modPromise;
+    loadedWasmMod = wasmMod;
+    modPromise = createChromaprintModule({
+        instantiateWasm: function (imports, receiveInstance) {
+            WebAssembly.instantiate(wasmMod, imports).then(function (instance) {
+                receiveInstance(instance, wasmMod);
+            }, function (err) {
+                throw err;
+            });
+            return {};
+        }
+    });
+    return modPromise;
+}
+
+${runLibChromaprint.toString()}
+
 self.onmessage = function (ev) {
     const { id, wasmMod, sampleRate, buffer } = ev.data || {};
-    try {
-        if (!initedMod || initedMod !== wasmMod) {
-            initSync({ module: wasmMod });
-            initedMod = wasmMod;
-        }
+    ensureModule(wasmMod).then(function (M) {
         const samples = new Int16Array(buffer);
-        const fp = fingerprint(sampleRate, samples);
+        const fp = runLibChromaprint(M, sampleRate, samples);
         self.postMessage({ id, ok: true, fingerprint: fp });
-    } catch (err) {
+    }).catch(function (err) {
         self.postMessage({ id, ok: false, error: (err && err.message) || String(err) });
-    }
+    });
 };
         `;
 
@@ -206,20 +322,22 @@ self.onmessage = function (ev) {
     async function computeFingerprintMainThread(mono, effectiveRate, jsUrl, wasmUrl) {
         if (!mainModPromise) {
             mainModPromise = (async () => {
-                const mod = await import(jsUrl);
-                await mod.default({ module_or_path: wasmUrl });
-                return mod.fingerprint;
+                const [mod, wasmResp] = await Promise.all([import(jsUrl), fetch(wasmUrl)]);
+                if (!wasmResp.ok) throw new Error(`Failed to fetch libchromaprint.wasm (${wasmResp.status})`);
+                const wasmBytes = new Uint8Array(await wasmResp.arrayBuffer());
+                return await mod.default({ wasmBinary: wasmBytes });
             })().catch((err) => {
                 mainModPromise = null;
                 throw err;
             });
         }
-        const fpFn = await mainModPromise;
-        return fpFn(effectiveRate, mono);
+        const M = await mainModPromise;
+        return runLibChromaprint(M, effectiveRate, mono);
     }
 
-    function computeFingerprint(leftInt16, rightInt16, sampleRate = 44100) {
-        const { mono, effectiveRate, duration } = buildMonoPcmWindow(leftInt16, rightInt16, sampleRate);
+    function computeFingerprint(leftInt16, rightInt16, sampleRate = 44100, options = {}) {
+        const trimSilence = options.trimSilence !== false;
+        const { mono, effectiveRate, duration } = buildMonoPcmWindow(leftInt16, rightInt16, sampleRate, trimSilence);
         if (mono.length === 0) {
             return Promise.reject(new Error('Cannot fingerprint empty audio slice'));
         }

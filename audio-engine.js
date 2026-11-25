@@ -512,11 +512,32 @@
             // Finalize trailing track region if there is recorded audio since currentTrackStartSample
             const createdOnStop = [];
             if (!wasArmedOnly && this.length > 0 && this._liveState && !this._liveState.waitingForNextTrackStart) {
-                const startS = Math.max(0, Math.min(this.length, this._liveState.currentTrackStartSample));
+                let startS = Math.max(0, Math.min(this.length, this._liveState.currentTrackStartSample));
                 let endS = this.length;
+                const pad = Math.round(this.sampleRate * 0.12);
                 if (this._liveState.inSilence && this._liveState.silenceStartSample > startS) {
-                    const pad = Math.round(this.sampleRate * 0.12);
                     endS = Math.min(this.length, this._liveState.silenceStartSample + pad);
+                }
+                if (this.settings.autoTrimSilence && endS - startS > Math.round(this.sampleRate * 0.5)) {
+                    const frameSize = Math.max(256, Math.round(this.sampleRate * 0.05));
+                    const dbLimit = Number(this.settings.thresholdDb ?? -42);
+                    let firstSound = -1;
+                    let lastSound = -1;
+                    for (let pos = startS; pos < endS; pos += frameSize) {
+                        const fEnd = Math.min(endS, pos + frameSize);
+                        if (computeStereoFrameDb(this.left, this.right, pos, fEnd) >= dbLimit) {
+                            if (firstSound === -1) firstSound = pos;
+                            lastSound = fEnd;
+                        }
+                    }
+                    if (firstSound !== -1 && lastSound > firstSound) {
+                        const trimmedStart = Math.max(startS, firstSound - pad);
+                        const trimmedEnd = Math.min(endS, lastSound + pad);
+                        if (trimmedEnd - trimmedStart > Math.round(this.sampleRate * 0.5)) {
+                            startS = trimmedStart;
+                            endS = trimmedEnd;
+                        }
+                    }
                 }
                 if (endS - startS > Math.round(this.sampleRate * 0.5)) {
                     const track = this._createTrackObject(this.tracks.length, startS, endS);

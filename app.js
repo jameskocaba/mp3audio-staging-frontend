@@ -386,7 +386,7 @@
                 }
                 if (autoSaveLiveToggle && autoSaveLiveToggle.checked && dirHandle) {
                     if (shouldTag || inFlightIdentifyPromises.has(track.id)) {
-                        await waitForTrackAutoTag(track.id, 9000);
+                        await waitForTrackAutoTag(track.id, 12000);
                     }
                     const latest = engine.tracks.find(t => t.id === track.id) || track;
                     queueLiveAutoSaveTrack(latest);
@@ -896,7 +896,7 @@
             isExporting = true;
             if (inFlightIdentifyPromises.has(track.id)) {
                 setExportProgress(true, 'Auto-tagging song metadata...', 2);
-                await waitForTrackAutoTag(track.id, 8000);
+                await waitForTrackAutoTag(track.id, 12000);
             }
             const latestTrack = engine.tracks[trackIdx] || track;
             latestTrack.saving = true;
@@ -976,7 +976,7 @@
                 const pendingTagIds = tracks.filter(t => inFlightIdentifyPromises.has(t.id)).map(t => t.id);
                 if (pendingTagIds.length > 0) {
                     setExportProgress(true, `Auto-tagging ${pendingTagIds.length} song${pendingTagIds.length === 1 ? '' : 's'}...`, 2);
-                    await Promise.all(pendingTagIds.map(id => waitForTrackAutoTag(id, 8000)));
+                    await Promise.all(pendingTagIds.map(id => waitForTrackAutoTag(id, 12000)));
                 }
                 for (let i = 0; i < tracks.length; i++) {
                     const trk = tracks[i];

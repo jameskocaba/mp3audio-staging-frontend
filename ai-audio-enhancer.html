@@ -46,7 +46,7 @@
         gtag('config', 'G-VGVP90K1M4');
     </script>
 
-    <link rel="stylesheet" href="studio.css?v=20261125_06">
+    <link rel="stylesheet" href="studio.css?v=20261125_07">
 
     <script type="application/ld+json">
     {
@@ -72,8 +72,7 @@
         <div class="drag-drop-card">
             <div class="drag-drop-icon">🎛️</div>
             <h2>Drop Audio File Here</h2>
-            <p>Load MP3, WAV, FLAC, M4A, OGG, or AAC locally to view the stereo waveform, auto-split tracks, and save.
-            </p>
+            <p>Load MP3, WAV, FLAC, M4A, OGG, or AAC locally to view the stereo waveform, auto-split tracks, and save.</p>
         </div>
     </div>
 
@@ -89,8 +88,7 @@
             </a>
 
             <div class="topbar-actions">
-                <button type="button" id="pickFolderBtn" class="folder-pill-btn"
-                    title="Choose a destination folder on your hard drive">
+                <button type="button" id="pickFolderBtn" class="folder-pill-btn" title="Choose a destination folder on your hard drive">
                     <span>📁</span>
                     <span id="pickFolderLabel">Save Folder</span>
                 </button>
@@ -106,15 +104,13 @@
             <section class="studio-card recorder-hero-card" aria-label="Record Transport and Stereo Channels">
                 <div id="guidedStepBanner" class="guided-step-banner">
                     <span class="guided-steps-flow">
-                        <span class="guided-step-item">✨ <strong>Step 1:</strong> Tap <strong>Record Music Tab</strong>
-                            (or <strong>Open Audio</strong>)</span>
+                        <span class="guided-step-item">✨ <strong>Step 1:</strong> Tap <strong>Record Music Tab</strong> (or <strong>Open Audio</strong>)</span>
                         <span class="guided-step-sep" aria-hidden="true">→</span>
                         <span class="guided-step-item"><strong>Step 2:</strong> Choose what to record</span>
                         <span class="guided-step-sep" aria-hidden="true">→</span>
                         <span class="guided-step-item"><strong>Step 3:</strong> Press <strong>Record</strong></span>
                         <span class="guided-step-sep" aria-hidden="true">→</span>
-                        <span class="guided-step-item"><strong>Step 4:</strong> Navigate back to the
-                            <strong>MP3aud.io</strong> tab</span>
+                        <span class="guided-step-item"><strong>Step 4:</strong> Navigate back to the <strong>MP3aud.io</strong> tab</span>
                     </span>
                 </div>
 
@@ -131,10 +127,8 @@
                         <span>📂</span>
                         <span>Open Audio</span>
                     </button>
-                    <input type="file" id="audioFileInput" accept="audio/*,.mp3,.wav,.flac,.m4a,.aac,.ogg,.opus,.webm"
-                        class="hidden">
-                    <button type="button" id="disconnectSourceBtn" class="studio-btn hidden"
-                        title="Disconnect capture source">
+                    <input type="file" id="audioFileInput" accept="audio/*,.mp3,.wav,.flac,.m4a,.aac,.ogg,.opus,.webm" class="hidden">
+                    <button type="button" id="disconnectSourceBtn" class="studio-btn hidden" title="Disconnect capture source">
                         <span>🔌</span>
                         <span>Disconnect</span>
                     </button>
@@ -147,188 +141,161 @@
                                 <span class="rec-dot"></span>
                                 <span id="recordBtnLabel">Record</span>
                             </button>
-                            <button type="button" id="pauseRecBtn" class="t-btn hidden" disabled
-                                title="Pause / Resume Recording (P)">
+                            <button type="button" id="pauseRecBtn" class="t-btn hidden" disabled title="Pause / Resume Recording (P)">
                                 ⏸ Pause
                             </button>
                             <button type="button" id="stopBtn" class="t-btn" disabled title="Stop">
                                 ⏹ Stop
                             </button>
-                            <button type="button" id="playBtn" class="t-btn t-btn-play" disabled
-                                title="Play / Pause (Space)">
+                            <button type="button" id="playBtn" class="t-btn t-btn-play" disabled title="Play / Pause (Space)">
                                 <span id="playBtnIcon">▶ Play</span>
                             </button>
                         </div>
 
                         <!-- Settings, Tools & Tags/Levels Drawers stacked directly under transport buttons -->
-                        <div class="transport-drawers-inline" id="studioDrawersBar"
-                            aria-label="Studio Settings, Edit Tools, and Tags">
-                            <details class="studio-drawer studio-drawer-inline studio-drawer-inline-settings">
-                                <summary class="drawer-summary" title="Auto-Split & Identify Settings">
-                                    <span class="drawer-title">✂️ Settings</span>
-                                    <span class="drawer-chevron">▾</span>
-                                </summary>
-                                <div class="drawer-body">
-                                    <div class="drawer-toggles-grid">
-                                        <label class="split-toggle-card">
-                                            <div class="split-toggle-text">
-                                                <strong>Live Auto-Split While Recording</strong>
-                                                <span>Automatically separates songs when quiet gaps appear.</span>
-                                            </div>
-                                            <input type="checkbox" id="liveAutoSplitToggle" class="switch-input"
-                                                checked>
-                                        </label>
+                        <div class="transport-drawers-inline" id="studioDrawersBar" aria-label="Studio Settings, Edit Tools, and Tags">
+                        <details class="studio-drawer studio-drawer-inline studio-drawer-inline-settings">
+                            <summary class="drawer-summary" title="Auto-Split & Identify Settings">
+                                <span class="drawer-title">✂️ Settings</span>
+                                <span class="drawer-chevron">▾</span>
+                            </summary>
+                            <div class="drawer-body">
+                                <div class="drawer-toggles-grid">
+                                    <label class="split-toggle-card">
+                                        <div class="split-toggle-text">
+                                            <strong>Live Auto-Split While Recording</strong>
+                                            <span>Automatically separates songs when quiet gaps appear.</span>
+                                        </div>
+                                        <input type="checkbox" id="liveAutoSplitToggle" class="switch-input" checked>
+                                    </label>
 
-                                        <label id="autoSaveLiveRow" class="split-toggle-card">
-                                            <div class="split-toggle-text">
-                                                <strong>Auto-Save Live to Folder</strong>
-                                                <span>Writes each track to your selected folder as it finishes.</span>
-                                            </div>
-                                            <input type="checkbox" id="autoSaveLiveToggle" class="switch-input" checked>
-                                        </label>
+                                    <label id="autoSaveLiveRow" class="split-toggle-card">
+                                        <div class="split-toggle-text">
+                                            <strong>Auto-Save Live to Folder</strong>
+                                            <span>Writes each track to your selected folder as it finishes.</span>
+                                        </div>
+                                        <input type="checkbox" id="autoSaveLiveToggle" class="switch-input" checked>
+                                    </label>
 
-                                        <label class="split-toggle-card">
-                                            <div class="split-toggle-text">
-                                                <strong>Sound-Activated Recording</strong>
-                                                <span>Waits in Armed mode until music begins playing.</span>
-                                            </div>
-                                            <input type="checkbox" id="soundActivatedToggle" class="switch-input">
-                                        </label>
+                                    <label class="split-toggle-card">
+                                        <div class="split-toggle-text">
+                                            <strong>Sound-Activated Recording</strong>
+                                            <span>Waits in Armed mode until music begins playing.</span>
+                                        </div>
+                                        <input type="checkbox" id="soundActivatedToggle" class="switch-input">
+                                    </label>
 
-                                        <label class="split-toggle-card">
-                                            <div class="split-toggle-text">
-                                                <strong>Auto-Trim Silence Gaps</strong>
-                                                <span>Removes dead air at the start and end of split tracks.</span>
-                                            </div>
-                                            <input type="checkbox" id="autoTrimSilenceToggle" class="switch-input"
-                                                checked>
-                                        </label>
+                                    <label class="split-toggle-card">
+                                        <div class="split-toggle-text">
+                                            <strong>Auto-Trim Silence Gaps</strong>
+                                            <span>Removes dead air at the start and end of split tracks.</span>
+                                        </div>
+                                        <input type="checkbox" id="autoTrimSilenceToggle" class="switch-input" checked>
+                                    </label>
 
-                                        <label class="split-toggle-card">
-                                            <div class="split-toggle-text">
-                                                <strong>Auto-Tag Songs on Track Creation</strong>
-                                                <span>Automatically tags title, artist, album, year, genre &amp; cover
-                                                    art via AcoustID (zero uploads).</span>
-                                            </div>
-                                            <input type="checkbox" id="autoIdentifyToggle" class="switch-input" checked>
-                                        </label>
+                                    <label class="split-toggle-card">
+                                        <div class="split-toggle-text">
+                                            <strong>Auto-Tag Songs on Track Creation</strong>
+                                            <span>Automatically tags title, artist, album, year, genre &amp; cover art via AcoustID (zero uploads).</span>
+                                        </div>
+                                        <input type="checkbox" id="autoIdentifyToggle" class="switch-input" checked>
+                                    </label>
+                                </div>
+
+                                <div class="drawer-sliders-grid">
+                                    <div class="slider-control-group">
+                                        <div class="slider-label-row">
+                                            <label for="thresholdDbSlider">Silence Threshold</label>
+                                            <span id="thresholdDbVal" class="slider-val-pill">-42 dB</span>
+                                        </div>
+                                        <input type="range" id="thresholdDbSlider" min="-60" max="-20" step="1" value="-42">
                                     </div>
 
-                                    <div class="drawer-sliders-grid">
-                                        <div class="slider-control-group">
-                                            <div class="slider-label-row">
-                                                <label for="thresholdDbSlider">Silence Threshold</label>
-                                                <span id="thresholdDbVal" class="slider-val-pill">-42 dB</span>
-                                            </div>
-                                            <input type="range" id="thresholdDbSlider" min="-60" max="-20" step="1"
-                                                value="-42">
+                                    <div class="slider-control-group">
+                                        <div class="slider-label-row">
+                                            <label for="minSilenceSlider">Minimum Gap Duration</label>
+                                            <span id="minSilenceVal" class="slider-val-pill">1.5 s</span>
                                         </div>
-
-                                        <div class="slider-control-group">
-                                            <div class="slider-label-row">
-                                                <label for="minSilenceSlider">Minimum Gap Duration</label>
-                                                <span id="minSilenceVal" class="slider-val-pill">1.5 s</span>
-                                            </div>
-                                            <input type="range" id="minSilenceSlider" min="0.5" max="5.0" step="0.1"
-                                                value="1.5">
-                                        </div>
-
-                                        <div class="slider-control-group">
-                                            <div class="slider-label-row">
-                                                <label for="minTrackSlider">Minimum Track Length</label>
-                                                <span id="minTrackVal" class="slider-val-pill">10 s</span>
-                                            </div>
-                                            <input type="range" id="minTrackSlider" min="3" max="60" step="1"
-                                                value="10">
-                                        </div>
+                                        <input type="range" id="minSilenceSlider" min="0.5" max="5.0" step="0.1" value="1.5">
                                     </div>
 
-                                    <button type="button" id="scanSplitNowBtn" class="studio-btn studio-btn-emerald"
-                                        disabled>
-                                        <span>🔍</span>
-                                        <span>Scan Waveform &amp; Auto-Split Tracks</span>
+                                    <div class="slider-control-group">
+                                        <div class="slider-label-row">
+                                            <label for="minTrackSlider">Minimum Track Length</label>
+                                            <span id="minTrackVal" class="slider-val-pill">10 s</span>
+                                        </div>
+                                        <input type="range" id="minTrackSlider" min="3" max="60" step="1" value="10">
+                                    </div>
+                                </div>
+
+                                <button type="button" id="scanSplitNowBtn" class="studio-btn studio-btn-emerald" disabled>
+                                    <span>🔍</span>
+                                    <span>Scan Waveform &amp; Auto-Split Tracks</span>
+                                </button>
+                            </div>
+                        </details>
+
+                        <details class="studio-drawer studio-drawer-inline studio-drawer-inline-tools">
+                            <summary class="drawer-summary" title="More Edit Tools">
+                                <span class="drawer-title">🎛️ Tools</span>
+                                <span class="drawer-chevron">▾</span>
+                            </summary>
+                            <div class="drawer-body">
+                                <div class="more-tools-row">
+                                    <button type="button" id="splitAtCursorBtn" class="tool-chip-btn t-btn-split-marker" disabled title="Split song here (M)">✂️ Split Song</button>
+                                    <button type="button" id="loopBtn" class="tool-chip-btn t-btn-loop" title="Loop playback" aria-label="Loop playback">🔁 Loop Playback</button>
+                                    <button type="button" id="silenceSelBtn" class="tool-chip-btn" disabled>🔇 Silence Selection</button>
+                                    <button type="button" id="fadeInBtn" class="tool-chip-btn" disabled>📈 Fade In</button>
+                                    <button type="button" id="fadeOutBtn" class="tool-chip-btn" disabled>📉 Fade Out</button>
+                                    <button type="button" id="clearSessionBtn" class="tool-chip-btn" disabled>✕ Clear Session</button>
+                                </div>
+                                <p class="drawer-note">
+                                    Tip: Tap the wave to move the playhead, drag horizontally to select a section, or double-tap any track region to select it.
+                                </p>
+                            </div>
+                        </details>
+
+                        <details class="studio-drawer studio-drawer-inline studio-drawer-inline-tags">
+                            <summary class="drawer-summary" title="Tags, Cover Art & Audio Levels">
+                                <span class="drawer-title">🏷️ Tags &amp; Levels</span>
+                                <span class="drawer-chevron">▾</span>
+                            </summary>
+                            <div class="drawer-body">
+                                <div class="album-meta-bar">
+                                    <button type="button" id="coverArtPickerBtn" class="cover-picker-btn" title="Choose album artwork image">
+                                        <img id="coverArtPreview" src="" alt="Cover Art" class="hidden">
+                                        <span id="coverArtPlaceholder">🎨 Cover Art</span>
                                     </button>
-                                </div>
-                            </details>
+                                    <input type="file" id="coverArtInput" accept="image/*" class="hidden">
 
-                            <details class="studio-drawer studio-drawer-inline studio-drawer-inline-tools">
-                                <summary class="drawer-summary" title="More Edit Tools">
-                                    <span class="drawer-title">🎛️ Tools</span>
-                                    <span class="drawer-chevron">▾</span>
-                                </summary>
-                                <div class="drawer-body">
-                                    <div class="more-tools-row">
-                                        <button type="button" id="splitAtCursorBtn"
-                                            class="tool-chip-btn t-btn-split-marker" disabled
-                                            title="Split song here (M)">✂️ Split Song</button>
-                                        <button type="button" id="loopBtn" class="tool-chip-btn t-btn-loop"
-                                            title="Loop playback" aria-label="Loop playback">🔁 Loop Playback</button>
-                                        <button type="button" id="silenceSelBtn" class="tool-chip-btn" disabled>🔇
-                                            Silence Selection</button>
-                                        <button type="button" id="fadeInBtn" class="tool-chip-btn" disabled>📈 Fade
-                                            In</button>
-                                        <button type="button" id="fadeOutBtn" class="tool-chip-btn" disabled>📉 Fade
-                                            Out</button>
-                                        <button type="button" id="clearSessionBtn" class="tool-chip-btn" disabled>✕
-                                            Clear Session</button>
-                                    </div>
-                                    <p class="drawer-note">
-                                        Tip: Tap the wave to move the playhead, drag horizontally to select a section,
-                                        or double-tap any track region to select it.
-                                    </p>
-                                </div>
-                            </details>
-
-                            <details class="studio-drawer studio-drawer-inline studio-drawer-inline-tags">
-                                <summary class="drawer-summary" title="Tags, Cover Art & Audio Levels">
-                                    <span class="drawer-title">🏷️ Tags &amp; Levels</span>
-                                    <span class="drawer-chevron">▾</span>
-                                </summary>
-                                <div class="drawer-body">
-                                    <div class="album-meta-bar">
-                                        <button type="button" id="coverArtPickerBtn" class="cover-picker-btn"
-                                            title="Choose album artwork image">
-                                            <img id="coverArtPreview" src="" alt="Cover Art" class="hidden">
-                                            <span id="coverArtPlaceholder">🎨 Cover Art</span>
-                                        </button>
-                                        <input type="file" id="coverArtInput" accept="image/*" class="hidden">
-
-                                        <div class="meta-inputs-grid">
-                                            <input type="text" id="albumMetaInput" class="studio-input"
-                                                placeholder="Album / Mix Name" aria-label="Album name">
-                                            <input type="text" id="albumArtistMetaInput" class="studio-input"
-                                                placeholder="Default Artist" aria-label="Default artist">
-                                            <input type="text" id="genreMetaInput" class="studio-input"
-                                                placeholder="Genre" aria-label="Genre">
-                                            <input type="text" id="yearMetaInput" class="studio-input"
-                                                placeholder="Year" maxlength="4" aria-label="Year">
-                                        </div>
-                                    </div>
-
-                                    <div class="audio-levels-row">
-                                        <label class="device-select-group">
-                                            <span>Input Device</span>
-                                            <select id="micDeviceSelect" class="studio-select"
-                                                aria-label="Audio input device"></select>
-                                        </label>
-                                        <label class="mini-knob-group">
-                                            <span>Input Gain</span>
-                                            <input type="range" id="inputGainSlider" min="0" max="2" step="0.05"
-                                                value="1">
-                                        </label>
-                                        <label class="mini-knob-group">
-                                            <span>Output Vol</span>
-                                            <input type="range" id="playbackVolSlider" min="0" max="1.5" step="0.05"
-                                                value="1">
-                                        </label>
-                                        <label class="monitor-toggle-chip"
-                                            title="Listen to captured input through speakers (leave OFF for tab recording)">
-                                            <input type="checkbox" id="monitorToggle">
-                                            <span>🎧 Monitor</span>
-                                        </label>
+                                    <div class="meta-inputs-grid">
+                                        <input type="text" id="albumMetaInput" class="studio-input" placeholder="Album / Mix Name" aria-label="Album name">
+                                        <input type="text" id="albumArtistMetaInput" class="studio-input" placeholder="Default Artist" aria-label="Default artist">
+                                        <input type="text" id="genreMetaInput" class="studio-input" placeholder="Genre" aria-label="Genre">
+                                        <input type="text" id="yearMetaInput" class="studio-input" placeholder="Year" maxlength="4" aria-label="Year">
                                     </div>
                                 </div>
-                            </details>
+
+                                <div class="audio-levels-row">
+                                    <label class="device-select-group">
+                                        <span>Input Device</span>
+                                        <select id="micDeviceSelect" class="studio-select" aria-label="Audio input device"></select>
+                                    </label>
+                                    <label class="mini-knob-group">
+                                        <span>Input Gain</span>
+                                        <input type="range" id="inputGainSlider" min="0" max="2" step="0.05" value="1">
+                                    </label>
+                                    <label class="mini-knob-group">
+                                        <span>Output Vol</span>
+                                        <input type="range" id="playbackVolSlider" min="0" max="1.5" step="0.05" value="1">
+                                    </label>
+                                    <label class="monitor-toggle-chip" title="Listen to captured input through speakers (leave OFF for tab recording)">
+                                        <input type="checkbox" id="monitorToggle">
+                                        <span>🎧 Monitor</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </details>
                         </div>
                     </div>
 
@@ -367,8 +334,7 @@
                 </div>
 
                 <p id="mobileHintBanner" class="mobile-hint-banner hidden">
-                    📱 <strong>Mobile Ready:</strong> Tap <strong>Tap to Record</strong> for live mic/external audio or
-                    <strong>Open Audio</strong> to load a song/mix and save MP3s.
+                    📱 <strong>Mobile Ready:</strong> Tap <strong>Tap to Record</strong> for live mic/external audio or <strong>Open Audio</strong> to load a song/mix and save MP3s.
                 </p>
             </section>
 
@@ -390,16 +356,13 @@
 
                     <div id="waveformEmptyHint" class="waveform-empty-hint">
                         <div class="empty-hint-pill">
-                            <span id="emptyCardDesc">Tap <strong>Record Music Tab</strong> or <strong>Open
-                                    Audio</strong> — Left &amp; Right wave streams appear live here.</span>
+                            <span id="emptyCardDesc">Tap <strong>Record Music Tab</strong> or <strong>Open Audio</strong> — Left &amp; Right wave streams appear live here.</span>
                             <div class="empty-hint-actions">
-                                <button type="button" id="emptyCaptureTabBtn"
-                                    class="studio-btn studio-btn-primary studio-btn-compact">
+                                <button type="button" id="emptyCaptureTabBtn" class="studio-btn studio-btn-primary studio-btn-compact">
                                     <span>🖥️</span>
                                     <span>Record Music Tab</span>
                                 </button>
-                                <button type="button" id="emptyCaptureMicBtn"
-                                    class="studio-btn studio-btn-primary studio-btn-compact hidden">
+                                <button type="button" id="emptyCaptureMicBtn" class="studio-btn studio-btn-primary studio-btn-compact hidden">
                                     <span>🎙️</span>
                                     <span>Tap to Record</span>
                                 </button>
@@ -419,8 +382,7 @@
                         <button type="button" id="redoBtn" class="tool-chip-btn" disabled>↷ Redo</button>
                         <button type="button" id="trimSelBtn" class="tool-chip-btn" disabled>✂️ Trim</button>
                         <button type="button" id="deleteSelBtn" class="tool-chip-btn" disabled>🗑️ Cut</button>
-                        <button type="button" id="trimDeadAirBtn" class="tool-chip-btn" disabled>🧹 Trim
-                            Silence</button>
+                        <button type="button" id="trimDeadAirBtn" class="tool-chip-btn" disabled>🧹 Trim Silence</button>
                         <button type="button" id="normalizeBtn" class="tool-chip-btn" disabled>🔊 Normalize</button>
                     </div>
 
@@ -430,8 +392,7 @@
                             <button type="button" id="zoomOutBtn" class="tool-chip-btn" aria-label="Zoom Out">−</button>
                             <button type="button" id="zoomFitBtn" class="tool-chip-btn">Fit</button>
                             <button type="button" id="zoomInBtn" class="tool-chip-btn" aria-label="Zoom In">+</button>
-                            <input type="range" id="waveformPanSlider" min="0" max="1000" value="0" disabled
-                                aria-label="Scroll waveform">
+                            <input type="range" id="waveformPanSlider" min="0" max="1000" value="0" disabled aria-label="Scroll waveform">
                             <span id="zoomLevelBadge" class="zoom-badge">1.0x</span>
                         </div>
                     </div>
@@ -445,8 +406,7 @@
                         <h2 class="pane-title">🎵 Tracks</h2>
                         <span id="trackCountBadge" class="pane-badge">0 Tracks</span>
                     </div>
-                    <button type="button" id="quickAutoSplitBtn"
-                        class="studio-btn studio-btn-emerald studio-btn-compact" disabled>
+                    <button type="button" id="quickAutoSplitBtn" class="studio-btn studio-btn-emerald studio-btn-compact" disabled>
                         <span>🔍</span>
                         <span>Auto-Split</span>
                     </button>
@@ -462,8 +422,7 @@
                 </div>
 
                 <div class="save-footer-bar">
-                    <select id="exportPresetSelect" class="studio-select export-preset-select"
-                        aria-label="Export audio format and quality">
+                    <select id="exportPresetSelect" class="studio-select export-preset-select" aria-label="Export audio format and quality">
                         <option value="mp3:192" selected>MP3 &bull; 192 kbps (Recommended)</option>
                         <option value="mp3:320">MP3 &bull; 320 kbps (Studio Quality)</option>
                         <option value="mp3:256">MP3 &bull; 256 kbps (High)</option>
@@ -476,8 +435,7 @@
                             <span>✂️</span>
                             <span>Save Selection</span>
                         </button>
-                        <button type="button" id="exportAllBtn" class="studio-btn studio-btn-orange save-primary-btn"
-                            disabled>
+                        <button type="button" id="exportAllBtn" class="studio-btn studio-btn-orange save-primary-btn" disabled>
                             <span>💾</span>
                             <span id="exportAllLabel">Save Track to Device</span>
                         </button>
@@ -502,29 +460,20 @@
     <!-- MODALS -->
     <div id="howToRecordModal" class="modal" role="dialog" aria-labelledby="howToRecordTitle" aria-hidden="true">
         <div class="modal-content">
-            <button type="button" class="modal-close" onclick="closeModal('howToRecordModal')"
-                aria-label="Close modal">&times;</button>
+            <button type="button" class="modal-close" onclick="closeModal('howToRecordModal')" aria-label="Close modal">&times;</button>
             <h2 id="howToRecordTitle">How to Record &amp; Save Tracks</h2>
             <p><strong>On Desktop (Chrome / Edge):</strong></p>
             <ol>
-                <li><strong>Tap Record Music Tab (or Open Audio):</strong> Open your music stream in another browser
-                    tab, then tap <strong>Record Music Tab</strong> (or <strong>Open Audio</strong> to load an existing
-                    file).</li>
-                <li><strong>Choose what to record:</strong> Pick your music tab from the browser prompt and make sure
-                    <strong>"Share tab audio"</strong> is checked.</li>
-                <li><strong>Press Record:</strong> Tap the red <strong>Record</strong> button and press Play in your
-                    music tab.</li>
-                <li><strong>Navigate back to the MP3aud.io tab:</strong> Return to this tab to watch the Left &amp;
-                    Right recording bars and continuous stereo wave live while songs auto-split on quiet gaps.</li>
-                <li><strong>Save your tracks:</strong> Tap <strong>Save Track to Device</strong> (or choose a
-                    <strong>Save Folder</strong> for automatic saving).</li>
+                <li><strong>Tap Record Music Tab (or Open Audio):</strong> Open your music stream in another browser tab, then tap <strong>Record Music Tab</strong> (or <strong>Open Audio</strong> to load an existing file).</li>
+                <li><strong>Choose what to record:</strong> Pick your music tab from the browser prompt and make sure <strong>"Share tab audio"</strong> is checked.</li>
+                <li><strong>Press Record:</strong> Tap the red <strong>Record</strong> button and press Play in your music tab.</li>
+                <li><strong>Navigate back to the MP3aud.io tab:</strong> Return to this tab to watch the Left &amp; Right recording bars and continuous stereo wave live while songs auto-split on quiet gaps.</li>
+                <li><strong>Save your tracks:</strong> Tap <strong>Save Track to Device</strong> (or choose a <strong>Save Folder</strong> for automatic saving).</li>
             </ol>
             <p><strong>On Mobile (iPhone / Android):</strong></p>
             <ul>
-                <li>Tap <strong>Tap to Record</strong> to capture live audio from your phone microphone or external
-                    audio interface.</li>
-                <li>Or tap <strong>Open Audio</strong> to load a song/mix from your phone, view the Left &amp; Right
-                    wave, auto-split tracks, and save MP3s.</li>
+                <li>Tap <strong>Tap to Record</strong> to capture live audio from your phone microphone or external audio interface.</li>
+                <li>Or tap <strong>Open Audio</strong> to load a song/mix from your phone, view the Left &amp; Right wave, auto-split tracks, and save MP3s.</li>
             </ul>
             <div class="shortcut-grid">
                 <div class="shortcut-item"><span>Play / Pause</span><kbd>Space</kbd></div>
@@ -539,8 +488,7 @@
 
     <div id="aboutModal" class="modal" role="dialog" aria-labelledby="aboutTitle" aria-hidden="true">
         <div class="modal-content">
-            <button type="button" class="modal-close" onclick="closeModal('aboutModal')"
-                aria-label="Close modal">&times;</button>
+            <button type="button" class="modal-close" onclick="closeModal('aboutModal')" aria-label="Close modal">&times;</button>
             <h2 id="aboutTitle">About MP3aud.io</h2>
             <p>
                 MP3aud.io is a 100% client-side browser audio recorder with a continuous live stereo recording wave,
@@ -552,21 +500,18 @@
 
     <div id="privacyModal" class="modal" role="dialog" aria-labelledby="privacyTitle" aria-hidden="true">
         <div class="modal-content">
-            <button type="button" class="modal-close" onclick="closeModal('privacyModal')"
-                aria-label="Close modal">&times;</button>
+            <button type="button" class="modal-close" onclick="closeModal('privacyModal')" aria-label="Close modal">&times;</button>
             <h2 id="privacyTitle">Privacy Policy</h2>
             <p>
                 All audio recording, editing, and MP3/WAV conversion stays completely inside your browser memory.
-                Nothing is ever uploaded to any server. Saved files go directly to your chosen folder or device
-                Downloads.
+                Nothing is ever uploaded to any server. Saved files go directly to your chosen folder or device Downloads.
             </p>
         </div>
     </div>
 
     <div id="disclaimerModal" class="modal" role="dialog" aria-labelledby="disclaimerTitle" aria-hidden="true">
         <div class="modal-content">
-            <button type="button" class="modal-close" onclick="closeModal('disclaimerModal')"
-                aria-label="Close modal">&times;</button>
+            <button type="button" class="modal-close" onclick="closeModal('disclaimerModal')" aria-label="Close modal">&times;</button>
             <h2 id="disclaimerTitle">Terms &amp; Legal Disclaimer</h2>
             <p>
                 MP3aud.io is a local browser audio tool for personal archival, voice recording, and authorized streams.
@@ -575,10 +520,10 @@
         </div>
     </div>
 
-    <script src="export-engine.js?v=20261125_06"></script>
-    <script src="identify-engine.js?v=20261125_06"></script>
-    <script src="audio-engine.js?v=20261125_06"></script>
-    <script src="app.js?v=20261125_06"></script>
+    <script src="export-engine.js?v=20261125_07"></script>
+    <script src="identify-engine.js?v=20261125_07"></script>
+    <script src="audio-engine.js?v=20261125_07"></script>
+    <script src="app.js?v=20261125_07"></script>
 </body>
 
 </html>
