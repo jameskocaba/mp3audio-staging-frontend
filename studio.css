@@ -291,6 +291,23 @@ html, body {
     line-height: 1.4;
 }
 
+.guided-steps-flow {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 8px;
+}
+
+.guided-step-item {
+    display: inline;
+}
+
+.guided-step-sep {
+    color: #0284c7;
+    font-weight: 700;
+    opacity: 0.75;
+}
+
 .source-row {
     display: flex;
     align-items: center;

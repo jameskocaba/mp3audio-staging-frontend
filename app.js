@@ -420,9 +420,9 @@
                 const n = engine.tracks.length;
                 guidedStepBanner.innerHTML = `✅ <strong>Ready!</strong> ${n} track${n === 1 ? '' : 's'} captured — rename tracks below or tap <strong>💾 Save</strong>.`;
             } else if (supportsDisplayCapture) {
-                guidedStepBanner.innerHTML = '✨ <strong>Step 1:</strong> Tap <strong>Record Music Tab</strong> (or <strong>Open Audio</strong>) — watch the continuous L/R recording wave and auto-split songs.';
+                guidedStepBanner.innerHTML = '<span class="guided-steps-flow"><span class="guided-step-item">✨ <strong>Step 1:</strong> Tap <strong>Record Music Tab</strong> (or <strong>Open Audio</strong>)</span><span class="guided-step-sep" aria-hidden="true">→</span><span class="guided-step-item"><strong>Step 2:</strong> Choose what to record</span><span class="guided-step-sep" aria-hidden="true">→</span><span class="guided-step-item"><strong>Step 3:</strong> Press <strong>Record</strong></span></span>';
             } else {
-                guidedStepBanner.innerHTML = '✨ <strong>Step 1:</strong> Tap <strong>Tap to Record</strong> or <strong>Open Audio</strong> to capture Left/Right audio and save MP3s.';
+                guidedStepBanner.innerHTML = '<span class="guided-steps-flow"><span class="guided-step-item">✨ <strong>Step 1:</strong> Tap <strong>Tap to Record</strong> (or <strong>Open Audio</strong>)</span><span class="guided-step-sep" aria-hidden="true">→</span><span class="guided-step-item"><strong>Step 2:</strong> Choose what to record</span><span class="guided-step-sep" aria-hidden="true">→</span><span class="guided-step-item"><strong>Step 3:</strong> Press <strong>Record</strong></span></span>';
             }
         }
 
