@@ -22,6 +22,8 @@
         const guidedStepBanner = document.getElementById('guidedStepBanner');
         const captureTabBtn = document.getElementById('captureTabBtn');
         const emptyCaptureTabBtn = document.getElementById('emptyCaptureTabBtn');
+        const marathonModeBtn = document.getElementById('marathonModeBtn');
+        const marathonModeLabel = document.getElementById('marathonModeLabel');
         const captureMicBtn = document.getElementById('captureMicBtn');
         const captureMicLabel = document.getElementById('captureMicLabel');
         const emptyCaptureMicBtn = document.getElementById('emptyCaptureMicBtn');
@@ -125,7 +127,9 @@
 
         // --- App State ---
         const LIVE_SCROLL_SECONDS = 12;
+        const TRACKS_WINDOW_STEP = 50;
         let dirHandle = null;
+        let visibleFlushedLimit = TRACKS_WINDOW_STEP;
         let coverArtBytes = null;
         let coverArtMime = 'image/jpeg';
         let userEditedCoverArt = false;
@@ -186,6 +190,7 @@
         if (!supportsFolderPicker) {
             if (pickFolderBtn) pickFolderBtn.classList.add('hidden');
             if (isMobileUa) {
+                if (marathonModeBtn) marathonModeBtn.classList.add('hidden');
                 if (autoSaveLiveRow) autoSaveLiveRow.classList.add('hidden');
                 if (flushOnSaveRow) flushOnSaveRow.classList.add('hidden');
                 if (autoSaveLiveToggle) autoSaveLiveToggle.checked = false;
@@ -489,6 +494,7 @@
                     if (!wasActiveRec && engine.length === 0 && engine.tracks.length === 0) {
                         usedSavedFilenames.clear();
                         warnedHighRamWithoutFolder = false;
+                        visibleFlushedLimit = TRACKS_WINDOW_STEP;
                     }
                 } else if (state === 'idle') {
                     releaseWakeLock();
@@ -663,6 +669,46 @@
                 guidedStepBanner.innerHTML = '<span class="guided-steps-flow"><span class="guided-step-item">✨ <strong>Step 1:</strong> Tap <strong>Record Music Tab</strong> (or <strong>Open Audio</strong>)</span><span class="guided-step-sep" aria-hidden="true">→</span><span class="guided-step-item"><strong>Step 2:</strong> Choose what to record</span><span class="guided-step-sep" aria-hidden="true">→</span><span class="guided-step-item"><strong>Step 3:</strong> Press <strong>Record</strong></span><span class="guided-step-sep" aria-hidden="true">→</span><span class="guided-step-item"><strong>Step 4:</strong> Navigate back to the <strong>MP3aud.io</strong> tab</span></span>';
             } else {
                 guidedStepBanner.innerHTML = '<span class="guided-steps-flow"><span class="guided-step-item">✨ <strong>Step 1:</strong> Tap <strong>Tap to Record</strong> (or <strong>Open Audio</strong>)</span><span class="guided-step-sep" aria-hidden="true">→</span><span class="guided-step-item"><strong>Step 2:</strong> Choose what to record</span><span class="guided-step-sep" aria-hidden="true">→</span><span class="guided-step-item"><strong>Step 3:</strong> Press <strong>Record</strong></span><span class="guided-step-sep" aria-hidden="true">→</span><span class="guided-step-item"><strong>Step 4:</strong> Navigate back to the <strong>MP3aud.io</strong> tab</span></span>';
+            }
+        }
+
+        async function handleMarathonModeClick() {
+            if (liveAutoSplitToggle) liveAutoSplitToggle.checked = true;
+            if (autoSaveLiveToggle) autoSaveLiveToggle.checked = true;
+            if (flushOnSaveToggle) flushOnSaveToggle.checked = true;
+
+            if (supportsFolderPicker && !dirHandle) {
+                const picked = await handlePickFolder();
+                if (!picked) {
+                    showToast('📁 Pick a local Save Folder to start Marathon (12h+) Mode.', 'info');
+                    syncSettingsToEngine();
+                    updateUiState();
+                    return;
+                }
+            }
+
+            syncSettingsToEngine();
+            updateUiState();
+
+            if (engine.recordState === 'recording' || engine.recordState === 'armed' || engine.recordState === 'paused') {
+                engine.getUnflushedTracks().forEach(t => {
+                    if (!t.saving) queueLiveAutoSaveTrack(t);
+                });
+                showToast('🏃 Marathon (12h+) Mode active — tracks will save & flush RAM automatically.', 'success');
+                return;
+            }
+
+            if (engine.isSourceConnected()) {
+                userHasZoomed = false;
+                engine.startRecording(false);
+                showToast('🏃 Marathon (12h+) Recording live — tracks flush directly to disk with flat RAM.', 'success');
+                return;
+            }
+
+            if (supportsDisplayCapture) {
+                await handleCaptureTabClick();
+            } else {
+                await handleCaptureMicClick();
             }
         }
 
@@ -1312,7 +1358,72 @@
             tracksList.innerHTML = '';
             const showMobileShare = isMobileUa && ExportEngine.canShareFiles();
 
+            // Window older flushed tracks to keep multi-day (1,000+ song) lists fast in the DOM
+            const flushedIndices = [];
+            for (let i = 0; i < tracks.length; i++) {
+                if (tracks[i].flushed) flushedIndices.push(i);
+            }
+            const hiddenFlushedCount = Math.max(0, flushedIndices.length - visibleFlushedLimit);
+            const hiddenSet = hiddenFlushedCount > 0 ? new Set(flushedIndices.slice(0, hiddenFlushedCount)) : null;
+
+            if (flushedIndices.length > TRACKS_WINDOW_STEP) {
+                const windowBar = document.createElement('div');
+                windowBar.className = 'tracks-window-bar';
+
+                const shownFlushed = flushedIndices.length - hiddenFlushedCount;
+                const infoEl = document.createElement('span');
+                infoEl.className = 'tracks-window-info';
+                infoEl.textContent = hiddenFlushedCount > 0
+                    ? `🗂️ Showing latest ${shownFlushed} of ${flushedIndices.length} flushed tracks (${hiddenFlushedCount} older saved on disk)`
+                    : `🗂️ Showing all ${flushedIndices.length} flushed tracks`;
+
+                const actionsEl = document.createElement('div');
+                actionsEl.className = 'tracks-window-actions';
+
+                if (hiddenFlushedCount > 0) {
+                    const stepCount = Math.min(TRACKS_WINDOW_STEP, hiddenFlushedCount);
+                    const loadMoreBtn = document.createElement('button');
+                    loadMoreBtn.type = 'button';
+                    loadMoreBtn.className = 'tracks-window-btn';
+                    loadMoreBtn.textContent = `⬆ Load Earlier ${stepCount}`;
+                    loadMoreBtn.addEventListener('click', () => {
+                        visibleFlushedLimit += TRACKS_WINDOW_STEP;
+                        renderTracksList();
+                    });
+                    actionsEl.appendChild(loadMoreBtn);
+
+                    const showAllBtn = document.createElement('button');
+                    showAllBtn.type = 'button';
+                    showAllBtn.className = 'tracks-window-btn';
+                    showAllBtn.textContent = `Show All (${flushedIndices.length})`;
+                    showAllBtn.addEventListener('click', () => {
+                        visibleFlushedLimit = flushedIndices.length;
+                        renderTracksList();
+                    });
+                    actionsEl.appendChild(showAllBtn);
+                }
+
+                if (visibleFlushedLimit > TRACKS_WINDOW_STEP) {
+                    const collapseBtn = document.createElement('button');
+                    collapseBtn.type = 'button';
+                    collapseBtn.className = 'tracks-window-btn';
+                    collapseBtn.textContent = `Show Latest ${TRACKS_WINDOW_STEP}`;
+                    collapseBtn.addEventListener('click', () => {
+                        visibleFlushedLimit = TRACKS_WINDOW_STEP;
+                        renderTracksList();
+                    });
+                    actionsEl.appendChild(collapseBtn);
+                }
+
+                windowBar.appendChild(infoEl);
+                windowBar.appendChild(actionsEl);
+                tracksList.appendChild(windowBar);
+            }
+
+            const padWidth = tracks.length >= 1000 ? 4 : (tracks.length >= 100 ? 3 : 2);
+
             tracks.forEach((trk, idx) => {
+                if (hiddenSet && hiddenSet.has(idx)) return;
                 const isFlushed = Boolean(trk.flushed);
                 const sr = Math.max(1, engine.sampleRate);
                 const durSec = isFlushed && Number.isFinite(trk.durationSec)
@@ -1344,7 +1455,7 @@
 
                 const numBadge = document.createElement('div');
                 numBadge.className = 'track-num-badge';
-                numBadge.textContent = String(idx + 1).padStart(tracks.length >= 100 ? 3 : 2, '0');
+                numBadge.textContent = String(idx + 1).padStart(padWidth, '0');
 
                 const coverThumbUrl = trk.coverBytes ? getTrackCoverObjectUrl(trk.coverBytes, trk.coverMime) : '';
                 let coverThumbEl = null;
@@ -1553,6 +1664,13 @@
             }
             if (disconnectSourceBtn) {
                 disconnectSourceBtn.classList.toggle('hidden', !connected);
+            }
+            if (marathonModeBtn) {
+                const marathonActive = isTrackByTrackFlushActive();
+                marathonModeBtn.classList.toggle('is-active', marathonActive);
+                if (marathonModeLabel) {
+                    marathonModeLabel.textContent = marathonActive ? 'Marathon Active ✓' : 'Marathon (12h+)';
+                }
             }
             if (pauseRecBtn) {
                 pauseRecBtn.classList.toggle('hidden', isIdle);
@@ -2327,6 +2445,7 @@
         // --- Wire Controls ---
         if (captureTabBtn) captureTabBtn.addEventListener('click', handleCaptureTabClick);
         if (emptyCaptureTabBtn) emptyCaptureTabBtn.addEventListener('click', handleCaptureTabClick);
+        if (marathonModeBtn) marathonModeBtn.addEventListener('click', handleMarathonModeClick);
         if (captureMicBtn) captureMicBtn.addEventListener('click', handleCaptureMicClick);
         if (emptyCaptureMicBtn) emptyCaptureMicBtn.addEventListener('click', handleCaptureMicClick);
         if (disconnectSourceBtn) disconnectSourceBtn.addEventListener('click', () => {
@@ -2442,6 +2561,7 @@
             stopDiskPlayback(true);
             usedSavedFilenames.clear();
             warnedHighRamWithoutFolder = false;
+            visibleFlushedLimit = TRACKS_WINDOW_STEP;
             engine.clearSession();
             showToast('Cleared waveform', 'info');
         });
