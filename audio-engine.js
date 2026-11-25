@@ -510,6 +510,7 @@
             this._recRightCap = new Int16Array(0);
 
             // Finalize trailing track region if there is recorded audio since currentTrackStartSample
+            const createdOnStop = [];
             if (!wasArmedOnly && this.length > 0 && this._liveState && !this._liveState.waitingForNextTrackStart) {
                 const startS = Math.max(0, Math.min(this.length, this._liveState.currentTrackStartSample));
                 let endS = this.length;
@@ -520,6 +521,7 @@
                 if (endS - startS > Math.round(this.sampleRate * 0.5)) {
                     const track = this._createTrackObject(this.tracks.length, startS, endS);
                     this.tracks.push(track);
+                    createdOnStop.push(track);
                     this._emit('onTrackAutoSplit', track);
                 }
             }
@@ -527,6 +529,7 @@
             if (this.length > 0 && this.tracks.length === 0) {
                 const track = this._createTrackObject(0, 0, this.length);
                 this.tracks.push(track);
+                createdOnStop.push(track);
             }
 
             this._liveState = null;
@@ -539,6 +542,9 @@
             this._emit('onRecordStateChanged', { state: 'idle' });
             this._emit('onTracksChanged', this.tracks);
             this._emit('onBufferChanged', { length: this.length, sampleRate: this.sampleRate });
+            if (createdOnStop.length > 0) {
+                this._emit('onTracksCreated', { tracks: createdOnStop, reason: 'record-stop' });
+            }
         }
 
         _initRecordingCapacity(cap) {
@@ -769,6 +775,7 @@
                                 ls.inSilence = false;
                                 this._emit('onTrackAutoSplit', track);
                                 this._emit('onTracksChanged', this.tracks);
+                                this._emit('onTracksCreated', { tracks: [track], reason: 'live-split' });
                             }
                         }
                     } else {
@@ -791,6 +798,11 @@
                 genre: (prevMeta && prevMeta.genre) || '',
                 coverBytes: (prevMeta && prevMeta.coverBytes) || null,
                 coverMime: (prevMeta && prevMeta.coverMime) || 'image/jpeg',
+                tagSource: (prevMeta && prevMeta.tagSource) || 'none',
+                hasId3Title: Boolean(prevMeta && prevMeta.hasId3Title),
+                hasId3Artist: Boolean(prevMeta && prevMeta.hasId3Artist),
+                autoTagStatus: (prevMeta && prevMeta.autoTagStatus) || '',
+                autoTagAttempted: Boolean(prevMeta && prevMeta.autoTagAttempted),
                 identifying: false,
                 identified: Boolean(prevMeta && prevMeta.identified),
                 userEditedTitle: Boolean(prevMeta && prevMeta.userEditedTitle),
@@ -816,6 +828,7 @@
                     this._liveState.inSilence = false;
                     this._emit('onTrackAutoSplit', track);
                     this._emit('onTracksChanged', this.tracks);
+                    this._emit('onTracksCreated', { tracks: [track], reason: 'manual-split-live' });
                     return track;
                 }
                 return null;
@@ -823,10 +836,12 @@
 
             this._pushUndo();
             if (this.tracks.length === 0) {
-                this.tracks.push(this._createTrackObject(0, 0, splitAt));
-                this.tracks.push(this._createTrackObject(1, splitAt, this.length));
+                const t0 = this._createTrackObject(0, 0, splitAt);
+                const t1 = this._createTrackObject(1, splitAt, this.length);
+                this.tracks.push(t0, t1);
                 this._emit('onTracksChanged', this.tracks);
-                return this.tracks[1];
+                this._emit('onTracksCreated', { tracks: [t0, t1], reason: 'manual-split' });
+                return t1;
             }
 
             // Find the track containing splitAt and split it into two
@@ -834,18 +849,24 @@
             if (idx === -1) return null;
 
             const orig = this.tracks[idx];
-            const first = this._createTrackObject(idx, orig.startSample, splitAt, {
+            const preserveFirst = Boolean(orig.userEditedTitle || orig.userEditedArtist);
+            const first = this._createTrackObject(idx, orig.startSample, splitAt, preserveFirst ? {
                 title: orig.title,
                 artist: orig.artist,
-                album: orig.album
-            });
-            const second = this._createTrackObject(idx + 1, splitAt, orig.endSample, {
-                artist: orig.artist,
-                album: orig.album
-            });
+                album: orig.album,
+                year: orig.year,
+                genre: orig.genre,
+                coverBytes: orig.coverBytes,
+                coverMime: orig.coverMime,
+                tagSource: orig.tagSource,
+                userEditedTitle: orig.userEditedTitle,
+                userEditedArtist: orig.userEditedArtist
+            } : null);
+            const second = this._createTrackObject(idx + 1, splitAt, orig.endSample);
             this.tracks.splice(idx, 1, first, second);
             this._reindexTracks();
             this._emit('onTracksChanged', this.tracks);
+            this._emit('onTracksCreated', { tracks: preserveFirst ? [second] : [first, second], reason: 'manual-split' });
             return second;
         }
 
@@ -917,11 +938,27 @@
             }
 
             this._pushUndo();
+            const matchTol = Math.round(this.sampleRate * 1.0);
+            const usedPrev = new Set();
+            const createdTracks = [];
             this.tracks = detected.map((seg, idx) => {
-                const prev = prevTracks[idx] || null;
-                return this._createTrackObject(idx, seg.startSample, seg.endSample, prev);
+                const matchingPrev = prevTracks.find((pt, pIdx) =>
+                    !usedPrev.has(pIdx) &&
+                    Math.abs(pt.startSample - seg.startSample) <= matchTol &&
+                    Math.abs(pt.endSample - seg.endSample) <= matchTol
+                );
+                if (matchingPrev) {
+                    usedPrev.add(prevTracks.indexOf(matchingPrev));
+                    return this._createTrackObject(idx, seg.startSample, seg.endSample, matchingPrev);
+                }
+                const fresh = this._createTrackObject(idx, seg.startSample, seg.endSample, null);
+                createdTracks.push(fresh);
+                return fresh;
             });
             this._emit('onTracksChanged', this.tracks);
+            if (createdTracks.length > 0) {
+                this._emit('onTracksCreated', { tracks: createdTracks, reason: 'auto-split' });
+            }
             return this.tracks;
         }
 
@@ -933,9 +970,17 @@
             const curr = this.tracks[idx];
             prev.endSample = curr.endSample;
             prev.saved = false;
+            if (!prev.userEditedTitle && !prev.userEditedArtist) {
+                prev.identified = false;
+                prev.autoTagAttempted = false;
+                prev.autoTagStatus = '';
+            }
             this.tracks.splice(idx, 1);
             this._reindexTracks();
             this._emit('onTracksChanged', this.tracks);
+            if (!prev.userEditedTitle && !prev.userEditedArtist) {
+                this._emit('onTracksCreated', { tracks: [prev], reason: 'merge' });
+            }
             return true;
         }
 
@@ -1084,7 +1129,8 @@
                     updated.push(t);
                 }
             }
-            this.tracks = updated.length ? updated : [this._createTrackObject(0, 0, this.length)];
+            const createdFallback = updated.length === 0 ? this._createTrackObject(0, 0, this.length) : null;
+            this.tracks = updated.length ? updated : [createdFallback];
             this._reindexTracks();
             this.selection = null;
             this.cursorSample = 0;
@@ -1093,6 +1139,9 @@
             this._emit('onTracksChanged', this.tracks);
             this._emit('onSelectionChanged', null);
             this._emit('onBufferChanged', { length: this.length, sampleRate: this.sampleRate });
+            if (createdFallback) {
+                this._emit('onTracksCreated', { tracks: [createdFallback], reason: 'trim' });
+            }
             return true;
         }
 
@@ -1138,7 +1187,8 @@
                     }
                 }
             }
-            this.tracks = updated.length ? updated : (newLen > 0 ? [this._createTrackObject(0, 0, newLen)] : []);
+            const createdFallback = (updated.length === 0 && newLen > 0) ? this._createTrackObject(0, 0, newLen) : null;
+            this.tracks = updated.length ? updated : (createdFallback ? [createdFallback] : []);
             this._reindexTracks();
             this.selection = null;
             this.cursorSample = Math.min(range.start, newLen);
@@ -1147,6 +1197,9 @@
             this._emit('onTracksChanged', this.tracks);
             this._emit('onSelectionChanged', null);
             this._emit('onBufferChanged', { length: this.length, sampleRate: this.sampleRate });
+            if (createdFallback) {
+                this._emit('onTracksCreated', { tracks: [createdFallback], reason: 'delete' });
+            }
             return true;
         }
 
@@ -1277,13 +1330,18 @@
             const fallbackArtist = parts.length >= 2 ? parts[0].trim() : '';
             const fallbackTitle = parts.length >= 2 ? parts.slice(1).join(' - ').trim() : base;
 
-            const title = (id3Tags.title && id3Tags.title.trim()) || fallbackTitle;
-            const artist = (id3Tags.artist && id3Tags.artist.trim()) || fallbackArtist;
+            const hasId3Title = Boolean(id3Tags.title && id3Tags.title.trim());
+            const hasId3Artist = Boolean(id3Tags.artist && id3Tags.artist.trim());
+            const hasAnyId3 = Boolean(hasId3Title || hasId3Artist || id3Tags.album || id3Tags.year || id3Tags.genre || id3Tags.coverBytes);
+            const title = hasId3Title ? id3Tags.title.trim() : fallbackTitle;
+            const artist = hasId3Artist ? id3Tags.artist.trim() : fallbackArtist;
             const album = (id3Tags.album && id3Tags.album.trim()) || '';
             const year = (id3Tags.year && id3Tags.year.trim()) || '';
             const genre = (id3Tags.genre && id3Tags.genre.trim()) || '';
             const coverBytes = id3Tags.coverBytes || null;
             const coverMime = id3Tags.coverMime || 'image/jpeg';
+            const tagSource = (hasId3Title && hasId3Artist) ? 'id3' : (hasAnyId3 ? 'id3-partial' : 'filename');
+            const fullyTagged = Boolean(hasId3Title && hasId3Artist && (album || coverBytes));
 
             this.loadSyntheticBuffer(leftI16, rightI16, decoded.sampleRate, {
                 title,
@@ -1292,9 +1350,15 @@
                 year,
                 genre,
                 coverBytes,
-                coverMime
+                coverMime,
+                tagSource,
+                hasId3Title,
+                hasId3Artist,
+                identified: fullyTagged,
+                autoTagStatus: fullyTagged ? 'tagged' : '',
+                sourceReason: 'import'
             });
-            return { length: len, sampleRate: decoded.sampleRate, title, artist, album, year, genre, coverBytes, coverMime };
+            return { length: len, sampleRate: decoded.sampleRate, title, artist, album, year, genre, coverBytes, coverMime, tagSource, hasId3Title, hasId3Artist };
         }
 
         loadSyntheticBuffer(leftInt16, rightInt16, sampleRate = 44100, meta = {}) {
@@ -1315,13 +1379,20 @@
                     genre: meta.genre || '',
                     coverBytes: meta.coverBytes || null,
                     coverMime: meta.coverMime || 'image/jpeg',
-                    identified: Boolean(meta.identified)
+                    tagSource: meta.tagSource || (meta.title ? 'filename' : 'none'),
+                    hasId3Title: Boolean(meta.hasId3Title),
+                    hasId3Artist: Boolean(meta.hasId3Artist),
+                    identified: Boolean(meta.identified),
+                    autoTagStatus: meta.autoTagStatus || ''
                 })]
                 : [];
             this._rebuildPeakCache();
             this._emit('onTracksChanged', this.tracks);
             this._emit('onSelectionChanged', null);
             this._emit('onBufferChanged', { length: this.length, sampleRate: this.sampleRate });
+            if (this.tracks.length > 0) {
+                this._emit('onTracksCreated', { tracks: this.tracks.slice(), reason: meta.sourceReason || 'load' });
+            }
         }
 
         clearSession() {

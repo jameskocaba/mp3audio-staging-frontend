@@ -10,9 +10,10 @@
 
     const DEFAULT_ACOUSTID_CLIENT_KEY = 'MTVnNF4Ow5';
     const MAX_FINGERPRINT_SECONDS = 120;
-    const MIN_SCORE = 0.60;
+    const MIN_SCORE = 0.50;
     const RATE_LIMIT_GAP_MS = 400;
 
+    let fpQueue = Promise.resolve();
     let acoustQueue = Promise.resolve();
     let lastAcoustRequestAt = 0;
 
@@ -24,7 +25,13 @@
     function isGenericTrackTitle(title) {
         const s = String(title || '').trim();
         if (!s) return true;
-        return /^(track|recording|clip|audio|song|untitled|unknown(\s+track)?)\s*\d*$/i.test(s);
+        if (/^(track|recording|clip|audio|song|untitled|unknown(\s+track)?|capture|rec|voice\s*memo|mix|output|download|videoplayback|imported\s*track)\s*([\-_#]?\s*\d+|\(\d+\))?$/i.test(s)) {
+            return true;
+        }
+        if (/^\d{4}[-_]\d{2}[-_]\d{2}(?:[T _-]\d{2}[-_:]?\d{2}(?:[-_:]?\d{2})?)?$/.test(s)) {
+            return true;
+        }
+        return false;
     }
 
     function resolveVendorAssetUrls() {
@@ -162,8 +169,8 @@ self.onmessage = function (ev) {
                 if (settled) return;
                 settled = true;
                 pendingWorkerReqs.delete(id);
-                reject(new Error('Chromaprint worker startup timeout'));
-            }, 3000);
+                reject(new Error('Chromaprint worker timeout'));
+            }, 15000);
 
             pendingWorkerReqs.set(id, {
                 resolve: (val) => {
@@ -211,20 +218,25 @@ self.onmessage = function (ev) {
         return fpFn(effectiveRate, mono);
     }
 
-    async function computeFingerprint(leftInt16, rightInt16, sampleRate = 44100) {
+    function computeFingerprint(leftInt16, rightInt16, sampleRate = 44100) {
         const { mono, effectiveRate, duration } = buildMonoPcmWindow(leftInt16, rightInt16, sampleRate);
         if (mono.length === 0) {
-            throw new Error('Cannot fingerprint empty audio slice');
+            return Promise.reject(new Error('Cannot fingerprint empty audio slice'));
         }
         const { jsUrl, wasmUrl } = resolveVendorAssetUrls();
 
-        let fp = '';
-        try {
-            fp = await computeFingerprintInWorker(mono, effectiveRate, jsUrl, wasmUrl);
-        } catch (_) {
-            fp = await computeFingerprintMainThread(mono, effectiveRate, jsUrl, wasmUrl);
-        }
-        return { fingerprint: String(fp || ''), duration };
+        const task = fpQueue.then(async () => {
+            let fp = '';
+            try {
+                fp = await computeFingerprintInWorker(mono, effectiveRate, jsUrl, wasmUrl);
+            } catch (_) {
+                fp = await computeFingerprintMainThread(mono, effectiveRate, jsUrl, wasmUrl);
+            }
+            return { fingerprint: String(fp || ''), duration };
+        });
+
+        fpQueue = task.catch(() => {});
+        return task;
     }
 
     function lookupAcoustIdJsonp(urlParams) {
@@ -287,7 +299,7 @@ self.onmessage = function (ev) {
 
             const formParams = {
                 client: key,
-                meta: 'recordings+releasegroups+compress',
+                meta: 'recordings releasegroups',
                 duration: String(dur),
                 fingerprint: fp,
                 format: 'json'
@@ -415,7 +427,7 @@ self.onmessage = function (ev) {
     }
 
     async function enrichFromItunes(title, artist) {
-        const empty = { album: '', year: '', genre: '', coverUrl: '', coverBytes: null, coverMime: '' };
+        const empty = { matched: false, title: '', artist: '', album: '', year: '', genre: '', coverUrl: '', coverBytes: null, coverMime: '' };
         const t = String(title || '').trim();
         const a = String(artist || '').trim();
         if (!t) return empty;
@@ -441,7 +453,7 @@ self.onmessage = function (ev) {
 
         const nt = normMatchStr(t);
         const na = normMatchStr(a);
-        let best = list[0];
+        let best = null;
         let bestRank = -1;
         for (const item of list) {
             const it = normMatchStr(item.trackName);
@@ -456,6 +468,10 @@ self.onmessage = function (ev) {
             }
         }
 
+        if (!best || bestRank < 2) return empty;
+
+        const matchedTitle = String(best.trackName || '').trim();
+        const matchedArtist = String(best.artistName || '').trim();
         const album = String(best.collectionName || '').trim();
         const yearMatch = String(best.releaseDate || '').match(/\b(19\d\d|20\d\d)\b/);
         const year = yearMatch ? yearMatch[1] : '';
@@ -481,7 +497,7 @@ self.onmessage = function (ev) {
             }
         }
 
-        return { album, year, genre, coverUrl, coverBytes, coverMime };
+        return { matched: true, title: matchedTitle, artist: matchedArtist, album, year, genre, coverUrl, coverBytes, coverMime };
     }
 
     function readSyncSafeInt(b, offset) {

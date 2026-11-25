@@ -127,7 +127,8 @@
         let autoSaveQueue = Promise.resolve();
         let lastObservedRecLength = 0;
         let prevRecordState = 'idle';
-        const inFlightIdentifyIds = new Set();
+        const inFlightIdentifyPromises = new Map();
+        const trackCoverUrlCache = new WeakMap();
 
         // Viewport / Zoom State
         let viewStartSample = 0;
@@ -353,8 +354,8 @@
                 clampViewport();
                 syncPanScrollbar();
                 updateUiState();
-                if (wasActiveRec && state === 'idle' && engine.length > 0 && autoIdentifyToggle && autoIdentifyToggle.checked) {
-                    queueAutoIdentifyGenericTracks();
+                if (wasActiveRec && state === 'idle' && engine.length > 0 && isAutoTagEnabled()) {
+                    queueAutoTagTracks(engine.tracks);
                 }
             },
             onPlaybackStateChanged: ({ playing } = {}) => {
@@ -372,22 +373,23 @@
                 renderTracksList();
                 updateUiState();
             },
+            onTracksCreated: ({ tracks }) => {
+                if (!isAutoTagEnabled() || !Array.isArray(tracks) || tracks.length === 0) return;
+                queueAutoTagTracks(tracks);
+            },
             onTrackAutoSplit: async (track) => {
                 showToast(`✂️ Split Track ${track.index + 1} (${formatTimecode((track.endSample - track.startSample) / engine.sampleRate, false)})`, 'success');
                 renderTracksList();
-                const shouldAutoIdentify = autoIdentifyToggle && autoIdentifyToggle.checked && IdentifyEngine &&
-                    !track.userEditedTitle && IdentifyEngine.isGenericTrackTitle(track.title);
+                const shouldTag = isAutoTagEnabled() && shouldAutoTagTrack(track);
+                if (shouldTag) {
+                    identifyTrackById(track.id, { manual: false, forceOverwrite: false });
+                }
                 if (autoSaveLiveToggle && autoSaveLiveToggle.checked && dirHandle) {
-                    if (shouldAutoIdentify) {
-                        await Promise.race([
-                            identifyTrackById(track.id, { manual: false, forceOverwrite: false }),
-                            new Promise(r => setTimeout(r, 7000))
-                        ]);
+                    if (shouldTag || inFlightIdentifyPromises.has(track.id)) {
+                        await waitForTrackAutoTag(track.id, 9000);
                     }
                     const latest = engine.tracks.find(t => t.id === track.id) || track;
                     queueLiveAutoSaveTrack(latest);
-                } else if (shouldAutoIdentify) {
-                    identifyTrackById(track.id, { manual: false, forceOverwrite: false });
                 }
             },
             onBufferChanged: ({ length }) => {
@@ -578,93 +580,211 @@
             }
         }
 
-        async function identifyTrackById(trackId, { manual = false, forceOverwrite = false } = {}) {
-            if (!IdentifyEngine) return false;
+        function isAutoTagEnabled() {
+            return Boolean(IdentifyEngine && (!autoIdentifyToggle || autoIdentifyToggle.checked));
+        }
+
+        function shouldAutoTagTrack(track) {
+            if (!track || !IdentifyEngine) return false;
+            if (track.identifying || inFlightIdentifyPromises.has(track.id)) return false;
+            if (track.identified || track.autoTagAttempted) return false;
+            if (track.userEditedTitle && track.userEditedArtist) return false;
+            return true;
+        }
+
+        function waitForTrackAutoTag(trackId, timeoutMs = 8000) {
+            const p = inFlightIdentifyPromises.get(trackId);
+            if (!p) return Promise.resolve();
+            return Promise.race([
+                p.catch(() => false),
+                new Promise(r => setTimeout(r, timeoutMs))
+            ]);
+        }
+
+        function getTrackCoverObjectUrl(coverBytes, coverMime = 'image/jpeg') {
+            if (!coverBytes || !coverBytes.length) return '';
+            let cached = trackCoverUrlCache.get(coverBytes);
+            if (!cached) {
+                try {
+                    const blob = new Blob([coverBytes], { type: coverMime || 'image/jpeg' });
+                    cached = URL.createObjectURL(blob);
+                    trackCoverUrlCache.set(coverBytes, cached);
+                } catch (_) {
+                    return '';
+                }
+            }
+            return cached;
+        }
+
+        function identifyTrackById(trackId, { manual = false, forceOverwrite = false } = {}) {
+            if (!IdentifyEngine) return Promise.resolve(false);
+            if (inFlightIdentifyPromises.has(trackId)) {
+                return inFlightIdentifyPromises.get(trackId);
+            }
             const track = (engine.tracks || []).find(t => t.id === trackId);
-            if (!track || track.identifying || inFlightIdentifyIds.has(trackId)) return false;
+            if (!track || track.identifying) return Promise.resolve(false);
 
             const durSec = Math.max(0, (track.endSample - track.startSample) / (engine.sampleRate || 44100));
-            const minSec = manual ? 3 : 5;
+            const minSec = manual ? 3 : 4;
             if (durSec < minSec) {
                 if (manual) {
-                    showToast('Track is too short to fingerprint (need at least 3 seconds).', 'info');
+                    showToast('Track is too short to tag automatically (need at least 3 seconds).', 'info');
+                } else {
+                    engine.updateTrackMeta(trackId, { autoTagAttempted: true });
                 }
-                return false;
+                return Promise.resolve(false);
             }
 
-            inFlightIdentifyIds.add(trackId);
-            engine.updateTrackMeta(trackId, { identifying: true });
-            renderTracksList();
+            const runPromise = (async () => {
+                engine.updateTrackMeta(trackId, { identifying: true, autoTagStatus: 'tagging', autoTagAttempted: true });
+                renderTracksList();
 
-            try {
-                const slice = engine.getSlice(track.startSample, track.endSample);
-                const result = await IdentifyEngine.identifyTrackSlice(slice.left, slice.right, slice.sampleRate, { manual });
-                const liveTrk = (engine.tracks || []).find(t => t.id === trackId);
-                if (!liveTrk) return false;
+                try {
+                    const slice = engine.getSlice(track.startSample, track.endSample);
+                    const result = await IdentifyEngine.identifyTrackSlice(slice.left, slice.right, slice.sampleRate, { manual });
+                    const liveTrk = (engine.tracks || []).find(t => t.id === trackId);
+                    if (!liveTrk) return false;
 
-                if (result && result.matched && result.title) {
-                    const patch = {
+                    if (result && result.matched && result.title) {
+                        const patch = {
+                            identifying: false,
+                            identified: true,
+                            autoTagStatus: 'tagged',
+                            tagSource: 'auto',
+                            saved: false
+                        };
+                        const canReplaceTitle = forceOverwrite || (
+                            !liveTrk.userEditedTitle &&
+                            (!liveTrk.hasId3Title || IdentifyEngine.isGenericTrackTitle(liveTrk.title))
+                        );
+                        if (canReplaceTitle) {
+                            patch.title = result.title;
+                        }
+                        const canReplaceArtist = forceOverwrite || (
+                            !liveTrk.userEditedArtist &&
+                            (!liveTrk.hasId3Artist || !String(liveTrk.artist || '').trim())
+                        );
+                        if (result.artist && canReplaceArtist) {
+                            patch.artist = result.artist;
+                        }
+                        if (result.album && (forceOverwrite || !String(liveTrk.album || '').trim())) {
+                            patch.album = result.album;
+                        }
+                        if (result.year && (forceOverwrite || !String(liveTrk.year || '').trim())) {
+                            patch.year = result.year;
+                        }
+                        if (result.genre && (forceOverwrite || !String(liveTrk.genre || '').trim())) {
+                            patch.genre = result.genre;
+                        }
+                        if (result.coverBytes && (forceOverwrite || !liveTrk.coverBytes)) {
+                            patch.coverBytes = result.coverBytes;
+                            patch.coverMime = result.coverMime || 'image/jpeg';
+                        }
+
+                        engine.updateTrackMeta(trackId, patch);
+                        applySessionMetaIfEmpty({
+                            album: result.album,
+                            year: result.year,
+                            genre: result.genre,
+                            coverBytes: result.coverBytes,
+                            coverMime: result.coverMime
+                        });
+                        syncWaveTrackDisplay();
+                        renderTracksList();
+                        const dispArtist = (patch.artist || liveTrk.artist || '').trim();
+                        const dispTitle = (patch.title || liveTrk.title || '').trim();
+                        showToast(`🏷️ Auto-tagged: ${dispArtist ? dispArtist + ' — ' : ''}${dispTitle}`, 'success');
+                        return true;
+                    }
+
+                    // Fallback: if track already has a non-generic title (from ID3 or filename) and is missing album/art/tags, enrich via iTunes
+                    const hasUsableQuery = !IdentifyEngine.isGenericTrackTitle(liveTrk.title) &&
+                        (!liveTrk.album || !liveTrk.coverBytes || !liveTrk.artist || !liveTrk.genre || !liveTrk.year);
+                    if (hasUsableQuery && typeof IdentifyEngine.enrichFromItunes === 'function') {
+                        const extra = await IdentifyEngine.enrichFromItunes(liveTrk.title, liveTrk.artist);
+                        const latestTrk = (engine.tracks || []).find(t => t.id === trackId);
+                        if (!latestTrk) return false;
+                        if (extra && extra.matched && (extra.album || extra.coverBytes || extra.artist || extra.genre || extra.year)) {
+                            const patch = {
+                                identifying: false,
+                                identified: true,
+                                autoTagStatus: 'tagged',
+                                tagSource: latestTrk.tagSource === 'id3' ? 'id3' : 'auto',
+                                saved: false
+                            };
+                            if (extra.title && (forceOverwrite || (!latestTrk.userEditedTitle && !latestTrk.hasId3Title))) {
+                                patch.title = extra.title;
+                            }
+                            if (extra.artist && (forceOverwrite || (!latestTrk.userEditedArtist && !String(latestTrk.artist || '').trim()))) {
+                                patch.artist = extra.artist;
+                            }
+                            if (extra.album && (forceOverwrite || !String(latestTrk.album || '').trim())) {
+                                patch.album = extra.album;
+                            }
+                            if (extra.year && (forceOverwrite || !String(latestTrk.year || '').trim())) {
+                                patch.year = extra.year;
+                            }
+                            if (extra.genre && (forceOverwrite || !String(latestTrk.genre || '').trim())) {
+                                patch.genre = extra.genre;
+                            }
+                            if (extra.coverBytes && (forceOverwrite || !latestTrk.coverBytes)) {
+                                patch.coverBytes = extra.coverBytes;
+                                patch.coverMime = extra.coverMime || 'image/jpeg';
+                            }
+                            engine.updateTrackMeta(trackId, patch);
+                            applySessionMetaIfEmpty({
+                                album: extra.album,
+                                year: extra.year,
+                                genre: extra.genre,
+                                coverBytes: extra.coverBytes,
+                                coverMime: extra.coverMime
+                            });
+                            syncWaveTrackDisplay();
+                            renderTracksList();
+                            const dispArtist = (patch.artist || latestTrk.artist || '').trim();
+                            const dispTitle = (patch.title || latestTrk.title || '').trim();
+                            showToast(`🏷️ Tagged: ${dispArtist ? dispArtist + ' — ' : ''}${dispTitle}`, 'success');
+                            return true;
+                        }
+                    }
+
+                    engine.updateTrackMeta(trackId, {
                         identifying: false,
-                        identified: true,
-                        saved: false
-                    };
-                    if (forceOverwrite || (!liveTrk.userEditedTitle && IdentifyEngine.isGenericTrackTitle(liveTrk.title))) {
-                        patch.title = result.title;
-                    }
-                    if (result.artist && (forceOverwrite || (!liveTrk.userEditedArtist && !String(liveTrk.artist || '').trim()))) {
-                        patch.artist = result.artist;
-                    }
-                    if (result.album) patch.album = result.album;
-                    if (result.year) patch.year = result.year;
-                    if (result.genre) patch.genre = result.genre;
-                    if (result.coverBytes) {
-                        patch.coverBytes = result.coverBytes;
-                        patch.coverMime = result.coverMime || 'image/jpeg';
-                    }
-
-                    engine.updateTrackMeta(trackId, patch);
-                    applySessionMetaIfEmpty({
-                        album: result.album,
-                        year: result.year,
-                        genre: result.genre,
-                        coverBytes: result.coverBytes,
-                        coverMime: result.coverMime
+                        autoTagStatus: liveTrk.tagSource === 'id3' ? 'tagged' : 'unmatched'
                     });
-                    syncWaveTrackDisplay();
                     renderTracksList();
-                    const dispArtist = (patch.artist || liveTrk.artist || '').trim();
-                    const dispTitle = (patch.title || liveTrk.title || '').trim();
-                    showToast(`🎵 Identified: ${dispArtist ? dispArtist + ' — ' : ''}${dispTitle}`, 'success');
-                    return true;
+                    if (manual) {
+                        showToast('No automatic tag match found — type Title & Artist directly.', 'info');
+                    }
+                    return false;
+                } catch (err) {
+                    const liveTrk = (engine.tracks || []).find(t => t.id === trackId);
+                    engine.updateTrackMeta(trackId, {
+                        identifying: false,
+                        autoTagStatus: (liveTrk && liveTrk.tagSource === 'id3') ? 'tagged' : 'unmatched'
+                    });
+                    renderTracksList();
+                    if (manual) {
+                        showToast(`Tagging unavailable: ${(err && err.message) || 'Network error'}`, 'info');
+                    }
+                    return false;
+                } finally {
+                    inFlightIdentifyPromises.delete(trackId);
                 }
+            })();
 
-                engine.updateTrackMeta(trackId, { identifying: false });
-                renderTracksList();
-                if (manual) {
-                    showToast('No AcoustID match found — type Title & Artist directly.', 'info');
-                }
-                return false;
-            } catch (err) {
-                engine.updateTrackMeta(trackId, { identifying: false });
-                renderTracksList();
-                if (manual) {
-                    showToast(`Identify unavailable: ${(err && err.message) || 'Network error'}`, 'info');
-                }
-                return false;
-            } finally {
-                inFlightIdentifyIds.delete(trackId);
-            }
+            inFlightIdentifyPromises.set(trackId, runPromise);
+            return runPromise;
+        }
+
+        function queueAutoTagTracks(tracks = null) {
+            if (!isAutoTagEnabled()) return;
+            const list = (Array.isArray(tracks) ? tracks : (engine.tracks || [])).filter(shouldAutoTagTrack);
+            list.forEach(trk => { identifyTrackById(trk.id, { manual: false, forceOverwrite: false }); });
         }
 
         function queueAutoIdentifyGenericTracks() {
-            if (!IdentifyEngine || !autoIdentifyToggle || !autoIdentifyToggle.checked) return;
-            const list = (engine.tracks || []).filter(trk =>
-                !trk.identified &&
-                !trk.identifying &&
-                !trk.userEditedTitle &&
-                (IdentifyEngine.isGenericTrackTitle(trk.title) || (!trk.userEditedArtist && !String(trk.artist || '').trim()))
-            );
-            list.forEach(trk => { identifyTrackById(trk.id, { manual: false, forceOverwrite: false }); });
+            queueAutoTagTracks(engine.tracks);
         }
 
         async function handleLoadAudioFile(file) {
@@ -682,10 +802,6 @@
                 renderTracksList();
                 updateUiState();
                 showToast(`Loaded "${file.name}" (${formatTimecode(info.length / info.sampleRate, false)})`, 'success');
-                if (autoIdentifyToggle && autoIdentifyToggle.checked && IdentifyEngine && engine.tracks.length > 0 &&
-                    (!info.artist || IdentifyEngine.isGenericTrackTitle(info.title))) {
-                    identifyTrackById(engine.tracks[0].id, { manual: false, forceOverwrite: false });
-                }
             } catch (err) {
                 showToast(`Could not decode audio file: ${(err && err.message) || 'Unsupported format'}`, 'error');
             }
@@ -778,26 +894,31 @@
             const track = engine.tracks[trackIdx];
             if (!track) return;
             isExporting = true;
-            track.saving = true;
+            if (inFlightIdentifyPromises.has(track.id)) {
+                setExportProgress(true, 'Auto-tagging song metadata...', 2);
+                await waitForTrackAutoTag(track.id, 8000);
+            }
+            const latestTrack = engine.tracks[trackIdx] || track;
+            latestTrack.saving = true;
             renderTracksList();
-            setExportProgress(true, `Encoding ${track.title}...`, 5);
+            setExportProgress(true, `Encoding ${latestTrack.title}...`, 5);
             try {
                 const total = engine.tracks.length;
-                const meta = buildTrackExportMeta(track, trackIdx, total);
-                const { ext, blob } = await encodeTrackToBlob(track.startSample, track.endSample, meta, (pct) => {
-                    setExportProgress(true, `Encoding ${track.title}... ${pct}%`, pct);
+                const meta = buildTrackExportMeta(latestTrack, trackIdx, total);
+                const { ext, blob } = await encodeTrackToBlob(latestTrack.startSample, latestTrack.endSample, meta, (pct) => {
+                    setExportProgress(true, `Encoding ${latestTrack.title}... ${pct}%`, pct);
                 });
                 const filename = ExportEngine.buildTrackFilename(meta, trackIdx, total, ext);
                 const res = useNativeShare
                     ? await ExportEngine.shareBlobFile(blob, filename)
                     : await ExportEngine.saveBlobWithPickerOrDownload(blob, filename, ext, dirHandle);
-                track.saving = false;
+                latestTrack.saving = false;
                 if (res.method !== 'cancelled') {
-                    track.saved = true;
+                    latestTrack.saved = true;
                     showToast(`💾 ${res.method === 'share' ? 'Shared' : 'Saved'} ${res.filename}`, 'success');
                 }
             } catch (err) {
-                track.saving = false;
+                latestTrack.saving = false;
                 showToast(`Save failed: ${(err && err.message) || err}`, 'error');
             } finally {
                 isExporting = false;
@@ -852,6 +973,11 @@
             let savedCount = 0;
 
             try {
+                const pendingTagIds = tracks.filter(t => inFlightIdentifyPromises.has(t.id)).map(t => t.id);
+                if (pendingTagIds.length > 0) {
+                    setExportProgress(true, `Auto-tagging ${pendingTagIds.length} song${pendingTagIds.length === 1 ? '' : 's'}...`, 2);
+                    await Promise.all(pendingTagIds.map(id => waitForTrackAutoTag(id, 8000)));
+                }
                 for (let i = 0; i < tracks.length; i++) {
                     const trk = tracks[i];
                     trk.saving = true;
@@ -942,6 +1068,16 @@
                 numBadge.className = 'track-num-badge';
                 numBadge.textContent = String(idx + 1).padStart(2, '0');
 
+                const coverThumbUrl = trk.coverBytes ? getTrackCoverObjectUrl(trk.coverBytes, trk.coverMime) : '';
+                let coverThumbEl = null;
+                if (coverThumbUrl) {
+                    coverThumbEl = document.createElement('img');
+                    coverThumbEl.className = 'track-cover-thumb';
+                    coverThumbEl.src = coverThumbUrl;
+                    coverThumbEl.alt = trk.album || trk.title || 'Cover art';
+                    coverThumbEl.title = [trk.album, trk.year, trk.genre].filter(Boolean).join(' • ') || 'Embedded cover art';
+                }
+
                 const titleInput = document.createElement('input');
                 titleInput.type = 'text';
                 titleInput.className = 'studio-input track-title-input';
@@ -1000,6 +1136,7 @@
                 }
 
                 mainRow.appendChild(numBadge);
+                if (coverThumbEl) mainRow.appendChild(coverThumbEl);
                 mainRow.appendChild(titleInput);
                 mainRow.appendChild(artistInput);
                 mainRow.appendChild(actions);
@@ -1007,9 +1144,31 @@
                 const subRow = document.createElement('div');
                 subRow.className = 'track-row-sub';
 
+                const metaGroup = document.createElement('div');
+                metaGroup.className = 'track-sub-meta-group';
+
                 const timeMeta = document.createElement('div');
                 timeMeta.className = 'track-time-meta';
                 timeMeta.textContent = `${startStr}–${endStr} (${durStr})`;
+                metaGroup.appendChild(timeMeta);
+
+                if (trk.identifying) {
+                    const tagPill = document.createElement('span');
+                    tagPill.className = 'track-tag-pill is-tagging';
+                    tagPill.textContent = '⏳ Auto-tagging…';
+                    metaGroup.appendChild(tagPill);
+                } else {
+                    const tagBits = [trk.album, trk.genre, trk.year].filter(Boolean);
+                    if (trk.identified || tagBits.length > 0) {
+                        const tagPill = document.createElement('span');
+                        tagPill.className = 'track-tag-pill is-tagged';
+                        const summary = tagBits.join(' • ');
+                        const prefix = trk.tagSource === 'id3' ? '🏷️ ID3' : '🏷️ Auto-tagged';
+                        tagPill.textContent = summary ? `🏷️ ${summary}` : prefix;
+                        tagPill.title = summary ? `${prefix}: ${summary}` : prefix;
+                        metaGroup.appendChild(tagPill);
+                    }
+                }
 
                 const subTools = document.createElement('div');
                 subTools.className = 'track-sub-tools';
@@ -1018,8 +1177,8 @@
                 idBtn.type = 'button';
                 idBtn.className = `row-icon-btn row-identify-btn${trk.identified ? ' identified' : ''}`;
                 idBtn.disabled = Boolean(trk.identifying);
-                idBtn.title = trk.identifying ? 'Identifying song...' : 'Auto-identify Artist & Title (AcoustID)';
-                idBtn.setAttribute('aria-label', `Identify track ${idx + 1}`);
+                idBtn.title = trk.identifying ? 'Auto-tagging song...' : 'Re-tag song automatically (AcoustID)';
+                idBtn.setAttribute('aria-label', `Re-tag track ${idx + 1}`);
                 idBtn.textContent = trk.identifying ? '⏳' : '🪄';
                 idBtn.addEventListener('click', () => identifyTrackById(trk.id, { manual: true, forceOverwrite: true }));
                 subTools.appendChild(idBtn);
@@ -1056,7 +1215,7 @@
                     subTools.appendChild(rmBtn);
                 }
 
-                subRow.appendChild(timeMeta);
+                subRow.appendChild(metaGroup);
                 subRow.appendChild(subTools);
 
                 row.appendChild(mainRow);
@@ -1991,11 +2150,22 @@
         });
         syncSettingsToEngine();
 
+        if (autoIdentifyToggle) {
+            autoIdentifyToggle.addEventListener('change', () => {
+                if (autoIdentifyToggle.checked && engine.tracks.length > 0) {
+                    engine.tracks.forEach(t => {
+                        if (!t.identified && !t.identifying) t.autoTagAttempted = false;
+                    });
+                    queueAutoTagTracks(engine.tracks);
+                }
+            });
+        }
+
         const runAutoSplitScan = () => {
             const tracks = engine.scanAndAutoSplit();
             showToast(`🔍 Detected ${tracks.length} track${tracks.length === 1 ? '' : 's'} by silence gaps`, 'success');
-            if (autoIdentifyToggle && autoIdentifyToggle.checked) {
-                queueAutoIdentifyGenericTracks();
+            if (isAutoTagEnabled()) {
+                queueAutoTagTracks(engine.tracks);
             }
         };
         if (scanSplitNowBtn) scanSplitNowBtn.addEventListener('click', runAutoSplitScan);

@@ -898,6 +898,16 @@ html, body {
     flex-shrink: 0;
 }
 
+.track-cover-thumb {
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-sm);
+    object-fit: cover;
+    border: 1px solid var(--border-subtle);
+    flex-shrink: 0;
+    background: #e2e8f0;
+}
+
 .track-title-input {
     flex: 1.2 1 140px;
     min-width: 0;
@@ -916,6 +926,40 @@ html, body {
     justify-content: space-between;
     gap: 8px;
     flex-wrap: wrap;
+}
+
+.track-sub-meta-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    min-width: 0;
+}
+
+.track-tag-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 0.71rem;
+    font-weight: 600;
+    max-width: 320px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.track-tag-pill.is-tagging {
+    background: rgba(2, 132, 199, 0.10);
+    color: #0369a1;
+    border: 1px solid rgba(2, 132, 199, 0.28);
+}
+
+.track-tag-pill.is-tagged {
+    background: rgba(5, 150, 105, 0.10);
+    color: #047857;
+    border: 1px solid rgba(5, 150, 105, 0.30);
 }
 
 .track-artist-input {
